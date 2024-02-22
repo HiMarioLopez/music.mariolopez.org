@@ -71,7 +71,8 @@ public class AuthStack : Stack
                     { "APPLE_AUTH_KEY_SECRET_NAME", appleAuthKey.SecretName },
                     { "TEAM_ID", teamId },
                     { "KEY_ID", keyId }
-                }
+                },
+                Description = "Generates a token for use with Apple's Music API.",
             }
         );
 
