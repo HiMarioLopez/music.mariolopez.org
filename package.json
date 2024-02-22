@@ -1,7 +1,7 @@
 {
   "name": "music.mariolopez.org",
   "version": "0.1.0",
-  "description": "See what I'm listening to, and make me a music recommendation.",
+  "description": "See what I'm listening to, and make me a music recommendation. This is a mono-repo for the various frontends, backends, and infra components of this app.",
   "scripts": {
     "prepare": "husky install",
     "cz": "cz",
