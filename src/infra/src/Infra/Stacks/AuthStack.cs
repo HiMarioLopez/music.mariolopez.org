@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Amazon.CDK;
+using Amazon.CDK.AWS.APIGateway;
 using Amazon.CDK.AWS.IAM;
 using Amazon.CDK.AWS.Lambda;
 using Amazon.CDK.AWS.SecretsManager;
@@ -9,7 +10,7 @@ namespace Infra.Stacks;
 
 public class AuthStack : Stack
 {
-    internal AuthStack(Construct scope, string id, IStackProps props = null)
+    internal AuthStack(Construct scope, string id, RestApi authApi, IStackProps props = null)
         : base(scope, id, props)
     {
         #region Secret
@@ -75,6 +76,20 @@ public class AuthStack : Stack
                 Description = "Generates a token for use with Apple's Music API.",
             }
         );
+
+        #endregion
+
+        #region Integrate to API Gateway
+
+        // Create a resource for the '/auth/token' endpoint
+        var authResource = authApi.Root.AddResource("auth").AddResource("token");
+        
+        // Create a method for the '/auth/token' resource that integrates with the Lambda function
+        authResource.AddMethod("GET", new LambdaIntegration(lambdaFunction, new LambdaIntegrationOptions
+        {
+            AllowTestInvoke = true,
+            Timeout = Duration.Seconds(10)
+        }));
 
         #endregion
     }
