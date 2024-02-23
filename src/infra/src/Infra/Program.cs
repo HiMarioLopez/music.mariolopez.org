@@ -9,7 +9,8 @@ public class Program
     {
         var app = new App();
 
-        var accountId = System.Environment.GetEnvironmentVariable("AWS_ACCOUNT_ID");
+        var accountId = System.Environment.GetEnvironmentVariable("AWS_ACCOUNT_ID") ??
+                        "851725225504";
 
         var defaultRegion = System.Environment.GetEnvironmentVariable("AWS_REGION") ??
                             System.Environment.GetEnvironmentVariable("AWS_DEFAULT_REGION") ??
@@ -17,25 +18,19 @@ public class Program
 
         var env = new Environment { Account = accountId, Region = defaultRegion };
 
-        var coreStack = new CoreStack(app, "CoreStack", new StackProps
+        var apiStack = new ApiStack(app, "ApiStack", new StackProps
         {
             Env = env,
-            StackName = "Music-CoreStack"
+            StackName = "Music-ApiStack",
+            Description = "This stack contains the API Gateway and Lambda function for the Music application."
         });
 
-        var authStack = new AuthStack(app, "AuthStack", coreStack.AuthApi, new StackProps
+        var baseSiteStack = new SiteStack(app, "SiteStack", new StackProps
         {
             Env = env,
-            StackName = "Music-AuthStack"
+            StackName = "Music-SiteStack",
+            Description = "This stack contains the S3 bucket and CloudFront distribution for the Music application."
         });
-
-        var siteStack = new SiteStack(app, "SiteStack", new StackProps
-        {
-            Env = env,
-            StackName = "Music-SiteStack"
-        });
-
-        siteStack.AddDependency(coreStack);
 
         app.Synth();
     }
