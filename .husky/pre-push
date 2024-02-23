@@ -2,6 +2,3 @@
 
 # Run husky
 . "$(dirname -- "$0")/_/husky.sh"
-
-# Run commitlint
-npx --no -- commitlint --edit $1

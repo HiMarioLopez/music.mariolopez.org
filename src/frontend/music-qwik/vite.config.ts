@@ -9,4 +9,8 @@ export default defineConfig({
     }),
   ],
   base: 'https://music.mariolopez.org/qwik',
+  build: {
+    minify: 'esbuild',
+    reportCompressedSize: true
+  }
 })
