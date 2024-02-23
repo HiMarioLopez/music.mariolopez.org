@@ -53,29 +53,33 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="app">
-      <Navbar />
-      <div className="main-content">
-        <div className="left-column">
-          <div className="now-playing-container">
-            <NowPlaying
-              albumArt={currentSong.albumArt}
-              songTitle={currentSong.songTitle}
-              artist={currentSong.artist}
-              album={currentSong.album}
-            />
+    <>
+      {/* REF: https://css-tricks.com/the-fixed-background-attachment-hack/ */}
+      <div className="app-bg" />
+      <div className="app">
+        <Navbar />
+        <div className="main-content">
+          <div className="left-column">
+            <div className="now-playing-container">
+              <NowPlaying
+                albumArt={currentSong.albumArt}
+                songTitle={currentSong.songTitle}
+                artist={currentSong.artist}
+                album={currentSong.album}
+              />
+            </div>
           </div>
-        </div>
-        <div className="right-column">
-          <div className="recommendation-form-container">
-            <RecommendationForm onRecommend={handleNewRecommendation} />
-          </div>
-          <div className="recommendations-list-container">
-            <RecommendationList recommendations={recommendations} />
+          <div className="right-column">
+            <div className="recommendation-form-container">
+              <RecommendationForm onRecommend={handleNewRecommendation} />
+            </div>
+            <div className="recommendations-list-container">
+              <RecommendationList recommendations={recommendations} />
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }
 
