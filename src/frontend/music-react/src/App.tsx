@@ -1,35 +1,82 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import React, { useState } from 'react';
+import './App.css';
+import NowPlaying from './components/NowPlaying/index';
+import RecommendationForm from './components/RecommendationForm/index';
+import RecommendationList from './components/RecommendationList/index';
+import Navbar from './components/Navbar';
 
-function App() {
-  const [count, setCount] = useState(0)
+const App: React.FC = () => {
+  // Define a type for a single recommendation
+  type Recommendation = {
+    songTitle: string;
+    artistName: string;
+    albumName: string;
+    albumCoverUrl: string;
+  };
+
+  // Mock data for the currently playing song
+  const [currentSong] = useState({
+    albumArt: 'https://via.placeholder.com/250',
+    songTitle: 'Example Song',
+    artist: 'Example Artist',
+    album: 'Example Album',
+  });
+
+  // State to hold the list of recommendations with initial mock data
+  const [recommendations, setRecommendations] = useState<Recommendation[]>([
+    {
+      songTitle: 'Song One',
+      artistName: 'Artist One',
+      albumName: 'Album One',
+      albumCoverUrl: 'https://via.placeholder.com/50',
+    },
+    {
+      songTitle: 'Song Two',
+      artistName: 'Artist Two',
+      albumName: 'Album Two',
+      albumCoverUrl: 'https://via.placeholder.com/50',
+    },
+  ]);
+
+  // Function to handle new recommendations
+  const handleNewRecommendation = (songTitle: string) => {
+    // Mock additional data
+    const newRecommendation = {
+      songTitle: songTitle,
+      artistName: 'Mock Artist',
+      albumName: 'Mock Album',
+      albumCoverUrl: 'https://via.placeholder.com/50',
+    };
+
+    // Update the recommendations list with the new mock recommendation
+    setRecommendations(prevRecommendations => [...prevRecommendations, newRecommendation]);
+  };
 
   return (
-    <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+    <div className="app">
+      <Navbar />
+      <div className="main-content">
+        <div className="left-column">
+          <div className="now-playing-container">
+            <NowPlaying
+              albumArt={currentSong.albumArt}
+              songTitle={currentSong.songTitle}
+              artist={currentSong.artist}
+              album={currentSong.album}
+            />
+          </div>
+        </div>
+        <div className="right-column">
+          <div className="recommendation-form-container">
+            <RecommendationForm onRecommend={handleNewRecommendation} />
+          </div>
+          <div className="recommendations-list-container">
+            <RecommendationList recommendations={recommendations} />
+          </div>
+        </div>
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    </div>
+  );
 }
 
-export default App
+export default App;

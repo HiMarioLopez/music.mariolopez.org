@@ -1,0 +1,31 @@
+/* components/Navbar.css */
+
+.navbar {
+    display: flex;
+    justify-content: center;
+    padding: 10px;
+    background: rgba(0, 0, 0, 0.5);
+    color: white;
+    position: fixed;
+    top: 0;
+    width: 100%;
+    height: 40px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+}
+
+.nav-icon {
+    width: 40px;
+    /* Standard size for icons */
+    height: 40px;
+    /* Standard size for icons */
+    margin: 0 10px;
+    /* Space between icons */
+}
+
+.nav-icon:hover {
+    filter: drop-shadow(0 0 0.5em rgba(255, 255, 255, 0.4));
+    /* General highlight effect for all icons */
+    transition: filter 0.3s ease;
+    /* Smooth transition for the effect */
+}
