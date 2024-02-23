@@ -1,14 +1,24 @@
 ﻿using Amazon.CDK;
 using Amazon.CDK.AWS.S3;
-using Amazon.CDK.AWS.CloudFront;
 using Constructs;
-using Amazon.CDK.AWS.S3.Deployment;
 using Amazon.CDK.AWS.CertificateManager;
-using Amazon.CDK.AWS.Route53;
-using Amazon.CDK.AWS.Route53.Targets;
+using Amazon.CDK.AWS.CloudFront;
+using Amazon.CDK.AWS.S3.Deployment;
+using Amazon.CDK.AWS.CloudFront.Origins;
+using Amazon.CDK.AWS.CloudFront.Experimental;
+using Amazon.CDK.AWS.Lambda;
 
 namespace Infra.Stacks;
 
+/// <summary>
+/// Defines the stack for the music.mariolopez.org website(s).
+/// </summary>
+/// <remarks>
+/// Pricing Information:
+///     - https://aws.amazon.com/lambda/pricing/
+///     - https://aws.amazon.com/cloudfront/pricing/
+///     - https://aws.amazon.com/s3/pricing/
+/// </remarks>
 public class SiteStack : Stack
 {
     public SiteStack(Construct scope, string id, IStackProps props = null) : base(scope, id, props)
@@ -27,64 +37,23 @@ public class SiteStack : Stack
 
         #endregion
 
-        #region CloudFront
+        #region Site Deployments
 
-        // Create a CloudFront OAI for the S3 bucket
-        var originAccessIdentity = new OriginAccessIdentity(this, "Music-OAI", new OriginAccessIdentityProps
+        // Deploy Lit site assets
+        new BucketDeployment(this, "Music-DeployLitSite", new BucketDeploymentProps
         {
-            Comment = "OAI for React Site"
+            Sources = [Source.Asset("../frontend/music-lit/dist")],
+            DestinationBucket = siteBucket,
+            DestinationKeyPrefix = "lit",
         });
 
-        // Restrict bucket access to the OAI
-        siteBucket.GrantRead(originAccessIdentity);
-
-        var certificateArn = "arn:aws:acm:us-east-1:851725225504:certificate/27ef25f9-83b8-4a24-8a59-a3e2c32dfb74";
-        var certificate = Certificate.FromCertificateArn(this, "Music-SiteCertificate", certificateArn);
-
-        // Create a CloudFront distribution for the S3 bucket
-        var distribution = new CloudFrontWebDistribution(this, "Music-SiteDistribution", new CloudFrontWebDistributionProps
+        // Deploy Qwik site assets
+        new BucketDeployment(this, "Music-DeployQkiwSite", new BucketDeploymentProps
         {
-            OriginConfigs = [
-                new SourceConfiguration {
-                    S3OriginSource = new S3OriginConfig {
-                        S3BucketSource = siteBucket,
-                        OriginAccessIdentity = originAccessIdentity
-                    },
-                    Behaviors = [
-                        new Behavior {
-                            PathPattern = "/react/*",
-                            IsDefaultBehavior = true
-                        },
-                    ]
-                }
-            ],
-            // Configure the default behavior if needed, or specify a custom error page.
-            ErrorConfigurations = [
-                new CfnDistribution.CustomErrorResponseProperty {
-                    ErrorCode = 404,
-                    ResponsePagePath = "/react/index.html", // Default app or specify per app basis
-                    ResponseCode = 200,
-                    ErrorCachingMinTtl = 300
-                }
-            ],
-            // Adding custom domain and ACM certificate
-            ViewerCertificate = ViewerCertificate.FromAcmCertificate(certificate, new ViewerCertificateOptions
-            {
-                Aliases = ["music.mariolopez.org"],
-                SecurityPolicy = SecurityPolicyProtocol.TLS_V1_2_2021,
-                SslMethod = SSLMethod.SNI
-            }),
+            Sources = [Source.Asset("../frontend/music-qwik/dist")],
+            DestinationBucket = siteBucket,
+            DestinationKeyPrefix = "qwik",
         });
-
-        // Output the distribution domain name so you can easily access it
-        new CfnOutput(this, "Music-DistributionDomainName", new CfnOutputProps
-        {
-            Value = distribution.DistributionDomainName
-        });
-
-        #endregion
-
-        #region Site Asset Upload(s)
 
         // Deploy React site assets
         new BucketDeployment(this, "Music-DeployReactSite", new BucketDeploymentProps
@@ -94,22 +63,87 @@ public class SiteStack : Stack
             DestinationKeyPrefix = "react",
         });
 
-        #endregion
-
-        #region Domain Resolution
-
-        // Lookup the hosted zone for music.mariolopez.org
-        var hostedZone = HostedZone.FromLookup(this, "HostedZone", new HostedZoneProviderProps
+        // Deploy Solid site assets
+        new BucketDeployment(this, "Music-DeploySolidSite", new BucketDeploymentProps
         {
-            DomainName = "music.mariolopez.org",
+            Sources = [Source.Asset("../frontend/music-solid/dist")],
+            DestinationBucket = siteBucket,
+            DestinationKeyPrefix = "solid",
         });
 
-        // Create an A record for the CloudFront distribution
-        new ARecord(this, "AliasRecord", new ARecordProps
+        // Deploy Svelte site assets
+        new BucketDeployment(this, "Music-DeploySvelteSite", new BucketDeploymentProps
         {
-            Zone = hostedZone,
-            RecordName = "", // For the root of music.mariolopez.org, you leave this empty
-            Target = RecordTarget.FromAlias(new CloudFrontTarget(distribution)),
+            Sources = [Source.Asset("../frontend/music-svelte/dist")],
+            DestinationBucket = siteBucket,
+            DestinationKeyPrefix = "svelte",
+        });
+
+        // Deploy Vue site assets
+        new BucketDeployment(this, "Music-DeployVanillaSite", new BucketDeploymentProps
+        {
+            Sources = [Source.Asset("../frontend/music-vanilla/dist")],
+            DestinationBucket = siteBucket,
+            DestinationKeyPrefix = "vanilla",
+        });
+
+        // Deploy Vue site assets
+        new BucketDeployment(this, "Music-DeployVueSite", new BucketDeploymentProps
+        {
+            Sources = [Source.Asset("../frontend/music-vue/dist")],
+            DestinationBucket = siteBucket,
+            DestinationKeyPrefix = "vue",
+        });
+
+        #endregion
+
+        #region Route Randomization Handler
+
+        var edgeFunction = new EdgeFunction(this, "Music-EdgeFunction", new EdgeFunctionProps
+        {
+            Runtime = Runtime.NODEJS_20_X,
+            Handler = "index.handler",
+            Code = Code.FromAsset("../backend/handlers/frontend-route-randomization-handler"),
+            Description = "Randomizes the frontend to be served on `music.mariolopez.org`.",
+            CurrentVersionOptions = new VersionOptions
+            {
+                RemovalPolicy = RemovalPolicy.DESTROY,
+            }
+        });
+
+        #endregion
+
+        #region Distribution
+
+        // Certificate for music.mariolopez.org
+        var rootCertificateArn = "arn:aws:acm:us-east-1:851725225504:certificate/70d15630-f6b4-495e-9d0c-572c64804dfc";
+        var rootCertificate = Certificate.FromCertificateArn(this, "Music-SiteCertificate", rootCertificateArn);
+
+        // Create a CloudFront distribution for the S3 bucket
+        var distribution = new Distribution(this, "Music-SiteDistribution", new DistributionProps
+        {
+            DefaultBehavior = new BehaviorOptions
+            {
+                Origin = new S3Origin(siteBucket),
+                ViewerProtocolPolicy = ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
+                EdgeLambdas =
+                [
+                    new EdgeLambda
+                    {
+                        FunctionVersion = edgeFunction.CurrentVersion,
+                        EventType = LambdaEdgeEventType.ORIGIN_REQUEST
+                    }
+                ],
+                CachePolicy = CachePolicy.CACHING_OPTIMIZED
+            },
+            Certificate = rootCertificate,
+            DomainNames = ["music.mariolopez.org"]
+        });
+
+        // Output the distribution domain name
+        new CfnOutput(this, "Music-DistributionDomainName", new CfnOutputProps
+        {
+            Value = distribution.DistributionDomainName
         });
 
         #endregion

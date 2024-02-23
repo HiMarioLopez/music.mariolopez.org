@@ -8,42 +8,55 @@ using Constructs;
 
 namespace Infra.Stacks;
 
-public class AuthStack : Stack
+/// <summary>
+/// Defines the stack for the music.mariolopez.org API.
+/// </summary>
+/// <remarks>
+/// Pricing Information:
+///     - https://aws.amazon.com/lambda/pricing/
+///     - https://aws.amazon.com/api-gateway/pricing/
+///     - https://aws.amazon.com/secrets-manager/pricing/
+/// </remarks>
+public class ApiStack : Stack
 {
-    internal AuthStack(Construct scope, string id, RestApi authApi, IStackProps props = null)
+    internal ApiStack(Construct scope, string id, IStackProps props = null)
         : base(scope, id, props)
     {
+        #region API Gateway
+
+        // Create a new REST API
+        var authApi = new RestApi(this, "Music-IntegrationApiGateway", new RestApiProps
+        {
+            RestApiName = "Integration API Gateway",
+            Description = "This gateway serves a variety of integration-related services."
+        });
+
+        #endregion
+
         #region Secret
 
         // Create a new secret in Secrets Manager
-        var appleAuthKey = new Secret(
-            this,
-            "AppleAuthKey",
-            new SecretProps
-            {
-                SecretName = "AppleAuthKey"
-            }
-        );
+        // Note: Once this secret is provisioned you'll have to set the value manually.
+        var appleAuthKey = new Secret(this, "Music-AppleAuthKey", new SecretProps
+        {
+            SecretName = "AppleAuthKey"
+        });
 
         #endregion
 
         #region Lambda Function
 
         // Create an IAM role for the Lambda function
-        var lambdaRole = new Role(
-            this,
-            "AuthHandlerExecutionRole",
-            new RoleProps
-            {
-                AssumedBy = new ServicePrincipal("lambda.amazonaws.com"),
-                ManagedPolicies =
+        var lambdaRole = new Role(this, "Music-AuthHandlerExecutionRole", new RoleProps
+        {
+            AssumedBy = new ServicePrincipal("lambda.amazonaws.com"),
+            ManagedPolicies =
                 [
                     ManagedPolicy.FromAwsManagedPolicyName(
                         "service-role/AWSLambdaBasicExecutionRole"
                     )
                 ]
-            }
-        );
+        });
 
         // Define the permissions for the Lambda function
         lambdaRole.AddToPolicy(new PolicyStatement(new PolicyStatementProps
@@ -58,24 +71,25 @@ public class AuthStack : Stack
         var keyId = System.Environment.GetEnvironmentVariable("APPLE_KEY_ID");
 
         // Define the Lambda function
-        var lambdaFunction = new Function(
-            this,
-            "AuthHandler",
-            new FunctionProps
-            {
-                Runtime = Runtime.NODEJS_LATEST,
-                Role = lambdaRole,
-                Code = Code.FromAsset("../backend/auth-handler"),
-                Handler = "index.handler",
-                Environment = new Dictionary<string, string>
+        var lambdaFunction = new Function(this, "Music-AuthHandler", new FunctionProps
+        {
+            Runtime = Runtime.NODEJS_LATEST,
+            Role = lambdaRole,
+            Code = Code.FromAsset("../backend/handlers/auth-handler"),
+            Handler = "index.handler",
+            Environment = new Dictionary<string, string>
                 {
                     { "APPLE_AUTH_KEY_SECRET_NAME", appleAuthKey.SecretName },
                     { "TEAM_ID", teamId },
                     { "KEY_ID", keyId }
                 },
-                Description = "Generates a token for use with Apple's Music API.",
-            }
-        );
+            Description = "Generates a token for use with Apple's Music API.",
+
+            // Main cost drivers
+            Architecture = Architecture.ARM_64,
+            MemorySize = 128,
+            EphemeralStorageSize = Size.Mebibytes(512),
+        });
 
         #endregion
 
@@ -83,7 +97,7 @@ public class AuthStack : Stack
 
         // Create a resource for the '/auth/token' endpoint
         var authResource = authApi.Root.AddResource("auth").AddResource("token");
-        
+
         // Create a method for the '/auth/token' resource that integrates with the Lambda function
         authResource.AddMethod("GET", new LambdaIntegration(lambdaFunction, new LambdaIntegrationOptions
         {
