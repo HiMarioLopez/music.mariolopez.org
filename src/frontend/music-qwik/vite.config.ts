@@ -8,5 +8,5 @@ export default defineConfig({
       csr: true,
     }),
   ],
-  base: 'https://music.mariolopez.org/',
+  base: 'https://music.mariolopez.org/qwik',
 })
