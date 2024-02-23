@@ -3,19 +3,30 @@
 exports.handler = (event, context, callback) => {
     const request = event.Records[0].cf.request;
 
-    // Define an array of your site prefixes
-    const sites = ['lit', 'qwik', 'react', 'solid', 'svelte', 'vanilla', 'vue'];
+    // Define base path mappings to site versions
+    const siteMappings = {
+        '/lit': '/lit',
+        '/qwik': '/qwik',
+        '/react': '/react',
+        '/solid': '/solid',
+        '/svelte': '/svelte',
+        '/vanilla': '/vanilla',
+        '/vue': '/vue'
+    };
 
-    // Randomly select a site prefix
-    const randomIndex = Math.floor(Math.random() * sites.length);
-    const selectedSite = sites[randomIndex];
+    // Extract the first part of the URI path
+    const firstPathSegment = '/' + (request.uri.split('/')[1] || '');
 
-    // Prepend the selected site prefix to the request URI
-    const newPath = `/${selectedSite}` + request.uri;
+    // Check if the first path segment matches any predefined site versions
+    if (siteMappings[firstPathSegment]) {
+        // Serve content from the specified site version
+        request.uri = request.uri.replace(firstPathSegment, siteMappings[firstPathSegment]);
+    } else {
+        // Random site selection logic for when no specific site version is requested
+        const sites = Object.values(siteMappings);
+        const randomSite = sites[Math.floor(Math.random() * sites.length)];
+        request.uri = randomSite + request.uri;
+    }
 
-    // Update the request URI
-    request.uri = newPath;
-
-    // Return the modified request
     callback(null, request);
 };
