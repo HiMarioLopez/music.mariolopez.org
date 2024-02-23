@@ -50,7 +50,6 @@
     /* Removes padding which is usually reserved for bullets */
     width: 100%;
     /* Full width */
-
     max-height: calc(7 * 60px);
     /* Adjust the multiplier based on the total height of a single item */
     overflow-y: auto;

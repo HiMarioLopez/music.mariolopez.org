@@ -36,25 +36,6 @@ body,
     animation: gradient 10s ease infinite;
 }
 
-/* This is for screens smaller than 1299px */
-@media (max-width: 1299px) {
-    .app {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-    }
-
-    .now-playing-container,
-    .recommendation-form-container,
-    .recommendations-list-container {
-        width: 100%;
-        /* Take the full width of the container */
-        margin: 20px 0;
-        /* Adds space between components vertically */
-    }
-}
-
 /* This is for screens larger than 1300px */
 @media (min-width: 1300px) {
     .app {
@@ -100,9 +81,27 @@ body,
     }
 }
 
+/* This is for screens smaller than 1299px */
+@media (max-width: 1299px) {
+    .app {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .now-playing-container,
+    .recommendation-form-container,
+    .recommendations-list-container {
+        width: 100%;
+        /* Take the full width of the container */
+        margin: 20px 0;
+        /* Adds space between components vertically */
+    }
+}
+
 @media (max-width: 680px) {
     .main-content {
-        padding-top: 140px;
-        /* should be equal to or greater than the height of the navbar */
+        padding-top: 5vh;
     }
 }
