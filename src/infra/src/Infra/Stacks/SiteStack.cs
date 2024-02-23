@@ -134,7 +134,7 @@ public class SiteStack : Stack
                         EventType = LambdaEdgeEventType.ORIGIN_REQUEST
                     }
                 ],
-                CachePolicy = CachePolicy.CACHING_OPTIMIZED
+                CachePolicy = CachePolicy.CACHING_DISABLED
             },
             Certificate = rootCertificate,
             DomainNames = ["music.mariolopez.org"]
