@@ -1,7 +1,0 @@
-#!/usr/bin/env sh
-
-# Run husky
-. "$(dirname -- "$0")/_/husky.sh"
-
-# Run commitizen
-node_modules/.bin/cz --hook || true
