@@ -60,13 +60,13 @@ export class Navbar extends LitElement {
         // Update the paths to your images as necessary
         return html`
       <nav class="navbar">
-        <a href="https://music.mariolopez.org/lit" rel="alternate"><img src=${litLogo} alt="Lit" class="nav-icon lit-icon" /></a>
-        <a href="https://music.mariolopez.org/qwik" rel="alternate"><img src=${qwikLogo} alt="Qwik" class="nav-icon" /></a>
-        <a href="https://music.mariolopez.org/react" rel="alternate"><img src=${reactLogo} alt="React" class="nav-icon" /></a>
-        <a href="https://music.mariolopez.org/solid" rel="alternate"><img src=${solidLogo} alt="Solid" class="nav-icon" /></a>
-        <a href="https://music.mariolopez.org/svelte" rel="alternate"><img src=${svelteLogo} alt="Svelte" class="nav-icon" /></a>
-        <a href="https://music.mariolopez.org/vanilla" rel="alternate"><img src=${tsLogo} alt="TypeScript" class="nav-icon" /></a>
-        <a href="https://music.mariolopez.org/vue" rel="alternate"><img src=${vueLogo} alt="Vue" class="nav-icon" /></a>
+        <a href="https://music.mariolopez.org/lit" target="_self" rel="alternate"><img src=${litLogo} alt="Lit" class="nav-icon lit-icon" /></a>
+        <a href="https://music.mariolopez.org/qwik" target="_self" rel="alternate"><img src=${qwikLogo} alt="Qwik" class="nav-icon" /></a>
+        <a href="https://music.mariolopez.org/react" target="_self" rel="alternate"><img src=${reactLogo} alt="React" class="nav-icon" /></a>
+        <a href="https://music.mariolopez.org/solid" target="_self" rel="alternate"><img src=${solidLogo} alt="Solid" class="nav-icon" /></a>
+        <a href="https://music.mariolopez.org/svelte" target="_self" rel="alternate"><img src=${svelteLogo} alt="Svelte" class="nav-icon" /></a>
+        <a href="https://music.mariolopez.org/vanilla" target="_self" rel="alternate"><img src=${tsLogo} alt="TypeScript" class="nav-icon" /></a>
+        <a href="https://music.mariolopez.org/vue" target="_self" rel="alternate"><img src=${vueLogo} alt="Vue" class="nav-icon" /></a>
       </nav>
     `;
     }
