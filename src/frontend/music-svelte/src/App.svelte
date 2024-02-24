@@ -1,47 +1,164 @@
 <script lang="ts">
-  import svelteLogo from './assets/svelte.svg'
-  import viteLogo from '/vite.svg'
-  import Counter from './lib/Counter.svelte'
+  import NowPlaying from "./lib/NowPlaying.svelte";
+  import RecentlyPlayedList from "./lib/RecentlyPlayedList.svelte";
+  import RecommendationForm from "./lib/RecommendationForm.svelte";
+  import RecommendationList from "./lib/RecommendationList.svelte";
+  import Navbar from "./lib/Navbar.svelte";
+  import type { Song } from "./types/Song";
+
+  let recommendations: Song[] = [
+    {
+      songTitle: "Song One",
+      artistName: "Artist One",
+      albumName: "Album One",
+      albumCoverUrl: "https://via.placeholder.com/50",
+    },
+    {
+      songTitle: "Song Two",
+      artistName: "Artist Two",
+      albumName: "Album Two",
+      albumCoverUrl: "https://via.placeholder.com/50",
+    },
+  ];
+
+  function handleNewRecommendation(title: string) {
+    const newRecommendation: Song = {
+      songTitle: title,
+      artistName: "Mock Artist",
+      albumName: "Mock Album",
+      albumCoverUrl: "https://via.placeholder.com/50",
+    };
+    recommendations = [...recommendations, newRecommendation];
+  }
 </script>
 
-<main>
-  <div>
-    <a href="https://vitejs.dev" target="_blank" rel="noreferrer">
-      <img src={viteLogo} class="logo" alt="Vite Logo" />
-    </a>
-    <a href="https://svelte.dev" target="_blank" rel="noreferrer">
-      <img src={svelteLogo} class="logo svelte" alt="Svelte Logo" />
-    </a>
+<div class="app-bg" />
+<div class="app">
+  <Navbar />
+  <div class="main-content">
+    <div class="left-column">
+      <div class="now-playing-container">
+        <NowPlaying />
+      </div>
+      <RecentlyPlayedList />
+    </div>
+    <div class="right-column">
+      <div class="recommendation-form-container">
+        <RecommendationForm onRecommend={handleNewRecommendation} />
+      </div>
+      <div class="recommendations-list-container">
+        <RecommendationList {recommendations} />
+      </div>
+    </div>
   </div>
-  <h1>Vite + Svelte</h1>
-
-  <div class="card">
-    <Counter />
-  </div>
-
-  <p>
-    Check out <a href="https://github.com/sveltejs/kit#readme" target="_blank" rel="noreferrer">SvelteKit</a>, the official Svelte app framework powered by Vite!
-  </p>
-
-  <p class="read-the-docs">
-    Click on the Vite and Svelte logos to learn more
-  </p>
-</main>
+</div>
 
 <style>
-  .logo {
-    height: 6em;
-    padding: 1.5em;
-    will-change: filter;
-    transition: filter 300ms;
+  @keyframes gradient {
+    0% {
+      background-position: 0% 50%;
+    }
+
+    50% {
+      background-position: 100% 50%;
+    }
+
+    100% {
+      background-position: 0% 50%;
+    }
   }
-  .logo:hover {
-    filter: drop-shadow(0 0 2em #646cffaa);
+
+  .app {
+    position: absolute;
+    width: 100%;
+    height: 100%;
   }
-  .logo.svelte:hover {
-    filter: drop-shadow(0 0 2em #ff3e00aa);
+
+  .app-bg {
+    position: fixed;
+    animation: gradient 5s ease infinite;
+    background: linear-gradient(
+      -45deg,
+      #ff3e00,
+      #fa573c,
+      #ffffff,
+      #fa573c,
+      #ff3e00
+    );
+
+    background-attachment: fixed;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 400% 400%;
+    height: 100vh;
+    width: 100vw;
   }
-  .read-the-docs {
-    color: #888;
+
+  @media (min-width: 1300px) {
+    .app {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .main-content {
+      max-width: 1200px;
+      display: flex;
+      flex-direction: row;
+      align-items: flex-start;
+      justify-content: space-between;
+      margin: 20px;
+    }
+
+    .left-column,
+    .right-column {
+      width: calc(50% - 20px);
+      margin: 0 20px;
+    }
+
+    .now-playing-container,
+    .recommendation-form-container,
+    .recommendations-list-container {
+      width: 100%;
+      margin-bottom: 20px;
+    }
+
+    .recommendations-list-container:last-child {
+      margin-bottom: 0;
+    }
+  }
+
+  @media (max-width: 1299px) {
+    .app {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .now-playing-container,
+    .recommendation-form-container,
+    .recommendations-list-container {
+      width: 100%;
+      margin: 20px 0;
+    }
+
+    .main-content {
+      padding-top: 60px;
+    }
+  }
+
+  @media (max-width: 680px) {
+    .main-content {
+      padding-top: 50px;
+    }
+
+    .app,
+    .main-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+    }
   }
 </style>
