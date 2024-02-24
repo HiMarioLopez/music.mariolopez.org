@@ -16,7 +16,7 @@ const App: React.FC = () => {
 
   // Mock data for the currently playing song
   const [currentSong] = useState({
-    albumArt: 'https://via.placeholder.com/250',
+    albumArt: 'https://via.placeholder.com/300',
     songTitle: 'Example Song',
     artist: 'Example Artist',
     album: 'Example Album',

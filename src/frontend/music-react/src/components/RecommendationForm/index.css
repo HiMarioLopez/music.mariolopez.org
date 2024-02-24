@@ -97,3 +97,27 @@
     outline: 4px auto -webkit-focus-ring-color;
     /* Auto-outline for high contrast */
 }
+
+@media (max-width: 680px) {
+
+    .recommendation-form-modal {
+        width: 80vw;
+        /* Adjust width for smaller screens */
+        max-width: none;
+        /* Remove max-width for smaller screens */
+    }
+
+    .recommendation-form-modal form {
+        flex-direction: column;
+        /* Stack the input and button */
+    }
+
+    .recommendation-form-modal input[type="text"] {
+        /* Adjust width for smaller screens */
+        margin-right: 0;
+        /* Remove margin between input and button */
+        margin-bottom: 10px;
+        /* Add space between input and button */
+    }
+
+}

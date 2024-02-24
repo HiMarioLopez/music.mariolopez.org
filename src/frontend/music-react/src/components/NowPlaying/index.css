@@ -49,36 +49,29 @@
 @media (max-width: 680px) {
 
     .now-playing-modal {
-        flex-direction: column;
-        /* Stack the children vertically */
-        align-items: center;
-        /* Center align the children */
-        text-align: center;
-        /* Center the text for all child elements */
-        width: 100%;
-        /* Full width */
+        flex-direction: column-reverse;
+        /* Stack the content on top of the album art */
+        width: 80vw;
         max-width: none;
-        /* Remove any maximum width restrictions */
-        padding: 20px;
-        /* Adjust if necessary, but keep it consistent all around */
-        box-sizing: border-box;
-        /* Ensure padding doesn't affect the overall width */
     }
 
     .album-art {
-        width: 100%;
+        width: 80vw;
         height: auto;
         margin: 10px 0;
-        order: 1;
     }
 
     .header-title {
-        text-align: start;
-        height: auto;
+        width: 80vw;
         margin-bottom: 10px;
+    }
+
+    .music-info {
+        width: 80vw;
     }
 
     .content-container {
         height: auto;
     }
+
 }

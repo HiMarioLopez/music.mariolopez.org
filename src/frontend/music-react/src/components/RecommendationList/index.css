@@ -117,3 +117,12 @@
     color: aliceblue;
     /* Set text color to match modal */
 }
+
+@media (max-width: 680px) {
+    .recommendation-list-modal {
+        width: 80vw;
+        /* Adjust the width for smaller screens */
+        max-width: none;
+        /* Remove the max-width */
+    }
+}
