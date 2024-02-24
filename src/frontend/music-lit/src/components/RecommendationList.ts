@@ -112,7 +112,7 @@ export class RecommendationList extends LitElement {
   `;
 
     @property({ type: Array })
-    recommendations: Recommendation[] = []; // Use the interface to type the array
+    recommendations: Recommendation[] = [];
 
     render() {
         return html`

@@ -57,7 +57,6 @@ export class Navbar extends LitElement {
   `;
 
     render() {
-        // Update the paths to your images as necessary
         return html`
       <nav class="navbar">
         <a href="https://music.mariolopez.org/lit" target="_self" rel="alternate"><img src=${litLogo} alt="Lit" class="nav-icon lit-icon" /></a>

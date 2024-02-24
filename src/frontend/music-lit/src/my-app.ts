@@ -128,9 +128,9 @@ class MyApp extends LitElement {
   handleNewRecommendation(e: CustomEvent) {
     const newRecommendation = {
       songTitle: e.detail.songTitle,
-      artistName: 'New Artist', // You might want to include artist name in the form or default it here
-      albumName: 'New Album', // Same as above for album name
-      albumCoverUrl: 'https://via.placeholder.com/50', // And for the album cover URL
+      artistName: 'New Artist',
+      albumName: 'New Album',
+      albumCoverUrl: 'https://via.placeholder.com/50',
     };
 
     this.recommendations = [...this.recommendations, newRecommendation];

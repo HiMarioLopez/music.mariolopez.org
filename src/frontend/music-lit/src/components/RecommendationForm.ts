@@ -91,7 +91,6 @@ export class RecommendationForm extends LitElement {
     @state()
     private songTitle: string = '';
 
-    // Custom event to emit the song title to parent components
     private handleSubmit(e: Event) {
         e.preventDefault();
         this.dispatchEvent(new CustomEvent('recommend', { detail: { songTitle: this.songTitle }, bubbles: true, composed: true }));
