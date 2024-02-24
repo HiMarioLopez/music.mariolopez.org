@@ -1,22 +1,46 @@
 import React, { useEffect, useRef } from 'react';
 import './index.css';
 
-type RecentlyPlayed = {
-    songTitle: string;
-    albumName: string;
-    artistName: string;
-    albumCoverUrl: string;
-};
+// Mock data for the recently played songs
+const recentlyPlayed = [
+    {
+        songTitle: 'Song One',
+        artistName: 'Artist One',
+        albumName: 'Album One',
+        albumCoverUrl: 'https://via.placeholder.com/50',
+    },
+    {
+        songTitle: 'Song Two',
+        artistName: 'Artist Two',
+        albumName: 'Album Two',
+        albumCoverUrl: 'https://via.placeholder.com/50',
+    },
+    {
+        songTitle: 'Song Three',
+        artistName: 'Artist Three',
+        albumName: 'Album Three',
+        albumCoverUrl: 'https://via.placeholder.com/50',
+    },
+    {
+        songTitle: 'Song Four',
+        artistName: 'Artist Four',
+        albumName: 'Album Four',
+        albumCoverUrl: 'https://via.placeholder.com/50',
+    },
+    {
+        songTitle: 'Song Five',
+        artistName: 'Artist Five',
+        albumName: 'Album Five',
+        albumCoverUrl: 'https://via.placeholder.com/50',
+    }
+]
 
-type RecentlyPlayedListProps = {
-    recentlyPlayed: RecentlyPlayed[];
-};
-
-const RecentlyPlayedList: React.FC<RecentlyPlayedListProps> = ({ recentlyPlayed }) => {
+const RecentlyPlayedList: React.FC = () => {
     const scrollRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         const scroll = scrollRef.current;
+
         if (scroll) {
             let startLeft = 0;
             const step = () => {
