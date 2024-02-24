@@ -9,6 +9,7 @@ body,
     padding: 0;
     width: 100%;
     height: 100%;
+    font-family: Arial, sans-serif;
 }
 
 /* Keyframes for the gradient animation */
@@ -29,7 +30,6 @@ body,
 /* Make sure the App component takes up all available space */
 .app {
     position: absolute;
-    font-family: Arial, sans-serif;
     width: 100%;
     height: 100%;
 }
@@ -48,6 +48,7 @@ body,
 
 /* This is for screens larger than 1300px */
 @media (min-width: 1300px) {
+
     .app {
         display: flex;
         align-items: center;
@@ -89,10 +90,12 @@ body,
     .recommendations-list-container:last-child {
         margin-bottom: 0;
     }
+
 }
 
 /* This is for screens smaller than 1299px */
 @media (max-width: 1299px) {
+
     .app {
         display: flex;
         flex-direction: column;
@@ -113,10 +116,12 @@ body,
         padding-top: 60px;
         /* Padding for Navbar */
     }
+
 }
 
 /* Adjustments for mobile responsiveness */
 @media (max-width: 680px) {
+
     .main-content {
         padding-top: 50px;
         /* Padding for Navbar */
@@ -133,4 +138,5 @@ body,
         justify-content: flex-start;
         /* Align content to start at the top */
     }
+
 }
