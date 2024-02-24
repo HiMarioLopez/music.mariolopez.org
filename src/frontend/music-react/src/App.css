@@ -133,9 +133,4 @@ body,
         justify-content: flex-start;
         /* Align content to start at the top */
     }
-
-    .now-playing-container {
-        margin-bottom: 0;
-        /* Remove margin from the bottom */
-    }
 }

@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
 import './App.css';
 import NowPlaying from './components/NowPlaying/index';
+import RecentlyPlayedList from './components/RecentlyPlayedList/index';
 import RecommendationForm from './components/RecommendationForm/index';
 import RecommendationList from './components/RecommendationList/index';
 import Navbar from './components/Navbar';
 
 const App: React.FC = () => {
   // Define a type for a single recommendation
-  type Recommendation = {
+  type Song = {
     songTitle: string;
     artistName: string;
     albumName: string;
@@ -23,7 +24,7 @@ const App: React.FC = () => {
   });
 
   // State to hold the list of recommendations with initial mock data
-  const [recommendations, setRecommendations] = useState<Recommendation[]>([
+  const [recommendations, setRecommendations] = useState<Song[]>([
     {
       songTitle: 'Song One',
       artistName: 'Artist One',
@@ -38,6 +39,40 @@ const App: React.FC = () => {
     },
   ]);
 
+  // State to hold the list of recommendations with initial mock data
+  const [recentlyPlayed, setRecentlyPlayed] = useState<Song[]>([
+    {
+      songTitle: 'Song One',
+      artistName: 'Artist One',
+      albumName: 'Album One',
+      albumCoverUrl: 'https://via.placeholder.com/50',
+    },
+    {
+      songTitle: 'Song Two',
+      artistName: 'Artist Two',
+      albumName: 'Album Two',
+      albumCoverUrl: 'https://via.placeholder.com/50',
+    },
+    {
+      songTitle: 'Song Three',
+      artistName: 'Artist Three',
+      albumName: 'Album Three',
+      albumCoverUrl: 'https://via.placeholder.com/50',
+    },
+    {
+      songTitle: 'Song Four',
+      artistName: 'Artist Four',
+      albumName: 'Album Four',
+      albumCoverUrl: 'https://via.placeholder.com/50',
+    },
+    {
+      songTitle: 'Song Five',
+      artistName: 'Artist Five',
+      albumName: 'Album Five',
+      albumCoverUrl: 'https://via.placeholder.com/50',
+    }
+  ]);
+
   // Function to handle new recommendations
   const handleNewRecommendation = (songTitle: string) => {
     // Mock additional data
@@ -48,8 +83,8 @@ const App: React.FC = () => {
       albumCoverUrl: 'https://via.placeholder.com/50',
     };
 
-    // Update the recommendations list with the new mock recommendation
     setRecommendations(prevRecommendations => [...prevRecommendations, newRecommendation]);
+    setRecentlyPlayed(prevRecentlyPlayed => [...prevRecentlyPlayed, newRecommendation]);
   };
 
   return (
@@ -68,6 +103,7 @@ const App: React.FC = () => {
                 album={currentSong.album}
               />
             </div>
+            <RecentlyPlayedList recentlyPlayed={recentlyPlayed} />
           </div>
           <div className="right-column">
             <div className="recommendation-form-container">

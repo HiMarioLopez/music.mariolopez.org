@@ -35,12 +35,14 @@
 }
 
 .recommendation-list-modal h1 {
-    align-self: flex-start;
-    /* Align header to the start (left) */
+    width: 100%;
+    /* Ensure the header fills the width */
+    text-align: left;
+    /* Align the text to the left */
     margin-top: 0;
-    /* Removes margin at the top */
+    /* Remove default top margin */
     margin-bottom: 10px;
-    /* Space below the header */
+    /* Add some space below the header */
 }
 
 .recommendation-list-modal ul {
@@ -56,6 +58,8 @@
     /* Enables vertical scrolling when content overflows */
     scrollbar-width: thin;
     scrollbar-color: rgba(255, 255, 255, 0.5) rgba(0, 0, 0, 0.1);
+    margin-top: 0;
+    margin-bottom: 0;
 }
 
 .recommendation-list-modal li {
