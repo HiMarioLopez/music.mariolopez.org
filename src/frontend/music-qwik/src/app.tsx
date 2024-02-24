@@ -1,29 +1,54 @@
-import { component$, useSignal } from '@builder.io/qwik'
-
-import qwikLogo from './assets/qwik.svg'
-import viteLogo from '/vite.svg'
-import './app.css'
+import { $, component$, useStore } from '@builder.io/qwik';
+import './app.css';
+import Navbar from './components/navbar';
+import NowPlaying from './components/now-playing';
+import RecentlyPlayedList from './components/recently-played-list';
+import RecommendationForm from './components/recommendation-form';
+import RecommendationList from './components/recommendation-list';
+import { Song } from './types/Song';
 
 export const App = component$(() => {
-  const count = useSignal(0)
+  const recommendations = useStore<Song[]>([
+    {
+      songTitle: 'Song One',
+      artistName: 'Artist One',
+      albumName: 'Album One',
+      albumCoverUrl: 'https://via.placeholder.com/50',
+    },
+    {
+      songTitle: 'Song Two',
+      artistName: 'Artist Two',
+      albumName: 'Album Two',
+      albumCoverUrl: 'https://via.placeholder.com/50',
+    },
+  ]);
+
+  const addRecommendation = $((song: Song) => {
+    recommendations.push(song);
+  });
 
   return (
     <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} class="logo" alt="Vite logo" />
-        </a>
-        <a href="https://qwik.builder.io" target="_blank">
-          <img src={qwikLogo} class="logo qwik" alt="Qwik logo" />
-        </a>
+      <div class="app-bg" />
+      <div class="app">
+        <Navbar />
+        <div class="main-content">
+          <div class="left-column">
+            <div class="now-playing-container">
+              <NowPlaying />
+            </div>
+            <RecentlyPlayedList />
+          </div>
+          <div class="right-column">
+            <div class="recommendation-form-container">
+              <RecommendationForm onAddRecommendation={addRecommendation} />
+            </div>
+            <div class="recommendations-list-container">
+              <RecommendationList recommendations={recommendations} />
+            </div>
+          </div>
+        </div>
       </div>
-      <h1>Vite + Qwik</h1>
-      <div class="card">
-        <button onClick$={() => count.value++}>count is {count.value}</button>
-      </div>
-      <p class="read-the-docs">
-        Click on the Vite and Qwik logos to learn more
-      </p>
     </>
-  )
-})
+  );
+});

@@ -1,24 +1,130 @@
-#app {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
+/* App.css */
+
+/* Keyframes for the gradient animation */
+@keyframes gradient {
+  0% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
+
+  100% {
+    background-position: 0% 50%;
+  }
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.qwik:hover {
-  filter: drop-shadow(0 0 2em #673ab8aa);
-}
-.card {
-  padding: 2em;
+/* Make sure the App component takes up all available space */
+.app {
+  position: absolute;
+  width: 100%;
+  height: 100%;
 }
 
-.read-the-docs {
-  color: #888;
+.app-bg {
+  position: fixed;
+  animation: gradient 5s ease infinite;
+  background: linear-gradient(-45deg, #FA573C, #61DAFB, #007AFF, #FA573C, #BF2A52);
+  background-attachment: fixed;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 400% 400%;
+  height: 100vh;
+  width: 100vw;
+}
+
+/* This is for screens larger than 1300px */
+@media (min-width: 1300px) {
+
+  .app {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .main-content {
+    max-width: 1200px;
+    /* Maximum width of the main content area */
+    display: flex;
+    flex-direction: row;
+    /* Arrange left and right columns side by side */
+    align-items: flex-start;
+    /* Align the columns to the start of the cross axis */
+    justify-content: space-between;
+    /* Put space between the two columns */
+    margin: 20px;
+    /* Add some margin around the main content for breathing room */
+  }
+
+  .left-column,
+  .right-column {
+    width: calc(50% - 20px);
+    /* Subtracting margin from 50% width */
+    margin: 0 20px;
+    /* Spacing between the columns */
+  }
+
+  .now-playing-container,
+  .recommendation-form-container,
+  .recommendations-list-container {
+    width: 100%;
+    /* Each child takes full width of its parent column */
+    margin-bottom: 20px;
+    /* Adds space between the stacked components within each column */
+  }
+
+  /* Remove the margin-bottom from the last item in the right column */
+  .recommendations-list-container:last-child {
+    margin-bottom: 0;
+  }
+
+}
+
+/* This is for screens smaller than 1299px */
+@media (max-width: 1299px) {
+
+  .app {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .now-playing-container,
+  .recommendation-form-container,
+  .recommendations-list-container {
+    width: 100%;
+    /* Take the full width of the container */
+    margin: 20px 0;
+    /* Adds space between components vertically */
+  }
+
+  .main-content {
+    padding-top: 60px;
+    /* Padding for Navbar */
+  }
+
+}
+
+/* Adjustments for mobile responsiveness */
+@media (max-width: 680px) {
+
+  .main-content {
+    padding-top: 50px;
+    /* Padding for Navbar */
+  }
+
+  .app,
+  .main-content {
+    display: flex;
+    /* Use flexbox to stack the columns */
+    flex-direction: column;
+    /* Stack the columns on top of each other */
+    align-items: center;
+    /* Stretch items to use the full width */
+    justify-content: flex-start;
+    /* Align content to start at the top */
+  }
+
 }
