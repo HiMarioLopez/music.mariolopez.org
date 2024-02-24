@@ -117,6 +117,10 @@ body,
 
 /* Adjustments for mobile responsiveness */
 @media (max-width: 680px) {
+    .main-content {
+        padding-top: 40px;
+        /* Padding for Navbar */
+    }
 
     .app,
     .main-content {
@@ -128,7 +132,12 @@ body,
         /* Align content to start at the top */
     }
 
-    .main-content {
-        max-width: 95%;
+    .now-playing-container {
+        width: 100%;
+        /* Full width */
+        margin: 20px 0;
+        /* Only vertical margin */
+        padding: 0;
+        /* No horizontal padding */
     }
 }

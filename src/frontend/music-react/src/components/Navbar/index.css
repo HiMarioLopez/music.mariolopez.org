@@ -28,3 +28,18 @@
     transition: filter 0.3s ease;
     /* Smooth transition for the effect */
 }
+
+@media (max-width: 680px) {
+    .navbar {
+        height: 30px;
+    }
+
+    .nav-icon {
+        width: 30px;
+        /* Standard size for icons */
+        height: 30px;
+        /* Standard size for icons */
+        margin: 0 7px;
+        /* Space between icons */
+    }
+}
