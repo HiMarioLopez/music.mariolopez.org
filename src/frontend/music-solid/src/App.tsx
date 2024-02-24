@@ -1,35 +1,73 @@
-import { createSignal } from 'solid-js'
-import solidLogo from './assets/solid.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { createSignal } from 'solid-js';
+import './App.css';
+import NowPlaying from './components/NowPlaying';
+import RecentlyPlayedList from './components/RecentlyPlayedList';
+import RecommendationForm from './components/RecommendationForm';
+import RecommendationList from './components/RecommendationList';
+import Navbar from './components/Navbar';
 
-function App() {
-  const [count, setCount] = createSignal(0)
+// Define a type for a single recommendation
+type Song = {
+  songTitle: string;
+  artistName: string;
+  albumName: string;
+  albumCoverUrl: string;
+};
+
+const App = () => {
+  // State to hold the list of recommendations with initial mock data
+  const [recommendations, setRecommendations] = createSignal<Song[]>([
+    {
+      songTitle: 'Song One',
+      artistName: 'Artist One',
+      albumName: 'Album One',
+      albumCoverUrl: 'https://via.placeholder.com/50',
+    },
+    {
+      songTitle: 'Song Two',
+      artistName: 'Artist Two',
+      albumName: 'Album Two',
+      albumCoverUrl: 'https://via.placeholder.com/50',
+    },
+  ]);
+
+  // Function to handle new recommendations
+  const handleNewRecommendation = (songTitle: string) => {
+    // Mock additional data
+    const newRecommendation = {
+      songTitle: songTitle,
+      artistName: 'Mock Artist',
+      albumName: 'Mock Album',
+      albumCoverUrl: 'https://via.placeholder.com/50',
+    };
+
+    setRecommendations(prevRecommendations => [...prevRecommendations, newRecommendation]);
+  };
 
   return (
     <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} class="logo" alt="Vite logo" />
-        </a>
-        <a href="https://solidjs.com" target="_blank">
-          <img src={solidLogo} class="logo solid" alt="Solid logo" />
-        </a>
+      <div class="app-bg" />
+      <div class="app">
+        <Navbar />
+        <div class="main-content">
+          <div class="left-column">
+            <div class="now-playing-container">
+              <NowPlaying />
+            </div>
+            <RecentlyPlayedList />
+          </div>
+          <div class="right-column">
+            <div class="recommendation-form-container">
+              <RecommendationForm onRecommend={handleNewRecommendation} />
+            </div>
+            <div class="recommendations-list-container">
+              <RecommendationList recommendations={recommendations()} />
+            </div>
+          </div>
+        </div>
       </div>
-      <h1>Vite + Solid</h1>
-      <div class="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count()}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p class="read-the-docs">
-        Click on the Vite and Solid logos to learn more
-      </p>
     </>
-  )
-}
+  );
+};
 
-export default App
+export default App;
