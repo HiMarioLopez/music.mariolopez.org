@@ -95,7 +95,7 @@ export default {
 .app-bg {
   position: fixed;
   animation: gradient 5s ease infinite;
-  background: linear-gradient(-45deg, #FA573C, #61DAFB, #60A4F4, #FA573C, #1f2378);
+  background: linear-gradient(-45deg, #FA573C, #FFFFFF, #42b883, #4FC08D, #FA573C);
   background-attachment: fixed;
   background-repeat: no-repeat;
   background-position: center;
