@@ -6,6 +6,7 @@ import solidLogo from '../../assets/solid.svg';
 import svelteLogo from '../../assets/svelte.svg';
 import tsLogo from '../../assets/typescript.svg';
 import vueLogo from '../../assets/vue.svg';
+import preactLogo from '../../assets/preact.svg';
 import './index.css';
 
 const Navbar: Component = () => {
@@ -18,6 +19,7 @@ const Navbar: Component = () => {
             <a href="https://music.mariolopez.org/svelte" target="_self" rel="alternate"><img src={svelteLogo} alt="Svelte" class="nav-icon" /></a>
             <a href="https://music.mariolopez.org/vanilla" target="_self" rel="alternate"><img src={tsLogo} alt="TypeScript" class="nav-icon" /></a>
             <a href="https://music.mariolopez.org/vue" target="_self" rel="alternate"><img src={vueLogo} alt="Vue" class="nav-icon" /></a>
+            <a href="https://music.mariolopez.org/preact" target="_self" rel="alternate"><img src={preactLogo} alt="Preact" class="nav-icon" /></a>
         </nav>
     );
 };

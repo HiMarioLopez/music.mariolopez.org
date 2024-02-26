@@ -5,6 +5,7 @@ import solidLogo from '../Assets/Icons/solid.svg';
 import svelteLogo from '../Assets/Icons/svelte.svg';
 import tsLogo from '../Assets/Icons/typescript.svg';
 import vueLogo from '../Assets/Icons/vue.svg';
+import preactLogo from '../Assets/Icons/preact.svg';
 import '../Assets/Styles/Navbar.styles.css';
 
 export function Navbar(): HTMLElement {
@@ -20,6 +21,7 @@ export function Navbar(): HTMLElement {
         { href: 'https://music.mariolopez.org/svelte', src: svelteLogo, alt: 'Svelte' },
         { href: 'https://music.mariolopez.org/vanilla', src: tsLogo, alt: 'TypeScript', additionalClass: 'ts-icon' },
         { href: 'https://music.mariolopez.org/vue', src: vueLogo, alt: 'Vue' },
+        { href: 'https://music.mariolopez.org/preact', src: preactLogo, alt: 'Preact' },
     ];
 
     logos.forEach(logo => {

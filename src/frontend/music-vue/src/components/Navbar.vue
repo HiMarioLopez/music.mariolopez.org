@@ -14,6 +14,8 @@
                 class="nav-icon" /></a>
         <a href="https://music.mariolopez.org/vue" target="_self" rel="alternate"><img :src="vueIcon" alt="Vue"
                 class="nav-icon vue-icon" /></a>
+        <a href="https://music.mariolopez.org/preact" target="_self" rel="alternate"><img :src="preactIcon" alt="Preact"
+                class="nav-icon" /></a>
     </nav>
 </template>
   
@@ -25,6 +27,7 @@ import solidIcon from '../assets/solid.svg';
 import svelteIcon from '../assets/svelte.svg';
 import tsIcon from '../assets/typescript.svg';
 import vueIcon from '../assets/vue.svg';
+import preactIcon from '../assets/preact.svg';
 
 export default {
     name: 'Navbar',
@@ -37,6 +40,7 @@ export default {
             svelteIcon: svelteIcon,
             tsIcon: tsIcon,
             vueIcon: vueIcon,
+            preactIcon: preactIcon,
         };
     },
 };

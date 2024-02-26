@@ -6,6 +6,7 @@
     import svelteLogo from "../assets/svelte.svg";
     import tsLogo from "../assets/typescript.svg";
     import vueLogo from "../assets/vue.svg";
+    import preactLogo from "../assets/preact.svg";
 </script>
 
 <nav class="navbar">
@@ -32,6 +33,9 @@
     >
     <a href="https://music.mariolopez.org/vue" target="_self" rel="alternate"
         ><img src={vueLogo} alt="Vue" class="nav-icon" /></a
+    >
+    <a href="https://music.mariolopez.org/preact" target="_self" rel="alternate"
+        ><img src={preactLogo} alt="Preact" class="nav-icon" /></a
     >
 </nav>
 

@@ -5,14 +5,7 @@ import RecentlyPlayedList from './components/RecentlyPlayedList/index';
 import RecommendationForm from './components/RecommendationForm/index';
 import RecommendationList from './components/RecommendationList/index';
 import Navbar from './components/Navbar';
-
-// Define a type for a single recommendation
-type Song = {
-  songTitle: string;
-  artistName: string;
-  albumName: string;
-  albumCoverUrl: string;
-};
+import { Song } from './types/Song';
 
 const App: React.FC = () => {
   // State to hold the list of recommendations with initial mock data
