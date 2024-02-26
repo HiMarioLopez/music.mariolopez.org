@@ -1,0 +1,99 @@
+.recommendationListModal {
+    background: rgba(50, 50, 50, 0.6);
+    color: aliceblue;
+    padding: 20px;
+    border-radius: 15px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    max-width: 600px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    box-shadow: inset 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.recommendationListModal::-webkit-scrollbar {
+    width: 12px;
+}
+
+.recommendationListModal::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.1);
+}
+
+.recommendationListModal::-webkit-scrollbar-thumb {
+    background-color: rgba(255, 255, 255, 0.5);
+    border-radius: 6px;
+    border: 3px solid rgba(0, 0, 0, 0.1);
+}
+
+.recommendationListModal h1 {
+    width: 100%;
+    text-align: left;
+    margin-top: 0;
+    margin-bottom: 10px;
+}
+
+.recommendationListModal ul {
+    list-style-type: none;
+    padding-left: 0;
+    width: 100%;
+    max-height: calc(7 * 60px);
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.5) rgba(0, 0, 0, 0.1);
+    margin-top: 0;
+    margin-bottom: 0;
+}
+
+.recommendationListModal li {
+    background: rgba(60, 60, 60, 0.6);
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+}
+
+.recommendationListModal li:last-child {
+    margin-bottom: 0;
+}
+
+.recommendationListModal li:hover {
+    background: rgba(75, 75, 75, 0.7);
+}
+
+.albumCover {
+    width: 50px;
+    height: 50px;
+    margin-right: 10px;
+    border-radius: 3px;
+}
+
+.recommendationItem {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    border-radius: 10px;
+    margin-bottom: 10px;
+    height: 60px;
+    margin-right: 7px;
+}
+
+.recommendationItem:last-child {
+    margin-bottom: 0;
+}
+
+.songInfo {
+    display: flex;
+    flex-direction: column;
+}
+
+.songInfo h3,
+.songInfo p {
+    margin: 0;
+    color: aliceblue;
+}
+
+@media (max-width: 680px) {
+    .recommendationListModal {
+        width: 80vw;
+        max-width: none;
+    }
+}
