@@ -103,6 +103,14 @@ public class SiteStack : Stack
             DestinationKeyPrefix = "preact",
         });
 
+        // Deploy Next site assets
+        new BucketDeployment(this, "Music-DeployNextSite", new BucketDeploymentProps
+        {
+            Sources = [Source.Asset("../frontend/music-next/dist")],
+            DestinationBucket = siteBucket,
+            DestinationKeyPrefix = "next",
+        });
+
         #endregion
 
         #region Route Randomization Handler
