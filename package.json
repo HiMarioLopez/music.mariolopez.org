@@ -13,6 +13,7 @@
     "update:music-qwik": "cd src/frontend/music-qwik && pnpm install",
     "update:music-lit": "cd src/frontend/music-lit && pnpm install",
     "update:music-preact": "cd src/frontend/music-preact && pnpm install",
+    "update:music-next": "cd src/frontend/music-next && pnpm install",
     "build:frontend": "pnpm npm-run-all --parallel build:music-*",
     "build:music-vue": "cd src/frontend/music-vue && pnpm run build",
     "build:music-vanilla": "cd src/frontend/music-vanilla && pnpm run build",
@@ -21,7 +22,8 @@
     "build:music-react": "cd src/frontend/music-react && pnpm run build",
     "build:music-qwik": "cd src/frontend/music-qwik && pnpm run build",
     "build:music-lit": "cd src/frontend/music-lit && pnpm run build",
-    "build:music-preact": "cd src/frontend/music-preact && pnpm run build"
+    "build:music-preact": "cd src/frontend/music-preact && pnpm run build",
+    "build:music-next": "cd src/frontend/music-next && pnpm run build"
   },
   "author": "Mario Lopez Martinez <mario@lopez.fyi>",
   "license": "GPL-3.0",
