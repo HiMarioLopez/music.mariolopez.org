@@ -1,0 +1,48 @@
+.navbar {
+    display: flex;
+    justify-content: center;
+    padding: 10px;
+    background: rgba(35, 35, 35, 0.9);
+    color: white;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 40px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.nav-icon {
+    width: 40px;
+    height: 40px;
+    margin: 0 10px;
+}
+
+.angular-icon {
+    opacity: 1;
+}
+
+.nav-icon:not(.angular-icon) {
+    opacity: 0.25;
+}
+
+.nav-icon:hover {
+    filter: drop-shadow(0 0 0.5em rgba(255, 255, 255, 0.3));
+    transition: filter 0.3s ease;
+    opacity: 1;
+    transition: opacity 0.3s ease;
+}
+
+@media (max-width: 680px) {
+
+    .navbar {
+        height: 30px;
+    }
+
+    .nav-icon {
+        width: 30px;
+        height: 30px;
+        margin: 0 7px;
+    }
+
+}

@@ -1,0 +1,12 @@
+<div class="recommendation-list-modal">
+    <h1>Recommendation Backlog</h1>
+    <ul>
+        <li *ngFor="let recommendation of recommendations; let i = index" class="recommendation-item">
+            <img [src]="recommendation.albumCoverUrl" alt="Album Cover" class="album-cover" />
+            <div class="song-info">
+                <h3>{{ recommendation.songTitle }}</h3>
+                <p>{{ recommendation.artistName }} - {{ recommendation.albumName }}</p>
+            </div>
+        </li>
+    </ul>
+</div>

@@ -1,0 +1,12 @@
+<div class="recently-played-list-modal">
+    <h1>Recently Played</h1>
+    <div class="scroll-container" #scrollContainer>
+        <div *ngFor="let play of recentlyPlayed; let i = index" class="play-item">
+            <img [src]="play.albumCoverUrl" alt="Album Cover" class="album-cover" />
+            <div class="song-info">
+                <h3>{{ play.songTitle }}</h3>
+                <p>{{ play.artistName }} - {{ play.albumName }}</p>
+            </div>
+        </div>
+    </div>
+</div>
