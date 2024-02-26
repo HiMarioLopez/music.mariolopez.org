@@ -95,6 +95,14 @@ public class SiteStack : Stack
             DestinationKeyPrefix = "vue",
         });
 
+        // Deploy Preact site assets
+        new BucketDeployment(this, "Music-DeployPreactSite", new BucketDeploymentProps
+        {
+            Sources = [Source.Asset("../frontend/music-preact/dist")],
+            DestinationBucket = siteBucket,
+            DestinationKeyPrefix = "preact",
+        });
+
         #endregion
 
         #region Route Randomization Handler
