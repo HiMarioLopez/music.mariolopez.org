@@ -11,7 +11,8 @@ exports.handler = (event, context, callback) => {
         '/solid': '/solid',
         '/svelte': '/svelte',
         '/vanilla': '/vanilla',
-        '/vue': '/vue'
+        '/vue': '/vue',
+        '/preact': '/preact'
     };
 
     // Extract the first part of the URI path
