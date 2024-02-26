@@ -79,7 +79,7 @@ public class SiteStack : Stack
             DestinationKeyPrefix = "svelte",
         });
 
-        // Deploy Vue site assets
+        // Deploy Vanilla site assets
         new BucketDeployment(this, "Music-DeployVanillaSite", new BucketDeploymentProps
         {
             Sources = [Source.Asset("../frontend/music-vanilla/dist")],
