@@ -16,7 +16,7 @@ const NowPlaying: React.FC = () => {
         <div className={styles.nowPlayingModal}>
             <Image src={currentSong.albumCoverUrl} alt="Album Art" width={300} height={300} className={styles.albumArt} />
             <div className={styles.contentContainer}>
-                <h1 className={styles.headerTitle}>Mario's Now Playing</h1>
+                <h1 className={styles.headerTitle}>Mario&apos;s Now Playing</h1>
                 <div className={styles.musicInfo}>
                     <h2>{currentSong.songTitle}</h2>
                     <p>{currentSong.artistName}</p>
