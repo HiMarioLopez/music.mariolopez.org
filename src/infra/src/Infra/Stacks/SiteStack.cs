@@ -111,6 +111,14 @@ public class SiteStack : Stack
             DestinationKeyPrefix = "next",
         });
 
+        // Deploy Angular site assets
+        new BucketDeployment(this, "Music-DeployAngularSite", new BucketDeploymentProps
+        {
+            Sources = [Source.Asset("../frontend/music-angular/dist")],
+            DestinationBucket = siteBucket,
+            DestinationKeyPrefix = "angular",
+        });
+
         #endregion
 
         #region Route Randomization Handler
