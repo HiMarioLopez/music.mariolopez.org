@@ -11,11 +11,11 @@
       "prefix": "app",
       "architect": {
         "build": {
-          "builder": "@angular-devkit/build-angular:application",
+          "builder": "@angular-devkit/build-angular:browser",
           "options": {
-            "outputPath": "dist/music-angular",
+            "outputPath": "dist",
             "index": "src/index.html",
-            "browser": "src/main.ts",
+            "main": "src/main.ts",
             "polyfills": [
               "zone.js"
             ],
@@ -31,6 +31,10 @@
           },
           "configurations": {
             "production": {
+              "deployUrl": "https://music.mariolopez.org/angular/",
+              "aot": true,
+              "optimization": true,
+              "extractLicenses": true,
               "budgets": [
                 {
                   "type": "initial",
