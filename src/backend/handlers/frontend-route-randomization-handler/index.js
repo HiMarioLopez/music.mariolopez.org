@@ -4,7 +4,18 @@ exports.handler = (event, context, callback) => {
     const request = event.Records[0].cf.request;
 
     // Direct mapping for path to itself, assuming future divergence is possible
-    const siteVersions = ['/lit', '/qwik', '/react', '/solid', '/svelte', '/vanilla', '/vue', '/preact', '/next'];
+    const siteVersions = [
+        '/lit',
+        '/qwik',
+        '/react',
+        '/solid',
+        '/svelte',
+        '/vanilla',
+        '/vue',
+        '/preact',
+        '/next',
+        '/angular'
+    ];
     const defaultUri = request.uri;
     const firstPathSegment = `/${defaultUri.split('/')[1] || ''}`;
 
