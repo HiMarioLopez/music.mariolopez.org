@@ -25,7 +25,8 @@
     "build:music-lit": "cd src/frontend/music-lit && pnpm run build",
     "build:music-preact": "cd src/frontend/music-preact && pnpm run build",
     "build:music-next": "cd src/frontend/music-next && pnpm run build",
-    "build:music-angular": "cd src/frontend/music-angular && pnpm run build"
+    "build:music-angular": "cd src/frontend/music-angular && pnpm run build",
+    "build:music-blazor": "cd src/frontend/music-blazor && dotnet publish Music.csproj /p:PublishProfile=FolderProfile"
   },
   "author": "Mario Lopez Martinez <mario@lopez.fyi>",
   "license": "GPL-3.0",
