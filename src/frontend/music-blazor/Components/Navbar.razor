@@ -1,0 +1,34 @@
+﻿@inject IJSRuntime JsRuntime;
+@inject Microsoft.AspNetCore.Components.WebAssembly.Hosting.IWebAssemblyHostEnvironment Environment;
+@using Music.Enum;
+
+<nav class="navbar">
+    @foreach (var framework in Enum.GetValues(typeof(Framework)))
+    {
+        var frameworkName = framework.ToString().ToLower();
+
+        <a href="@GetItemUrl((Framework)framework)" target="_self" rel="alternate">
+            <img src="@($"/{(Environment.Environment == "Production" ? "blazor/" : "")}images/{frameworkName}.svg")"
+                 alt="@frameworkName"
+                 class="nav-icon @(framework.ToString() == "Blazor" ? "blazor-icon" : "")" />
+        </a>
+    }
+</nav>
+
+
+@code {
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await JsRuntime.InvokeVoidAsync("scrollToIcon");
+        }
+    }
+
+    private string GetItemUrl(Framework framework)
+    {
+        // If URLs directly match the enum names, convert to lowercase or any specific case
+        return $"https://music.mariolopez.org/{framework.ToString().ToLower()}";
+    }
+
+}

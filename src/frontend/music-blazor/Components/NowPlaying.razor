@@ -1,0 +1,17 @@
+﻿@using Music.Models
+
+<div class="now-playing-modal">
+    <img src="@_currentSong.AlbumCoverUrl" alt="Album Art" class="album-art" />
+    <div class="content-container">
+        <h1 class="header-title">Mario's Now Playing</h1>
+        <div class="music-info">
+            <h2>@_currentSong.SongTitle</h2>
+            <p>@_currentSong.ArtistName</p>
+            <p>@_currentSong.AlbumName</p>
+        </div>
+    </div>
+</div>
+
+@code {
+    private Song _currentSong = new Song("Song Title", "Artist", "Album", "https://via.placeholder.com/300");
+}

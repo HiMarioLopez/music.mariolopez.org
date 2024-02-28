@@ -1,0 +1,81 @@
+﻿.recently-played-list-modal {
+    background: rgba(50, 50, 50, 0.6);
+    color: aliceblue;
+    padding: 20px;
+    border-radius: 15px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    max-width: 600px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    position: relative;
+}
+
+    .recently-played-list-modal h1 {
+        width: 100%;
+        /* Ensure the header fills the width */
+        text-align: left;
+        /* Align the text to the left */
+        margin-top: 0;
+        /* Remove default top margin */
+        margin-bottom: 10px;
+        /* Add some space below the header */
+    }
+
+.scroll-container {
+    display: flex;
+    align-items: center;
+    overflow-x: auto;
+    white-space: nowrap;
+    /* Hide scrollbar for IE, Edge, and Firefox */
+    scrollbar-width: none;
+    /* For Firefox */
+    -ms-overflow-style: none;
+    /* For Internet Explorer and Edge */
+}
+
+    /* Hide scrollbar for Chrome, Safari, and Opera */
+    .scroll-container::-webkit-scrollbar {
+        display: none;
+        /* This is the key to hide the scrollbar in WebKit browsers */
+    }
+
+.play-item {
+    display: inline-flex;
+    align-items: center;
+    padding: 10px;
+    border-radius: 5px;
+    margin-right: 10px;
+    height: 60px;
+    background: rgba(60, 60, 60, 0.6);
+}
+
+    .play-item:last-child {
+        margin-right: 0;
+    }
+
+.album-cover {
+    width: 50px;
+    height: 50px;
+    margin-right: 10px;
+    border-radius: 3px;
+}
+
+.song-info {
+    display: flex;
+    flex-direction: column;
+    margin-right: 5px;
+}
+
+    .song-info h3,
+    .song-info p {
+        margin: 0;
+        color: aliceblue;
+    }
+
+@media (max-width: 680px) {
+    .recently-played-list-modal {
+        width: 80vw;
+        max-width: none;
+    }
+}

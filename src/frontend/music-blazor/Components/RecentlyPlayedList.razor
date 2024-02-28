@@ -1,0 +1,37 @@
+﻿@using Music.Models
+@inject IJSRuntime JsRuntime
+
+<div class="recently-played-list-modal">
+    <h1>Recently Played</h1>
+    <div class="scroll-container" @ref="_scrollContainer">
+        @foreach (var play in _recentlyPlayed)
+        {
+            <div class="play-item">
+                <img src="@play.AlbumCoverUrl" alt="Album Cover" class="album-cover" />
+                <div class="song-info">
+                    <h3>@play.SongTitle</h3>
+                    <p>@play.ArtistName - @play.AlbumName</p>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    private ElementReference _scrollContainer;
+    private List<Song> _recentlyPlayed = new() {
+        new Song("Song One", "Artist One", "Album One", "https://via.placeholder.com/50"),
+        new Song("Song Two", "Artist Two", "Album Two", "https://via.placeholder.com/50"),
+        new Song("Song Three", "Artist Three", "Album Three", "https://via.placeholder.com/50"),
+        new Song("Song Four", "Artist Four", "Album Four", "https://via.placeholder.com/50"),
+        new Song("Song Five", "Artist Five", "Album Five", "https://via.placeholder.com/50")
+    };
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await JsRuntime.InvokeVoidAsync("startAutoScrollingHorizontal", _scrollContainer);
+        }
+    }
+}

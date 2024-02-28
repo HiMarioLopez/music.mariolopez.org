@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <link rel="icon" type="image/svg+xml" href="images/blazor.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Music</title>
+
+    <!-- Styles -->
+    <link href="css/Global.styles.css" rel="stylesheet" />
+    <link href="css/App.styles.css" rel="stylesheet" />
+    <link href="css/Navbar.styles.css" rel="stylesheet" />
+    <link href="css/NowPlaying.styles.css" rel="stylesheet" />
+    <link href="css/RecentlyPlayedList.styles.css" rel="stylesheet" />
+    <link href="css/RecommendationForm.styles.css" rel="stylesheet" />
+    <link href="css/RecommendationList.styles.css" rel="stylesheet" />
+
+    <!-- Scripts -->
+    <script src="js/scrollToIcon.js"></script>
+    <script src="js/startAutoScrollingHorizontal.js"></script>
+</head>
+
+<body>
+    <div id="app">
+        <svg class="loading-progress">
+            <circle r="40%" cx="50%" cy="50%" />
+            <circle r="40%" cx="50%" cy="50%" />
+        </svg>
+        <div class="loading-progress-text"></div>
+    </div>
+
+    <div id="blazor-error-ui" data-nosnippet>
+        An unhandled error has occurred.
+        <a href="" class="reload">Reload</a>
+        <a class="dismiss">🗙</a>
+    </div>
+
+    <!-- Blazor WebAssembly script with auto-start disabled (to let us configure the way sources are loaded in the script below) -->
+    <script src="_framework/blazor.webassembly.js" autostart="false"></script>
+
+    <!-- Configuring the Blazor WebAssembly app to load boot resources from a different location -->
+    <!-- https://learn.microsoft.com/en-us/aspnet/core/blazor/fundamentals/startup?view=aspnetcore-8.0#load-client-side-boot-resources -->
+    <!-- https://learn.microsoft.com/en-us/aspnet/core/blazor/host-and-deploy/webassembly?view=aspnetcore-8.0#customize-how-boot-resources-are-loaded -->
+    <script>
+        Blazor.start({
+            loadBootResource: function (type, name, defaultUri, integrity) {
+                // Debugging (Comment out when not needed)
+                // console.log(`Loading: '${type}', '${name}', '${defaultUri}', '${integrity}'`);
+
+                // Determine if we're running locally
+                var isLocal = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
+
+                // Base URL for resources; adjust as needed for your local and deployed environments
+                var baseUrl = isLocal ? "_framework" : "https://music.mariolopez.org/blazor/_framework";
+
+                // Construct the URI based on the environment
+                var resourceUri = `${baseUrl}/${name}`;
+
+                // Return the appropriate URI
+                return resourceUri;
+            }
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,132 @@
+﻿/* index.css for RecommendationList */
+
+.recommendation-list-modal {
+    background: rgba(50, 50, 50, 0.6);
+    color: aliceblue;
+    padding: 20px;
+    border-radius: 15px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    max-width: 600px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    /* Aligns items to the start (left) */
+    box-shadow: inset 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+    /* Custom scrollbar styles */
+    .recommendation-list-modal::-webkit-scrollbar {
+        width: 12px;
+        /* Width of the scrollbar */
+    }
+
+    .recommendation-list-modal::-webkit-scrollbar-track {
+        background: rgba(0, 0, 0, 0.1);
+        /* Color of the track */
+    }
+
+    .recommendation-list-modal::-webkit-scrollbar-thumb {
+        background-color: rgba(255, 255, 255, 0.5);
+        /* Color of the scrollbar thumb */
+        border-radius: 6px;
+        /* Roundness of the scrollbar thumb */
+        border: 3px solid rgba(0, 0, 0, 0.1);
+        /* Creates padding around the scrollbar thumb */
+    }
+
+    .recommendation-list-modal h1 {
+        width: 100%;
+        /* Ensure the header fills the width */
+        text-align: left;
+        /* Align the text to the left */
+        margin-top: 0;
+        /* Remove default top margin */
+        margin-bottom: 10px;
+        /* Add some space below the header */
+    }
+
+    .recommendation-list-modal ul {
+        list-style-type: none;
+        /* Removes the list-style dots */
+        padding-left: 0;
+        /* Removes padding which is usually reserved for bullets */
+        width: 100%;
+        /* Full width */
+        max-height: calc(7 * 60px);
+        /* Adjust the multiplier based on the total height of a single item */
+        overflow-y: auto;
+        /* Enables vertical scrolling when content overflows */
+        scrollbar-width: thin;
+        scrollbar-color: rgba(255, 255, 255, 0.5) rgba(0, 0, 0, 0.1);
+        margin-top: 0;
+        margin-bottom: 0;
+    }
+
+    .recommendation-list-modal li {
+        background: rgba(60, 60, 60, 0.6);
+        padding: 10px;
+        margin-bottom: 10px;
+        border-radius: 5px;
+        /* You can add text-align: left; if the text is not aligned left */
+    }
+
+        /* Remove bottom margin for the last list item */
+        .recommendation-list-modal li:last-child {
+            margin-bottom: 0;
+        }
+
+        /* Add a hover effect for list items */
+        .recommendation-list-modal li:hover {
+            background: rgba(75, 75, 75, 0.7);
+        }
+
+.album-cover {
+    width: 50px;
+    /* Set a fixed size or use a responsive size */
+    height: 50px;
+    /* Set a fixed size or use a responsive size */
+    margin-right: 10px;
+    /* Space between the image and the song info */
+    border-radius: 3px;
+    /* Optional: to match the modal's style */
+}
+
+.recommendation-item {
+    display: flex;
+    align-items: center;
+    /* Align the image and text vertically */
+    padding: 10px;
+    border-radius: 10px;
+    margin-bottom: 10px;
+    height: 60px;
+    /* Set the height of each item, ensure this matches the calc in max-height */
+    margin-right: 7px;
+    /* Compensate for the padding on the right side */
+}
+
+    .recommendation-item:last-child {
+        margin-bottom: 0;
+        /* Remove bottom margin from the last item */
+    }
+
+.song-info {
+    display: flex;
+    flex-direction: column;
+}
+
+    .song-info h3,
+    .song-info p {
+        margin: 0;
+        /* Remove default margins */
+        color: aliceblue;
+        /* Set text color to match modal */
+    }
+
+@media (max-width: 680px) {
+    .recommendation-list-modal {
+        width: 80vw;
+        /* Adjust the width for smaller screens */
+        max-width: none;
+        /* Remove the max-width */
+    }
+}

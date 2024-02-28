@@ -1,0 +1,38 @@
+﻿@using Music.Components
+@using Music.Models
+
+<div class="app-bg"></div>
+<div class="app">
+    <Navbar />
+    <div class="main-content">
+        <div class="left-column">
+            <div class="now-playing-container">
+                <NowPlaying />
+            </div>
+            <RecentlyPlayedList />
+        </div>
+        <div class="right-column">
+            <div class="recommendation-form-container">
+                <RecommendationForm OnRecommend="HandleNewRecommendation" />
+            </div>
+            <div class="recommendations-list-container">
+                <RecommendationList Recommendations="@_recommendations" />
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private readonly List<Song> _recommendations = new()
+    {
+        new Song("Song One", "Artist One", "Album One", "https://via.placeholder.com/50"),
+        new Song("Song Two", "Artist Two", "Album Two", "https://via.placeholder.com/50")
+    };
+
+    private void HandleNewRecommendation(string songTitle)
+    {
+        var newRecommendation = new Song(songTitle, "Mock Artist", "Mock Album", "https://via.placeholder.com/50");
+
+        _recommendations.Add(newRecommendation);
+    }
+}

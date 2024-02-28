@@ -1,0 +1,30 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.BlazorWebAssembly">
+
+	<PropertyGroup>
+		<TargetFramework>net8.0</TargetFramework>
+		<Nullable>enable</Nullable>
+		<ImplicitUsings>enable</ImplicitUsings>
+
+		<!-- These features won't work with Blazor WebAssembly apps (until .NET 9?) -->
+		<!-- Either way, it would further bloat the already bloated first load for the users. -->
+		<!-- REF: https://github.com/dotnet/runtime/pull/90436, https://github.com/dotnet/runtime/issues/92238 -->
+		<!-- <RunAOTCompilation>true</RunAOTCompilation> -->
+		<!-- <WasmStripILAfterAOT>true</WasmStripILAfterAOT> -->
+
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="8.0.2" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="8.0.2" PrivateAssets="all" />
+	</ItemGroup>
+
+
+	<Target Name="PostPublishActions" AfterTargets="Publish">
+		<!-- Moves the wwwroot folder to the root of the project directory in a `dist` folder. -->
+		<Exec Command="powershell -NonInteractive -ExecutionPolicy Unrestricted -File &quot;$(ProjectDir)Scripts\PostPublishMove.ps1&quot; -sourceDir &quot;$(PublishDir)wwwroot&quot; -targetDir &quot;$(ProjectDir)dist&quot;" />
+
+		<!-- Updates the index.html file to use the CDN URL for the Blazor WebAssembly app. -->
+		<Exec Command="powershell -NonInteractive -ExecutionPolicy Bypass -File &quot;$(ProjectDir)Scripts\UpdateIndexHtmlForCdn.ps1&quot; -indexFilePath &quot;$(ProjectDir)dist\index.html&quot; -cdnUrl &quot;https://music.mariolopez.org/blazor&quot;" />
+	</Target>
+
+</Project>
