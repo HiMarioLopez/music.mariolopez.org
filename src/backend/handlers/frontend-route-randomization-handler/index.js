@@ -14,7 +14,8 @@ exports.handler = (event, context, callback) => {
         '/vue',
         '/preact',
         '/next',
-        '/angular'
+        '/angular',
+        '/blazor'
     ];
     const defaultUri = request.uri;
     const firstPathSegment = `/${defaultUri.split('/')[1] || ''}`;
