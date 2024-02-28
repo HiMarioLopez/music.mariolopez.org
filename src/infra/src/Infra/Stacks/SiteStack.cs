@@ -119,6 +119,14 @@ public class SiteStack : Stack
             DestinationKeyPrefix = "angular",
         });
 
+        // Deploy Blazor site assets
+        new BucketDeployment(this, "Music-DeployBlazorSite", new BucketDeploymentProps
+        {
+            Sources = [Source.Asset("../frontend/music-blazor/dist")],
+            DestinationBucket = siteBucket,
+            DestinationKeyPrefix = "blazor",
+        });
+
         #endregion
 
         #region Route Randomization Handler
