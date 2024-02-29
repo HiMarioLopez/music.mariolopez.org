@@ -34,6 +34,10 @@
     height: 60px;
 }
 
+.recently-played-list-component-track:hover {
+    background: var(--track-bg-color-hover);
+}
+
 .recently-played-list-component-track:last-child {
     margin-right: 0;
 }

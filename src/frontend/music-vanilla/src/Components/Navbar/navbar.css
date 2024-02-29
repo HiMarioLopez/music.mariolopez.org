@@ -42,7 +42,6 @@ nav img:hover {
 
 @media (max-width: 680px) {
     nav {
-        justify-content: flex-start;
         height: var(--navbar-height-mobile);
     }
 
@@ -54,5 +53,11 @@ nav img:hover {
 
     nav a:last-child img {
         margin-right: var(--margin-large);
+    }
+}
+
+@media (max-width: 510px) {
+    nav {
+        justify-content: flex-start;
     }
 }
