@@ -1,6 +1,6 @@
-import placeholderAlbumCover from '../Assets/Images/50.png';
-import '../Assets/Styles/RecentlyPlayedList.styles.css';
-import { Song } from "../Types/Song.type";
+import placeholderAlbumCover from '../../Assets/Images/50.png';
+import './recently-played-list.css';
+import { Song } from "../../Types/Song.type";
 
 // Mock data for the recently played songs
 const recentlyPlayed: Song[] = [

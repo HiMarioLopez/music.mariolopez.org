@@ -1,4 +1,4 @@
-import '../Assets/Styles/RecommendationForm.styles.css';
+import './recommendation-form.css';
 
 // Assuming an interface for the props similar to what's used in the React version
 interface RecommendationFormProps {

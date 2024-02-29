@@ -1,5 +1,5 @@
-import '../Assets/Styles/RecommendationList.styles.css';
-import { Song } from '../Types/Song.type';
+import './recommendation-list.css';
+import { Song } from '../../Types/Song.type';
 
 // Assuming an interface for the props similar to what's used in the React version
 interface RecommendationListProps {

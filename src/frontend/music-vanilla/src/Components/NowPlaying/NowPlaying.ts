@@ -1,6 +1,6 @@
-import placeholderAlbumCover from '../Assets/Images/300.png';
-import '../Assets/Styles/NowPlaying.styles.css';
-import { Song } from "../Types/Song.type";
+import placeholderAlbumCover from '../../Assets/Images/300.png';
+import './now-playing.css';
+import { Song } from "../../Types/Song.type";
 
 // Mock data for the currently playing song
 const currentSong: Song = {

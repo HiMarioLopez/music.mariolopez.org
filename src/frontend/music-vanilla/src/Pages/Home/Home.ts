@@ -1,12 +1,12 @@
-import placeholderAlbumCover from '../Assets/Images/50.png';
-import '../Assets/Styles/App.styles.css';
-import { Song } from "../Types/Song.type";
-import { Navbar } from "./Navbar.component";
-import { NowPlaying } from "./NowPlaying.component";
-import { RecentlyPlayedList } from "./RecentlyPlayedList.component";
-import { RecommendationForm } from "./RecommendationForm.component";
-import { RecommendationList } from "./RecommendationList.component";
-import { Footer } from "./Footer.component";
+import placeholderAlbumCover from '../../Assets/Images/50.png';
+import { Footer } from "../../Components/Footer/Footer";
+import { Navbar } from "../../Components/Navbar/Navbar";
+import { NowPlaying } from "../../Components/NowPlaying/NowPlaying";
+import { RecentlyPlayedList } from "../../Components/RecentlyPlayedList/RecentlyPlayedList";
+import { RecommendationForm } from "../../Components/RecommendationForm/RecommendationForm";
+import { RecommendationList } from "../../Components/RecommendationList/RecommendationList";
+import { Song } from "../../Types/Song.type";
+import './home.css';
 
 // Mock data for recommendations
 let recommendations: Song[] = [
@@ -24,7 +24,7 @@ let recommendations: Song[] = [
     },
 ];
 
-function App(): HTMLElement {
+function Home(): HTMLElement {
     const app = document.createElement('div');
     app.className = 'app';
 
@@ -98,4 +98,4 @@ function App(): HTMLElement {
 }
 
 
-export default App;
+export default Home;

@@ -1,15 +1,15 @@
-import angularLogo from '../Assets/Images/angular.svg';
-import blazorLogo from '../Assets/Images/blazor.svg';
-import litLogo from '../Assets/Images/lit.svg';
-import nextLogo from '../Assets/Images/next.svg';
-import preactLogo from '../Assets/Images/preact.svg';
-import qwikLogo from '../Assets/Images/qwik.svg';
-import reactLogo from '../Assets/Images/react.svg';
-import solidLogo from '../Assets/Images/solid.svg';
-import svelteLogo from '../Assets/Images/svelte.svg';
-import tsLogo from '../Assets/Images/typescript.svg';
-import vueLogo from '../Assets/Images/vue.svg';
-import '../Assets/Styles/Navbar.styles.css';
+import angularLogo from '../../Assets/Images/angular.svg';
+import blazorLogo from '../../Assets/Images/blazor.svg';
+import litLogo from '../../Assets/Images/lit.svg';
+import nextLogo from '../../Assets/Images/next.svg';
+import preactLogo from '../../Assets/Images/preact.svg';
+import qwikLogo from '../../Assets/Images/qwik.svg';
+import reactLogo from '../../Assets/Images/react.svg';
+import solidLogo from '../../Assets/Images/solid.svg';
+import svelteLogo from '../../Assets/Images/svelte.svg';
+import tsLogo from '../../Assets/Images/typescript.svg';
+import vueLogo from '../../Assets/Images/vue.svg';
+import './navbar.css';
 
 export function Navbar(): HTMLElement {
     const logos = [
