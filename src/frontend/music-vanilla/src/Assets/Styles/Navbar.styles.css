@@ -11,6 +11,12 @@
     height: var(--navbar-height-desktop);
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
     z-index: 1000;
+
+    /* make navbar scrollable */
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
 }
 
 .nav-icon {
@@ -34,6 +40,10 @@
     opacity: 1;
 }
 
+.navbar a:last-child .nav-icon {
+    margin-right: var(--margin-large);
+}
+
 @media (max-width: 680px) {
     .navbar {
         height: var(--navbar-height-mobile);
@@ -43,5 +53,9 @@
         width: var(--navbar-height-mobile);
         height: var(--navbar-height-mobile);
         margin: 0 7px;
+    }
+
+    .navbar a:last-child .nav-icon {
+        margin-right: var(--margin-large);
     }
 }
