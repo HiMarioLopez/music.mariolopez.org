@@ -1,10 +1,11 @@
+import placeholderAlbumCover from '../Assets/Images/50.png';
+import '../Assets/Styles/App.styles.css';
+import { Song } from "../Types/Song.type";
 import { Navbar } from "./Navbar.component";
 import { NowPlaying } from "./NowPlaying.component";
 import { RecentlyPlayedList } from "./RecentlyPlayedList.component";
 import { RecommendationForm } from "./RecommendationForm.component";
 import { RecommendationList } from "./RecommendationList.component";
-import { Song } from "../Types/Song.type";
-import '../Assets/Styles/App.styles.css';
 
 // Mock data for recommendations
 let recommendations: Song[] = [
@@ -12,13 +13,13 @@ let recommendations: Song[] = [
         songTitle: 'Song One',
         artistName: 'Artist One',
         albumName: 'Album One',
-        albumCoverUrl: 'https://via.placeholder.com/50',
+        albumCoverUrl: placeholderAlbumCover
     },
     {
         songTitle: 'Song Two',
         artistName: 'Artist Two',
         albumName: 'Album Two',
-        albumCoverUrl: 'https://via.placeholder.com/50',
+        albumCoverUrl: placeholderAlbumCover
     },
 ];
 

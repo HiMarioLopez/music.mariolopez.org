@@ -1,5 +1,6 @@
-import { Song } from "../Types/Song.type";
+import placeholderAlbumCover from '../Assets/Images/50.png';
 import '../Assets/Styles/RecentlyPlayedList.styles.css';
+import { Song } from "../Types/Song.type";
 
 // Mock data for the recently played songs
 const recentlyPlayed: Song[] = [
@@ -7,37 +8,39 @@ const recentlyPlayed: Song[] = [
         songTitle: 'Song One',
         artistName: 'Artist One',
         albumName: 'Album One',
-        albumCoverUrl: 'https://via.placeholder.com/50',
+        albumCoverUrl: placeholderAlbumCover
     },
     {
         songTitle: 'Song Two',
         artistName: 'Artist Two',
         albumName: 'Album Two',
-        albumCoverUrl: 'https://via.placeholder.com/50',
+        albumCoverUrl: placeholderAlbumCover
     },
     {
         songTitle: 'Song Three',
         artistName: 'Artist Three',
         albumName: 'Album Three',
-        albumCoverUrl: 'https://via.placeholder.com/50',
+        albumCoverUrl: placeholderAlbumCover
     },
     {
         songTitle: 'Song Four',
         artistName: 'Artist Four',
         albumName: 'Album Four',
-        albumCoverUrl: 'https://via.placeholder.com/50',
+        albumCoverUrl: placeholderAlbumCover
     },
     {
         songTitle: 'Song Five',
         artistName: 'Artist Five',
         albumName: 'Album Five',
-        albumCoverUrl: 'https://via.placeholder.com/50',
+        albumCoverUrl: placeholderAlbumCover
     }
 ];
 
+const styleRoot = 'recently-played-list-component';
+
 export function RecentlyPlayedList(): HTMLElement {
     const modal = document.createElement('div');
-    modal.className = 'recently-played-list-modal';
+    modal.className = styleRoot;
 
     const title = document.createElement('h1');
     title.textContent = 'Recently Played';

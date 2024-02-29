@@ -1,5 +1,3 @@
-/* components/Navbar.css */
-
 .navbar {
     display: flex;
     justify-content: center;
@@ -8,54 +6,42 @@
     color: white;
     position: fixed;
     top: 0;
+    left: 0;
     width: 100%;
     height: 40px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
 }
 
 .nav-icon {
     width: 40px;
-    /* Standard size for icons */
     height: 40px;
-    /* Standard size for icons */
     margin: 0 10px;
-    /* Space between icons */
 }
 
 .ts-icon {
     opacity: 1;
-    /* Full opacity for the active icon */
 }
 
 .nav-icon:not(.ts-icon) {
     opacity: 0.25;
-    /* Dim other icons to indicate they're not the current selection */
 }
 
 .nav-icon:hover {
     filter: drop-shadow(0 0 0.5em rgba(255, 255, 255, 0.3));
-    /* General highlight effect for all icons */
     transition: filter 0.3s ease;
-    /* Smooth transition for the effect */
     opacity: 1;
-    /* Full opacity for the hovered icon */
     transition: opacity 0.3s ease;
-    /* Smooth transition for the effect */
 }
 
 @media (max-width: 680px) {
-
     .navbar {
         height: 30px;
     }
 
     .nav-icon {
         width: 30px;
-        /* Standard size for icons */
         height: 30px;
-        /* Standard size for icons */
         margin: 0 7px;
-        /* Space between icons */
     }
-
 }

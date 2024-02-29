@@ -7,3 +7,16 @@ body,
   height: 100%;
   font-family: Arial, sans-serif;
 }
+
+/* Shared Styles */
+.styled-container {
+  background: rgba(50, 50, 50, 0.6);
+  color: aliceblue;
+  padding: 20px;
+  border-radius: 15px;
+  box-shadow: inset 0 4px 8px rgba(0, 0, 0, 0.1);
+  max-width: 600px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}

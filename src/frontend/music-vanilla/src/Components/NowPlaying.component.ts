@@ -9,26 +9,27 @@ const currentSong: Song = {
     albumCoverUrl: "https://via.placeholder.com/300"
 };
 
+// Root (prefix) for the component's styles
+const styleRoot = "now-playing-component";
+
 export function NowPlaying(): HTMLElement {
-    const nowPlayingModal = document.createElement('div');
-    nowPlayingModal.className = 'now-playing-modal';
+    const nowPlayingComponent = document.createElement('div');
+    nowPlayingComponent.className = styleRoot;
 
     const albumArt = document.createElement('img');
     albumArt.src = currentSong.albumCoverUrl;
     albumArt.alt = "Album Art";
-    albumArt.className = "album-art";
-    nowPlayingModal.appendChild(albumArt);
+    nowPlayingComponent.appendChild(albumArt);
 
     const contentContainer = document.createElement('div');
-    contentContainer.className = "content-container";
+    contentContainer.className = `${styleRoot}-text-container`;
 
     const headerTitle = document.createElement('h1');
-    headerTitle.className = "header-title";
     headerTitle.textContent = "Mario's Now Playing";
     contentContainer.appendChild(headerTitle);
 
     const musicInfo = document.createElement('div');
-    musicInfo.className = "music-info";
+    musicInfo.className = `${styleRoot}-text`;
 
     const songTitle = document.createElement('h2');
     songTitle.textContent = currentSong.songTitle;
@@ -46,7 +47,7 @@ export function NowPlaying(): HTMLElement {
     contentContainer.appendChild(musicInfo);
 
     // Append the content container to the modal
-    nowPlayingModal.appendChild(contentContainer);
+    nowPlayingComponent.appendChild(contentContainer);
 
-    return nowPlayingModal;
+    return nowPlayingComponent;
 }

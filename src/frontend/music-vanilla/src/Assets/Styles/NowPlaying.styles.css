@@ -1,31 +1,24 @@
-/* NowPlaying/index.css */
-
-.now-playing-modal {
+.now-playing-component {
     background: rgba(50, 50, 50, 0.6);
     color: aliceblue;
     padding: 20px;
     border-radius: 15px;
-    /* Adjust for desired roundness */
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    /* This adds a subtle shadow */
     display: flex;
     align-items: center;
-    /* Vertical alignment */
     justify-content: flex-start;
-    /* Centers the modal and adds space around it */
     max-width: 600px;
-    /* Adjust as needed */
     box-shadow: inset 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-.album-art {
+.now-playing-component img {
     width: 250px;
     height: 250px;
     border-radius: 10px;
     margin-right: 20px;
 }
 
-.content-container {
+.now-playing-component-text-container {
     flex-grow: 1;
     display: flex;
     flex-direction: column;
@@ -33,45 +26,44 @@
     height: 250px;
 }
 
-.header-title {
+.now-playing-component h1 {
     margin: 0;
 }
 
-.music-info {
+.now-playing-component-text {
     text-align: left;
 }
 
-.music-info h2,
-.music-info p {
+.now-playing-component-text h2,
+.now-playing-component-text p {
     margin: 0;
 }
 
 @media (max-width: 680px) {
 
-    .now-playing-modal {
-        flex-direction: column-reverse;
-        /* Stack the content on top of the album art */
+    .now-playing-component,
+    .now-playing-component h1,
+    .now-playing-component img,
+    .now-playing-component-text {
         width: 80vw;
+
+    }
+
+    .now-playing-component {
+        flex-direction: column-reverse;
         max-width: none;
     }
 
-    .album-art {
-        width: 80vw;
+    .now-playing-component img {
         height: auto;
         margin: 10px 0;
     }
 
-    .header-title {
-        width: 80vw;
+    .now-playing-component h1 {
         margin-bottom: 10px;
     }
 
-    .music-info {
-        width: 80vw;
-    }
-
-    .content-container {
+    .now-playing-component-text-container {
         height: auto;
     }
-
 }

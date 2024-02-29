@@ -13,13 +13,13 @@
 
 .recently-played-list-modal h1 {
     width: 100%;
-    /* Ensure the header fills the width */
+    /* Fills the width */
     text-align: left;
-    /* Align the text to the left */
+    /* Aligns text to the left */
     margin-top: 0;
-    /* Remove default top margin */
+    /* Removes the default top margin */
     margin-bottom: 10px;
-    /* Add some space below the header */
+    /* Adds space below the header */
 }
 
 .scroll-container {
@@ -27,17 +27,15 @@
     align-items: center;
     overflow-x: auto;
     white-space: nowrap;
-    /* Hide scrollbar for IE, Edge, and Firefox */
     scrollbar-width: none;
     /* For Firefox */
     -ms-overflow-style: none;
-    /* For Internet Explorer and Edge */
+    /* For IE and Edge */
 }
 
-/* Hide scrollbar for Chrome, Safari, and Opera */
 .scroll-container::-webkit-scrollbar {
     display: none;
-    /* This is the key to hide the scrollbar in WebKit browsers */
+    /* Hides scrollbar for WebKit browsers (Chrome, Safari, Opera) */
 }
 
 .play-item {
@@ -46,36 +44,45 @@
     padding: 10px;
     border-radius: 5px;
     margin-right: 10px;
-    height: 60px;
+    /* Consistent right margin for all items */
     background: rgba(60, 60, 60, 0.6);
+    height: 60px;
+    /* Ensures consistent item height */
 }
 
 .play-item:last-child {
     margin-right: 0;
+    /* Removes the right margin for the last item */
 }
 
 .album-cover {
     width: 50px;
     height: 50px;
     margin-right: 10px;
+    /* Space between the cover and song info */
     border-radius: 3px;
+    /* Matches modal border-radius style */
 }
 
 .song-info {
     display: flex;
     flex-direction: column;
     margin-right: 5px;
+    /* Space to the right of the song info */
 }
 
 .song-info h3,
 .song-info p {
     margin: 0;
+    /* Removes default margins */
     color: aliceblue;
+    /* Ensures text color consistency */
 }
 
 @media (max-width: 680px) {
     .recently-played-list-modal {
         width: 80vw;
         max-width: none;
+        /* Ensures modal uses available width on smaller screens */
     }
 }

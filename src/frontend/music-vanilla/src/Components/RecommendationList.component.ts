@@ -1,5 +1,5 @@
-import { Song } from '../Types/Song.type';
 import '../Assets/Styles/RecommendationList.styles.css';
+import { Song } from '../Types/Song.type';
 
 // Assuming an interface for the props similar to what's used in the React version
 interface RecommendationListProps {
@@ -8,7 +8,8 @@ interface RecommendationListProps {
 
 export function RecommendationList(props: RecommendationListProps): HTMLElement {
     const modal = document.createElement('div');
-    modal.className = 'recommendation-list-modal';
+    modal.classList.add('recommendation-list-container');
+    modal.classList.add('styled-container');
 
     const title = document.createElement('h1');
     title.textContent = 'Recommendation Backlog';
