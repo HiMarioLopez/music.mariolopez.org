@@ -6,6 +6,7 @@ import { NowPlayingComponent } from './components/now-playing/now-playing.compon
 import { RecentlyPlayedListComponent } from './components/recently-played-list/recently-played-list.component';
 import { RecommendationFormComponent } from './components/recommendation-form/recommendation-form.component';
 import { RecommendationListComponent } from './components/recommendation-list/recommendation-list.component';
+import { FooterComponent } from './components/footer/footer.component';
 
 @Component({
   selector: 'app-root',
@@ -16,7 +17,8 @@ import { RecommendationListComponent } from './components/recommendation-list/re
     NowPlayingComponent,
     RecentlyPlayedListComponent,
     RecommendationFormComponent,
-    RecommendationListComponent
+    RecommendationListComponent,
+    FooterComponent
   ],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'
