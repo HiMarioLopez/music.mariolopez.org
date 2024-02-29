@@ -5,9 +5,12 @@ interface RecommendationFormProps {
     onRecommend: (songTitle: string) => void;
 }
 
+const styleRoot = "recommendation-form-component";
+
 export function RecommendationForm(props: RecommendationFormProps): HTMLElement {
     const modal = document.createElement('div');
-    modal.className = 'recommendation-form-modal';
+    modal.classList.add(styleRoot);
+    modal.classList.add('styled-container');
 
     const title = document.createElement('h1');
     title.textContent = 'Recommend a Song';

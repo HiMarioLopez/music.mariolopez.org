@@ -1,12 +1,13 @@
-import { Song } from "../Types/Song.type";
+import placeholderAlbumCover from '../Assets/Images/300.png';
 import '../Assets/Styles/NowPlaying.styles.css';
+import { Song } from "../Types/Song.type";
 
 // Mock data for the currently playing song
 const currentSong: Song = {
     songTitle: "Song Title",
     artistName: "Artist",
     albumName: "Album",
-    albumCoverUrl: "https://via.placeholder.com/300"
+    albumCoverUrl: placeholderAlbumCover
 };
 
 // Root (prefix) for the component's styles
@@ -14,7 +15,8 @@ const styleRoot = "now-playing-component";
 
 export function NowPlaying(): HTMLElement {
     const nowPlayingComponent = document.createElement('div');
-    nowPlayingComponent.className = styleRoot;
+    nowPlayingComponent.classList.add(styleRoot);
+    nowPlayingComponent.classList.add('styled-container');
 
     const albumArt = document.createElement('img');
     albumArt.src = currentSong.albumCoverUrl;

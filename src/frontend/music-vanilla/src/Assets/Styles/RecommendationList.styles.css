@@ -1,82 +1,82 @@
-.recommendation-list-container::-webkit-scrollbar {
+:root {
+    --recommended-track-size: 60px;
+}
+
+.recommendation-list-component::-webkit-scrollbar {
     width: 12px;
 }
 
-.recommendation-list-container::-webkit-scrollbar-track {
-    background: rgba(0, 0, 0, 0.1);
+.recommendation-list-component::-webkit-scrollbar-track {
+    background: var(--scrollbar-end-color);
 }
 
-.recommendation-list-container::-webkit-scrollbar-thumb {
-    background-color: rgba(255, 255, 255, 0.5);
-    border-radius: 6px;
-    border: 3px solid rgba(0, 0, 0, 0.1);
+.recommendation-list-component::-webkit-scrollbar-thumb {
+    background-color: var(--scrollbar-start-color);
+    border-radius: var(--border-radius-medium);
+    border: 3px solid var(--scrollbar-end-color);
 }
 
-.recommendation-list-container h1 {
+.recommendation-list-component h1 {
     width: 100%;
     text-align: left;
     margin-top: 0;
-    margin-bottom: 10px;
+    margin-bottom: var(--margin-medium);
 }
 
-.recommendation-list-container ul {
+.recommendation-list-component ul {
     list-style-type: none;
     padding-left: 0;
     width: 100%;
-    max-height: calc(5 * 60px);
+    max-height: calc(5 * var(--recommended-track-size));
     overflow-y: auto;
     scrollbar-width: thin;
-    scrollbar-color: rgba(255, 255, 255, 0.5) rgba(0, 0, 0, 0.1);
+    scrollbar-color: var(--scrollbar-start-color) var(--scrollbar-end-color);
     margin: 0;
 }
 
-.recommendation-list-container li {
-    background: rgba(60, 60, 60, 0.6);
-    padding: 10px;
-    margin-bottom: 10px;
-    border-radius: 5px;
+.recommendation-list-component li {
+    background: var(--track-bg-color);
+    padding: var(--padding-medium);
+    display: flex;
+    align-items: center;
+    padding: var(--padding-medium);
+    border-radius: var(--border-radius-medium);
+    margin-bottom: var(--margin-medium);
+    height: var(--recommended-track-size);
+
+    margin-right: 7px;
+    /* margin for the scrollbar */
 }
 
-.recommendation-list-container li:last-child,
 .recommendation-item:last-child {
     margin-bottom: 0;
 }
 
-.recommendation-list-container li:hover {
-    background: rgba(75, 75, 75, 0.7);
+.recommendation-list-component li:hover {
+    background: var(--track-bg-color-hover);
 }
 
-.album-cover {
-    width: 50px;
-    height: 50px;
-    margin-right: 10px;
-    border-radius: 3px;
+.recommendation-list-component img {
+    width: var(--album-art-size-small);
+    height: var(--album-art-size-small);
+    margin-right: var(--margin-medium);
+    border-radius: var(--border-radius-small);
 }
 
-.recommendation-item {
-    display: flex;
-    align-items: center;
-    padding: 10px;
-    border-radius: 10px;
-    margin-bottom: 10px;
-    height: 60px;
-    margin-right: 7px;
-}
-
-.song-info {
+.recommendation-list-component-track-text-container {
     display: flex;
     flex-direction: column;
 }
 
-.song-info h3,
-.song-info p {
+.recommendation-list-component-track-text-container h3,
+.recommendation-list-component-track-text-container p {
     margin: 0;
-    color: aliceblue;
+    color: var(--font-color);
 }
 
 @media (max-width: 680px) {
-    .recommendation-list-container {
-        width: 80vw;
+    .recommendation-list-component {
+        width: var(--width-mobile);
         max-width: none;
     }
 }

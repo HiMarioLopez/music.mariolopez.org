@@ -6,9 +6,11 @@ interface RecommendationListProps {
     recommendations: Song[];
 }
 
+const styleRoot = 'recommendation-list-component';
+
 export function RecommendationList(props: RecommendationListProps): HTMLElement {
     const modal = document.createElement('div');
-    modal.classList.add('recommendation-list-container');
+    modal.classList.add(styleRoot);
     modal.classList.add('styled-container');
 
     const title = document.createElement('h1');
@@ -18,16 +20,14 @@ export function RecommendationList(props: RecommendationListProps): HTMLElement 
     const ul = document.createElement('ul');
     props.recommendations.forEach((recommendation) => {
         const li = document.createElement('li');
-        li.className = 'recommendation-item';
 
         const img = document.createElement('img');
         img.src = recommendation.albumCoverUrl;
         img.alt = 'Album Cover';
-        img.className = 'album-cover';
         li.appendChild(img);
 
         const songInfo = document.createElement('div');
-        songInfo.className = 'song-info';
+        songInfo.className = `${styleRoot}-track-text-container`;
 
         const songTitle = document.createElement('h3');
         songTitle.textContent = recommendation.songTitle;

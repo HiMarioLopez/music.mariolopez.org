@@ -39,56 +39,57 @@ const recentlyPlayed: Song[] = [
 const styleRoot = 'recently-played-list-component';
 
 export function RecentlyPlayedList(): HTMLElement {
-    const modal = document.createElement('div');
-    modal.className = styleRoot;
+    const component = document.createElement('div');
+    component.classList.add(styleRoot);
+    component.classList.add('styled-container');
 
     const title = document.createElement('h1');
     title.textContent = 'Recently Played';
-    modal.appendChild(title);
+    component.appendChild(title);
 
-    const scrollContainer = document.createElement('div');
-    scrollContainer.className = 'scroll-container';
-    modal.appendChild(scrollContainer);
+    const listContainer = document.createElement('div');
+    listContainer.className = `${styleRoot}-list-container`;
+    component.appendChild(listContainer);
 
+    // Create a track for each recently played song
     recentlyPlayed.forEach((play) => {
-        const playItem = document.createElement('div');
-        playItem.className = 'play-item';
+        const track = document.createElement('div');
+        track.className = `${styleRoot}-track`;
 
         const albumCover = document.createElement('img');
         albumCover.src = play.albumCoverUrl;
         albumCover.alt = 'Album Cover';
-        albumCover.className = 'album-cover';
-        playItem.appendChild(albumCover);
+        track.appendChild(albumCover);
 
-        const songInfo = document.createElement('div');
-        songInfo.className = 'song-info';
+        const textContainer = document.createElement('div');
+        textContainer.className = `${styleRoot}-track-text-container`;
 
         const songTitle = document.createElement('h3');
         songTitle.textContent = play.songTitle;
-        songInfo.appendChild(songTitle);
+        textContainer.appendChild(songTitle);
 
         const artistAlbum = document.createElement('p');
         artistAlbum.textContent = `${play.artistName} - ${play.albumName}`;
-        songInfo.appendChild(artistAlbum);
+        textContainer.appendChild(artistAlbum);
 
-        playItem.appendChild(songInfo);
-        scrollContainer.appendChild(playItem);
+        track.appendChild(textContainer);
+        listContainer.appendChild(track);
     });
 
     // Implement auto-scrolling feature
     let startLeft = 0;
     const step = () => {
-        if (scrollContainer.offsetWidth + startLeft >= scrollContainer.scrollWidth) {
+        if (listContainer.offsetWidth + startLeft >= listContainer.scrollWidth) {
             startLeft = 0; // Reset to start if end reached
-            scrollContainer.scrollLeft = startLeft;
+            listContainer.scrollLeft = startLeft;
         } else {
             startLeft += 0.25; // Increment the scroll position
-            scrollContainer.scrollLeft = startLeft;
+            listContainer.scrollLeft = startLeft;
         }
         requestAnimationFrame(step);
     };
 
     step();
 
-    return modal;
+    return component;
 }

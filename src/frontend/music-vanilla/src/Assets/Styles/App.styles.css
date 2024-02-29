@@ -46,13 +46,13 @@
     }
 
     .left-column {
-        margin-right: 20px;
+        margin-right: var(--margin-large);
     }
 
     .now-playing-container,
     .recommendation-form-container,
     .recommendations-list-container {
-        margin-bottom: 20px;
+        margin-bottom: var(--margin-large);
     }
 
     .recommendations-list-container:last-child {
@@ -71,7 +71,7 @@
 @media (min-width: 1300px) and (max-height: 1000px),
 (max-width: 1299px) and (max-height: 1000px) {
     .main-content {
-        padding-top: 80px;
+        padding-top: calc(var(--navbar-height-desktop) + 40px);
     }
 }
 
@@ -84,11 +84,11 @@
     .recommendation-form-container,
     .recommendations-list-container {
         width: 100%;
-        margin: 20px 0;
+        margin: var(--margin-large) 0;
     }
 
     .main-content {
-        padding-top: 60px;
+        padding-top: calc(var(--navbar-height-desktop) + var(--padding-large));
     }
 }
 
@@ -100,6 +100,6 @@
     }
 
     .main-content {
-        padding-top: 50px;
+        padding-top: calc(var(--navbar-height-mobile) + var(--padding-large));
     }
 }

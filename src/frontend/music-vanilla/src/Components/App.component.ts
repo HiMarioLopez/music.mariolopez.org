@@ -64,7 +64,7 @@ function App(): HTMLElement {
                 songTitle: songTitle,
                 artistName: 'Mock Artist',
                 albumName: 'Mock Album',
-                albumCoverUrl: 'https://via.placeholder.com/50',
+                albumCoverUrl: placeholderAlbumCover
             };
             recommendations.push(newRecommendation);
             updateRecommendationList();
