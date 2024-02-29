@@ -1,0 +1,30 @@
+footer {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    height: var(--footer-height-desktop);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: var(--padding-medium) 0;
+    background-color: var(--navbar-bg-color);
+}
+
+footer a {
+    margin: 0 10px;
+    color: var(--font-color);
+    text-decoration: none;
+}
+
+footer a:hover {
+    text-decoration: underline;
+}
+
+@media (max-height: 1000px) and (max-width: 680px),
+(max-width: 1299px) and (max-height: 1080px),
+(max-width: 680px) {
+    footer {
+        height: var(--footer-height-mobile);
+        position: relative;
+    }
+}

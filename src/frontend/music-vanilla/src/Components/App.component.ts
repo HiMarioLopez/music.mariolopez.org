@@ -6,6 +6,7 @@ import { NowPlaying } from "./NowPlaying.component";
 import { RecentlyPlayedList } from "./RecentlyPlayedList.component";
 import { RecommendationForm } from "./RecommendationForm.component";
 import { RecommendationList } from "./RecommendationList.component";
+import { Footer } from "./Footer.component";
 
 // Mock data for recommendations
 let recommendations: Song[] = [
@@ -88,6 +89,10 @@ function App(): HTMLElement {
         recommendationList = RecommendationList({ recommendations });
         recommendationsListContainer.appendChild(recommendationList);
     }
+
+    // Append Footer
+    const footer = Footer();
+    app.appendChild(footer);
 
     return app;
 }

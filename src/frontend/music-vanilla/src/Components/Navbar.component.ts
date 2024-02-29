@@ -12,12 +12,8 @@ import vueLogo from '../Assets/Images/vue.svg';
 import '../Assets/Styles/Navbar.styles.css';
 
 export function Navbar(): HTMLElement {
-    const navbar = document.createElement('nav');
-    navbar.className = 'navbar';
-
-    // Define your logo URLs. You would need these logos to be accessible from your public directory.
     const logos = [
-        { href: 'https://music.mariolopez.org/vanilla', src: tsLogo, alt: 'TypeScript', additionalClass: 'ts-icon' },
+        { href: 'https://music.mariolopez.org/vanilla', src: tsLogo, alt: 'TypeScript', class: 'focused-icon' },
         { href: 'https://music.mariolopez.org/lit', src: litLogo, alt: 'Lit' },
         { href: 'https://music.mariolopez.org/qwik', src: qwikLogo, alt: 'Qwik' },
         { href: 'https://music.mariolopez.org/react', src: reactLogo, alt: 'React' },
@@ -30,6 +26,8 @@ export function Navbar(): HTMLElement {
         { href: 'https://music.mariolopez.org/blazor', src: blazorLogo, alt: 'Blazor' },
     ];
 
+    const navbar = document.createElement('nav');
+
     logos.forEach(logo => {
         const link = document.createElement('a');
         link.href = logo.href;
@@ -39,7 +37,10 @@ export function Navbar(): HTMLElement {
         const img = document.createElement('img');
         img.src = logo.src;
         img.alt = logo.alt;
-        img.className = 'nav-icon' + (logo.additionalClass ? ` ${logo.additionalClass}` : '');
+
+        if (logo.class) {
+            img.className = logo.class;
+        }
 
         link.appendChild(img);
         navbar.appendChild(link);
