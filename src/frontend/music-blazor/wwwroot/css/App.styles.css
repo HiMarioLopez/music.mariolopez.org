@@ -31,8 +31,7 @@
     width: 100vw;
 }
 
-/* This is for screens larger than 1300px */
-@media (min-width: 1300px) {
+@media (min-width: 1300px) and (min-height: 1000px) {
 
     .app {
         display: flex;
@@ -77,8 +76,7 @@
         }
 }
 
-/* This is for screens smaller than 1299px */
-@media (max-width: 1299px) {
+@media (max-width: 1299px) and (min-height: 1000px) {
 
     .app {
         display: flex;
@@ -102,12 +100,20 @@
     }
 }
 
-/* Adjustments for mobile responsiveness */
-@media (max-width: 680px) {
+@media (max-width: 680px) or (max-height: 1000px) {
 
-    .main-content {
-        padding-top: 50px;
-        /* Padding for Navbar */
+    @media (max-width: 680px) {
+        .main-content {
+            padding-top: 50px;
+            /* Padding for Navbar */
+        }
+    }
+
+    @media (min-width: 681px) {
+        .main-content {
+            padding-top: 60px;
+            /* Padding for Navbar */
+        }
     }
 
     .app,

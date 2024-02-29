@@ -36,9 +36,6 @@
 .blazor-icon {
     opacity: 1;
     /* Full opacity for the active icon */
-    margin-left: -1px;
-    margin-top: -4px;
-    padding-right: 2.5vw;
 }
 
 .nav-icon:not(.blazor-icon) {
@@ -70,13 +67,9 @@
     .nav-icon {
         width: 30px;
         /* Standard size for icons */
-        height: 30px;
+        height: auto;
         /* Standard size for icons */
         margin: 0 7px;
         /* Space between icons */
-    }
-
-    .blazor-icon {
-        margin-top: -3px;
     }
 }
