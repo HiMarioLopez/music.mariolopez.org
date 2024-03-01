@@ -1,26 +1,20 @@
 import React from 'react';
+import { Song } from '../../types/Song';
 import './index.css';
 
-type Recommendation = {
-    songTitle: string;
-    albumName: string;
-    artistName: string;
-    albumCoverUrl: string;
-};
-
 type RecommendationListProps = {
-    recommendations: Recommendation[];
+    recommendations: Song[];
 };
 
 const RecommendationList: React.FC<RecommendationListProps> = ({ recommendations }) => {
     return (
-        <div className="recommendation-list-modal">
+        <div className="recommendation-list-component styled-container">
             <h1>Recommendation Backlog</h1>
             <ul>
                 {recommendations.map((recommendation, index) => (
-                    <li key={index} className="recommendation-item">
-                        <img src={recommendation.albumCoverUrl} alt="Album Cover" className="album-cover" />
-                        <div className="song-info">
+                    <li key={index}>
+                        <img src={recommendation.albumCoverUrl} alt="Album Cover" />
+                        <div className="recommendation-list-component-track-text-container">
                             <h3>{recommendation.songTitle}</h3>
                             <p>{recommendation.artistName} - {recommendation.albumName}</p>
                         </div>

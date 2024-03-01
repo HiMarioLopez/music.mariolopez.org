@@ -5,7 +5,6 @@ type RecommendationFormProps = {
     onRecommend: (songTitle: string) => void;
 };
 
-
 const RecommendationForm: React.FC<RecommendationFormProps> = ({ onRecommend }) => {
     const [songTitle, setSongTitle] = useState('');
 
@@ -16,7 +15,7 @@ const RecommendationForm: React.FC<RecommendationFormProps> = ({ onRecommend }) 
     };
 
     return (
-        <div className="recommendation-form-modal">
+        <div className="recommendation-form-component styled-container">
             <h1>Recommend a Song</h1>
             <form onSubmit={handleSubmit}>
                 <input

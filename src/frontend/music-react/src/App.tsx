@@ -6,6 +6,8 @@ import RecommendationForm from './components/RecommendationForm/index';
 import RecommendationList from './components/RecommendationList/index';
 import Navbar from './components/Navbar';
 import { Song } from './types/Song';
+import placeholderAlbumArt from './assets/50.png';
+import Footer from './components/Footer';
 
 const App: React.FC = () => {
   // State to hold the list of recommendations with initial mock data
@@ -14,13 +16,13 @@ const App: React.FC = () => {
       songTitle: 'Song One',
       artistName: 'Artist One',
       albumName: 'Album One',
-      albumCoverUrl: 'https://via.placeholder.com/50',
+      albumCoverUrl: placeholderAlbumArt
     },
     {
       songTitle: 'Song Two',
       artistName: 'Artist Two',
       albumName: 'Album Two',
-      albumCoverUrl: 'https://via.placeholder.com/50',
+      albumCoverUrl: placeholderAlbumArt
     },
   ]);
 
@@ -31,7 +33,7 @@ const App: React.FC = () => {
       songTitle: songTitle,
       artistName: 'Mock Artist',
       albumName: 'Mock Album',
-      albumCoverUrl: 'https://via.placeholder.com/50',
+      albumCoverUrl: placeholderAlbumArt
     };
 
     setRecommendations(prevRecommendations => [...prevRecommendations, newRecommendation]);
@@ -58,6 +60,7 @@ const App: React.FC = () => {
             </div>
           </div>
         </div>
+        <Footer />
       </div>
     </>
   );
