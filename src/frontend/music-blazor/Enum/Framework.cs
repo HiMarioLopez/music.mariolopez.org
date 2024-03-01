@@ -2,15 +2,15 @@
 
 public enum Framework
 {
+    TypeScript,
     Lit,
     Qwik,
     React,
     Solid,
     Svelte,
-    TypeScript,
     Vue,
     Preact,
-    Next,
     Angular,
+    Next,
     Blazor
 }
