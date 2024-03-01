@@ -1,21 +1,23 @@
 import { Component } from 'solid-js';
 import './index.css';
+import placeholderAlbumCover from '../../assets/300.png';
+import { Song } from '../../types/Song';
 
 // Mock data for the currently playing song
-const currentSong = {
+const currentSong: Song = {
     songTitle: "Song Title",
     artistName: "Artist",
     albumName: "Album",
-    albumCoverUrl: "https://via.placeholder.com/300"
+    albumCoverUrl: placeholderAlbumCover
 };
 
 const NowPlaying: Component = () => {
     return (
-        <div class="now-playing-modal">
-            <img src={currentSong.albumCoverUrl} alt="Album Art" class="album-art" />
-            <div class="content-container">
-                <h1 class="header-title">Mario's Now Playing</h1>
-                <div class="music-info">
+        <div class="now-playing-component styled-container">
+            <img src={currentSong.albumCoverUrl} alt="Album Art" />
+            <div class="now-playing-component-text-container">
+                <h1>Mario's Now Playing</h1>
+                <div class="now-playing-component-text">
                     <h2>{currentSong.songTitle}</h2>
                     <p>{currentSong.artistName}</p>
                     <p>{currentSong.albumName}</p>

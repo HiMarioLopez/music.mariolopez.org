@@ -1,18 +1,13 @@
 import { createSignal } from 'solid-js';
 import './App.css';
+import placeholderAlbumCover from './assets/50.png';
+import Navbar from './components/Navbar';
 import NowPlaying from './components/NowPlaying';
 import RecentlyPlayedList from './components/RecentlyPlayedList';
 import RecommendationForm from './components/RecommendationForm';
 import RecommendationList from './components/RecommendationList';
-import Navbar from './components/Navbar';
-
-// Define a type for a single recommendation
-type Song = {
-  songTitle: string;
-  artistName: string;
-  albumName: string;
-  albumCoverUrl: string;
-};
+import { Song } from './types/Song';
+import Footer from './components/Footer';
 
 const App = () => {
   // State to hold the list of recommendations with initial mock data
@@ -21,24 +16,24 @@ const App = () => {
       songTitle: 'Song One',
       artistName: 'Artist One',
       albumName: 'Album One',
-      albumCoverUrl: 'https://via.placeholder.com/50',
+      albumCoverUrl: placeholderAlbumCover
     },
     {
       songTitle: 'Song Two',
       artistName: 'Artist Two',
       albumName: 'Album Two',
-      albumCoverUrl: 'https://via.placeholder.com/50',
+      albumCoverUrl: placeholderAlbumCover
     },
   ]);
 
   // Function to handle new recommendations
   const handleNewRecommendation = (songTitle: string) => {
     // Mock additional data
-    const newRecommendation = {
+    const newRecommendation: Song = {
       songTitle: songTitle,
       artistName: 'Mock Artist',
       albumName: 'Mock Album',
-      albumCoverUrl: 'https://via.placeholder.com/50',
+      albumCoverUrl: placeholderAlbumCover
     };
 
     setRecommendations(prevRecommendations => [...prevRecommendations, newRecommendation]);
@@ -65,6 +60,7 @@ const App = () => {
             </div>
           </div>
         </div>
+        <Footer />
       </div>
     </>
   );

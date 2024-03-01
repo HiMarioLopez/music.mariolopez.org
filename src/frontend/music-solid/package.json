@@ -1,7 +1,18 @@
 {
   "name": "music-solid",
-  "private": true,
-  "version": "0.0.0",
+  "description": "A simple app to track my music habits and send me recommendations. Built with Solid.",
+  "homepage": "https://music.mariolopez.org/solid",
+  "version": "0.2.0",
+  "author": {
+    "name": "Mario Lopez Martinez",
+    "email": "mario@lopez.fyi"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/HiMarioLopez/music.mariolopez.org/tree/main/src/frontend/music-solid"
+  },
+  "license": "GPL-3.0-only",
+  "private": false,
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -12,7 +23,7 @@
     "solid-js": "^1.8.15"
   },
   "devDependencies": {
-    "typescript": "^5.2.2",
+    "typescript": "^5.3.3",
     "vite": "^5.1.4",
     "vite-plugin-solid": "^2.10.1"
   }

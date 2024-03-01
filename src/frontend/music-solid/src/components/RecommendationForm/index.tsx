@@ -15,7 +15,7 @@ const RecommendationForm = (props: RecommendationFormProps) => {
     };
 
     return (
-        <div class="recommendation-form-modal">
+        <div class="recommendation-form-component styled-container">
             <h1>Recommend a Song</h1>
             <form onSubmit={handleSubmit}>
                 <input
