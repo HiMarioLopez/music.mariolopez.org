@@ -5,6 +5,8 @@ import './components/NowPlaying';
 import './components/RecentlyPlayedList';
 import './components/RecommendationForm';
 import './components/RecommendationList';
+import './components/Footer';
+import placeholderAlbumCover from './assets/50.png'
 
 class MyApp extends LitElement {
   static styles = css`  
@@ -12,22 +14,25 @@ class MyApp extends LitElement {
     position: absolute;
     width: 100%;
     height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
   @keyframes gradient {
       0% {
           background-position: 0% 50%;
       }
-  
+
       50% {
           background-position: 100% 50%;
       }
-  
+
       100% {
           background-position: 0% 50%;
       }
   }
-  
+
   .app-bg {
       position: fixed;
       animation: gradient 5s ease infinite;
@@ -38,73 +43,84 @@ class MyApp extends LitElement {
       background-size: 400% 400%;
       height: 100vh;
       width: 100vw;
+      z-index: -1;
   }
-  
+
+  my-navbar,
+  my-footer {
+      width: 100%;
+  }
+
   @media (min-width: 1300px) {
-      .app {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-      }
-  
       .main-content {
           max-width: 1200px;
           display: flex;
-          flex-direction: row;
-          align-items: flex-start;
-          justify-content: space-between;
-          margin: 20px;
       }
-  
+
       .left-column,
       .right-column {
-          width: calc(50% - 20px);
-          margin: 0 20px;
+          width: 50%;
       }
-  
+
+      .left-column {
+          margin-right: var(--margin-large);
+      }
+
       .now-playing-container,
       .recommendation-form-container,
       .recommendations-list-container {
-          width: 100%;
-          margin-bottom: 20px;
+          margin-bottom: var(--margin-large);
       }
-  
+
       .recommendations-list-container:last-child {
           margin-bottom: 0;
       }
   }
-  
-  @media (max-width: 1299px) {
+
+  @media (max-height: 1000px) {
       .app {
-          display: flex;
           flex-direction: column;
           align-items: center;
-          justify-content: center;
+          justify-content: flex-start;
       }
-  
+  }
+
+  @media (min-width: 1300px) and (max-height: 1000px),
+  (max-width: 1299px) and (max-height: 1000px) {
+      .main-content {
+          padding-top: calc(var(--navbar-height-desktop) + 40px);
+          padding-bottom: 0;
+      }
+  }
+
+  @media (max-width: 1299px) {
+      .app {
+          flex-direction: column;
+      }
+
       .now-playing-container,
       .recommendation-form-container,
       .recommendations-list-container {
           width: 100%;
-          margin: 20px 0;
+          margin: var(--margin-large) 0;
       }
-  
+
       .main-content {
-          padding-top: 60px;
+          padding-top: calc(var(--navbar-height-desktop) + var(--padding-large));
+          padding-bottom: 0;
       }
   }
-  
+
   @media (max-width: 680px) {
-      .main-content {
-          padding-top: 50px;
-      }
-  
-      .app,
-      .main-content {
-          display: flex;
+      .app {
           flex-direction: column;
           align-items: center;
           justify-content: flex-start;
+      }
+
+      .main-content {
+          padding-top: calc(var(--navbar-height-mobile) + var(--padding-large));
+          padding-bottom: 0;
       }
   }
 `;
@@ -130,7 +146,7 @@ class MyApp extends LitElement {
       songTitle: e.detail.songTitle,
       artistName: 'New Artist',
       albumName: 'New Album',
-      albumCoverUrl: 'https://via.placeholder.com/50',
+      albumCoverUrl: placeholderAlbumCover
     };
 
     this.recommendations = [...this.recommendations, newRecommendation];
@@ -157,6 +173,7 @@ class MyApp extends LitElement {
             </div>
           </div>
         </div>
+        <my-footer></my-footer>
       </div>
     `;
   }

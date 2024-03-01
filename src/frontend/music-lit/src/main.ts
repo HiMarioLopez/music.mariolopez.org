@@ -1,7 +1,7 @@
 import { LitElement, html } from 'lit';
 import './my-app';
 
-class MainElement extends LitElement {
+export class MainElement extends LitElement {
   render() {
     return html`<my-app></my-app>`;
   }
