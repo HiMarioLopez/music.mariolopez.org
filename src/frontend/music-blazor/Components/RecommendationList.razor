@@ -1,13 +1,13 @@
 ﻿@using Music.Models
 
-<div class="recommendation-list-modal">
+<div class="recommendation-list-component styled-container">
     <h1>Recommendation Backlog</h1>
     <ul>
         @foreach (var recommendation in Recommendations)
         {
             <li class="recommendation-item">
-                <img src="@recommendation.AlbumCoverUrl" alt="Album Cover" class="album-cover" />
-                <div class="song-info">
+                <img src="@recommendation.AlbumCoverUrl" alt="Album Cover" />
+                <div class="recommendation-list-component-track-text-container">
                     <h3>@recommendation.SongTitle</h3>
                     <p>@recommendation.ArtistName - @recommendation.AlbumName</p>
                 </div>

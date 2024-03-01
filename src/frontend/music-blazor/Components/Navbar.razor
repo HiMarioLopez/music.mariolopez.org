@@ -2,7 +2,7 @@
 @inject Microsoft.AspNetCore.Components.WebAssembly.Hosting.IWebAssemblyHostEnvironment Environment;
 @using Music.Enum;
 
-<nav class="navbar">
+<nav>
     @foreach (var framework in Enum.GetValues(typeof(Framework)))
     {
         var frameworkName = framework.ToString().ToLower();
@@ -10,7 +10,7 @@
         <a href="@GetItemUrl((Framework)framework)" target="_self" rel="alternate">
             <img src="@($"/{(Environment.Environment == "Production" ? "blazor/" : "")}images/{frameworkName}.svg")"
                  alt="@frameworkName"
-                 class="nav-icon @(framework.ToString() == "Blazor" ? "blazor-icon" : "")" />
+                 class="@(framework.ToString() == "Blazor" ? "focused-icon" : "")" />
         </a>
     }
 </nav>
@@ -21,7 +21,7 @@
     {
         if (firstRender)
         {
-            await JsRuntime.InvokeVoidAsync("scrollToIcon");
+            await JsRuntime.InvokeVoidAsync("scrollToRight");
         }
     }
 

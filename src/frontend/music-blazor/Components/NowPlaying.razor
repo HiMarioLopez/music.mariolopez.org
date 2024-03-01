@@ -1,10 +1,10 @@
 ﻿@using Music.Models
 
-<div class="now-playing-modal">
-    <img src="@_currentSong.AlbumCoverUrl" alt="Album Art" class="album-art" />
-    <div class="content-container">
+<div class="now-playing-component styled-container">
+    <img src="@_currentSong.AlbumCoverUrl" alt="Album Art" />
+    <div class="now-playing-component-text-container">
         <h1 class="header-title">Mario's Now Playing</h1>
-        <div class="music-info">
+        <div class="now-playing-component-text">
             <h2>@_currentSong.SongTitle</h2>
             <p>@_currentSong.ArtistName</p>
             <p>@_currentSong.AlbumName</p>
