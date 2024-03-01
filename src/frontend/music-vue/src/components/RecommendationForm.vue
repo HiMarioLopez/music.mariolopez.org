@@ -1,5 +1,5 @@
 <template>
-    <div class="recommendation-form-modal">
+    <div class="recommendation-form-component styled-container">
         <h1>Recommend a Song</h1>
         <form @submit.prevent="handleSubmit">
             <input type="text" v-model="songTitle" placeholder="Find a song on Apple Music..." required />
@@ -33,87 +33,69 @@ export default {
 </script>
   
 <style>
-.recommendation-form-modal {
-    background: rgba(50, 50, 50, 0.6);
-    color: aliceblue;
-    padding: 20px;
-    border-radius: 15px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    max-width: 600px;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    box-shadow: inset 0 4px 8px rgba(0, 0, 0, 0.1);
-}
-
-.recommendation-form-modal h1 {
+.recommendation-form-component h1 {
     width: 100%;
     text-align: left;
-    margin-top: 0;
-    margin-bottom: 10px;
+    margin: 0 0 var(--margin-medium);
 }
 
-.recommendation-form-modal form {
+.recommendation-form-component form {
     width: 100%;
     display: flex;
 }
 
-.recommendation-form-modal input[type="text"] {
-    padding: 10px 15px;
+.recommendation-form-component input[type="text"] {
+    padding: var(--padding-medium) 15px;
     width: calc(100% - 32px);
-    border: 2px solid #fc3c44;
-    border-radius: 7px;
-    background-color: rgba(32, 35, 42, 0.7);
-    color: aliceblue;
-    margin-right: 10px;
+    border: var(--input-border);
+    border-radius: var(--border-radius-medium);
+    background-color: var(--input-bg-color);
+    color: var(--font-color);
+    margin-right: var(--margin-medium);
     outline: none;
-    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    transition: border-color var(--transition-speed), box-shadow var(--transition-speed);
 }
 
-.recommendation-form-modal input[type="text"]:focus {
-    border-color: #f94c57;
+.recommendation-form-component input[type="text"]:focus,
+.recommendation-form-component input[type="text"]:hover {
+    border-color: var(--focus-border-color);
     box-shadow: 0 0 8px rgba(252, 60, 68, 0.4);
 }
 
-.recommendation-form-modal input[type="text"]:hover {
-    border-color: #f94c57;
-}
-
-.recommendation-form-modal button {
-    padding: 10px 15px;
+.recommendation-form-component button {
+    padding: var(--padding-medium) 15px;
     border: 2px solid transparent;
-    border-radius: 7px;
-    background-color: #fc3c44;
+    border-radius: var(--border-radius-medium);
+    background-color: var(--button-bg-color);
     color: white;
     cursor: pointer;
-    transition: background-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+    transition: background-color var(--transition-speed), color var(--transition-speed), box-shadow var(--transition-speed), border-color var(--transition-speed);
 }
 
-.recommendation-form-modal button:focus,
-.recommendation-form-modal button:hover {
-    background-color: #f94c57;
-    color: #ffffff;
+.recommendation-form-component button:focus,
+.recommendation-form-component button:hover {
+    background-color: var(--button-hover-bg-color);
+    color: white;
     box-shadow: 0 0 8px rgba(252, 60, 68, 0.6);
-    border-color: #f94c57;
+    border-color: var(--focus-border-color);
 }
 
-.recommendation-form-modal button:focus {
+.recommendation-form-component button:focus {
     outline: 4px auto -webkit-focus-ring-color;
 }
 
 @media (max-width: 680px) {
-    .recommendation-form-modal {
-        width: 80vw;
-        max-width: none;
+    .recommendation-form-component {
+        width: var(--width-mobile);
     }
 
-    .recommendation-form-modal form {
+    .recommendation-form-component form {
         flex-direction: column;
     }
 
-    .recommendation-form-modal input[type="text"] {
+    .recommendation-form-component input[type="text"] {
         margin-right: 0;
-        margin-bottom: 10px;
+        margin-bottom: var(--margin-medium);
     }
 }
 </style>

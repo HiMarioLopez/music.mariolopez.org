@@ -1,10 +1,10 @@
 <template>
-    <div class="recommendation-list-modal">
+    <div class="recommendation-list-component styled-container">
         <h1>Recommendation Backlog</h1>
         <ul>
-            <li v-for="(recommendation, index) in recommendations" :key="index" class="recommendation-item">
-                <img :src="recommendation.albumCoverUrl" alt="Album Cover" class="album-cover" />
-                <div class="song-info">
+            <li v-for="(recommendation, index) in recommendations" :key="index">
+                <img :src="recommendation.albumCoverUrl" alt="Album Cover" />
+                <div class="recommendation-list-component-track-text-container">
                     <h3>{{ recommendation.songTitle }}</h3>
                     <p>{{ recommendation.artistName }} - {{ recommendation.albumName }}</p>
                 </div>
@@ -29,102 +29,85 @@ export default defineComponent({
 </script>
   
 <style>
-.recommendation-list-modal {
-    background: rgba(50, 50, 50, 0.6);
-    color: aliceblue;
-    padding: 20px;
-    border-radius: 15px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    max-width: 600px;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    box-shadow: inset 0 4px 8px rgba(0, 0, 0, 0.1);
+:root {
+    --recommended-track-size: 60px;
 }
 
-.recommendation-list-modal::-webkit-scrollbar {
+.recommendation-list-component::-webkit-scrollbar {
     width: 12px;
 }
 
-.recommendation-list-modal::-webkit-scrollbar-track {
-    background: rgba(0, 0, 0, 0.1);
+.recommendation-list-component::-webkit-scrollbar-track {
+    background: var(--scrollbar-end-color);
 }
 
-.recommendation-list-modal::-webkit-scrollbar-thumb {
-    background-color: rgba(255, 255, 255, 0.5);
-    border-radius: 6px;
-    border: 3px solid rgba(0, 0, 0, 0.1);
+.recommendation-list-component::-webkit-scrollbar-thumb {
+    background-color: var(--scrollbar-start-color);
+    border-radius: var(--border-radius-medium);
+    border: 3px solid var(--scrollbar-end-color);
 }
 
-.recommendation-list-modal h1 {
+.recommendation-list-component h1 {
     width: 100%;
     text-align: left;
     margin-top: 0;
-    margin-bottom: 10px;
+    margin-bottom: var(--margin-medium);
 }
 
-.recommendation-list-modal ul {
+.recommendation-list-component ul {
     list-style-type: none;
     padding-left: 0;
     width: 100%;
-    max-height: calc(7 * 60px);
+    max-height: calc(5 * var(--recommended-track-size));
     overflow-y: auto;
     scrollbar-width: thin;
-    scrollbar-color: rgba(255, 255, 255, 0.5) rgba(0, 0, 0, 0.1);
-    margin-top: 0;
-    margin-bottom: 0;
+    scrollbar-color: var(--scrollbar-start-color) var(--scrollbar-end-color);
+    margin: 0;
 }
 
-.recommendation-list-modal li {
-    background: rgba(60, 60, 60, 0.6);
-    padding: 10px;
-    margin-bottom: 10px;
-    border-radius: 5px;
-}
-
-.recommendation-list-modal li:last-child {
-    margin-bottom: 0;
-}
-
-.recommendation-list-modal li:hover {
-    background: rgba(75, 75, 75, 0.7);
-}
-
-.album-cover {
-    width: 50px;
-    height: 50px;
-    margin-right: 10px;
-    border-radius: 3px;
-}
-
-.recommendation-item {
+.recommendation-list-component li {
+    background: var(--track-bg-color);
+    padding: var(--padding-medium);
     display: flex;
     align-items: center;
-    padding: 10px;
-    border-radius: 10px;
-    margin-bottom: 10px;
-    height: 60px;
+    padding: var(--padding-medium);
+    border-radius: var(--border-radius-medium);
+    margin-bottom: var(--margin-medium);
+    height: var(--recommended-track-size);
+
     margin-right: 7px;
+    /* margin for the scrollbar */
 }
 
-.recommendation-item:last-child {
+.recommendation-list-component li:last-child {
     margin-bottom: 0;
 }
 
-.song-info {
+.recommendation-list-component li:hover {
+    background: var(--track-bg-color-hover);
+}
+
+.recommendation-list-component img {
+    width: var(--album-art-size-small);
+    height: var(--album-art-size-small);
+    margin-right: var(--margin-medium);
+    border-radius: var(--border-radius-small);
+}
+
+.recommendation-list-component-track-text-container {
     display: flex;
     flex-direction: column;
 }
 
-.song-info h3,
-.song-info p {
+.recommendation-list-component-track-text-container h3,
+.recommendation-list-component-track-text-container p {
     margin: 0;
-    color: aliceblue;
+    color: var(--font-color);
 }
 
 @media (max-width: 680px) {
-    .recommendation-list-modal {
-        width: 80vw;
+    .recommendation-list-component {
+        width: var(--width-mobile);
         max-width: none;
     }
 }
