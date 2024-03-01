@@ -1,6 +1,7 @@
-import { component$, useStore, $ } from '@builder.io/qwik';
-import './index.css';
+import { $, component$, useStore } from '@builder.io/qwik';
+import placeholderAlbumCover from '../../assets/50.png';
 import { Song } from '../../types/Song';
+import './index.css';
 
 type RecommendationFormProps = {
     onAddRecommendation: (song: Song) => void;
@@ -14,14 +15,14 @@ export default component$((props: RecommendationFormProps) => {
             songTitle: state.songTitle,
             artistName: 'Mock Artist',
             albumName: 'Mock Album',
-            albumCoverUrl: 'https://via.placeholder.com/50',
+            albumCoverUrl: placeholderAlbumCover
         });
 
         state.songTitle = '';
     });
 
     return (
-        <div class="recommendation-form-modal">
+        <div class="recommendation-form-component styled-container">
             <h1>Recommend a Song</h1>
             <form preventdefault:submit onSubmit$={handleSubmit}>
                 <input

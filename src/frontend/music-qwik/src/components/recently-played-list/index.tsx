@@ -1,4 +1,5 @@
 import { component$, useId, useSignal, useVisibleTask$ } from '@builder.io/qwik';
+import placeholderAlbumCover from '../../assets/50.png';
 import './index.css';
 
 // Mock data for the recently played songs
@@ -7,31 +8,31 @@ const recentlyPlayed = [
         songTitle: 'Song One',
         artistName: 'Artist One',
         albumName: 'Album One',
-        albumCoverUrl: 'https://via.placeholder.com/50',
+        albumCoverUrl: placeholderAlbumCover
     },
     {
         songTitle: 'Song Two',
         artistName: 'Artist Two',
         albumName: 'Album Two',
-        albumCoverUrl: 'https://via.placeholder.com/50',
+        albumCoverUrl: placeholderAlbumCover
     },
     {
         songTitle: 'Song Three',
         artistName: 'Artist Three',
         albumName: 'Album Three',
-        albumCoverUrl: 'https://via.placeholder.com/50',
+        albumCoverUrl: placeholderAlbumCover
     },
     {
         songTitle: 'Song Four',
         artistName: 'Artist Four',
         albumName: 'Album Four',
-        albumCoverUrl: 'https://via.placeholder.com/50',
+        albumCoverUrl: placeholderAlbumCover
     },
     {
         songTitle: 'Song Five',
         artistName: 'Artist Five',
         albumName: 'Album Five',
-        albumCoverUrl: 'https://via.placeholder.com/50',
+        albumCoverUrl: placeholderAlbumCover
     }
 ]
 
@@ -65,13 +66,13 @@ export default component$(() => {
     });
 
     return (
-        <div class="recently-played-list-modal">
+        <div class="recently-played-list-component styled-container">
             <h1>Recently Played</h1>
-            <div class="scroll-container" id={elemId}>
+            <div class="recently-played-list-component-list-container" id={elemId}>
                 {recentlyPlayed.map((play, index) => (
-                    <div key={index} class="play-item">
-                        <img src={play.albumCoverUrl} alt="Album Cover" class="album-cover" />
-                        <div class="song-info">
+                    <div key={index} class="recently-played-list-component-track">
+                        <img src={play.albumCoverUrl} alt="Album Cover" />
+                        <div class="recently-played-list-component-track-text-container">
                             <h3>{play.songTitle}</h3>
                             <p>{play.artistName} - {play.albumName}</p>
                         </div>

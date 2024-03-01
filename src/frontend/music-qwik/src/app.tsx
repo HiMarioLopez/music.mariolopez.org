@@ -1,5 +1,7 @@
 import { $, component$, useStore } from '@builder.io/qwik';
 import './app.css';
+import placeholderAlbumCover from './assets/50.png';
+import Footer from './components/footer';
 import Navbar from './components/navbar';
 import NowPlaying from './components/now-playing';
 import RecentlyPlayedList from './components/recently-played-list';
@@ -13,13 +15,13 @@ export const App = component$(() => {
       songTitle: 'Song One',
       artistName: 'Artist One',
       albumName: 'Album One',
-      albumCoverUrl: 'https://via.placeholder.com/50',
+      albumCoverUrl: placeholderAlbumCover
     },
     {
       songTitle: 'Song Two',
       artistName: 'Artist Two',
       albumName: 'Album Two',
-      albumCoverUrl: 'https://via.placeholder.com/50',
+      albumCoverUrl: placeholderAlbumCover
     },
   ]);
 
@@ -48,6 +50,7 @@ export const App = component$(() => {
             </div>
           </div>
         </div>
+        <Footer />
       </div>
     </>
   );
