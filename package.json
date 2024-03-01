@@ -1,7 +1,18 @@
 {
   "name": "music.mariolopez.org",
-  "version": "0.1.0",
   "description": "See what I'm listening to, and make me a music recommendation. This is a mono-repo for the various frontends, backends, and infra components of this app.",
+  "homepage": "https://music.mariolopez.org/",
+  "version": "0.2.0",
+  "author": {
+    "name": "Mario Lopez Martinez",
+    "email": "mario@lopez.fyi"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/HiMarioLopez/music.mariolopez.org/"
+  },
+  "license": "GPL-3.0-only",
+  "private": false,
   "scripts": {
     "update-and-build:frontend": "pnpm npm-run-all update:frontend build:frontend",
     "update:frontend": "pnpm npm-run-all --parallel update:music-*",
@@ -28,8 +39,6 @@
     "build:music-angular": "cd src/frontend/music-angular && pnpm run build",
     "build:music-blazor": "cd src/frontend/music-blazor && dotnet publish Music.csproj /p:PublishProfile=FolderProfile"
   },
-  "author": "Mario Lopez Martinez <mario@lopez.fyi>",
-  "license": "GPL-3.0",
   "devDependencies": {
     "npm-run-all": "^4.1.5"
   }
