@@ -30,10 +30,6 @@ export class NowPlaying extends LitElement {
                 /* Matching the size of the album art */
             }
             
-            .recently-played-list-component-track:hover {
-                background: var(--track-bg-color-hover);
-            }
-            
             .now-playing-component h1 {
                 margin: 0;
             }

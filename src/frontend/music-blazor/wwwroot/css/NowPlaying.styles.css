@@ -4,12 +4,12 @@
     justify-content: flex-start;
 }
 
-    .now-playing-component img {
-        width: var(--album-art-size-large);
-        height: var(--album-art-size-large);
-        border-radius: 10px;
-        margin-right: var(--margin-large);
-    }
+.now-playing-component img {
+    width: var(--album-art-size-large);
+    height: var(--album-art-size-large);
+    border-radius: 10px;
+    margin-right: var(--margin-large);
+}
 
 .now-playing-component-text-container {
     flex-grow: 1;
@@ -20,10 +20,6 @@
     /* Matching the size of the album art */
 }
 
-.recently-played-list-component-track:hover {
-    background: var(--track-bg-color-hover);
-}
-
 .now-playing-component h1 {
     margin: 0;
 }
@@ -32,10 +28,10 @@
     text-align: left;
 }
 
-    .now-playing-component-text h2,
-    .now-playing-component-text p {
-        margin: 0;
-    }
+.now-playing-component-text h2,
+.now-playing-component-text p {
+    margin: 0;
+}
 
 @media (max-width: 680px) {
 
@@ -51,14 +47,14 @@
         max-width: none;
     }
 
-        .now-playing-component img {
-            height: auto;
-            margin: var(--margin-medium) 0;
-        }
+    .now-playing-component img {
+        height: auto;
+        margin: var(--margin-medium) 0;
+    }
 
-        .now-playing-component h1 {
-            margin-bottom: var(--margin-medium);
-        }
+    .now-playing-component h1 {
+        margin-bottom: var(--margin-medium);
+    }
 
     .now-playing-component-text-container {
         height: auto;
