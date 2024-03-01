@@ -8,6 +8,7 @@ import RecommendationList from '@/components/RecommendationList';
 import { Song } from '@/types/Song';
 import { useState } from 'react';
 import styles from './page.module.css';
+import Footer from '@/components/Footer';
 
 export default function Home() {
   const [recommendations, setRecommendations] = useState<Song[]>([
@@ -59,6 +60,7 @@ export default function Home() {
             </div>
           </div>
         </div>
+        <Footer />
       </div>
     </>
   );

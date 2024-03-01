@@ -67,13 +67,13 @@ const RecentlyPlayedList: React.FC = () => {
     }, []); // Empty dependency array means this effect runs once on mount
 
     return (
-        <div className={styles.recentlyPlayedListModal}>
-            <h1 className={styles.recentlyPlayedListModalH1}>Recently Played</h1>
-            <div className={styles.scrollContainer} ref={scrollRef}>
+        <div className={`styledContainer ${styles.recentlyPlayedListComponent}`}>
+            <h1>Recently Played</h1>
+            <div className={styles.recentlyPlayedListComponentListContainer} ref={scrollRef}>
                 {recentlyPlayed.map((play, index) => (
-                    <div key={index} className={styles.playItem}>
-                        <Image src={play.albumCoverUrl} alt="Album Cover" width={50} height={50} className={styles.albumCover} />
-                        <div className={styles.songInfo}>
+                    <div key={index} className={styles.recentlyPlayedListComponentTrack}>
+                        <Image src={play.albumCoverUrl} alt="Album Cover" width={50} height={50} unoptimized />
+                        <div className={styles.recentlyPlayedListComponentTrackTextContainer}>
                             <h3>{play.songTitle}</h3>
                             <p>{play.artistName} - {play.albumName}</p>
                         </div>

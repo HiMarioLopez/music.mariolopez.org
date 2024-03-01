@@ -1,7 +1,18 @@
 {
   "name": "music-next",
-  "version": "0.1.0",
-  "private": true,
+  "description": "A simple app to track my music habits and send me recommendations. Built with Next.",
+  "homepage": "https://music.mariolopez.org/next",
+  "version": "0.2.0",
+  "author": {
+    "name": "Mario Lopez Martinez",
+    "email": "mario@lopez.fyi"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/HiMarioLopez/music.mariolopez.org/tree/main/src/frontend/music-next"
+  },
+  "license": "GPL-3.0-only",
+  "private": false,
   "scripts": {
     "dev": "next dev",
     "build": "next build",

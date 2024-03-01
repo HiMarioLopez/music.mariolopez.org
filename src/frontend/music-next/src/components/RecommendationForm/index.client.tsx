@@ -17,18 +17,17 @@ const RecommendationForm: React.FC<RecommendationFormProps> = ({ onRecommend }) 
     };
 
     return (
-        <div className={styles.recommendationFormModal}>
+        <div className={`styledContainer ${styles.recommendationFormComponent}`}>
             <h1>Recommend a Song</h1>
-            <form onSubmit={handleSubmit} className={styles.recommendationFormModalForm}>
+            <form onSubmit={handleSubmit}>
                 <input
                     type="text"
                     value={songTitle}
                     onChange={(e) => setSongTitle(e.target.value)}
                     placeholder="Find a song on Apple Music..."
                     required
-                    className={styles.recommendationFormModalInputText}
                 />
-                <button type="submit" className={styles.recommendationFormModalButton}>Recommend</button>
+                <button type="submit">Recommend</button>
             </form>
         </div>
     );

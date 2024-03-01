@@ -1,24 +1,17 @@
-.recentlyPlayedListModal {
-    background: rgba(50, 50, 50, 0.6);
-    color: aliceblue;
-    padding: 20px;
-    border-radius: 15px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    max-width: 600px;
-    display: flex;
+.recentlyPlayedListComponent {
+    align-items: normal;
     flex-direction: column;
     overflow: hidden;
     position: relative;
 }
 
-.recentlyPlayedListModal h1 {
+.recentlyPlayedListComponent h1 {
     width: 100%;
     text-align: left;
-    margin-top: 0;
-    margin-bottom: 10px;
+    margin: 0 0 var(--margin-medium);
 }
 
-.scrollContainer {
+.recentlyPlayedListComponentListContainer {
     display: flex;
     align-items: center;
     overflow-x: auto;
@@ -27,46 +20,49 @@
     -ms-overflow-style: none;
 }
 
-.scrollContainer::-webkit-scrollbar {
+.recentlyPlayedListComponentListContainer::-webkit-scrollbar {
     display: none;
 }
 
-.playItem {
+.recentlyPlayedListComponentTrack {
     display: inline-flex;
     align-items: center;
-    padding: 10px;
-    border-radius: 5px;
-    margin-right: 10px;
+    padding: var(--padding-medium);
+    margin-right: var(--margin-medium);
+    border-radius: var(--border-radius-medium);
+    background: var(--track-bg-color);
     height: 60px;
-    background: rgba(60, 60, 60, 0.6);
 }
 
-.playItem:last-child {
+.recentlyPlayedListComponentTrack:hover {
+    background: var(--track-bg-color-hover);
+}
+
+.recentlyPlayedListComponentTrack:last-child {
     margin-right: 0;
 }
 
-.albumCover {
-    width: 50px;
-    height: 50px;
-    margin-right: 10px;
-    border-radius: 3px;
+.recentlyPlayedListComponentTrack img {
+    width: var(--album-art-size-small);
+    height: var(--album-art-size-small);
+    margin-right: var(--margin-medium);
+    border-radius: var(--border-radius-small);
 }
 
-.songInfo {
+.recentlyPlayedListComponentTrackTextContainer {
     display: flex;
     flex-direction: column;
-    margin-right: 5px;
+    margin-right: var(--margin-small);
 }
 
-.songInfo h3,
-.songInfo p {
+.recentlyPlayedListComponentTrackTextContainer h3,
+.recentlyPlayedListComponentTrackTextContainer p {
     margin: 0;
-    color: aliceblue;
+    color: var(--font-color);
 }
 
 @media (max-width: 680px) {
-    .recentlyPlayedListModal {
-        width: 80vw;
-        max-width: none;
+    .recentlyPlayedListComponent {
+        width: var(--width-mobile);
     }
 }

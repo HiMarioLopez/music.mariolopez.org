@@ -13,11 +13,11 @@ const currentSong: Song = {
 
 const NowPlaying: React.FC = () => {
     return (
-        <div className={styles.nowPlayingModal}>
-            <Image src={currentSong.albumCoverUrl} alt="Album Art" width={300} height={300} className={styles.albumArt} />
-            <div className={styles.contentContainer}>
-                <h1 className={styles.headerTitle}>Mario&apos;s Now Playing</h1>
-                <div className={styles.musicInfo}>
+        <div className={`styledContainer ${styles.nowPlayingComponent}`}>
+            <Image src={currentSong.albumCoverUrl} alt="Album Art" width={300} height={300} unoptimized />
+            <div className={styles.nowPlayingComponentTextContainer}>
+                <h1>Mario&apos;s Now Playing</h1>
+                <div className={styles.nowPlayingComponentText}>
                     <h2>{currentSong.songTitle}</h2>
                     <p>{currentSong.artistName}</p>
                     <p>{currentSong.albumName}</p>
