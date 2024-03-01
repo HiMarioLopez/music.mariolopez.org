@@ -43,7 +43,7 @@
     /* margin for the scrollbar */
 }
 
-.recommendation-item:last-child {
+.recommendation-list-component li:last-child {
     margin-bottom: 0;
 }
 
@@ -63,11 +63,11 @@
     flex-direction: column;
 }
 
-    .recommendation-list-component-track-text-container h3,
-    .recommendation-list-component-track-text-container p {
-        margin: 0;
-        color: var(--font-color);
-    }
+.recommendation-list-component-track-text-container h3,
+.recommendation-list-component-track-text-container p {
+    margin: 0;
+    color: var(--font-color);
+}
 
 @media (max-width: 680px) {
     .recommendation-list-component {
