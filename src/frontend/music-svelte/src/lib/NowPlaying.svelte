@@ -1,19 +1,20 @@
 <script lang="ts">
     import type { Song } from "../types/Song";
+    import placeholderAlbumCover from "../assets/300.png";
 
     const currentSong: Song = {
         songTitle: "Song Title",
         artistName: "Artist",
         albumName: "Album",
-        albumCoverUrl: "https://via.placeholder.com/300",
+        albumCoverUrl: placeholderAlbumCover,
     };
 </script>
 
-<div class="now-playing-modal">
-    <img src={currentSong.albumCoverUrl} alt="Album Art" class="album-art" />
-    <div class="content-container">
-        <h1 class="header-title">Mario's Now Playing</h1>
-        <div class="music-info">
+<div class="now-playing-component styled-container">
+    <img src={currentSong.albumCoverUrl} alt="Album Art" />
+    <div class="now-playing-component-text-container">
+        <h1>Mario's Now Playing</h1>
+        <div class="now-playing-component-text">
             <h2>{currentSong.songTitle}</h2>
             <p>{currentSong.artistName}</p>
             <p>{currentSong.albumName}</p>
@@ -22,68 +23,65 @@
 </div>
 
 <style>
-    .now-playing-modal {
-        background: rgba(50, 50, 50, 0.6);
-        color: aliceblue;
-        padding: 20px;
-        border-radius: 15px;
-        box-shadow:
-            0 4px 8px rgba(0, 0, 0, 0.1),
-            inset 0 4px 8px rgba(0, 0, 0, 0.1);
+    .now-playing-component {
         display: flex;
         align-items: center;
         justify-content: flex-start;
-        max-width: 600px;
     }
 
-    .album-art {
-        width: 250px;
-        height: 250px;
+    .now-playing-component img {
+        width: var(--album-art-size-large);
+        height: var(--album-art-size-large);
         border-radius: 10px;
-        margin-right: 20px;
+        margin-right: var(--margin-large);
     }
 
-    .content-container {
+    .now-playing-component-text-container {
         flex-grow: 1;
         display: flex;
         flex-direction: column;
         justify-content: space-between;
-        height: 250px;
+
+        height: var(--album-art-size-large);
+        /* Matching the size of the album art */
     }
 
-    .header-title {
+    .now-playing-component h1 {
         margin: 0;
     }
 
-    .music-info {
+    .now-playing-component-text {
         text-align: left;
     }
 
-    .music-info h2,
-    .music-info p {
+    .now-playing-component-text h2,
+    .now-playing-component-text p {
         margin: 0;
     }
 
     @media (max-width: 680px) {
-        .now-playing-modal {
+        .now-playing-component,
+        .now-playing-component h1,
+        .now-playing-component img,
+        .now-playing-component-text {
+            width: var(--width-mobile);
+        }
+
+        .now-playing-component {
             flex-direction: column-reverse;
-            width: 80vw;
             max-width: none;
         }
 
-        .album-art {
-            width: 80vw;
+        .now-playing-component img {
             height: auto;
-            margin: 10px 0;
+            margin: var(--margin-medium) 0;
         }
 
-        .header-title,
-        .music-info {
-            width: 80vw;
-            margin-bottom: 10px;
+        .now-playing-component h1 {
+            margin-bottom: var(--margin-medium);
         }
 
-        .content-container {
+        .now-playing-component-text-container {
             height: auto;
         }
     }

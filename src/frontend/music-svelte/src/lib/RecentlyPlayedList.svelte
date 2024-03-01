@@ -1,37 +1,39 @@
 <script lang="ts">
     import { onMount } from "svelte";
+    import placeholderAlbumCover from "../assets/50.png";
+    import type { Song } from "../types/Song";
 
     // Mock data for the recently played songs
-    const recentlyPlayed = [
+    const recentlyPlayed: Song[] = [
         {
             songTitle: "Song One",
             artistName: "Artist One",
             albumName: "Album One",
-            albumCoverUrl: "https://via.placeholder.com/50",
+            albumCoverUrl: placeholderAlbumCover,
         },
         {
             songTitle: "Song Two",
             artistName: "Artist Two",
             albumName: "Album Two",
-            albumCoverUrl: "https://via.placeholder.com/50",
+            albumCoverUrl: placeholderAlbumCover,
         },
         {
             songTitle: "Song Three",
             artistName: "Artist Three",
             albumName: "Album Three",
-            albumCoverUrl: "https://via.placeholder.com/50",
+            albumCoverUrl: placeholderAlbumCover,
         },
         {
             songTitle: "Song Four",
             artistName: "Artist Four",
             albumName: "Album Four",
-            albumCoverUrl: "https://via.placeholder.com/50",
+            albumCoverUrl: placeholderAlbumCover,
         },
         {
             songTitle: "Song Five",
             artistName: "Artist Five",
             albumName: "Album Five",
-            albumCoverUrl: "https://via.placeholder.com/50",
+            albumCoverUrl: placeholderAlbumCover,
         },
     ];
 
@@ -62,17 +64,18 @@
     });
 </script>
 
-<div class="recently-played-list-modal">
+<div class="recently-played-list-component styled-container">
     <h1>Recently Played</h1>
-    <div class="scroll-container" bind:this={scrollContainer}>
+    <div
+        class="recently-played-list-component-list-container"
+        bind:this={scrollContainer}
+    >
         {#each recentlyPlayed as play}
-            <div class="play-item">
-                <img
-                    src={play.albumCoverUrl}
-                    alt="Album Cover"
-                    class="album-cover"
-                />
-                <div class="song-info">
+            <div class="recently-played-list-component-track">
+                <img src={play.albumCoverUrl} alt="Album Cover" />
+                <div
+                    class="recently-played-list-component-track-text-container"
+                >
                     <h3>{play.songTitle}</h3>
                     <p>{play.artistName} - {play.albumName}</p>
                 </div>
@@ -82,27 +85,20 @@
 </div>
 
 <style>
-    .recently-played-list-modal {
-        background: rgba(50, 50, 50, 0.6);
-        color: aliceblue;
-        padding: 20px;
-        border-radius: 15px;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        max-width: 600px;
-        display: flex;
+    .recently-played-list-component {
+        align-items: normal;
         flex-direction: column;
         overflow: hidden;
         position: relative;
     }
 
-    .recently-played-list-modal h1 {
+    .recently-played-list-component h1 {
         width: 100%;
         text-align: left;
-        margin-top: 0;
-        margin-bottom: 10px;
+        margin: 0 0 var(--margin-medium);
     }
 
-    .scroll-container {
+    .recently-played-list-component-list-container {
         display: flex;
         align-items: center;
         overflow-x: auto;
@@ -111,47 +107,50 @@
         -ms-overflow-style: none;
     }
 
-    .scroll-container::-webkit-scrollbar {
+    .recently-played-list-component-list-container::-webkit-scrollbar {
         display: none;
     }
 
-    .play-item {
+    .recently-played-list-component-track {
         display: inline-flex;
         align-items: center;
-        padding: 10px;
-        border-radius: 5px;
-        margin-right: 10px;
+        padding: var(--padding-medium);
+        margin-right: var(--margin-medium);
+        border-radius: var(--border-radius-medium);
+        background: var(--track-bg-color);
         height: 60px;
-        background: rgba(60, 60, 60, 0.6);
     }
 
-    .play-item:last-child {
+    .recently-played-list-component-track:hover {
+        background: var(--track-bg-color-hover);
+    }
+
+    .recently-played-list-component-track:last-child {
         margin-right: 0;
     }
 
-    .album-cover {
-        width: 50px;
-        height: 50px;
-        margin-right: 10px;
-        border-radius: 3px;
+    .recently-played-list-component-track img {
+        width: var(--album-art-size-small);
+        height: var(--album-art-size-small);
+        margin-right: var(--margin-medium);
+        border-radius: var(--border-radius-small);
     }
 
-    .song-info {
+    .recently-played-list-component-track-text-container {
         display: flex;
         flex-direction: column;
-        margin-right: 5px;
+        margin-right: var(--margin-small);
     }
 
-    .song-info h3,
-    .song-info p {
+    .recently-played-list-component-track-text-container h3,
+    .recently-played-list-component-track-text-container p {
         margin: 0;
-        color: aliceblue;
+        color: var(--font-color);
     }
 
     @media (max-width: 680px) {
-        .recently-played-list-modal {
-            width: 80vw;
-            max-width: none;
+        .recently-played-list-component {
+            width: var(--width-mobile);
         }
     }
 </style>
