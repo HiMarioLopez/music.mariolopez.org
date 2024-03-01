@@ -6,6 +6,8 @@ import RecentlyPlayedList from './components/RecentlyPlayedList';
 import RecommendationForm from './components/RecommendationForm';
 import RecommendationList from './components/RecommendationList';
 import { Song } from './types/song';
+import placeholderAlbumCover from './assets/50.png';
+import Footer from './components/Footer';
 
 export function App() {
   // State to hold the list of recommendations with initial mock data
@@ -14,13 +16,13 @@ export function App() {
       songTitle: 'Song One',
       artistName: 'Artist One',
       albumName: 'Album One',
-      albumCoverUrl: 'https://via.placeholder.com/50',
+      albumCoverUrl: placeholderAlbumCover
     },
     {
       songTitle: 'Song Two',
       artistName: 'Artist Two',
       albumName: 'Album Two',
-      albumCoverUrl: 'https://via.placeholder.com/50',
+      albumCoverUrl: placeholderAlbumCover
     },
   ]);
 
@@ -31,7 +33,7 @@ export function App() {
       songTitle: songTitle,
       artistName: 'Mock Artist',
       albumName: 'Mock Album',
-      albumCoverUrl: 'https://via.placeholder.com/50',
+      albumCoverUrl: placeholderAlbumCover
     };
 
     setRecommendations(prevRecommendations => [...prevRecommendations, newRecommendation]);
@@ -57,6 +59,7 @@ export function App() {
             </div>
           </div>
         </div>
+        <Footer />
       </div>
     </>
   );

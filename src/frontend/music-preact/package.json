@@ -1,7 +1,18 @@
 {
-  "name": "music",
-  "private": true,
-  "version": "0.0.0",
+  "name": "music-preact",
+  "description": "A simple app to track my music habits and send me recommendations. Built with Preact.",
+  "homepage": "https://music.mariolopez.org/preact",
+  "version": "0.2.0",
+  "author": {
+    "name": "Mario Lopez Martinez",
+    "email": "mario@lopez.fyi"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/HiMarioLopez/music.mariolopez.org/tree/main/src/frontend/music-preact"
+  },
+  "license": "GPL-3.0-only",
+  "private": false,
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -9,11 +20,11 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "preact": "^10.19.5"
+    "preact": "^10.19.6"
   },
   "devDependencies": {
     "@preact/preset-vite": "^2.8.1",
-    "typescript": "^5.2.2",
+    "typescript": "^5.3.3",
     "vite": "^5.1.4"
   }
 }
