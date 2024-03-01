@@ -48,7 +48,7 @@
     /* margin for the scrollbar */
 }
 
-.recommendation-item:last-child {
+.recommendation-list-component li:last-child {
     margin-bottom: 0;
 }
 
