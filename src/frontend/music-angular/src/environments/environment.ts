@@ -1,4 +1,4 @@
 export const environment = {
-    production: false,
-    assetsBasePath: ''
+    production: true,
+    assetsBasePath: '/angular'
 };
