@@ -1,12 +1,13 @@
 ﻿using Amazon.CDK;
-using Amazon.CDK.AWS.S3;
-using Constructs;
 using Amazon.CDK.AWS.CertificateManager;
 using Amazon.CDK.AWS.CloudFront;
-using Amazon.CDK.AWS.S3.Deployment;
-using Amazon.CDK.AWS.CloudFront.Origins;
 using Amazon.CDK.AWS.CloudFront.Experimental;
+using Amazon.CDK.AWS.CloudFront.Origins;
 using Amazon.CDK.AWS.Lambda;
+using Amazon.CDK.AWS.S3;
+using Amazon.CDK.AWS.S3.Deployment;
+using Constructs;
+using System.Collections.Generic;
 
 namespace Infra.Stacks;
 
@@ -151,31 +152,38 @@ public class SiteStack : Stack
         var rootCertificateArn = "arn:aws:acm:us-east-1:851725225504:certificate/70d15630-f6b4-495e-9d0c-572c64804dfc";
         var rootCertificate = Certificate.FromCertificateArn(this, "Music-SiteCertificate", rootCertificateArn);
 
-        // Create a CloudFront distribution for the S3 bucket
+        // Keep your Certificate and Distribution setup as before
         var distribution = new Distribution(this, "Music-SiteDistribution", new DistributionProps
         {
+            // Define additional behaviors, including one for the root path
+            AdditionalBehaviors = new Dictionary<string, IBehaviorOptions>
+            {
+                // Specific behavior for the root path
+                ["/"] = new BehaviorOptions
+                {
+                    Origin = new S3Origin(siteBucket),
+                    ViewerProtocolPolicy = ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
+                    EdgeLambdas =
+                    [
+                        new EdgeLambda
+                        {
+                            FunctionVersion = edgeFunction.CurrentVersion,
+                            EventType = LambdaEdgeEventType.ORIGIN_REQUEST
+                        }
+                    ],
+                    // Disable caching due to the randomization
+                    CachePolicy = CachePolicy.CACHING_DISABLED
+                }
+            },
             DefaultBehavior = new BehaviorOptions
             {
                 Origin = new S3Origin(siteBucket),
                 ViewerProtocolPolicy = ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
-                EdgeLambdas =
-                [
-                    new EdgeLambda
-                    {
-                        FunctionVersion = edgeFunction.CurrentVersion,
-                        EventType = LambdaEdgeEventType.ORIGIN_REQUEST
-                    }
-                ],
+                // TODO: Once frontend development is 'complete', enable caching
                 CachePolicy = CachePolicy.CACHING_DISABLED
             },
             Certificate = rootCertificate,
             DomainNames = ["music.mariolopez.org"]
-        });
-
-        // Output the distribution domain name
-        new CfnOutput(this, "Music-DistributionDomainName", new CfnOutputProps
-        {
-            Value = distribution.DistributionDomainName
         });
 
         #endregion
