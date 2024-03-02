@@ -4,12 +4,25 @@ const isProd = process.env.NODE_ENV === 'production'
 
 const nextConfig = {
     /**
-     * 
+     * Exporting as a static site for production builds. This requires a custom image loader.
+     * REF: https://nextjs.org/docs/pages/building-your-application/deploying/static-exports
      */
     output: isProd ? 'export' : 'standalone',
 
     /**
+     * A loader is a function returning a URL string for the image, given the parameters 'src',
+     * 'width', and 'quality'. Setting this here will configure every instance of next/image in
+     * your application, without passing a prop.
+     * REF: https://nextjs.org/docs/pages/api-reference/next-config-js/images
+     */
+    images: isProd ? {
+        loader: 'custom',
+        loaderFile: './src/utilities/static-image-loader.ts',
+    } : undefined,
+
+    /**
      * Matches the output directory from all other projects.
+     * REF: https://nextjs.org/docs/pages/api-reference/next-config-js/distDir
      */
     distDir: 'dist',
 
@@ -26,16 +39,6 @@ const nextConfig = {
      * REF: https://nextjs.org/docs/pages/api-reference/next-config-js/assetPrefix
     */
     assetPrefix: isProd ? 'https://music.mariolopez.org/next' : undefined,
-
-    /**
-     * A loader is a function returning a URL string for the image, given the parameters 'src',
-     * 'width', and 'quality'. Setting this here will configure every instance of next/image in
-     * your application, without passing a prop.
-     */
-    images: isProd ? {
-        loader: 'custom',
-        loaderFile: './src/utilities/static-image-loader.ts',
-    } : undefined
 };
 
 export default nextConfig;
