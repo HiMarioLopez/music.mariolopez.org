@@ -9,8 +9,7 @@
 
         <a href="@GetItemUrl((Framework)framework)" target="_self" rel="alternate">
             <img src="@($"/{(Environment.Environment == "Production" ? "blazor/" : "")}images/{frameworkName}.svg")"
-                 alt="@frameworkName"
-                 class="@(framework.ToString() == "Blazor" ? "focused-icon" : "")" />
+                alt="@frameworkName" class="@(framework.ToString() == "Blazor" ? "focused-icon" : "")" />
         </a>
     }
 </nav>
@@ -28,7 +27,10 @@
     private string GetItemUrl(Framework framework)
     {
         // If URLs directly match the enum names, convert to lowercase or any specific case
-        return $"https://music.mariolopez.org/{framework.ToString().ToLower()}";
-    }
+        var frameworkName = (framework == Framework.TypeScript)
+            ? "vanilla"
+            : framework.ToString().ToLower();
 
+        return $"https://music.mariolopez.org/{frameworkName}";
+    }
 }
