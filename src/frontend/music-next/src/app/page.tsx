@@ -1,5 +1,6 @@
 'use client';
 
+import Footer from '@/components/Footer';
 import Navbar from '@/components/Navbar';
 import NowPlaying from '@/components/NowPlaying';
 import RecentlyPlayedList from '@/components/RecentlyPlayedList/index.client';
@@ -7,8 +8,8 @@ import RecommendationForm from '@/components/RecommendationForm/index.client';
 import RecommendationList from '@/components/RecommendationList';
 import { Song } from '@/types/Song';
 import { useState } from 'react';
+import placeholderAlbumCover from '../../public/images/50.png';
 import styles from './page.module.css';
-import Footer from '@/components/Footer';
 
 export default function Home() {
   const [recommendations, setRecommendations] = useState<Song[]>([
@@ -16,13 +17,13 @@ export default function Home() {
       songTitle: 'Song One',
       artistName: 'Artist One',
       albumName: 'Album One',
-      albumCoverUrl: '/images/50.png',
+      albumCoverUrl: placeholderAlbumCover.src
     },
     {
       songTitle: 'Song Two',
       artistName: 'Artist Two',
       albumName: 'Album Two',
-      albumCoverUrl: '/images/50.png',
+      albumCoverUrl: placeholderAlbumCover.src
     },
   ]);
 
@@ -33,7 +34,7 @@ export default function Home() {
       songTitle: songTitle,
       artistName: 'Mock Artist',
       albumName: 'Mock Album',
-      albumCoverUrl: '/images/50.png',
+      albumCoverUrl: placeholderAlbumCover.src
     };
 
     setRecommendations(prevRecommendations => [...prevRecommendations, newRecommendation]);

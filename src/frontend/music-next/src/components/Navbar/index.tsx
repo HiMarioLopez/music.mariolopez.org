@@ -1,7 +1,18 @@
 'use client';
 
-import React, { useEffect, useRef } from 'react';
 import Image from 'next/image';
+import React, { useEffect, useRef } from 'react';
+import angularLogo from '../../../public/images/angular.svg';
+import blazorLogo from '../../../public/images/blazor.svg';
+import litLogo from '../../../public/images/lit.svg';
+import nextLogo from '../../../public/images/next.svg';
+import preactLogo from '../../../public/images/preact.svg';
+import qwikLogo from '../../../public/images/qwik.svg';
+import reactLogo from '../../../public/images/react.svg';
+import solidLogo from '../../../public/images/solid.svg';
+import svelteLogo from '../../../public/images/svelte.svg';
+import tsLogo from '../../../public/images/typescript.svg';
+import vueLogo from '../../../public/images/vue.svg';
 import styles from './style.module.css';
 
 const Navbar: React.FC = () => {
@@ -19,45 +30,40 @@ const Navbar: React.FC = () => {
         }
     }, []); // Empty array means this effect runs once on mount
 
-    // Function to modify the src based on the environment
-    const getSrc = (src: string) => {
-        return process.env.NODE_ENV === 'production' ? `${src}/next` : src;
-    };
-
     return (
         <nav className={styles.navbarComponent} ref={navbarRef}>
             <a href="https://music.mariolopez.org/vanilla" target="_self" rel="alternate">
-                <Image src={getSrc("/images/typescript.svg")} alt="TypeScript" width={40} height={40} unoptimized />
+                <Image src={tsLogo.src} alt="TypeScript" width={40} height={40} unoptimized />
             </a>
             <a href="https://music.mariolopez.org/lit" target="_self" rel="alternate">
-                <Image src={getSrc("/images/lit.svg")} alt="Lit" width={40} height={40} unoptimized />
+                <Image src={litLogo.src} alt="Lit" width={40} height={40} unoptimized />
             </a>
             <a href="https://music.mariolopez.org/qwik" target="_self" rel="alternate">
-                <Image src={getSrc("/images/qwik.svg")} alt="Qwik" width={40} height={40} unoptimized />
+                <Image src={qwikLogo.src} alt="Qwik" width={40} height={40} unoptimized />
             </a>
             <a href="https://music.mariolopez.org/react" target="_self" rel="alternate">
-                <Image src={getSrc("/images/react.svg")} alt="React" width={40} height={40} unoptimized />
+                <Image src={reactLogo.src} alt="React" width={40} height={40} unoptimized />
             </a>
             <a href="https://music.mariolopez.org/solid" target="_self" rel="alternate">
-                <Image src={getSrc("/images/solid.svg")} alt="Solid" width={40} height={40} unoptimized />
+                <Image src={solidLogo.src} alt="Solid" width={40} height={40} unoptimized />
             </a>
             <a href="https://music.mariolopez.org/svelte" target="_self" rel="alternate">
-                <Image src={getSrc("/images/svelte.svg")} alt="Svelte" width={40} height={40} unoptimized />
+                <Image src={svelteLogo.src} alt="Svelte" width={40} height={40} unoptimized />
             </a>
             <a href="https://music.mariolopez.org/vue" target="_self" rel="alternate">
-                <Image src={getSrc("/images/vue.svg")} alt="Vue" width={40} height={40} unoptimized />
+                <Image src={vueLogo.src} alt="Vue" width={40} height={40} unoptimized />
             </a>
             <a href="https://music.mariolopez.org/preact" target="_self" rel="alternate">
-                <Image src={getSrc("/images/preact.svg")} alt="Preact" width={40} height={40} unoptimized />
+                <Image src={preactLogo.src} alt="Preact" width={40} height={40} unoptimized />
             </a>
             <a href="https://music.mariolopez.org/angular" target="_self" rel="alternate">
-                <Image src={getSrc("/images/angular.svg")} alt="Angular" width={40} height={40} unoptimized />
+                <Image src={angularLogo.src} alt="Angular" width={40} height={40} unoptimized />
             </a>
             <a href="https://music.mariolopez.org/next" target="_self" rel="alternate">
-                <Image src={getSrc("/images/next.svg")} alt="Next" width={40} height={40} className={styles.focusedIcon} unoptimized />
+                <Image src={nextLogo.src} alt="Next" width={40} height={40} className={styles.focusedIcon} unoptimized />
             </a>
             <a href="https://music.mariolopez.org/blazor" target="_self" rel="alternate">
-                <Image src={getSrc("/images/blazor.svg")} alt="Blazor" width={40} height={40} unoptimized />
+                <Image src={blazorLogo.src} alt="Blazor" width={40} height={40} unoptimized />
             </a>
         </nav>
     );

@@ -3,14 +3,39 @@
 const isProd = process.env.NODE_ENV === 'production'
 
 const nextConfig = {
+    /**
+     * 
+     */
     output: isProd ? 'export' : 'standalone',
-    distDir: 'dist', // Matches the output directory from all other projects
+
+    /**
+     * Matches the output directory from all other projects.
+     */
+    distDir: 'dist',
+
+    /**
+     * To deploy a Next.js application under a sub-path of a domain you can use the basePath config
+     * option. When using the next/image component, you will need to add the basePath in front of src.
+     * REF: https://nextjs.org/docs/pages/api-reference/next-config-js/basePath
+     */
     basePath: isProd ? '/next' : '',
-    assetPrefix: isProd ? 'https://music.mariolopez.org/next' : '',
-    images: {
+
+    /**
+     * Next.js will automatically use your asset prefix for the JavaScript and CSS files it loads
+     * from the /_next/ path (.next/static/ folder). This is NOT for the images, unfortunately.
+     * REF: https://nextjs.org/docs/pages/api-reference/next-config-js/assetPrefix
+    */
+    assetPrefix: isProd ? 'https://music.mariolopez.org/next' : undefined,
+
+    /**
+     * A loader is a function returning a URL string for the image, given the parameters 'src',
+     * 'width', and 'quality'. Setting this here will configure every instance of next/image in
+     * your application, without passing a prop.
+     */
+    images: isProd ? {
         loader: 'custom',
-        loaderFile: './image-loader.ts',
-    }
+        loaderFile: './src/utilities/static-image-loader.ts',
+    } : undefined
 };
 
 export default nextConfig;

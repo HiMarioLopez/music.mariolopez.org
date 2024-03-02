@@ -1,7 +1,9 @@
-import React from 'react';
-import Image from 'next/image';
-import styles from './style.module.css';
+'use client';
+
 import { Song } from '@/types/Song';
+import Image from 'next/image';
+import React from 'react';
+import styles from './style.module.css';
 
 type RecommendationListProps = {
     recommendations: Song[];

@@ -1,14 +1,17 @@
-import React from 'react';
-import Image from 'next/image';
-import styles from './style.module.css';
+'use client';
+
 import { Song } from '@/types/Song';
+import Image from 'next/image';
+import React from 'react';
+import placeholderAlbumCover from '../../../public/images/300.png';
+import styles from './style.module.css';
 
 // Mock data for the currently playing song
 const currentSong: Song = {
     songTitle: "Song Title",
     artistName: "Artist",
     albumName: "Album",
-    albumCoverUrl: "/images/300.png"
+    albumCoverUrl: placeholderAlbumCover.src
 };
 
 const NowPlaying: React.FC = () => {

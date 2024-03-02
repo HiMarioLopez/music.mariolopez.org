@@ -1,40 +1,41 @@
 'use client';
 
-import React, { useEffect, useRef } from 'react';
-import Image from 'next/image';
-import styles from './style.module.css';
 import { Song } from '@/types/Song';
+import Image from 'next/image';
+import React, { useEffect, useRef } from 'react';
+import placeholderAlbumCover from '../../../public/images/50.png';
+import styles from './style.module.css';
 
 const recentlyPlayed: Song[] = [
     {
         songTitle: 'Song One',
         artistName: 'Artist One',
         albumName: 'Album One',
-        albumCoverUrl: '/images/50.png',
+        albumCoverUrl: placeholderAlbumCover.src
     },
     {
         songTitle: 'Song Two',
         artistName: 'Artist Two',
         albumName: 'Album Two',
-        albumCoverUrl: '/images/50.png',
+        albumCoverUrl: placeholderAlbumCover.src
     },
     {
         songTitle: 'Song Three',
         artistName: 'Artist Three',
         albumName: 'Album Three',
-        albumCoverUrl: '/images/50.png',
+        albumCoverUrl: placeholderAlbumCover.src
     },
     {
         songTitle: 'Song Four',
         artistName: 'Artist Four',
         albumName: 'Album Four',
-        albumCoverUrl: '/images/50.png',
+        albumCoverUrl: placeholderAlbumCover.src
     },
     {
         songTitle: 'Song Five',
         artistName: 'Artist Five',
         albumName: 'Album Five',
-        albumCoverUrl: '/images/50.png',
+        albumCoverUrl: placeholderAlbumCover.src
     }
 ];
 
