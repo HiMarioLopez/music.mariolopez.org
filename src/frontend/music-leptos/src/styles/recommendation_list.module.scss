@@ -1,0 +1,104 @@
+:root {
+    --track-card-size: 60px;
+}
+
+.recommendationListComponent::-webkit-scrollbar {
+    width: 12px;
+}
+
+.recommendationListComponent::-webkit-scrollbar-track {
+    background: var(--scrollbar-end-color);
+}
+
+.recommendationListComponent::-webkit-scrollbar-thumb {
+    background-color: var(--scrollbar-start-color);
+    border-radius: var(--border-radius-medium);
+    border: 3px solid var(--scrollbar-end-color);
+}
+
+.recommendationListComponent h1 {
+    width: 100%;
+    text-align: left;
+    margin-top: 0;
+    margin-bottom: var(--margin-medium);
+}
+
+.recommendationListComponent ul {
+    list-style-type: none;
+    padding-left: 0;
+    width: 100%;
+    max-height: calc(5 * var(--track-card-size));
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--scrollbar-start-color) var(--scrollbar-end-color);
+    margin: 0;
+}
+
+.recommendationListComponent li {
+    background: var(--track-bg-color);
+    padding: var(--padding-medium);
+    display: flex;
+    align-items: center;
+    padding: var(--padding-medium);
+    border-radius: var(--border-radius-medium);
+    margin-bottom: var(--margin-medium);
+    height: var(--track-card-size);
+
+    margin-right: 7px;
+    /* margin for the scrollbar */
+}
+
+.recommendationListComponent li:last-child {
+    margin-bottom: 0;
+}
+
+.recommendationListComponent li:hover {
+    background: var(--track-bg-color-hover);
+}
+
+.recommendationListComponent img {
+    width: var(--album-art-size-small);
+    height: var(--album-art-size-small);
+    margin-right: var(--margin-medium);
+    border-radius: var(--border-radius-small);
+}
+
+.recommendationListComponentTrackTextContainer {
+    display: flex;
+    flex-direction: column;
+}
+
+.recommendationListComponentTrackTextContainer h3,
+.recommendationListComponentTrackTextContainer p {
+    margin: 0;
+    color: var(--font-color);
+}
+
+@media (max-width: 680px) {
+    .recommendationListComponent {
+        width: var(--width-mobile);
+        max-width: none;
+    }
+}
+
+// Shared Styles
+
+.styledContainer {
+    background: var(--component-bg-color);
+    color: var(--font-color);
+    padding: var(--padding-large);
+    border-radius: var(--border-radius-large);
+    box-shadow: inset 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+@media (min-width: 1300px) {
+    .styledContainer {
+        max-width: var(--max-width-large);
+    }
+}
+
+@media (max-width: 1299px) {
+    .styledContainer {
+        max-width: var(--max-width-medium);
+    }
+}

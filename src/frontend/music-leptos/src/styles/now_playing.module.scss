@@ -1,0 +1,85 @@
+.nowPlayingComponent {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+.nowPlayingComponent img {
+    width: var(--album-art-size-large);
+    height: var(--album-art-size-large);
+    border-radius: 10px;
+    margin-right: var(--margin-large);
+}
+
+.nowPlayingComponentTextContainer {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+
+    height: var(--album-art-size-large);
+    /* Matching the size of the album art */
+}
+
+.nowPlayingComponent h1 {
+    margin: 0;
+}
+
+.nowPlayingComponentText {
+    text-align: left;
+}
+
+.nowPlayingComponentText h2,
+.nowPlayingComponentText p {
+    margin: 0;
+}
+
+@media (max-width: 680px) {
+
+    .nowPlayingComponent,
+    .nowPlayingComponent h1,
+    .nowPlayingComponent img,
+    .nowPlayingComponentText {
+        width: var(--width-mobile);
+    }
+
+    .nowPlayingComponent {
+        flex-direction: column-reverse;
+        max-width: none;
+    }
+
+    .nowPlayingComponent img {
+        height: auto;
+        margin: var(--margin-medium) 0;
+    }
+
+    .nowPlayingComponent h1 {
+        margin-bottom: var(--margin-medium);
+    }
+
+    .nowPlayingComponentTextContainer {
+        height: auto;
+    }
+}
+
+// Shared Styles
+
+.styledContainer {
+    background: var(--component-bg-color);
+    color: var(--font-color);
+    padding: var(--padding-large);
+    border-radius: var(--border-radius-large);
+    box-shadow: inset 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+@media (min-width: 1300px) {
+    .styledContainer {
+        max-width: var(--max-width-large);
+    }
+}
+
+@media (max-width: 1299px) {
+    .styledContainer {
+        max-width: var(--max-width-medium);
+    }
+}

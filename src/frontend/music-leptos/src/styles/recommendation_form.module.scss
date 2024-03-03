@@ -1,0 +1,87 @@
+.recommendationFormComponent h1 {
+    width: 100%;
+    text-align: left;
+    margin: 0 0 var(--margin-medium);
+}
+
+.recommendationFormComponent form {
+    width: 100%;
+    display: flex;
+}
+
+.recommendationFormComponent input[type="text"] {
+    padding: var(--padding-medium) 15px;
+    width: calc(100% - 32px);
+    border: var(--input-border);
+    border-radius: var(--border-radius-medium);
+    background-color: var(--input-bg-color);
+    color: var(--font-color);
+    margin-right: var(--margin-medium);
+    outline: none;
+    transition: border-color var(--transition-speed), box-shadow var(--transition-speed);
+}
+
+.recommendationFormComponent input[type="text"]:focus,
+.recommendationFormComponent input[type="text"]:hover {
+    border-color: var(--focus-border-color);
+    box-shadow: 0 0 8px rgba(252, 60, 68, 0.4);
+}
+
+.recommendationFormComponent button {
+    padding: var(--padding-medium) 15px;
+    border: 2px solid transparent;
+    border-radius: var(--border-radius-medium);
+    background-color: var(--button-bg-color);
+    color: white;
+    cursor: pointer;
+    transition: background-color var(--transition-speed), color var(--transition-speed), box-shadow var(--transition-speed), border-color var(--transition-speed);
+}
+
+.recommendationFormComponent button:focus,
+.recommendationFormComponent button:hover {
+    background-color: var(--button-hover-bg-color);
+    color: white;
+    box-shadow: 0 0 8px rgba(252, 60, 68, 0.6);
+    border-color: var(--focus-border-color);
+}
+
+.recommendationFormComponent button:focus {
+    outline: 4px auto -webkit-focus-ring-color;
+}
+
+@media (max-width: 680px) {
+    .recommendationFormComponent {
+        width: var(--width-mobile);
+    }
+
+    .recommendationFormComponent form {
+        flex-direction: column;
+    }
+
+    .recommendationFormComponent input[type="text"] {
+        margin-right: 0;
+        margin-bottom: var(--margin-medium);
+    }
+}
+
+// Shared Styles
+
+.styledContainer {
+    background: var(--component-bg-color);
+    color: var(--font-color);
+    padding: var(--padding-large);
+    border-radius: var(--border-radius-large);
+    box-shadow: inset 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+@media (min-width: 1300px) {
+    .styledContainer {
+        max-width: var(--max-width-large);
+    }
+}
+
+@media (max-width: 1299px) {
+    .styledContainer {
+        max-width: var(--max-width-medium);
+    }
+}
