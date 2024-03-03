@@ -9,7 +9,7 @@ using Amazon.CDK.AWS.S3.Deployment;
 using Constructs;
 using System.Collections.Generic;
 
-namespace Infra.Stacks;
+namespace MusicInfra.Stacks;
 
 /// <summary>
 /// Defines the stack for the music.mariolopez.org website(s).

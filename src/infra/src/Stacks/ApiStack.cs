@@ -6,7 +6,7 @@ using Amazon.CDK.AWS.Lambda;
 using Amazon.CDK.AWS.SecretsManager;
 using Constructs;
 
-namespace Infra.Stacks;
+namespace MusicInfra.Stacks;
 
 /// <summary>
 /// Defines the stack for the music.mariolopez.org API.
@@ -95,8 +95,8 @@ public class ApiStack : Stack
 
         #region Integrate to API Gateway
 
-        // Create a resource for the '/auth/token' endpoint
-        var authResource = authApi.Root.AddResource("auth").AddResource("token");
+        // Create a resource for the '/api/auth/token' endpoint
+        var authResource = authApi.Root.AddResource("api").AddResource("auth").AddResource("token");
 
         // Create a method for the '/auth/token' resource that integrates with the Lambda function
         authResource.AddMethod("GET", new LambdaIntegration(lambdaFunction, new LambdaIntegrationOptions

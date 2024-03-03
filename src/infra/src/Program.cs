@@ -1,7 +1,7 @@
 ﻿using Amazon.CDK;
-using Infra.Stacks;
+using MusicInfra.Stacks;
 
-namespace Infra;
+namespace MusicInfra;
 
 public class Program
 {
