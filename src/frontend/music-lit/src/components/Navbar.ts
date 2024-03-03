@@ -9,6 +9,7 @@ import reactLogo from '../assets/react.svg';
 import solidLogo from '../assets/solid.svg';
 import svelteLogo from '../assets/svelte.svg';
 import tsLogo from '../assets/typescript.svg';
+import leptosLogo from '../assets/leptos.svg';
 import vueLogo from '../assets/vue.svg';
 
 export class Navbar extends LitElement {
@@ -92,6 +93,7 @@ export class Navbar extends LitElement {
                 <a href="https://music.mariolopez.org/angular" target="_self" rel="alternate"><img src=${angularLogo} alt="Angular" /></a>
                 <a href="https://music.mariolopez.org/next" target="_self" rel="alternate"><img src=${nextLogo} alt="Next" /></a>
                 <a href="https://music.mariolopez.org/blazor" target="_self" rel="alternate"><img src=${blazorLogo} alt="Blazor" /></a>
+                <a href="https://music.mariolopez.org/leptos" target="_self" rel="alternate"><img src=${leptosLogo} alt="Leptos" /></a>
             </nav>
     `;
     }

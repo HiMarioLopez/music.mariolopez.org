@@ -33,6 +33,9 @@
         <a href="https://music.mariolopez.org/blazor" target="_self" rel="alternate">
             <img :src="blazorIcon" alt="Blazor" />
         </a>
+        <a href="https://music.mariolopez.org/leptos" target="_self" rel="alternate">
+            <img :src="leptosIcon" alt="Leptos" />
+        </a>
     </nav>
 </template>
   
@@ -48,6 +51,7 @@ import solidIcon from '../assets/solid.svg';
 import svelteIcon from '../assets/svelte.svg';
 import tsIcon from '../assets/typescript.svg';
 import vueIcon from '../assets/vue.svg';
+import leptosIcon from '../assets/leptos.svg';
 
 export default {
     name: 'Navbar',
@@ -63,7 +67,8 @@ export default {
             preactIcon: preactIcon,
             angularIcon: angularIcon,
             nextIcon: nextIcon,
-            blazorIcon: blazorIcon
+            blazorIcon: blazorIcon,
+            leptosIcon: leptosIcon,
         };
     },
 };

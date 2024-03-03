@@ -13,6 +13,7 @@ import solidLogo from '../../../public/images/solid.svg';
 import svelteLogo from '../../../public/images/svelte.svg';
 import tsLogo from '../../../public/images/typescript.svg';
 import vueLogo from '../../../public/images/vue.svg';
+import leptosLogo from '../../../public/images/leptos.svg';
 import styles from './style.module.css';
 
 const Navbar: React.FC = () => {
@@ -64,6 +65,9 @@ const Navbar: React.FC = () => {
             </a>
             <a href="https://music.mariolopez.org/blazor" target="_self" rel="alternate">
                 <Image src={blazorLogo.src} alt="Blazor" width={40} height={40} unoptimized />
+            </a>
+            <a href="https://music.mariolopez.org/leptos" target="_self" rel="alternate">
+                <Image src={leptosLogo.src} alt="Leptos" width={40} height={40} unoptimized />
             </a>
         </nav>
     );

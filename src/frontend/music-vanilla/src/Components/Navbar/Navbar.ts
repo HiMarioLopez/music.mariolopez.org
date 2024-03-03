@@ -9,6 +9,7 @@ import solidLogo from '../../Assets/Images/solid.svg';
 import svelteLogo from '../../Assets/Images/svelte.svg';
 import tsLogo from '../../Assets/Images/typescript.svg';
 import vueLogo from '../../Assets/Images/vue.svg';
+import leptosLogo from '../../Assets/Images/leptos.svg';
 import './navbar.css';
 
 export function Navbar(): HTMLElement {
@@ -24,6 +25,7 @@ export function Navbar(): HTMLElement {
         { href: 'https://music.mariolopez.org/angular', src: angularLogo, alt: 'Angular' },
         { href: 'https://music.mariolopez.org/next', src: nextLogo, alt: 'Next' },
         { href: 'https://music.mariolopez.org/blazor', src: blazorLogo, alt: 'Blazor' },
+        { href: 'https://music.mariolopez.org/leptos', src: leptosLogo, alt: 'Leptos' }
     ];
 
     const navbar = document.createElement('nav');

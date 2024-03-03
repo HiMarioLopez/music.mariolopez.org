@@ -12,5 +12,6 @@ public enum Framework
     Preact,
     Angular,
     Next,
-    Blazor
+    Blazor,
+    Leptos
 }

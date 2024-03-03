@@ -10,6 +10,7 @@ import solidLogo from '../../assets/solid.svg';
 import svelteLogo from '../../assets/svelte.svg';
 import tsLogo from '../../assets/typescript.svg';
 import vueLogo from '../../assets/vue.svg';
+import leptosLogo from '../../assets/leptos.svg';
 import './index.css';
 
 export default component$(() => {
@@ -47,6 +48,9 @@ export default component$(() => {
             </a>
             <a href="https://music.mariolopez.org/blazor" target="_self" rel="alternate">
                 <img src={blazorLogo} alt="Blazor" />
+            </a>
+            <a href="https://music.mariolopez.org/leptos" target="_self" rel="alternate">
+                <img src={leptosLogo} alt="Leptos" />
             </a>
         </nav>
     );
