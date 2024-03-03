@@ -128,6 +128,14 @@ public class SiteStack : Stack
             DestinationKeyPrefix = "blazor",
         });
 
+        // Deploy Leptos site assets
+        new BucketDeployment(this, "Music-DeployLeptosSite", new BucketDeploymentProps
+        {
+            Sources = [Source.Asset("../frontend/music-leptos/dist")],
+            DestinationBucket = siteBucket,
+            DestinationKeyPrefix = "leptos",
+        });
+
         #endregion
 
         #region Route Randomization Handler
