@@ -15,7 +15,8 @@ exports.handler = (event, context, callback) => {
         '/preact',
         '/next',
         '/angular',
-        '/blazor'
+        '/blazor',
+        '/leptos'
     ];
     const defaultUri = request.uri;
     const firstPathSegment = `/${defaultUri.split('/')[1] || ''}`;
