@@ -2,7 +2,7 @@
   "name": "music-vanilla",
   "description": "A simple app to track my music habits and send me recommendations. Built with vanilla TypeScript.",
   "homepage": "https://music.mariolopez.org/vanilla",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "author": {
     "name": "Mario Lopez Martinez",
     "email": "mario@lopez.fyi"

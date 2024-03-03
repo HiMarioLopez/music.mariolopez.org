@@ -1,0 +1,39 @@
+.apple-music-tester-component h1 {
+    width: 100%;
+    text-align: left;
+    margin: 0 0 var(--margin-medium);
+}
+
+.apple-music-tester-component form {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.apple-music-tester-component button {
+    padding: var(--padding-medium) 15px;
+    border: 2px solid transparent;
+    border-radius: var(--border-radius-medium);
+    background-color: var(--button-bg-color);
+    color: white;
+    cursor: pointer;
+    transition: background-color var(--transition-speed), color var(--transition-speed), box-shadow var(--transition-speed), border-color var(--transition-speed);
+}
+
+.apple-music-tester-component button:focus,
+.apple-music-tester-component button:hover {
+    background-color: var(--button-hover-bg-color);
+    color: white;
+    box-shadow: 0 0 8px rgba(252, 60, 68, 0.6);
+    border-color: var(--focus-border-color);
+}
+
+.apple-music-tester-component button:focus {
+    outline: 4px auto -webkit-focus-ring-color;
+}
+
+@media (max-width: 680px) {
+    .apple-music-tester-component {
+        width: var(--width-mobile);
+    }
+}

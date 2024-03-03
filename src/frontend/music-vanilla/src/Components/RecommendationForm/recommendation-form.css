@@ -63,3 +63,30 @@
         margin-bottom: var(--margin-medium);
     }
 }
+
+/* Suggestion List Stuff */
+
+.suggestions-list {
+    list-style-type: none;
+    margin-top: 0;
+    padding: 0;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    width: 80%;
+    z-index: 1000;
+
+    background: rgb(54, 54, 54);
+}
+
+.suggestion-item {
+    padding: 10px;
+    cursor: pointer;
+    border-bottom: 1px solid #eee;
+}
+
+.suggestion-item:last-child {
+    border-bottom: none;
+}
+
+.suggestion-item:hover {
+    background-color: #a1a1a1;
+}

@@ -50,6 +50,7 @@
     }
 
     .now-playing-container,
+    .recently-played-list-container,
     .recommendation-form-container,
     .recommendations-list-container {
         margin-bottom: var(--margin-large);
@@ -82,6 +83,7 @@
     }
 
     .now-playing-container,
+    .recently-played-list-container,
     .recommendation-form-container,
     .recommendations-list-container {
         width: 100%;

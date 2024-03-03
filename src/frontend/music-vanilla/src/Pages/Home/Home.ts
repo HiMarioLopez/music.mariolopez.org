@@ -5,6 +5,7 @@ import { NowPlaying } from "../../Components/NowPlaying/NowPlaying";
 import { RecentlyPlayedList } from "../../Components/RecentlyPlayedList/RecentlyPlayedList";
 import { RecommendationForm } from "../../Components/RecommendationForm/RecommendationForm";
 import { RecommendationList } from "../../Components/RecommendationList/RecommendationList";
+import { AppleMusicTester } from "../../Components/AppleMusicTester/AppleMusicTester";
 import { Song } from "../../Types/Song.type";
 import './home.css';
 
@@ -50,7 +51,12 @@ function Home(): HTMLElement {
     nowPlayingContainer.appendChild(NowPlaying());
     leftColumn.appendChild(nowPlayingContainer);
 
+    const recentlyPlayedListContainer = document.createElement('div');
+    recentlyPlayedListContainer.className = 'recently-played-list-container';
     leftColumn.appendChild(RecentlyPlayedList());
+    leftColumn.appendChild(recentlyPlayedListContainer);
+
+    leftColumn.appendChild(AppleMusicTester());
     mainContent.appendChild(leftColumn);
 
     // Right column
