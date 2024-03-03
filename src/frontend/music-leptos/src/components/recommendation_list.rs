@@ -16,7 +16,12 @@ pub fn RecommendationList() -> impl IntoView {
             <ul>
                 {move || parent_recommendations.with(|recommendations| {recommendations.iter().map(|recommendation| view! {
                     <li>
-                        <img src={&recommendation.album_cover_url} alt="Album Cover" />
+
+                        // PRODUCTION
+                        <img src={"/leptos".to_owned() + &recommendation.album_cover_url} alt="Album Cover" />
+                        // DEVELOPMENT
+                        // <img src={&recommendation.album_cover_url} alt="Album Cover" />
+
                         <div class=style::recommendationListComponentTrackTextContainer>
                             <h3>{&recommendation.song_title}</h3>
                             <p>{format!("{} - {}", &recommendation.artist_name, &recommendation.album_name)}</p>

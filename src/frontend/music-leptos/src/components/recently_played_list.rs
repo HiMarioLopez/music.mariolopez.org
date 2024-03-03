@@ -51,7 +51,12 @@ pub fn RecentlyPlayedList() -> impl IntoView {
             <div id="recentlyPlayedListContainer" class=style::recentlyPlayedListComponentListContainer>
                 {recently_played.iter().map(|track| view! {
                     <div class=style::recentlyPlayedListComponentTrack>
-                        <img src={&track.album_cover_url} alt="Album Cover" />
+
+                        // PRODUCTION
+                        <img src={"/leptos".to_owned() + &track.album_cover_url} alt="Album Cover" />
+                        // DEVELOPMENT
+                        // <img src={&track.album_cover_url} alt="Album Cover" />
+
                         <div class=style::recentlyPlayedListComponentTrackTextContainer>
                             <h3>{&track.song_title}</h3>
                             <p>{format!("{} - {}", &track.artist_name, &track.album_name)}</p>

@@ -18,7 +18,12 @@ pub fn NowPlaying() -> impl IntoView {
 
     view! {
         <div class=(style::nowPlayingComponent, style::styledContainer).join_classes() >
-            <img src={current_song.album_cover_url} alt="Album Art" />
+
+            // PRODUCTION
+            <img src={"/leptos".to_owned() + &current_song.album_cover_url} alt="Album Art" />
+            // DEVELOPMENT
+            // <img src={&current_song.album_cover_url} alt="Album Art" />
+
             <div class=style::nowPlayingComponentTextContainer>
                 <h1>"Mario's Now Playing"</h1>
                 <div class=style::nowPlayingComponentText>
