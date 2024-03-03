@@ -160,13 +160,16 @@ public class SiteStack : Stack
         var rootCertificateArn = "arn:aws:acm:us-east-1:851725225504:certificate/70d15630-f6b4-495e-9d0c-572c64804dfc";
         var rootCertificate = Certificate.FromCertificateArn(this, "Music-SiteCertificate", rootCertificateArn);
 
+        // Import the API Gateway's custom domain name
+        var importedApiDomainName = Fn.ImportValue("Music-ApiGatewayCustomDomainName");
+
         // Keep your Certificate and Distribution setup as before
         var distribution = new Distribution(this, "Music-SiteDistribution", new DistributionProps
         {
             // Define additional behaviors, including one for the root path
             AdditionalBehaviors = new Dictionary<string, IBehaviorOptions>
             {
-                // Specific behavior for the root path
+                // Root Path: Randomize the frontend
                 ["/"] = new BehaviorOptions
                 {
                     Origin = new S3Origin(siteBucket),
@@ -181,8 +184,20 @@ public class SiteStack : Stack
                     ],
                     // Disable caching due to the randomization
                     CachePolicy = CachePolicy.CACHING_DISABLED
+                },
+                // API Path: Proxy to the API Gateway
+                ["/api/*"] = new BehaviorOptions
+                {
+                    Origin = new HttpOrigin(importedApiDomainName, new HttpOriginProps
+                    {
+                        ProtocolPolicy = OriginProtocolPolicy.HTTPS_ONLY
+                    }),
+                    ViewerProtocolPolicy = ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
+                    CachePolicy = CachePolicy.CACHING_DISABLED,
+                    OriginRequestPolicy = OriginRequestPolicy.ALL_VIEWER
                 }
             },
+            // Default Behavior: Redirect to the site assets S3 bucket
             DefaultBehavior = new BehaviorOptions
             {
                 Origin = new S3Origin(siteBucket),

@@ -3,7 +3,7 @@ using MusicInfra.Stacks;
 
 namespace MusicInfra;
 
-public class Program
+public static class Program
 {
     public static void Main()
     {
@@ -25,12 +25,15 @@ public class Program
             Description = "This stack contains the API Gateway and Lambda function for the Music application."
         });
 
-        var baseSiteStack = new SiteStack(app, "SiteStack", new StackProps
+        var siteStack = new SiteStack(app, "SiteStack", new StackProps
         {
             Env = env,
             StackName = "Music-SiteStack",
             Description = "This stack contains the S3 bucket and CloudFront distribution for the Music application."
         });
+
+        // Explicitly declare that SiteStack depends on ApiStack
+        siteStack.AddDependency(apiStack);
 
         app.Synth();
     }
