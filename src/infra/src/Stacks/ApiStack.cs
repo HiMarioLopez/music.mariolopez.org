@@ -1,14 +1,10 @@
-using System.Collections.Generic;
 using Amazon.CDK;
 using Amazon.CDK.AWS.APIGateway;
 using Amazon.CDK.AWS.CertificateManager;
-using Amazon.CDK.AWS.Cognito;
-using Amazon.CDK.AWS.IAM;
-using Amazon.CDK.AWS.Lambda;
 using Amazon.CDK.AWS.SecretsManager;
 using Constructs;
 
-namespace MusicInfra.Stacks;
+namespace Music.Infra.Stacks;
 
 /// <summary>
 /// Defines the stack for the Music Integration API.
@@ -31,7 +27,7 @@ public class ApiStack : Stack
         var rootCertificate = Certificate.FromCertificateArn(this, "Music-ApiCertificate", rootCertificateArn);
 
         // Create a new REST API
-        var authApi = new RestApi(this, "Music-IntegrationApiGateway", new RestApiProps
+        var apiGateway = new RestApi(this, "Music-IntegrationApiGateway", new RestApiProps
         {
             RestApiName = "Music Integration API Gateway",
             Description = "This gateway serves a variety of integration-related services for the Music app.",
@@ -48,7 +44,7 @@ public class ApiStack : Stack
         // Output the API Gateway's custom domain name
         var apiDomainName = new CfnOutput(this, "Music-ApiGatewayCustomDomainName", new CfnOutputProps
         {
-            Value = authApi.DomainName!.DomainNameAliasDomainName,
+            Value = apiGateway.DomainName!.DomainNameAliasDomainName,
             ExportName = "Music-ApiGatewayCustomDomainName"
         });
 
@@ -63,68 +59,132 @@ public class ApiStack : Stack
             SecretName = "AppleAuthKey"
         });
 
-        #endregion
-
-        #region Lambda Function
-
-        // Create an IAM role for the Lambda function
-        var lambdaRole = new Role(this, "Music-AuthHandlerExecutionRole", new RoleProps
-        {
-            AssumedBy = new ServicePrincipal("lambda.amazonaws.com"),
-            ManagedPolicies =
-                [
-                    ManagedPolicy.FromAwsManagedPolicyName(
-                        "service-role/AWSLambdaBasicExecutionRole"
-                    )
-                ]
-        });
-
-        // Define the permissions for the Lambda function
-        lambdaRole.AddToPolicy(new PolicyStatement(new PolicyStatementProps
-        {
-            Actions = ["secretsmanager:GetSecretValue"],
-            Resources = [appleAuthKey.SecretArn],
-            Effect = Effect.ALLOW
-        }));
-
         // Fetch environment variables
         var teamId = System.Environment.GetEnvironmentVariable("APPLE_TEAM_ID");
         var keyId = System.Environment.GetEnvironmentVariable("APPLE_KEY_ID");
 
-        // Define the Lambda function
-        var lambdaFunction = new Function(this, "Music-AuthHandler", new FunctionProps
-        {
-            Runtime = Runtime.NODEJS_LATEST,
-            Role = lambdaRole,
-            Code = Code.FromAsset("../backend/handlers/auth-handler"),
-            Handler = "index.handler",
-            Environment = new Dictionary<string, string>
-                {
-                    { "APPLE_AUTH_KEY_SECRET_NAME", appleAuthKey.SecretName },
-                    { "TEAM_ID", teamId },
-                    { "KEY_ID", keyId }
-                },
-            Description = "Generates a token for use with Apple's Music API.",
+        #endregion
 
-            // Main cost drivers
-            Architecture = Architecture.ARM_64,
-            MemorySize = 128,
-            EphemeralStorageSize = Size.Mebibytes(512),
-        });
+        #region Lambda Functions
+
+        #region Auth Handler
+
+        // // Create an IAM role for the Lambda function
+        // var lambdaRole = new Role(this, "Music-AuthHandlerExecutionRole", new RoleProps
+        // {
+        //     AssumedBy = new ServicePrincipal("lambda.amazonaws.com"),
+        //     ManagedPolicies =
+        //         [
+        //             ManagedPolicy.FromAwsManagedPolicyName(
+        //                 "service-role/AWSLambdaBasicExecutionRole"
+        //             )
+        //         ]
+        // });
+
+        // // Define the permissions for the Lambda function
+        // lambdaRole.AddToPolicy(new PolicyStatement(new PolicyStatementProps
+        // {
+        //     Actions = ["secretsmanager:GetSecretValue"],
+        //     Resources = [appleAuthKey.SecretArn],
+        //     Effect = Effect.ALLOW
+        // }));
+
+        // // Define the Lambda function
+        // var authHandlerFunction = new Function(this, "Music-AuthHandler", new FunctionProps
+        // {
+        //     Runtime = Runtime.NODEJS_LATEST,
+        //     Role = lambdaRole,
+        //     Code = Code.FromAsset("../backend/handlers/auth-handler"),
+        //     Handler = "index.handler",
+        //     Environment = new Dictionary<string, string>
+        //         {
+        //             { "APPLE_AUTH_KEY_SECRET_NAME", appleAuthKey.SecretName },
+        //             { "TEAM_ID", teamId },
+        //             { "KEY_ID", keyId }
+        //         },
+        //     Description = "Generates a token for use with Apple's Music API.",
+
+        //     // Main cost drivers
+        //     Architecture = Architecture.ARM_64,
+        //     MemorySize = 128,
+        //     EphemeralStorageSize = Size.Mebibytes(512),
+        // });
 
         #endregion
 
-        #region Integrate to API Gateway
+        #region Integration API (Express)
 
-        // Create a resource for the '/auth/token' endpoint (it would be '/api/auth/token' via root domain)
-        var authResource = authApi.Root.AddResource("auth").AddResource("token");
+        // var integrationApiExpressPrefix = "Music-IntegrationApiExpress";
 
-        // Create a method for the '/auth/token' resource that integrates with the Lambda function
-        authResource.AddMethod("GET", new LambdaIntegration(lambdaFunction, new LambdaIntegrationOptions
-        {
-            AllowTestInvoke = true,
-            Timeout = Duration.Seconds(10)
-        }));
+        // // Create an IAM role for the Lambda function
+        // var integrationApiExpressLambdaRole = new Role(this, $"{integrationApiExpressPrefix}ExecutionRole", new RoleProps
+        // {
+        //     AssumedBy = new ServicePrincipal("lambda.amazonaws.com"),
+        //     ManagedPolicies =
+        //         [
+        //             ManagedPolicy.FromAwsManagedPolicyName(
+        //                 "service-role/AWSLambdaBasicExecutionRole"
+        //             )
+        //         ]
+        // });
+
+        // // Define the permissions for the Lambda function
+        // integrationApiExpressLambdaRole.AddToPolicy(new PolicyStatement(new PolicyStatementProps
+        // {
+        //     Actions = ["secretsmanager:GetSecretValue"],
+        //     Resources = [appleAuthKey.SecretArn],
+        //     Effect = Effect.ALLOW
+        // }));
+
+        // // Define the Lambda function
+        // var integrationApiExpressLambdaFunction = new Function(this, $"{integrationApiExpressPrefix}Lambda", new FunctionProps
+        // {
+        //     Runtime = Runtime.NODEJS_LATEST,
+        //     Role = integrationApiExpressLambdaRole,
+        //     Code = Code.FromAsset("../backend/api/integration-express"),
+        //     Handler = "index.handler",
+        //     Environment = new Dictionary<string, string>
+        //         {
+        //             { "APPLE_AUTH_KEY_SECRET_NAME", appleAuthKey.SecretName },
+        //             { "TEAM_ID", teamId },
+        //             { "KEY_ID", keyId }
+        //         },
+        //     Description = "Integration API for the Music App (interface for Apple's Music API) written in Express.",
+
+        //     // Main cost drivers
+        //     Architecture = Architecture.ARM_64,
+        //     MemorySize = 128,
+        //     EphemeralStorageSize = Size.Mebibytes(512),
+        // });
+
+        #endregion
+
+        #endregion
+
+        #region Integrate Lambdas to API Gateway
+
+        // // Create a resource for the '/auth/token' endpoint (it would be '/api/auth/token' via root domain)
+        // var authResource = apiGateway.Root.AddResource("auth").AddResource("token");
+
+        // // Create a method for the '/auth/token' resource that integrates with the Lambda function
+        // authResource.AddMethod("GET", new LambdaIntegration(lambdaFunction, new LambdaIntegrationOptions
+        // {
+        //     AllowTestInvoke = true,
+        //     Timeout = Duration.Seconds(10)
+        // }));
+
+        // var integrationApiExpressResource = apiGateway.Root.AddResource("express");
+        // integrationApiExpressResource.AddMethod("GET", new LambdaIntegration(integrationApiExpressLambdaFunction, new LambdaIntegrationOptions
+        // {
+        //     AllowTestInvoke = true,
+        //     Timeout = Duration.Seconds(10)
+        // }));
+
+        // integrationApiExpressResource.AddProxy(new ProxyResourceOptions
+        // {
+        //     AnyMethod = true,
+        //     DefaultIntegration = new LambdaIntegration(integrationApiExpressLambdaFunction)
+        // });
 
         #endregion
     }
