@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "Music.Handlers.Auth.Native.Aot": {
+      "commandName": "Project"
+    },
+    "Container (Dockerfile)": {
+      "commandName": "Docker"
+    }
+  }
+}
