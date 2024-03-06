@@ -25,15 +25,15 @@ public static class Program
             Description = "This stack contains the API Gateway and Lambda function for the Music application."
         });
 
-        var siteStack = new SiteStack(app, "SiteStack", new StackProps
+        var frontendStack = new FrontendStack(app, "FrontendStack", new StackProps
         {
             Env = env,
-            StackName = "Music-SiteStack",
+            StackName = "Music-FrontendStack",
             Description = "This stack contains the S3 bucket and CloudFront distribution for the Music application."
         });
 
         // Explicitly declare that SiteStack depends on ApiStack
-        siteStack.AddDependency(apiStack);
+        frontendStack.AddDependency(apiStack);
 
         app.Synth();
     }

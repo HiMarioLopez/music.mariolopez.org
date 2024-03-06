@@ -20,9 +20,9 @@ namespace Music.Infra.Stacks;
 ///     - https://aws.amazon.com/cloudfront/pricing/
 ///     - https://aws.amazon.com/s3/pricing/
 /// </remarks>
-public class SiteStack : Stack
+public class FrontendStack : Stack
 {
-    public SiteStack(Construct scope, string id, IStackProps props = null) : base(scope, id, props)
+    public FrontendStack(Construct scope, string id, IStackProps props = null) : base(scope, id, props)
     {
         #region Bucket
 
