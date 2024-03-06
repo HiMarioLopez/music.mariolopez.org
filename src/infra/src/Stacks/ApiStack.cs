@@ -95,7 +95,7 @@ public class ApiStack : Stack
         // Define the Lambda function
         var authHandlerFunction = new Function(this, "Music-AuthHandler", new FunctionProps
         {
-            Runtime = Runtime.NODEJS_LATEST,
+            Runtime = Runtime.NODEJS_20_X,
             Role = lambdaRole,
             Code = Code.FromAsset("../app/backend/handlers/music-auth"),
             Handler = "index.handler",

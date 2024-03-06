@@ -4,6 +4,8 @@ using Amazon.CDK.AWS.CloudFront;
 using Amazon.CDK.AWS.CloudFront.Experimental;
 using Amazon.CDK.AWS.CloudFront.Origins;
 using Amazon.CDK.AWS.Lambda;
+using Amazon.CDK.AWS.Route53;
+using Amazon.CDK.AWS.Route53.Targets;
 using Amazon.CDK.AWS.S3;
 using Amazon.CDK.AWS.S3.Deployment;
 using Constructs;
@@ -40,7 +42,7 @@ public class FrontendStack : Stack
 
         #region Site Deployments
 
-        // Deploy Lit site assets
+        // Deploy Lit static site assets
         new BucketDeployment(this, "Music-DeployLitSite", new BucketDeploymentProps
         {
             Sources = [Source.Asset("../app/frontend/music-lit/dist")],
@@ -48,7 +50,7 @@ public class FrontendStack : Stack
             DestinationKeyPrefix = "lit",
         });
 
-        // Deploy Qwik site assets
+        // Deploy Qwik static site assets
         new BucketDeployment(this, "Music-DeployQkiwSite", new BucketDeploymentProps
         {
             Sources = [Source.Asset("../app/frontend/music-qwik/dist")],
@@ -56,7 +58,7 @@ public class FrontendStack : Stack
             DestinationKeyPrefix = "qwik",
         });
 
-        // Deploy React site assets
+        // Deploy React static site assets
         new BucketDeployment(this, "Music-DeployReactSite", new BucketDeploymentProps
         {
             Sources = [Source.Asset("../app/frontend/music-react/dist")],
@@ -64,7 +66,7 @@ public class FrontendStack : Stack
             DestinationKeyPrefix = "react",
         });
 
-        // Deploy Solid site assets
+        // Deploy Solid static site assets
         new BucketDeployment(this, "Music-DeploySolidSite", new BucketDeploymentProps
         {
             Sources = [Source.Asset("../app/frontend/music-solid/dist")],
@@ -72,7 +74,7 @@ public class FrontendStack : Stack
             DestinationKeyPrefix = "solid",
         });
 
-        // Deploy Svelte site assets
+        // Deploy Svelte static site assets
         new BucketDeployment(this, "Music-DeploySvelteSite", new BucketDeploymentProps
         {
             Sources = [Source.Asset("../app/frontend/music-svelte/dist")],
@@ -80,7 +82,7 @@ public class FrontendStack : Stack
             DestinationKeyPrefix = "svelte",
         });
 
-        // Deploy Vanilla site assets
+        // Deploy Vanilla static site assets
         new BucketDeployment(this, "Music-DeployVanillaSite", new BucketDeploymentProps
         {
             Sources = [Source.Asset("../app/frontend/music-vanilla/dist")],
@@ -88,7 +90,7 @@ public class FrontendStack : Stack
             DestinationKeyPrefix = "vanilla",
         });
 
-        // Deploy Vue site assets
+        // Deploy Vue static site assets
         new BucketDeployment(this, "Music-DeployVueSite", new BucketDeploymentProps
         {
             Sources = [Source.Asset("../app/frontend/music-vue/dist")],
@@ -96,7 +98,7 @@ public class FrontendStack : Stack
             DestinationKeyPrefix = "vue",
         });
 
-        // Deploy Preact site assets
+        // Deploy Preact static site assets
         new BucketDeployment(this, "Music-DeployPreactSite", new BucketDeploymentProps
         {
             Sources = [Source.Asset("../app/frontend/music-preact/dist")],
@@ -104,7 +106,7 @@ public class FrontendStack : Stack
             DestinationKeyPrefix = "preact",
         });
 
-        // Deploy Next site assets
+        // Deploy Next static site assets
         new BucketDeployment(this, "Music-DeployNextSite", new BucketDeploymentProps
         {
             Sources = [Source.Asset("../app/frontend/music-next/dist")],
@@ -112,7 +114,7 @@ public class FrontendStack : Stack
             DestinationKeyPrefix = "next",
         });
 
-        // Deploy Angular site assets
+        // Deploy Angular static site assets
         new BucketDeployment(this, "Music-DeployAngularSite", new BucketDeploymentProps
         {
             Sources = [Source.Asset("../app/frontend/music-angular/dist")],
@@ -120,7 +122,7 @@ public class FrontendStack : Stack
             DestinationKeyPrefix = "angular",
         });
 
-        // Deploy Blazor site assets
+        // Deploy Blazor static site assets
         new BucketDeployment(this, "Music-DeployBlazorSite", new BucketDeploymentProps
         {
             Sources = [Source.Asset("../app/frontend/music-blazor/dist")],
@@ -128,7 +130,7 @@ public class FrontendStack : Stack
             DestinationKeyPrefix = "blazor",
         });
 
-        // Deploy Leptos site assets
+        // Deploy Leptos static site assets
         new BucketDeployment(this, "Music-DeployLeptosSite", new BucketDeploymentProps
         {
             Sources = [Source.Asset("../app/frontend/music-leptos/dist")],
@@ -156,7 +158,7 @@ public class FrontendStack : Stack
 
         #region Distribution
 
-        // Certificate for music.mariolopez.org
+        // Certificate for `music.mariolopez.org`
         var rootCertificateArn = "arn:aws:acm:us-east-1:851725225504:certificate/70d15630-f6b4-495e-9d0c-572c64804dfc";
         var rootCertificate = Certificate.FromCertificateArn(this, "Music-SiteCertificate", rootCertificateArn);
 
@@ -197,7 +199,7 @@ public class FrontendStack : Stack
                     OriginRequestPolicy = OriginRequestPolicy.ALL_VIEWER
                 }
             },
-            // Default Behavior: Redirect to the site assets S3 bucket
+            // Default Behavior: Redirect to the static site assets S3 bucket
             DefaultBehavior = new BehaviorOptions
             {
                 Origin = new S3Origin(siteBucket),
@@ -207,6 +209,26 @@ public class FrontendStack : Stack
             },
             Certificate = rootCertificate,
             DomainNames = ["music.mariolopez.org"]
+        });
+
+        #endregion
+
+        #region DNS (A-Record for Distribution)
+
+        // Note: A prerequisite for this is to have a Hosted Zone for the domain (in our case, `music.mariolopez.org`)
+
+        var hostedZone = HostedZone.FromLookup(this, "Music-HostedZone", new HostedZoneProviderProps
+        {
+            DomainName = "music.mariolopez.org"
+        });
+
+        // Create an A-Record that points to the CloudFront distribution
+        // Note: Any changes to DNS records take ages to deploy / propagate
+        var aRecord = new ARecord(this, "Music-SiteDistributionARecord", new ARecordProps
+        {
+            Zone = hostedZone,
+            Target = RecordTarget.FromAlias(new CloudFrontTarget(distribution)),
+            RecordName = "music.mariolopez.org"
         });
 
         #endregion
