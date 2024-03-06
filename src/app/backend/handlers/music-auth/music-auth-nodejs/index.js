@@ -16,12 +16,12 @@ async function getSecret(secretName) {
 exports.handler = async (event) => {
     try {
         // Fetch the PEM private key from Secrets Manager
-        const secretName = process.env.APPLE_AUTH_KEY_SECRET_NAME; // The name of your secret
+        const secretName = process.env.APPLE_AUTH_KEY_SECRET_NAME;
         const applePrivateKey = await getSecret(secretName);
 
         // Read TEAM_ID and KEY_ID from environment variables
-        const teamId = process.env.TEAM_ID;
-        const keyId = process.env.KEY_ID;
+        const teamId = process.env.APPLE_TEAM_ID;
+        const keyId = process.env.APPLE_KEY_ID;
 
         // Ensure the private key is correctly formatted
         const privateKey = applePrivateKey.replace(/\\n/g, '\n');
