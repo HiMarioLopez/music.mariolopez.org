@@ -211,24 +211,8 @@ public class FrontendStack : Stack
             DomainNames = ["music.mariolopez.org"]
         });
 
-        #endregion
-
-        #region DNS (A-Record for Distribution)
-
-        // Note: A prerequisite for this is to have a Hosted Zone for the domain (in our case, `music.mariolopez.org`)
-        var hostedZone = HostedZone.FromLookup(this, "Music-HostedZone", new HostedZoneProviderProps
-        {
-            DomainName = "music.mariolopez.org"
-        });
-
-        // Create an A-Record that points to the CloudFront distribution
-        // Note: If this already exists and you make an update to it, you'll need to delete the record manually and re-create it
-        var aRecord = new ARecord(this, "Music-SiteDistributionARecord", new ARecordProps
-        {
-            Zone = hostedZone,
-            Target = RecordTarget.FromAlias(new CloudFrontTarget(distribution)),
-            RecordName = "music.mariolopez.org"
-        });
+        // Note: You will need to manually update the DNS records for `music.mariolopez.org` to point to the CloudFront distribution.
+        // I tried doing this in CDK but it's buggy as hell. Would not recommend (for now).
 
         #endregion
     }

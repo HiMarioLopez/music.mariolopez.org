@@ -72,8 +72,10 @@ public class ApiStack : Stack
 
         #region Auth Handler
 
+        var nodejsAuthHandlerPrefix = "Music-NodejsAuthHandler";
+
         // Create an IAM role for the Lambda function
-        var lambdaRole = new Role(this, "Music-AuthHandlerExecutionRole", new RoleProps
+        var nodejsAuthLanderLambdaRole = new Role(this, $"{nodejsAuthHandlerPrefix}ExecutionRole", new RoleProps
         {
             AssumedBy = new ServicePrincipal("lambda.amazonaws.com"),
             ManagedPolicies =
@@ -85,7 +87,7 @@ public class ApiStack : Stack
         });
 
         // Define the permissions for the Lambda function
-        lambdaRole.AddToPolicy(new PolicyStatement(new PolicyStatementProps
+        nodejsAuthLanderLambdaRole.AddToPolicy(new PolicyStatement(new PolicyStatementProps
         {
             Actions = ["secretsmanager:GetSecretValue"],
             Resources = [appleAuthKey.SecretArn],
@@ -93,72 +95,74 @@ public class ApiStack : Stack
         }));
 
         // Define the Lambda function
-        var authHandlerFunction = new Function(this, "Music-AuthHandler", new FunctionProps
+        var nodejsAuthHandlerFunction = new Function(this, $"{nodejsAuthHandlerPrefix}Lambda", new FunctionProps
         {
             Runtime = Runtime.NODEJS_20_X,
-            Role = lambdaRole,
-            Code = Code.FromAsset("../app/backend/handlers/music-auth"),
+            Role = nodejsAuthLanderLambdaRole,
+            Code = Code.FromAsset("../app/backend/handlers/music-auth/music-auth-nodejs"),
             Handler = "index.handler",
             Environment = new Dictionary<string, string>
                 {
                     { "APPLE_AUTH_KEY_SECRET_NAME", appleAuthKey.SecretName },
-                    { "TEAM_ID", teamId },
-                    { "KEY_ID", keyId }
+                    { "APPLE_TEAM_ID", teamId },
+                    { "APPLE_KEY_ID", keyId }
                 },
-            Description = "Generates a token for use with Apple's Music API.",
+            Description = "Generates a token for use with Apple's Music API. Built with Node.js.",
 
             // Main cost drivers
             Architecture = Architecture.ARM_64,
             MemorySize = 128,
             EphemeralStorageSize = Size.Mebibytes(512),
+            Timeout = Duration.Seconds(29),
         });
 
         #endregion
 
-        #region Integration API (Express)
+        #region Integration API (.NET)
 
-        // var integrationApiExpressPrefix = "Music-IntegrationApiExpress";
+        var dotnetAuthHandlerPrefix = "Music-DotnetAuthHandler";
 
-        // // Create an IAM role for the Lambda function
-        // var integrationApiExpressLambdaRole = new Role(this, $"{integrationApiExpressPrefix}ExecutionRole", new RoleProps
-        // {
-        //     AssumedBy = new ServicePrincipal("lambda.amazonaws.com"),
-        //     ManagedPolicies =
-        //         [
-        //             ManagedPolicy.FromAwsManagedPolicyName(
-        //                 "service-role/AWSLambdaBasicExecutionRole"
-        //             )
-        //         ]
-        // });
+        // Create an IAM role for the Lambda function
+        var dotnetAuthHandlerLambdaRole = new Role(this, $"{dotnetAuthHandlerPrefix}ExecutionRole", new RoleProps
+        {
+            AssumedBy = new ServicePrincipal("lambda.amazonaws.com"),
+            ManagedPolicies =
+                [
+                    ManagedPolicy.FromAwsManagedPolicyName(
+                        "service-role/AWSLambdaBasicExecutionRole"
+                    )
+                ]
+        });
 
-        // // Define the permissions for the Lambda function
-        // integrationApiExpressLambdaRole.AddToPolicy(new PolicyStatement(new PolicyStatementProps
-        // {
-        //     Actions = ["secretsmanager:GetSecretValue"],
-        //     Resources = [appleAuthKey.SecretArn],
-        //     Effect = Effect.ALLOW
-        // }));
+        // Define the permissions for the Lambda function
+        dotnetAuthHandlerLambdaRole.AddToPolicy(new PolicyStatement(new PolicyStatementProps
+        {
+            Actions = ["secretsmanager:GetSecretValue"],
+            Resources = [appleAuthKey.SecretArn],
+            Effect = Effect.ALLOW
+        }));
 
-        // // Define the Lambda function
-        // var integrationApiExpressLambdaFunction = new Function(this, $"{integrationApiExpressPrefix}Lambda", new FunctionProps
-        // {
-        //     Runtime = Runtime.NODEJS_LATEST,
-        //     Role = integrationApiExpressLambdaRole,
-        //     Code = Code.FromAsset("../backend/api/integration-express"),
-        //     Handler = "index.handler",
-        //     Environment = new Dictionary<string, string>
-        //         {
-        //             { "APPLE_AUTH_KEY_SECRET_NAME", appleAuthKey.SecretName },
-        //             { "TEAM_ID", teamId },
-        //             { "KEY_ID", keyId }
-        //         },
-        //     Description = "Integration API for the Music App (interface for Apple's Music API) written in Express.",
+        // Define the Lambda function
+        var dotnetAuthHandlerFunction = new Function(this, $"{dotnetAuthHandlerPrefix}Lambda", new FunctionProps
+        {
+            Runtime = Runtime.DOTNET_8,
+            Role = dotnetAuthHandlerLambdaRole,
+            Code = Code.FromAsset("../app/backend/handlers/music-auth/music-auth-dotnet/Music.Handlers.Auth/bin/Release/net8.0/publish"),
+            Handler = "Music.Handlers.Auth::Music.Handlers.Auth.Function::FunctionHandler",
+            Environment = new Dictionary<string, string>
+                {
+                    { "APPLE_AUTH_KEY_SECRET_NAME", appleAuthKey.SecretName },
+                    { "APPLE_TEAM_ID", teamId },
+                    { "APPLE_KEY_ID", keyId }
+                },
+            Description = "Generates a token for use with Apple's Music API. Built with .NET.",
 
-        //     // Main cost drivers
-        //     Architecture = Architecture.ARM_64,
-        //     MemorySize = 128,
-        //     EphemeralStorageSize = Size.Mebibytes(512),
-        // });
+            // Main cost drivers
+            Architecture = Architecture.X86_64,
+            MemorySize = 128,
+            EphemeralStorageSize = Size.Mebibytes(512),
+            Timeout = Duration.Seconds(29),
+        });
 
         #endregion
 
@@ -166,27 +170,24 @@ public class ApiStack : Stack
 
         #region Integrate Lambdas to API Gateway
 
-        // Create a resource for the '/auth/token' endpoint (it would be '/api/auth/token' via root domain)
-        var authResource = apiGateway.Root.AddResource("services").AddResource("auth").AddResource("token");
+        // Create a resource for the '/api/nodejs/auth/token' endpoint
+        var nodejsAuthHandlerResource = apiGateway.Root.AddResource("nodejs").AddResource("auth").AddResource("token");
 
         // Create a method for the '/auth/token' resource that integrates with the Lambda function
-        authResource.AddMethod("GET", new LambdaIntegration(authHandlerFunction, new LambdaIntegrationOptions
+        nodejsAuthHandlerResource.AddMethod("GET", new LambdaIntegration(nodejsAuthHandlerFunction, new LambdaIntegrationOptions
         {
+            Timeout = Duration.Seconds(29),
             AllowTestInvoke = true
         }));
 
-        // var integrationApiExpressResource = apiGateway.Root.AddResource("express");
-        // integrationApiExpressResource.AddMethod("GET", new LambdaIntegration(integrationApiExpressLambdaFunction, new LambdaIntegrationOptions
-        // {
-        //     AllowTestInvoke = true,
-        //     Timeout = Duration.Seconds(10)
-        // }));
+        // Create a resource for the '/api/dotnet/auth/token' endpoint
+        var dotnetAuthHandlerResource = apiGateway.Root.AddResource("dotnet").AddResource("auth").AddResource("token");
 
-        // integrationApiExpressResource.AddProxy(new ProxyResourceOptions
-        // {
-        //     AnyMethod = true,
-        //     DefaultIntegration = new LambdaIntegration(integrationApiExpressLambdaFunction)
-        // });
+        dotnetAuthHandlerResource.AddMethod("GET", new LambdaIntegration(dotnetAuthHandlerFunction, new LambdaIntegrationOptions
+        {
+            Timeout = Duration.Seconds(29),
+            AllowTestInvoke = true,
+        }));
 
         #endregion
     }
