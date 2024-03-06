@@ -31,8 +31,8 @@ public class AppleMusicService : IAppleMusicService
             throw new InvalidOperationException("Missing required environment variables.");
         }
 
-        var privateKey = await GetSecretAsync(secretName);
-        // var privateKey = applePrivateKey.Replace("\\n", "\n");
+        var applePrivateKey = await GetSecretAsync(secretName);
+        var privateKey = applePrivateKey.Replace("\\n", "\n");
 
         using var es256Key = ECDsa.Create();
         es256Key.ImportFromPem(privateKey);
@@ -50,7 +50,6 @@ public class AppleMusicService : IAppleMusicService
             Claims = new Dictionary<string, object>()
         };
 
-        // AdditionalHeaderClaims are set through the ECDsaSecurityKey.KeyId property
         var token = tokenHandler.CreateToken(tokenDescriptor);
         return tokenHandler.WriteToken(token);
     }
