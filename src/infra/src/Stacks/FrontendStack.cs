@@ -216,14 +216,13 @@ public class FrontendStack : Stack
         #region DNS (A-Record for Distribution)
 
         // Note: A prerequisite for this is to have a Hosted Zone for the domain (in our case, `music.mariolopez.org`)
-
         var hostedZone = HostedZone.FromLookup(this, "Music-HostedZone", new HostedZoneProviderProps
         {
             DomainName = "music.mariolopez.org"
         });
 
         // Create an A-Record that points to the CloudFront distribution
-        // Note: Any changes to DNS records take ages to deploy / propagate
+        // Note: If this already exists and you make an update to it, you'll need to delete the record manually and re-create it
         var aRecord = new ARecord(this, "Music-SiteDistributionARecord", new ARecordProps
         {
             Zone = hostedZone,
