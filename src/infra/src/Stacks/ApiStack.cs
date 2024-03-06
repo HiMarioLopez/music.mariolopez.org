@@ -166,6 +166,57 @@ public class ApiStack : Stack
 
         #endregion
 
+        #region Integration API (.NET - Native AoT)
+
+        // Packaging and deploying a .NET 8 Lambda function with Native AoT is not yet supported by the AWS CDK.
+        // I will revisit this once the feature is available.
+
+        // var dotnetNativeAotAuthHandlerPrefix = "Music-DotnetNativeAoTAuthHandler";
+
+        // // Create an IAM role for the Lambda function
+        // var dotnetNativeAotAuthHandlerLambdaRole = new Role(this, $"{dotnetNativeAotAuthHandlerPrefix}ExecutionRole", new RoleProps
+        // {
+        //     AssumedBy = new ServicePrincipal("lambda.amazonaws.com"),
+        //     ManagedPolicies =
+        //         [
+        //             ManagedPolicy.FromAwsManagedPolicyName(
+        //                 "service-role/AWSLambdaBasicExecutionRole"
+        //             )
+        //         ]
+        // });
+
+        // // Define the permissions for the Lambda function
+        // dotnetNativeAotAuthHandlerLambdaRole.AddToPolicy(new PolicyStatement(new PolicyStatementProps
+        // {
+        //     Actions = ["secretsmanager:GetSecretValue"],
+        //     Resources = [appleAuthKey.SecretArn],
+        //     Effect = Effect.ALLOW
+        // }));
+
+        // // Define the Lambda function
+        // var dotnetNativeAotAuthHandlerFunction = new Function(this, $"{dotnetNativeAotAuthHandlerPrefix}Lambda", new FunctionProps
+        // {
+        //     Runtime = Runtime.DOTNET_8,
+        //     Role = dotnetNativeAotAuthHandlerLambdaRole,
+        //     Code = Code.FromAsset("../app/backend/handlers/music-auth/music-auth-dotnet-native-aot/Music.Handlers.Auth.Native.Aot/bin/Release/net8.0/Music.Handlers.Auth.Native.Aot.zip"),
+        //     Handler = "Music.Handlers.Auth.Native.Aot::Music.Handlers.Auth.Native.Aot.Function::FunctionHandler",
+        //     Environment = new Dictionary<string, string>
+        //         {
+        //             { "APPLE_AUTH_KEY_SECRET_NAME", appleAuthKey.SecretName },
+        //             { "APPLE_TEAM_ID", teamId },
+        //             { "APPLE_KEY_ID", keyId }
+        //         },
+        //     Description = "Generates a token for use with Apple's Music API. Built with .NET.",
+
+        //     // Main cost drivers
+        //     Architecture = Architecture.X86_64,
+        //     MemorySize = 128,
+        //     EphemeralStorageSize = Size.Mebibytes(512),
+        //     Timeout = Duration.Seconds(29),
+        // });
+
+        #endregion
+
         #endregion
 
         #region Integrate Lambdas to API Gateway
@@ -188,6 +239,15 @@ public class ApiStack : Stack
             Timeout = Duration.Seconds(29),
             AllowTestInvoke = true,
         }));
+
+        // // Create a resource for the '/api/dotnet/auth/token' endpoint
+        // var dotnetNativeAotAuthHandlerResource = apiGateway.Root.AddResource("dotnet-native-aot").AddResource("auth").AddResource("token");
+
+        // dotnetNativeAotAuthHandlerResource.AddMethod("GET", new LambdaIntegration(dotnetNativeAotAuthHandlerFunction, new LambdaIntegrationOptions
+        // {
+        //     Timeout = Duration.Seconds(29),
+        //     AllowTestInvoke = true,
+        // }));
 
         #endregion
     }
