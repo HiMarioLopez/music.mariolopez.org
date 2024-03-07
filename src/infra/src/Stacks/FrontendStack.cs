@@ -146,7 +146,7 @@ public class FrontendStack : Stack
         {
             Runtime = Runtime.NODEJS_20_X,
             Handler = "index.handler",
-            Code = Code.FromAsset("../app/backend/handlers/music-frontend-randomization"),
+            Code = Code.FromAsset("../app/backend/handlers/music-frontend-randomization/music-frontend-randomization-nodejs"),
             Description = "Randomizes the frontend to be served on `music.mariolopez.org`.",
             CurrentVersionOptions = new VersionOptions
             {
