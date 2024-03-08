@@ -4,12 +4,12 @@ using Amazon.CDK.AWS.CloudFront;
 using Amazon.CDK.AWS.CloudFront.Experimental;
 using Amazon.CDK.AWS.CloudFront.Origins;
 using Amazon.CDK.AWS.Lambda;
-using Amazon.CDK.AWS.Route53;
-using Amazon.CDK.AWS.Route53.Targets;
 using Amazon.CDK.AWS.S3;
 using Amazon.CDK.AWS.S3.Deployment;
 using Constructs;
 using System.Collections.Generic;
+using System.IO;
+using System.Text;
 
 namespace Music.Infra.Stacks;
 
@@ -146,7 +146,8 @@ public class FrontendStack : Stack
         {
             Runtime = Runtime.NODEJS_20_X,
             Handler = "index.handler",
-            Code = Code.FromAsset("../app/backend/handlers/music-frontend-randomization/music-frontend-randomization-nodejs"),
+            // Use the minified version of the Node.js frontned randomization handler
+            Code = Code.FromInline(Encoding.UTF8.GetString(File.ReadAllBytes("../app/backend/handlers/music-frontend-randomization/music-frontend-randomization-nodejs/dist/index.js"))),
             Description = "Randomizes the frontend to be served on `music.mariolopez.org`.",
             CurrentVersionOptions = new VersionOptions
             {
