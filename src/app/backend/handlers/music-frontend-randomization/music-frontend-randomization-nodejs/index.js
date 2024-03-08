@@ -33,19 +33,14 @@ const siteVersions = [
  * @param {Function} callback - The callback function to be invoked with the modified request.
  */
 exports.handler = ({ Records: [{ cf: { request } }] }, context, callback) => {
-    const defaultUri = request.uri;
-
     // Extract the first path segment from the request URI
-    const firstPathSegment = `/${defaultUri.split('/')[1] || ''}`;
+    const firstPathSegment = `/${request.uri.split('/')[1] || ''}`;
 
     // Check if the first path segment matches any of the defined site versions
-    if (siteVersions.includes(firstPathSegment)) {
-        // If there is a match, keep the request URI unchanged
-        request.uri = defaultUri;
-    } else {
-        // If there is no match, select a random site version and prepend it to the request URI
+    // If there is no match, select a random site version and prepend it to the request URI
+    if (!siteVersions.includes(firstPathSegment)) {
         const randomIndex = Math.floor(Math.random() * siteVersions.length);
-        request.uri = siteVersions[randomIndex] + defaultUri;
+        request.uri = siteVersions[randomIndex] + request.uri;
     }
 
     // Invoke the callback function with the modified request
