@@ -21,15 +21,15 @@ const siteVersions = [
 ];
 
 /**
- * Lambda@Edge handler function for route randomization.
+ * LambdaEdge handler function for route randomization.
  *
  * This function inspects the incoming request URI and checks if the first path segment
  * matches any of the defined site versions. If there is a match, the request URI remains
  * unchanged. If there is no match, a random site version is selected and prepended to
  * the request URI.
  *
- * @param {Object} event - The Lambda@Edge event object.
- * @param {Object} context - The Lambda@Edge context object.
+ * @param {Object} event - The LambdaEdge event object.
+ * @param {Object} context - The LambdaEdge context object.
  * @param {Function} callback - The callback function to be invoked with the modified request.
  */
 exports.handler = ({ Records: [{ cf: { request } }] }, context, callback) => {
