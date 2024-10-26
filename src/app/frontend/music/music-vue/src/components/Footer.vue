@@ -2,15 +2,9 @@
     <footer>
         <div class="footer-component-link-container">
             <a href="https://github.com/HiMarioLopez/music.mariolopez.org/tree/main/src/app/frontend/music/music-vue" target="_blank"
-                rel="noopener noreferrer">
-                Site Source
-            </a>
-            <a href="https://music.mariolopez.org/" target="_blank" rel="noopener noreferrer">
-                Randomize
-            </a>
-            <a href="https://vuejs.org/" target="_blank" rel="noopener noreferrer">
-                Vue
-            </a>
+                rel="noopener noreferrer">Site Source</a>
+            <a href="https://music.mariolopez.org/" target="_blank" rel="noopener noreferrer">Randomize</a>
+            <a href="https://vuejs.org/" target="_blank" rel="noopener noreferrer">Vue</a>
         </div>
         <div class="footer-component-copyright-container">© 2024 Mario Lopez</div>
     </footer>
