@@ -45,7 +45,7 @@ public class FrontendStack : Stack
         // Deploy Lit static site assets
         new BucketDeployment(this, "Music-DeployLitSite", new BucketDeploymentProps
         {
-            Sources = [Source.Asset("../app/frontend/music-lit/dist")],
+            Sources = [Source.Asset("../app/frontend/music/music-lit/dist")],
             DestinationBucket = siteBucket,
             DestinationKeyPrefix = "lit",
         });
@@ -53,7 +53,7 @@ public class FrontendStack : Stack
         // Deploy Qwik static site assets
         new BucketDeployment(this, "Music-DeployQkiwSite", new BucketDeploymentProps
         {
-            Sources = [Source.Asset("../app/frontend/music-qwik/dist")],
+            Sources = [Source.Asset("../app/frontend/music/music-qwik/dist")],
             DestinationBucket = siteBucket,
             DestinationKeyPrefix = "qwik",
         });
@@ -61,7 +61,7 @@ public class FrontendStack : Stack
         // Deploy React static site assets
         new BucketDeployment(this, "Music-DeployReactSite", new BucketDeploymentProps
         {
-            Sources = [Source.Asset("../app/frontend/music-react/dist")],
+            Sources = [Source.Asset("../app/frontend/music/music-react/dist")],
             DestinationBucket = siteBucket,
             DestinationKeyPrefix = "react",
         });
@@ -69,7 +69,7 @@ public class FrontendStack : Stack
         // Deploy Solid static site assets
         new BucketDeployment(this, "Music-DeploySolidSite", new BucketDeploymentProps
         {
-            Sources = [Source.Asset("../app/frontend/music-solid/dist")],
+            Sources = [Source.Asset("../app/frontend/music/music-solid/dist")],
             DestinationBucket = siteBucket,
             DestinationKeyPrefix = "solid",
         });
@@ -77,7 +77,7 @@ public class FrontendStack : Stack
         // Deploy Svelte static site assets
         new BucketDeployment(this, "Music-DeploySvelteSite", new BucketDeploymentProps
         {
-            Sources = [Source.Asset("../app/frontend/music-svelte/dist")],
+            Sources = [Source.Asset("../app/frontend/music/music-svelte/dist")],
             DestinationBucket = siteBucket,
             DestinationKeyPrefix = "svelte",
         });
@@ -85,7 +85,7 @@ public class FrontendStack : Stack
         // Deploy Vanilla static site assets
         new BucketDeployment(this, "Music-DeployVanillaSite", new BucketDeploymentProps
         {
-            Sources = [Source.Asset("../app/frontend/music-vanilla/dist")],
+            Sources = [Source.Asset("../app/frontend/music/music-vanilla/dist")],
             DestinationBucket = siteBucket,
             DestinationKeyPrefix = "vanilla",
         });
@@ -93,7 +93,7 @@ public class FrontendStack : Stack
         // Deploy Vue static site assets
         new BucketDeployment(this, "Music-DeployVueSite", new BucketDeploymentProps
         {
-            Sources = [Source.Asset("../app/frontend/music-vue/dist")],
+            Sources = [Source.Asset("../app/frontend/music/music-vue/dist")],
             DestinationBucket = siteBucket,
             DestinationKeyPrefix = "vue",
         });
@@ -101,7 +101,7 @@ public class FrontendStack : Stack
         // Deploy Preact static site assets
         new BucketDeployment(this, "Music-DeployPreactSite", new BucketDeploymentProps
         {
-            Sources = [Source.Asset("../app/frontend/music-preact/dist")],
+            Sources = [Source.Asset("../app/frontend/music/music-preact/dist")],
             DestinationBucket = siteBucket,
             DestinationKeyPrefix = "preact",
         });
@@ -109,7 +109,7 @@ public class FrontendStack : Stack
         // Deploy Next static site assets
         new BucketDeployment(this, "Music-DeployNextSite", new BucketDeploymentProps
         {
-            Sources = [Source.Asset("../app/frontend/music-next/dist")],
+            Sources = [Source.Asset("../app/frontend/music/music-next/dist")],
             DestinationBucket = siteBucket,
             DestinationKeyPrefix = "next",
         });
@@ -117,7 +117,7 @@ public class FrontendStack : Stack
         // Deploy Angular static site assets
         new BucketDeployment(this, "Music-DeployAngularSite", new BucketDeploymentProps
         {
-            Sources = [Source.Asset("../app/frontend/music-angular/dist")],
+            Sources = [Source.Asset("../app/frontend/music/music-angular/dist")],
             DestinationBucket = siteBucket,
             DestinationKeyPrefix = "angular",
         });
@@ -125,7 +125,7 @@ public class FrontendStack : Stack
         // Deploy Blazor static site assets
         new BucketDeployment(this, "Music-DeployBlazorSite", new BucketDeploymentProps
         {
-            Sources = [Source.Asset("../app/frontend/music-blazor/dist")],
+            Sources = [Source.Asset("../app/frontend/music/music-blazor/dist")],
             DestinationBucket = siteBucket,
             DestinationKeyPrefix = "blazor",
         });
@@ -133,7 +133,7 @@ public class FrontendStack : Stack
         // Deploy Leptos static site assets
         new BucketDeployment(this, "Music-DeployLeptosSite", new BucketDeploymentProps
         {
-            Sources = [Source.Asset("../app/frontend/music-leptos/dist")],
+            Sources = [Source.Asset("../app/frontend/music/music-leptos/dist")],
             DestinationBucket = siteBucket,
             DestinationKeyPrefix = "leptos",
         });
@@ -160,6 +160,7 @@ public class FrontendStack : Stack
         #region Distribution
 
         // Certificate for `music.mariolopez.org`
+        // TODO: Remove this hard-coded ARN
         var rootCertificateArn = "arn:aws:acm:us-east-1:851725225504:certificate/70d15630-f6b4-495e-9d0c-572c64804dfc";
         var rootCertificate = Certificate.FromCertificateArn(this, "Music-SiteCertificate", rootCertificateArn);
 
@@ -175,7 +176,7 @@ public class FrontendStack : Stack
                 // Root Path: Randomize the frontend
                 ["/"] = new BehaviorOptions
                 {
-                    Origin = new S3Origin(siteBucket),
+                    Origin = new S3StaticWebsiteOrigin(siteBucket),
                     ViewerProtocolPolicy = ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
                     EdgeLambdas =
                     [
@@ -203,7 +204,7 @@ public class FrontendStack : Stack
             // Default Behavior: Redirect to the static site assets S3 bucket
             DefaultBehavior = new BehaviorOptions
             {
-                Origin = new S3Origin(siteBucket),
+                Origin = new S3StaticWebsiteOrigin(siteBucket),
                 ViewerProtocolPolicy = ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
                 // TODO: Once frontend development is 'complete', enable caching
                 CachePolicy = CachePolicy.CACHING_DISABLED

@@ -1,4 +1,4 @@
-# Welcome to your CDK C# project!
+# Welcome to your CDK C# project
 
 This is a blank project for CDK development with C#.
 

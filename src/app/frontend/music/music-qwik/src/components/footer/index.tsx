@@ -5,7 +5,7 @@ export default component$(() => {
     return (
         <footer>
             <div class="footer-component-link-container">
-                <a href="https://github.com/HiMarioLopez/music.mariolopez.org/tree/main/src/frontend/music-qwik"
+                <a href="https://github.com/HiMarioLopez/music.mariolopez.org/tree/main/src/app/frontend/music/music-qwik"
                     target="_blank" rel="noopener noreferrer">
                     Site Source
                 </a>

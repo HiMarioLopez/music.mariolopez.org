@@ -9,7 +9,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/HiMarioLopez/music.mariolopez.org/tree/main/src/frontend/music-lit"
+    "url": "https://github.com/HiMarioLopez/music.mariolopez.org/tree/main/src/app/frontend/music/music-lit"
   },
   "license": "GPL-3.0-only",
   "private": false,

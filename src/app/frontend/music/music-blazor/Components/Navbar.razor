@@ -28,8 +28,8 @@
     {
         // If URLs directly match the enum names, convert to lowercase or any specific case
         var frameworkName = (framework == Framework.TypeScript)
-            ? "vanilla"
-            : framework.ToString().ToLower();
+        ? "vanilla"
+        : framework.ToString().ToLower();
 
         return $"https://music.mariolopez.org/{frameworkName}";
     }

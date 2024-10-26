@@ -4,7 +4,7 @@ const Footer = () => {
     return (
         <footer>
             <div class="footer-component-link-container">
-                <a href="https://github.com/HiMarioLopez/music.mariolopez.org/tree/main/src/frontend/music-preact"
+                <a href="https://github.com/HiMarioLopez/music.mariolopez.org/tree/main/src/app/frontend/music/music-preact"
                     target="_blank" rel="noopener noreferrer">
                     Site Source
                 </a>

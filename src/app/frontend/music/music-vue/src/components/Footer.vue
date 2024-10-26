@@ -1,7 +1,7 @@
 <template>
     <footer>
         <div class="footer-component-link-container">
-            <a href="https://github.com/HiMarioLopez/music.mariolopez.org/tree/main/src/frontend/music-vue" target="_blank"
+            <a href="https://github.com/HiMarioLopez/music.mariolopez.org/tree/main/src/app/frontend/music/music-vue" target="_blank"
                 rel="noopener noreferrer">
                 Site Source
             </a>

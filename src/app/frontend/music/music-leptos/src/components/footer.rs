@@ -7,7 +7,7 @@ pub fn Footer() -> impl IntoView {
     view! {
         <footer>
             <div class=style::footerComponentLinkContainer>
-                <a href="https://github.com/HiMarioLopez/music.mariolopez.org/tree/main/src/frontend/music-leptos"
+                <a href="https://github.com/HiMarioLopez/music.mariolopez.org/tree/main/src/app/frontend/music/music-leptos"
                     target="_blank" rel="noopener noreferrer">
                     Site Source
                 </a>

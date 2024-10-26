@@ -5,7 +5,7 @@ const Footer: React.FC = () => {
     return (
         <footer>
             <div className="footer-component-link-container">
-                <a href="https://github.com/HiMarioLopez/music.mariolopez.org/tree/main/src/frontend/music-react"
+                <a href="https://github.com/HiMarioLopez/music.mariolopez.org/tree/main/src/app/frontend/music/music-react"
                     target="_blank" rel="noopener noreferrer">
                     Site Source
                 </a>

@@ -54,7 +54,7 @@ export class Footer extends LitElement {
         return html`
             <footer>
                 <div class="footer-component-link-container">
-                    <a href="https://github.com/HiMarioLopez/music.mariolopez.org/tree/main/src/frontend/music-lit"
+                    <a href="https://github.com/HiMarioLopez/music.mariolopez.org/tree/main/src/app/frontend/music/music-lit"
                         target="_blank" rel="noopener noreferrer">
                         Site Source
                     </a>

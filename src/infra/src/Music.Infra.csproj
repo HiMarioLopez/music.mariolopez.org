@@ -7,9 +7,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Amazon.CDK.Lib" Version="2.131.0" />
-    <PackageReference Include="Constructs" Version="10.3.0" />
+    <PackageReference Include="Amazon.CDK.Lib" Version="2.164.1" />
+    <PackageReference Include="Constructs" Version="10.4.2" />
     <PackageReference Include="Amazon.Jsii.Analyzers" Version="*" PrivateAssets="all" />
+    <PackageReference Include="System.Text.Json" Version="8.0.5" />
   </ItemGroup>
 
 </Project>

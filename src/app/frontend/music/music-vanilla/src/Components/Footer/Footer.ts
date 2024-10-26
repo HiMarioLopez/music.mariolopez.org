@@ -4,7 +4,7 @@ const styleRoot = 'footer-component';
 
 export function Footer(): HTMLElement {
     const links = [
-        { href: 'https://github.com/HiMarioLopez/music.mariolopez.org/tree/main/src/frontend/music-vanilla', text: 'Site Source' },
+        { href: 'https://github.com/HiMarioLopez/music.mariolopez.org/tree/main/src/app/frontend/music/music-vanilla', text: 'Site Source' },
         { href: 'https://music.mariolopez.org/', text: 'Randomize' },
         { href: 'https://www.typescriptlang.org/', text: 'TypeScript' },
     ];
