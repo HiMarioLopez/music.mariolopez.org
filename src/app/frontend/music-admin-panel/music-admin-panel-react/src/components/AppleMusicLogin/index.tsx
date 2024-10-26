@@ -69,16 +69,12 @@ export function AppleMusicAuthStatus() {
             <p>
                 <strong>Retrieved At:</strong> {retrievedAt || 'N/A'}
             </p>
-            <form className="login-form" onSubmit={handleRefreshToken}>
-                <button type="submit" disabled={isOperationPending}>
-                    Refresh User Token
-                </button>
-            </form>
-            <form className="clear-token-form" onSubmit={handleClearToken}>
-                <button type="submit" disabled={isOperationPending}>
-                    Delete User Token
-                </button>
-            </form>
+            <button className="login-button" onClick={handleRefreshToken} disabled={isOperationPending}>
+                Refresh User Token
+            </button>
+            <button className="clear-token-button" onClick={handleClearToken} disabled={isOperationPending}>
+                Delete User Token
+            </button>
         </div>
     );
 }
