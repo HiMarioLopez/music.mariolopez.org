@@ -26,13 +26,13 @@
 @code {
     private readonly List<Song> _recommendations = new()
     {
-        new Song("Song One", "Artist One", "Album One", "https://via.placeholder.com/50"),
-        new Song("Song Two", "Artist Two", "Album Two", "https://via.placeholder.com/50")
+        new Song("Song One", "Artist One", "Album One", "https://placehold.co/50"),
+        new Song("Song Two", "Artist Two", "Album Two", "https://placehold.co/50")
     };
 
     private void HandleNewRecommendation(string songTitle)
     {
-        var newRecommendation = new Song(songTitle, "Mock Artist", "Mock Album", "https://via.placeholder.com/50");
+        var newRecommendation = new Song(songTitle, "Mock Artist", "Mock Album", "https://placehold.co/50");
 
         _recommendations.Add(newRecommendation);
     }
