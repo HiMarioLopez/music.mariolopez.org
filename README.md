@@ -4,7 +4,7 @@ A simple site to track what I'm currently listening to on [Apple Music](https://
 
 ## Inspiration
 
-The idea for this project is not new, I think. I got my inspiration from my old Professor at Baylor University, [Dr. Pete Maurer](https://onlinecs.baylor.edu/faculty/dr-pete-maurer) and his collection of implementations of [The Sieve of Eratosthenes](https://en.wikipedia.org/wiki/Sieve_of_Eratosthenes) written in [several different programming languages](http://cs.ecs.baylor.edu/~maurer/SieveE/).
+The idea for this project is not new, I think. I got my inspiration from my old Professor at Baylor University, [Dr. Pete Maurer](https://onlinecs.baylor.edu/faculty/dr-pete-maurer) and his collection of implementations of [The Sieve of Eratosthenes](https://en.wikipedia.org/wiki/Sieve_of_Eratosthenes) written in [several different programming languages](https://cs.baylor.edu/~maurer/SieveE/).
 
 ## Outline
 

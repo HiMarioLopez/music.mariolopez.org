@@ -1,8 +1,8 @@
 {
   "name": "music.mariolopez.org",
-  "description": "See what I'm listening to, and make me a music recommendation. This is a mono-repo for the various frontends, backends, and infra components of this app.",
+  "description": "See what I'm listening to, and make me a music recommendation. This is a mono-repo for the various front-ends, back-ends, and infra components of this app.",
   "homepage": "https://music.mariolopez.org/",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "author": {
     "name": "Mario Lopez Martinez",
     "email": "mario@lopez.fyi"
@@ -37,9 +37,9 @@
     "build:music-preact": "cd src/app/frontend/music/music-preact && pnpm build",
     "build:music-next": "cd src/app/frontend/music/music-next && pnpm build",
     "build:music-angular": "cd src/app/frontend/music/music-angular && pnpm build",
-    "build:music-blazor": "cd src/app/frontend/music/music-blazor && dotnet publish Music.csproj /p:PublishProfile=FolderProfile"
+    "build:music-blazor": "cd src/app/frontend/music/music-blazor && dotnet publish -c Release"
   },
   "devDependencies": {
-    "npm-run-all2": "^6.1.2"
+    "npm-run-all2": "^7.0.2"
   }
 }
