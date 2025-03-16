@@ -1,31 +1,24 @@
-use leptos::*;
+use leptos::prelude::*;
 use stylance::*;
 
 import_style!(style, "../styles/recommendation_form.module.scss");
 
 #[component]
 pub fn RecommendationForm(on_recommend: Callback<String>) -> impl IntoView {
-    let input_element: NodeRef<html::Input> = create_node_ref();
+    let input_element: NodeRef<leptos::html::Input> = NodeRef::new();
 
-    let (song_title, set_song_title) = create_signal(String::new());
+    let (song_title, set_song_title) = signal(String::new());
 
     let on_submit = move |ev: leptos::ev::SubmitEvent| {
         // stop the page from reloading!
         ev.prevent_default();
 
         // here, we'll extract the value from the input
-        let title = input_element()
-            // event handlers can only fire after the view
-            // is mounted to the DOM, so the `NodeRef` will be `Some`
+        let title = input_element.get()
             .expect("<input> should be mounted")
-            // `leptos::HtmlElement<html::Input>` implements `Deref`
-            // to a `web_sys::HtmlInputElement`.
-            // this means we can call`HtmlInputElement::value()`
-            // to get the current value of the input
             .value();
-
         // Emit the song title to the parent component
-        on_recommend(title);
+        on_recommend.run(title);
 
         // Reset the song title to an empty string
         set_song_title.set(String::new());

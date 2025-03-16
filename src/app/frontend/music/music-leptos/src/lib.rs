@@ -1,5 +1,6 @@
-use leptos::*;
+use leptos::prelude::*;
 use leptos_meta::*;
+use leptos_router::components::{Route, Router, Routes};
 use leptos_router::*;
 
 // Modules
@@ -17,7 +18,7 @@ pub fn App() -> impl IntoView {
     provide_meta_context();
 
     view! {
-        <Html lang="en" dir="ltr" attr:data-theme="light"/>
+        <html lang="en" dir="ltr" data-theme="light">
 
         // sets the document title
         <Title text="Music"/>
@@ -27,10 +28,11 @@ pub fn App() -> impl IntoView {
         <Meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 
         <Router>
-            <Routes>
-                <Route path="/" view=Home/>
-                <Route path="/*" view=Home/>
+            <Routes fallback=move || view! { <h1>"404 - Not Found"</h1> }>
+                <Route path=path!() view=Home/>
+                <Route path=path!("*") view=Home/>
             </Routes>
         </Router>
+        </html>
     }
 }

@@ -1,4 +1,4 @@
-use leptos::*;
+use leptos::prelude::*;
 use stylance::*;
 use wasm_bindgen::prelude::*;
 
@@ -41,7 +41,7 @@ pub fn RecentlyPlayedList() -> impl IntoView {
         },
     ];
 
-    create_effect(move |_prev_value| {
+    Effect::new(move |_prev_value| {
         autoScroll("recentlyPlayedListContainer");
     });
 
@@ -58,8 +58,8 @@ pub fn RecentlyPlayedList() -> impl IntoView {
                         // <img src={&track.album_cover_url} alt="Album Cover" />
 
                         <div class=style::recentlyPlayedListComponentTrackTextContainer>
-                            <h3>{&track.song_title}</h3>
-                            <p>{format!("{} - {}", &track.artist_name, &track.album_name)}</p>
+                            <h3>{track.song_title.to_string().into_view()}</h3>
+                            <p>{format!("{} - {}", track.artist_name, track.album_name).into_view()}</p>
                         </div>
                     </div>
                 }).collect::<Vec<_>>()} // Collect into Vec to render

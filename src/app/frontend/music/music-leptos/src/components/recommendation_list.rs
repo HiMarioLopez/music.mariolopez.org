@@ -1,4 +1,4 @@
-use leptos::*;
+use leptos::prelude::*;
 use stylance::*;
 
 use crate::models::song::Song;
@@ -23,8 +23,8 @@ pub fn RecommendationList() -> impl IntoView {
                         // <img src={&recommendation.album_cover_url} alt="Album Cover" />
 
                         <div class=style::recommendationListComponentTrackTextContainer>
-                            <h3>{&recommendation.song_title}</h3>
-                            <p>{format!("{} - {}", &recommendation.artist_name, &recommendation.album_name)}</p>
+                            <h3>{recommendation.song_title.to_string().into_view()}</h3>
+                            <p>{format!("{} - {}", recommendation.artist_name, recommendation.album_name).into_view()}</p>
                         </div>
                     </li>
                 }).collect::<Vec<_>>()})} // Collect into Vec to render

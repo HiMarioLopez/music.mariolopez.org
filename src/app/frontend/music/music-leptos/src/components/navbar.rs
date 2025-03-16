@@ -1,11 +1,11 @@
-use leptos::*;
+use leptos::prelude::*;
 use wasm_bindgen::prelude::*;
 
 stylance::import_style!(style, "../styles/navbar.module.scss");
 
 #[component]
 pub fn Navbar() -> impl IntoView {
-    create_effect(move |_prev_value| {
+    Effect::new(move |_prev_value| {
         scrollToRight();
     });
 

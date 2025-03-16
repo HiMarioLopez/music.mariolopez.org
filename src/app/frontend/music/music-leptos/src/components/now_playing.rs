@@ -1,4 +1,4 @@
-use leptos::*;
+use leptos::prelude::*;
 use stylance::*;
 
 use crate::models::song::Song;
