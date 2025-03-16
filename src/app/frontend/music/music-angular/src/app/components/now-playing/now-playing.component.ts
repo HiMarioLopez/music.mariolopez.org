@@ -13,7 +13,7 @@ export class NowPlayingComponent {
     songTitle: "Song Title",
     artistName: "Artist",
     albumName: "Album",
-    albumCoverUrl: "https://via.placeholder.com/300"
+    albumCoverUrl: "https://placehold.co/300"
   };
 
 }

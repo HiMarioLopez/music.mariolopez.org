@@ -29,13 +29,13 @@ export class AppComponent {
       songTitle: 'Song One',
       artistName: 'Artist One',
       albumName: 'Album One',
-      albumCoverUrl: 'https://via.placeholder.com/50',
+      albumCoverUrl: 'https://placehold.co/50',
     },
     {
       songTitle: 'Song Two',
       artistName: 'Artist Two',
       albumName: 'Album Two',
-      albumCoverUrl: 'https://via.placeholder.com/50',
+      albumCoverUrl: 'https://placehold.co/50',
     },
   ];
 
@@ -44,7 +44,7 @@ export class AppComponent {
       songTitle: newSongTitle,
       artistName: 'Mock Artist',
       albumName: 'Mock Album',
-      albumCoverUrl: 'https://via.placeholder.com/50',
+      albumCoverUrl: 'https://placehold.co/50',
     };
 
     this.recommendations = [...this.recommendations, newRecommendation];

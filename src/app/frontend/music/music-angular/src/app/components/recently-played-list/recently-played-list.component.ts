@@ -16,31 +16,31 @@ export class RecentlyPlayedListComponent {
       songTitle: 'Song One',
       artistName: 'Artist One',
       albumName: 'Album One',
-      albumCoverUrl: 'https://via.placeholder.com/50',
+      albumCoverUrl: 'https://placehold.co/50',
     },
     {
       songTitle: 'Song Two',
       artistName: 'Artist Two',
       albumName: 'Album Two',
-      albumCoverUrl: 'https://via.placeholder.com/50',
+      albumCoverUrl: 'https://placehold.co/50',
     },
     {
       songTitle: 'Song Three',
       artistName: 'Artist Three',
       albumName: 'Album Three',
-      albumCoverUrl: 'https://via.placeholder.com/50',
+      albumCoverUrl: 'https://placehold.co/50',
     },
     {
       songTitle: 'Song Four',
       artistName: 'Artist Four',
       albumName: 'Album Four',
-      albumCoverUrl: 'https://via.placeholder.com/50',
+      albumCoverUrl: 'https://placehold.co/50',
     },
     {
       songTitle: 'Song Five',
       artistName: 'Artist Five',
       albumName: 'Album Five',
-      albumCoverUrl: 'https://via.placeholder.com/50',
+      albumCoverUrl: 'https://placehold.co/50',
     }
   ]
 
