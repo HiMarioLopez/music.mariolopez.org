@@ -146,7 +146,7 @@ public class FrontendStack : Stack
         {
             Runtime = Runtime.NODEJS_20_X,
             Handler = "index.handler",
-            // Use the minified version of the Node.js frontned randomization handler
+            // Use the minified version of the Node.js frontend randomization handler
             Code = Code.FromInline(Encoding.UTF8.GetString(File.ReadAllBytes("../app/backend/handlers/music-frontend-randomization/music-frontend-randomization-nodejs/dist/index.js"))),
             Description = "Randomizes the frontend to be served on `music.mariolopez.org`.",
             CurrentVersionOptions = new VersionOptions
@@ -165,7 +165,7 @@ public class FrontendStack : Stack
         var rootCertificate = Certificate.FromCertificateArn(this, "Music-SiteCertificate", rootCertificateArn);
 
         // Import the API Gateway's custom domain name
-        var importedApiDomainName = Fn.ImportValue("Music-ApiGatewayCustomDomainName");
+        // var importedApiDomainName = Fn.ImportValue("Music-ApiGatewayCustomDomainName");
 
         // Keep your Certificate and Distribution setup as before
         var distribution = new Distribution(this, "Music-SiteDistribution", new DistributionProps
@@ -190,16 +190,16 @@ public class FrontendStack : Stack
                     CachePolicy = CachePolicy.CACHING_DISABLED
                 },
                 // API Path: Proxy to the API Gateway
-                ["/api/*"] = new BehaviorOptions
-                {
-                    Origin = new HttpOrigin(importedApiDomainName, new HttpOriginProps
-                    {
-                        ProtocolPolicy = OriginProtocolPolicy.HTTPS_ONLY
-                    }),
-                    ViewerProtocolPolicy = ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
-                    CachePolicy = CachePolicy.CACHING_DISABLED,
-                    OriginRequestPolicy = OriginRequestPolicy.ALL_VIEWER
-                }
+                // ["/api/*"] = new BehaviorOptions
+                // {
+                //     Origin = new HttpOrigin(importedApiDomainName, new HttpOriginProps
+                //     {
+                //         ProtocolPolicy = OriginProtocolPolicy.HTTPS_ONLY
+                //     }),
+                //     ViewerProtocolPolicy = ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
+                //     CachePolicy = CachePolicy.CACHING_DISABLED,
+                //     OriginRequestPolicy = OriginRequestPolicy.ALL_VIEWER
+                // }
             },
             // Default Behavior: Redirect to the static site assets S3 bucket
             DefaultBehavior = new BehaviorOptions
