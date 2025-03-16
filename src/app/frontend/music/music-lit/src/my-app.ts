@@ -131,13 +131,13 @@ class MyApp extends LitElement {
       songTitle: 'Song One',
       artistName: 'Artist One',
       albumName: 'Album One',
-      albumCoverUrl: 'https://via.placeholder.com/50',
+      albumCoverUrl: 'https://placehold.co/50',
     },
     {
       songTitle: 'Song Two',
       artistName: 'Artist Two',
       albumName: 'Album Two',
-      albumCoverUrl: 'https://via.placeholder.com/50',
+      albumCoverUrl: 'https://placehold.co/50',
     },
   ];
 
