@@ -1,5 +1,5 @@
+using System;
 using System.Collections.Generic;
-using System.IO;
 using Amazon.CDK;
 using Amazon.CDK.AWS.APIGateway;
 using Amazon.CDK.AWS.CertificateManager;
@@ -23,16 +23,10 @@ namespace Music.Infra.Stacks;
 /// </remarks>
 public class ApiStack : Stack
 {
-    internal ApiStack(Construct scope, string id, IStackProps props = null)
+    internal ApiStack(Construct scope, string id, IStackProps props = null, IConfiguration configuration = null)
         : base(scope, id, props)
     {
-        // Load configuration
-        var environment = System.Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Development";
-        var configuration = new ConfigurationBuilder()
-            .SetBasePath(Path.Combine(Directory.GetCurrentDirectory(), "src", "config"))
-            .AddJsonFile("appsettings.json", optional: false)
-            .AddJsonFile($"appsettings.{environment}.json", optional: true)
-            .Build();
+        var corsSettings = configuration?.GetSection("MusicApiSettings").Get<MusicApiSettings>();
 
         #region API Gateway
 
@@ -51,9 +45,21 @@ public class ApiStack : Stack
                 Certificate = rootCertificate,
                 EndpointType = EndpointType.REGIONAL,
                 BasePath = "api"
+            },
+            DefaultCorsPreflightOptions = new CorsOptions
+            {
+                AllowCredentials = true,
+                AllowHeaders = [
+                    "Content-Type",
+                    "X-Amz-Date",
+                    "Authorization",
+                    "X-Api-Key",
+                    "X-Amz-Security-Token"
+                ],
+                AllowMethods = ["GET", "POST", "OPTIONS"],
+                AllowOrigins = corsSettings?.AllowedOrigins
             }
         });
-
 
         // Output the API Gateway's custom domain name
         var apiDomainName = new CfnOutput(this, "Music-ApiGatewayCustomDomainName", new CfnOutputProps
@@ -181,11 +187,14 @@ public class ApiStack : Stack
         var nodejsAuthHandlerResource = apiGateway.Root.AddResource("nodejs").AddResource("auth").AddResource("token");
 
         // Create a method for the '/auth/token' resource that integrates with the Lambda function
-        nodejsAuthHandlerResource.AddMethod("GET", new LambdaIntegration(nodejsAuthHandlerFunction, new LambdaIntegrationOptions
-        {
-            Timeout = Duration.Seconds(29),
-            AllowTestInvoke = true
-        }));
+        nodejsAuthHandlerResource.AddMethod(
+            "GET",
+            new LambdaIntegration(nodejsAuthHandlerFunction, new LambdaIntegrationOptions
+            {
+                Timeout = Duration.Seconds(29),
+                AllowTestInvoke = true
+            })
+        );
 
         // // Create a resource for the '/api/dotnet/auth/token' endpoint
         // var dotnetAuthHandlerResource = apiGateway.Root.AddResource("dotnet").AddResource("auth").AddResource("token");

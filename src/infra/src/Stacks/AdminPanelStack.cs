@@ -9,6 +9,9 @@ using System.Collections.Generic;
 using Amazon.CDK.AWS.Lambda;
 using Amazon.CDK.AWS.CloudFront;
 using Amazon.CDK.AWS.APIGateway;
+using Amazon.CDK.AWS.Cognito;
+using Microsoft.Extensions.Configuration;
+using Music.Infra.Models.Settings;
 
 using Function = Amazon.CDK.AWS.Lambda.Function;
 using FunctionProps = Amazon.CDK.AWS.Lambda.FunctionProps;
@@ -21,8 +24,68 @@ namespace Music.Infra.Stacks;
 /// </summary>
 public class AdminPanelStack : Stack
 {
-    internal AdminPanelStack(Construct scope, string id, IStackProps props = null) : base(scope, id, props)
+    internal AdminPanelStack(Construct scope, string id, IStackProps props = null, IConfiguration configuration = null)
+        : base(scope, id, props)
     {
+        #region Cognito
+
+        // Create Cognito User Pool
+        var userPool = new UserPool(this, "Music-AdminUserPool", new UserPoolProps
+        {
+            UserPoolName = "Music-AdminUserPool",
+            SelfSignUpEnabled = false,
+            SignInAliases = new SignInAliases
+            {
+                Username = true,
+                Email = true
+            },
+            StandardAttributes = new StandardAttributes
+            {
+                Email = new StandardAttribute { Required = true, Mutable = true }
+            },
+            PasswordPolicy = new PasswordPolicy
+            {
+                MinLength = 12,
+                RequireLowercase = true,
+                RequireUppercase = true,
+                RequireDigits = true,
+                RequireSymbols = true
+            },
+            AccountRecovery = AccountRecovery.EMAIL_ONLY,
+            RemovalPolicy = RemovalPolicy.DESTROY,
+            DeletionProtection = false
+        });
+
+        // Create Cognito User Pool Client
+        var userPoolClient = userPool.AddClient("Music-AdminUserPoolClient", new UserPoolClientOptions
+        {
+            UserPoolClientName = "Music-AdminUserPoolClient",
+            AuthFlows = new AuthFlow
+            {
+                UserPassword = true,
+                UserSrp = true
+            },
+            PreventUserExistenceErrors = true,
+            GenerateSecret = false
+        });
+
+        // Create a user in the pool (you'll need to set the password after deployment)
+        var adminUser = new CfnUserPoolUser(this, "Music-AdminUser", new CfnUserPoolUserProps
+        {
+            UserPoolId = userPool.UserPoolId,
+            Username = configuration?.GetValue<string>("AdminPanel:AdminUsername"),
+            UserAttributes = new[]
+            {
+                new CfnUserPoolUser.AttributeTypeProperty
+                {
+                    Name = "email",
+                    Value = configuration?.GetValue<string>("AdminPanel:AdminEmail")
+                }
+            }
+        });
+
+        #endregion
+
         #region SSM Parameter
 
         // Create SSM Parameter for storing MUT
@@ -143,7 +206,9 @@ public class AdminPanelStack : Stack
 
         #region API Gateway
 
-        // Create REST API
+        var corsSettings = configuration?.GetSection("AdminApiSettings").Get<AdminApiSettings>();
+
+        // Create REST API with Cognito Authorizer
         var api = new RestApi(this, "Music-AdminApi", new RestApiProps
         {
             RestApiName = "Music Admin API Gateway",
@@ -155,6 +220,27 @@ public class AdminPanelStack : Stack
                 EndpointType = EndpointType.REGIONAL,
                 BasePath = "api"
             },
+            DefaultMethodOptions = new MethodOptions
+            {
+                AuthorizationType = AuthorizationType.COGNITO,
+                Authorizer = new CognitoUserPoolsAuthorizer(this, "Music-AdminAuthorizer", new CognitoUserPoolsAuthorizerProps
+                {
+                    CognitoUserPools = [userPool]
+                })
+            },
+            DefaultCorsPreflightOptions = new CorsOptions
+            {
+                AllowCredentials = true,
+                AllowHeaders = [
+                    "Content-Type",
+                    "X-Amz-Date",
+                    "Authorization",
+                    "X-Api-Key",
+                    "X-Amz-Security-Token"
+                ],
+                AllowMethods = ["GET", "POST", "OPTIONS"],
+                AllowOrigins = corsSettings?.AllowedOrigins
+            }
         });
 
         // Create API resources and methods
@@ -163,15 +249,42 @@ public class AdminPanelStack : Stack
         // POST /api/nodejs/mut/store
         nodejsMutResource.AddResource("store").AddMethod(
             "POST",
-            new LambdaIntegration(storeMutFunction)
+            new LambdaIntegration(storeMutFunction, new LambdaIntegrationOptions
+            {
+                Timeout = Duration.Seconds(29),
+                AllowTestInvoke = true
+            })
         );
 
         // GET /api/nodejs/mut/get
         nodejsMutResource.AddResource("get").AddMethod(
             "GET",
-            new LambdaIntegration(getMutFunction)
+            new LambdaIntegration(getMutFunction, new LambdaIntegrationOptions
+            {
+                Timeout = Duration.Seconds(29),
+                AllowTestInvoke = true
+            })
         );
 
         #endregion
+
+        // Output Cognito configuration for frontend
+        new CfnOutput(this, "UserPoolId", new CfnOutputProps
+        {
+            Value = userPool.UserPoolId,
+            Description = "Cognito User Pool ID"
+        });
+
+        new CfnOutput(this, "UserPoolClientId", new CfnOutputProps
+        {
+            Value = userPoolClient.UserPoolClientId,
+            Description = "Cognito User Pool Client ID"
+        });
+
+        new CfnOutput(this, "UserPoolDomain", new CfnOutputProps
+        {
+            Value = $"admin-{this.Account}.auth.{this.Region}.amazoncognito.com",
+            Description = "Cognito User Pool Domain"
+        });
     }
 }
