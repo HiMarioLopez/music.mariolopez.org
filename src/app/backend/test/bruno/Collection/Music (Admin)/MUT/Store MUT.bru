@@ -7,15 +7,19 @@ meta {
 post {
   url: https://admin.music.mariolopez.org/api/nodejs/mut/store
   body: json
-  auth: none
+  auth: bearer
 }
 
 headers {
   Content-Type: application/json
 }
 
+auth:bearer {
+  token:
+}
+
 body:json {
   {
-    "musicUserToken": "someCoolToken"
+    "musicUserToken": "test-set-2"
   }
 }

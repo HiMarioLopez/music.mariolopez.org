@@ -7,5 +7,9 @@ meta {
 get {
   url: {{ADMIN_API_GATEWAY_URL}}/prod/nodejs/mut/get
   body: none
-  auth: none
+  auth: bearer
+}
+
+auth:bearer {
+  token:
 }

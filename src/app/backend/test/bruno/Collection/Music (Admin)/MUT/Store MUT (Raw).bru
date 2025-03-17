@@ -7,11 +7,15 @@ meta {
 post {
   url: {{ADMIN_API_GATEWAY_URL}}/prod/nodejs/mut/store
   body: json
-  auth: none
+  auth: bearer
 }
 
 headers {
   Content-Type: application/json
+}
+
+auth:bearer {
+  token:
 }
 
 body:json {
