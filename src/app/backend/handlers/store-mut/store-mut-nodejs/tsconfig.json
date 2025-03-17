@@ -1,18 +1,32 @@
 {
-    "compilerOptions": {
-      "target": "esnext",
-      "module": "commonjs",
-      "strict": true,
-      "esModuleInterop": true,
-      "skipLibCheck": true,
-      "forceConsistentCasingInFileNames": true,
-      "outDir": "./dist",
-      "declaration": true,
-      "sourceMap": true,
-      "rootDir": ".",
-      "types": ["node"],
-      "moduleResolution": "node"
-    },
-    "include": ["./**/*.ts"],
-    "exclude": ["node_modules", "dist"]
-  } 
+  "compilerOptions": {
+    "target": "esnext",
+    "module": "commonjs",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "outDir": "./dist",
+    "declaration": true,
+    "sourceMap": true,
+    "rootDir": "../..",
+    "types": [
+      "node"
+    ],
+    "moduleResolution": "node",
+    "baseUrl": "../..",
+    "paths": {
+      "@shared/*": [
+        "handlers/shared/*"
+      ]
+    }
+  },
+  "include": [
+    "./**/*.ts",
+    "../../shared/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist"
+  ]
+}

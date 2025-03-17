@@ -9,10 +9,24 @@
     "outDir": "./dist",
     "declaration": true,
     "sourceMap": true,
-    "rootDir": ".",
-    "types": ["node"],
-    "moduleResolution": "node"
+    "rootDir": "../..",
+    "types": [
+      "node"
+    ],
+    "moduleResolution": "node",
+    "baseUrl": "../..",
+    "paths": {
+      "@shared/*": [
+        "handlers/shared/*"
+      ]
+    }
   },
-  "include": ["./**/*.ts"],
-  "exclude": ["node_modules", "dist"]
-} 
+  "include": [
+    "./**/*.ts",
+    "../../shared/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist"
+  ]
+}

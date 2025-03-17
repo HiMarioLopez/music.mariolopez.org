@@ -3,6 +3,7 @@ import { sign } from 'jsonwebtoken';
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import { config } from 'dotenv';
 import { join } from 'path';
+import { getCorsHeaders } from 'shared/cors-headers';
 
 interface Environment {
   APPLE_AUTH_KEY_SECRET_NAME: string;
@@ -21,11 +22,11 @@ async function getSecret(secretName: string): Promise<string> {
   const client = new SecretsManagerClient({});
   const command = new GetSecretValueCommand({ SecretId: secretName });
   const result = await client.send(command);
-  
+
   if (!result.SecretString) {
     throw new Error('Secret string is empty');
   }
-  
+
   return result.SecretString;
 }
 
@@ -38,7 +39,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
       APPLE_TEAM_ID: process.env.APPLE_TEAM_ID!,
       APPLE_KEY_ID: process.env.APPLE_KEY_ID!
     };
-    
+
     // Validate environment variables
     const missingVars = Object.entries(env)
       .filter(([_, value]) => !value)
@@ -67,9 +68,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
 
     return {
       statusCode: 200,
-      headers: {
-        'Content-Type': 'application/json'
-      },
+      headers: getCorsHeaders(event.headers.origin, 'GET'),
       body: JSON.stringify({ token })
     };
 
@@ -77,10 +76,8 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
     console.error('Error fetching secret or generating token:', error);
     return {
       statusCode: 500,
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ 
+      headers: getCorsHeaders(event.headers.origin, 'GET'),
+      body: JSON.stringify({
         error: 'Error processing your request',
         message: error instanceof Error ? error.message : 'Unknown error'
       })
