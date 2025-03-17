@@ -165,7 +165,7 @@ public class FrontendStack : Stack
         var rootCertificate = Certificate.FromCertificateArn(this, "Music-SiteCertificate", rootCertificateArn);
 
         // Import the API Gateway's custom domain name
-        // var importedApiDomainName = Fn.ImportValue("Music-ApiGatewayCustomDomainName");
+        var importedApiDomainName = Fn.ImportValue("Music-ApiGatewayCustomDomainName");
 
         // Keep your Certificate and Distribution setup as before
         var distribution = new Distribution(this, "Music-SiteDistribution", new DistributionProps
@@ -190,16 +190,16 @@ public class FrontendStack : Stack
                     CachePolicy = CachePolicy.CACHING_DISABLED
                 },
                 // API Path: Proxy to the API Gateway
-                // ["/api/*"] = new BehaviorOptions
-                // {
-                //     Origin = new HttpOrigin(importedApiDomainName, new HttpOriginProps
-                //     {
-                //         ProtocolPolicy = OriginProtocolPolicy.HTTPS_ONLY
-                //     }),
-                //     ViewerProtocolPolicy = ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
-                //     CachePolicy = CachePolicy.CACHING_DISABLED,
-                //     OriginRequestPolicy = OriginRequestPolicy.ALL_VIEWER
-                // }
+                ["/api/*"] = new BehaviorOptions
+                {
+                    Origin = new HttpOrigin(importedApiDomainName, new HttpOriginProps
+                    {
+                        ProtocolPolicy = OriginProtocolPolicy.HTTPS_ONLY
+                    }),
+                    ViewerProtocolPolicy = ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
+                    CachePolicy = CachePolicy.CACHING_DISABLED,
+                    OriginRequestPolicy = OriginRequestPolicy.ALL_VIEWER
+                }
             },
             // Default Behavior: Redirect to the static site assets S3 bucket
             DefaultBehavior = new BehaviorOptions

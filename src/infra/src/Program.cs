@@ -18,12 +18,12 @@ public static class Program
 
         var env = new Environment { Account = accountId, Region = defaultRegion };
 
-        // var apiStack = new ApiStack(app, "ApiStack", new StackProps
-        // {
-        //     Env = env,
-        //     StackName = "Music-ApiStack",
-        //     Description = "This stack contains the API Gateway and Lambda function for the Music application."
-        // });
+        var apiStack = new ApiStack(app, "ApiStack", new StackProps
+        {
+            Env = env,
+            StackName = "Music-ApiStack",
+            Description = "This stack contains the API Gateway and Lambda function(s) for the Music application."
+        });
 
         var frontendStack = new FrontendStack(app, "FrontendStack", new StackProps
         {
@@ -33,7 +33,18 @@ public static class Program
         });
 
         // Explicitly declare that SiteStack depends on ApiStack
-        // frontendStack.AddDependency(apiStack);
+        frontendStack.AddDependency(apiStack);
+
+        var adminPanelStack = new AdminPanelStack(app, "AdminPanelStack", new StackProps
+        {
+            Env = env,
+            StackName = "Music-AdminPanelStack",
+            Description = "This stack contains the Admin Panel for the Music application."
+        });
+
+        // Explicitly declare that AdminPanelStack depends on ApiStack and FrontendStack
+        adminPanelStack.AddDependency(apiStack);
+        adminPanelStack.AddDependency(frontendStack);
 
         app.Synth();
     }
