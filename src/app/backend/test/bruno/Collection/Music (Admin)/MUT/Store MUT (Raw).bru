@@ -1,0 +1,21 @@
+meta {
+  name: Store MUT (Raw)
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{ADMIN_API_GATEWAY_URL}}/prod/nodejs/mut/store
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "musicUserToken": "test-set-1"
+  }
+}

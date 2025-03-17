@@ -1,0 +1,15 @@
+meta {
+  name: Test
+  type: http
+  seq: 1
+}
+
+get {
+  url: https://api.music.apple.com/v1/test
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{AUTH_TOKEN}}
+}

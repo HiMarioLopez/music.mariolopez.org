@@ -1,0 +1,19 @@
+meta {
+  name: Recently Played Tracks
+  type: http
+  seq: 3
+}
+
+get {
+  url: https://api.music.apple.com/v1/me/recent/played/tracks
+  body: none
+  auth: bearer
+}
+
+headers {
+  Music-User-Token: {{MUSIC_USER_TOKEN}}
+}
+
+auth:bearer {
+  token: {{AUTH_TOKEN}}
+}
