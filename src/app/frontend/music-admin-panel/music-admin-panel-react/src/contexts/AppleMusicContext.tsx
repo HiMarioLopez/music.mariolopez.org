@@ -1,10 +1,13 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { createContext, ReactNode, useContext, useEffect, useState } from 'react';
+import { storeMusicUserToken } from '../utils/api';
 
 interface AppleMusicContextType {
   isAuthorized: boolean;
   musicUserToken: string | null;
+  developerToken: string | null;
   authorize: () => Promise<void>;
   logout: () => void;
+  setDeveloperToken: (token: string) => void;
 }
 
 const AppleMusicContext = createContext<AppleMusicContextType | undefined>(undefined);
@@ -12,14 +15,20 @@ const AppleMusicContext = createContext<AppleMusicContextType | undefined>(undef
 export function AppleMusicProvider({ children }: { children: ReactNode }) {
   const [isAuthorized, setIsAuthorized] = useState(false);
   const [musicUserToken, setMusicUserToken] = useState<string | null>(null);
+  const [developerToken, setDeveloperToken] = useState<string | null>(null);
   const [musicKit, setMusicKit] = useState<MusicKit.MusicKitInstance | null>(null);
 
   useEffect(() => {
     // Initialize MusicKit when the component mounts
     const initializeMusicKit = async () => {
       try {
+        if (!developerToken) {
+          console.log('Waiting for developer token...');
+          return;
+        }
+
         await MusicKit.configure({
-          developerToken: import.meta.env.VITE_APPLE_DEVELOPER_TOKEN,
+          developerToken,
           app: {
             name: 'Music Admin Panel',
             build: '1.0.0',
@@ -39,7 +48,7 @@ export function AppleMusicProvider({ children }: { children: ReactNode }) {
     };
 
     initializeMusicKit();
-  }, []);
+  }, [developerToken]);
 
   const authorize = async () => {
     if (!musicKit) return;
@@ -49,20 +58,13 @@ export function AppleMusicProvider({ children }: { children: ReactNode }) {
       setIsAuthorized(true);
       setMusicUserToken(musicKit.musicUserToken);
 
-      // Send MUT to your backend
+      // Store MUT in backend
       if (musicKit.musicUserToken) {
         try {
-          await fetch('/api/store-mut', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              musicUserToken: musicKit.musicUserToken,
-            }),
-          });
+          await storeMusicUserToken(musicKit.musicUserToken);
         } catch (error) {
           console.error('Error storing MUT:', error);
+          alert('Failed to store token in backend. Please try again.');
         }
       }
     } catch (error) {
@@ -87,8 +89,10 @@ export function AppleMusicProvider({ children }: { children: ReactNode }) {
       value={{
         isAuthorized,
         musicUserToken,
+        developerToken,
         authorize,
         logout,
+        setDeveloperToken,
       }}
     >
       {children}

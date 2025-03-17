@@ -1,0 +1,41 @@
+.developer-token-card {
+    margin-bottom: 2rem !important;
+}
+
+.error-message {
+    background-color: var(--error-color);
+    color: white;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    margin: 1rem 0;
+    font-size: 0.875rem;
+}
+
+.token-info {
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+    margin: 1rem 0;
+}
+
+.developer-token-card .button-container {
+    margin-top: 1rem;
+}
+
+.developer-token-card button:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+.token-display {
+    margin: 1rem 0;
+    padding: 1rem;
+    background-color: #f5f5f5;
+    border-radius: 4px;
+    overflow-x: auto;
+}
+
+.token-display pre {
+    margin: 0;
+    white-space: pre-wrap;
+    word-break: break-all;
+}

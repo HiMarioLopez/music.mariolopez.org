@@ -1,58 +1,47 @@
-import { useTokenManagement } from '../hooks/useTokenManagement';
+import { Authenticator } from '@aws-amplify/ui-react';
+import '@aws-amplify/ui-react/styles.css';
+import { useAppleMusic } from '../contexts/AppleMusicContext';
+import '../styles/components.css';
+import '../styles/theme.css';
 import './AdminPanel.css';
+import { DeveloperTokenManagement } from './DeveloperTokenManagement';
+import { MusicUserTokenManagement } from './MusicUserTokenManagement';
+import { ThemeToggle } from './ThemeToggle';
 
 export function AdminPanel() {
-  const {
-    isAuthorized,
-    musicUserToken,
-    tokenInfo,
-    handleAuthorize,
-    handleLogout,
-    handleRefreshToken,
-    handleCopyToken,
-    formatTimestamp,
-  } = useTokenManagement();
+  const { setDeveloperToken } = useAppleMusic();
 
   return (
-    <div className="container">
-      <h1>Music Admin Panel</h1>
+    <div className="auth-container">
+      <Authenticator>
+        {({ signOut, user }) => (
+          <div className="admin-container">
+            <nav className="admin-nav">
+              <div className="nav-content">
+                <div className="nav-header">
+                  <h1 className="nav-title">Music Admin Panel</h1>
+                  <span className="welcome-message">
+                    Welcome, <span className="username">{user?.username}</span>
+                  </span>
+                </div>
+                <div className="nav-actions">
+                  <ThemeToggle />
+                  <button onClick={signOut} className="primary-button">
+                    Sign Out
+                  </button>
+                </div>
+              </div>
+            </nav>
 
-      <div className="auth-status">
-        <p>
-          <strong>Authentication Status: </strong>
-          <span className={isAuthorized ? 'status-authorized' : 'status-unauthorized'}>
-            {isAuthorized ? 'Authorized' : 'Not Authorized'}
-          </span>
-        </p>
-
-        <button onClick={isAuthorized ? handleLogout : handleAuthorize}>
-          {isAuthorized ? 'Logout' : 'Authorize with Apple Music'}
-        </button>
-
-        {isAuthorized && musicUserToken && (
-          <div className="token-section">
-            <p><strong>Music User Token:</strong></p>
-            {tokenInfo.timestamp && (
-              <p>
-                <small>
-                  Token obtained at: {formatTimestamp(tokenInfo.timestamp)}
-                </small>
-              </p>
-            )}
-            <pre className="token-display">
-              {musicUserToken}
-            </pre>
-            <div className="button-container">
-              <button onClick={handleCopyToken}>
-                Copy Token
-              </button>
-              <button onClick={handleRefreshToken}>
-                Refresh Token
-              </button>
-            </div>
+            <main className="admin-main">
+              <div className="admin-content">
+                <DeveloperTokenManagement onTokenFetched={setDeveloperToken} />
+                <MusicUserTokenManagement />
+              </div>
+            </main>
           </div>
         )}
-      </div>
+      </Authenticator>
     </div>
   );
 } 

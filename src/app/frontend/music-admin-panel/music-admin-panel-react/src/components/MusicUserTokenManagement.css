@@ -1,0 +1,80 @@
+.content-card {
+    background: var(--bg-secondary);
+    border-radius: 0.5rem;
+    box-shadow: var(--shadow-md);
+    padding: 2rem;
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.content-card h2 {
+    margin-bottom: 1.5rem;
+    color: var(--text-primary);
+    font-size: 1.5rem;
+    font-weight: 600;
+}
+
+.auth-status {
+    border: 1px solid var(--border-color);
+    padding: 1.5rem;
+    border-radius: 0.5rem;
+    background: var(--bg-tertiary);
+}
+
+.token-display {
+    overflow-x: auto;
+    white-space: pre-wrap;
+    word-break: break-all;
+    padding: 1rem;
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    border-radius: 0.5rem;
+    margin: 1rem 0;
+    font-family: monospace;
+    color: var(--text-primary);
+}
+
+.button-container {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.status-authorized {
+    color: var(--success-color);
+    font-weight: 500;
+}
+
+.status-unauthorized {
+    color: var(--error-color);
+    font-weight: 500;
+}
+
+.token-warning {
+    color: var(--warning-color);
+    margin: 1rem 0;
+    font-size: 0.875rem;
+}
+
+@media (max-width: 640px) {
+    .content-card {
+        width: 90%;
+        padding: 1.5rem;
+        border-radius: 0.5rem;
+    }
+
+    .button-container {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .button-container button {
+        width: 100%;
+    }
+
+    .token-display {
+        font-size: 0.75rem;
+        padding: 0.75rem;
+    }
+}

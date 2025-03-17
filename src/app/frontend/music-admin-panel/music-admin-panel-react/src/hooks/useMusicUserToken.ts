@@ -16,24 +16,13 @@ interface TokenManagement {
   formatTimestamp: (date: Date) => string;
 }
 
-export function useTokenManagement(): TokenManagement {
+export function useMusicUserToken(): TokenManagement {
   const { isAuthorized, musicUserToken, authorize, logout } = useAppleMusic();
   const [timestamp, setTimestamp] = useState<Date | null>(null);
 
   useEffect(() => {
     if (musicUserToken) {
       setTimestamp(new Date());
-      // Store token in backend
-      fetch('https://admin.music.mariolopez.org/api/mut/store', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ musicUserToken }),
-      }).catch(error => {
-        console.error('Error storing token:', error);
-        alert('Failed to store token in backend. Please try again.');
-      });
     } else {
       setTimestamp(null);
     }
