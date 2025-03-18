@@ -1,0 +1,32 @@
+{
+  "compilerOptions": {
+    "target": "esnext",
+    "module": "commonjs",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "outDir": "./dist",
+    "declaration": true,
+    "sourceMap": true,
+    "rootDir": "../../..",
+    "types": [
+      "node"
+    ],
+    "moduleResolution": "node",
+    "baseUrl": "../../..",
+    "paths": {
+      "@shared/*": [
+        "handlers/shared/*"
+      ]
+    }
+  },
+  "include": [
+    "./**/*.ts",
+    "../../../shared/nodejs/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist"
+  ]
+}
