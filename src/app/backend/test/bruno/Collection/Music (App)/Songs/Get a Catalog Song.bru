@@ -1,0 +1,15 @@
+meta {
+  name: Get a Catalog Song
+  type: http
+  seq: 2
+}
+
+get {
+  url: https://music.mariolopez.org/api/nodejs/apple-music/catalog/us/songs/1613600188
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{AUTH_TOKEN}}
+}

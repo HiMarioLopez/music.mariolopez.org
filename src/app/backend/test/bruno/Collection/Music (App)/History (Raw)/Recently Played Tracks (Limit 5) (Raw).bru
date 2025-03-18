@@ -1,0 +1,19 @@
+meta {
+  name: Recently Played Tracks (Limit 5) (Raw)
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{ADMIN_API_GATEWAY_URL}}/prod/nodejs/apple-music/me/recent/played/tracks?limit=5
+  body: none
+  auth: bearer
+}
+
+params:query {
+  limit: 5
+}
+
+auth:bearer {
+  token: {{AUTH_TOKEN}}
+}

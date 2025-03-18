@@ -1,0 +1,19 @@
+meta {
+  name: Recently Played Tracks (Limit 5)
+  type: http
+  seq: 2
+}
+
+get {
+  url: https://music.mariolopez.org/api/nodejs/apple-music/me/recent/played/tracks?limit=5
+  body: none
+  auth: bearer
+}
+
+params:query {
+  limit: 5
+}
+
+auth:bearer {
+  token: {{AUTH_TOKEN}}
+}
