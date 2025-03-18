@@ -11,7 +11,6 @@ using Amazon.CDK.AWS.SNS.Subscriptions;
 using Amazon.CDK.AWS.SQS;
 using Amazon.CDK.AWS.SSM;
 using Amazon.CDK.AWS.CloudWatch;
-using System;
 using Constructs;
 using Microsoft.Extensions.Configuration;
 using Music.Infra.Models.Settings;
