@@ -96,12 +96,16 @@ public class AdminPanelStack : Stack
             StringValue = "placeholder", // Initial 'placeholder' value
         });
 
+        #endregion
+
+        #region Lambda Functions
+
         // Create Lambda function to store MUT
         var storeMutFunction = new Function(this, "Music-StoreMutFunction", new FunctionProps
         {
             Runtime = Runtime.NODEJS_22_X,
             Handler = "index.handler",
-            Code = Code.FromAsset("../app/backend/handlers/store-mut/store-mut-nodejs/dist"),
+            Code = Code.FromAsset("../app/backend/handlers/api/store-mut/store-mut-nodejs/dist"),
             Environment = new Dictionary<string, string>
             {
                 { "PARAMETER_NAME", mutParameter.ParameterName }
@@ -121,7 +125,7 @@ public class AdminPanelStack : Stack
         {
             Runtime = Runtime.NODEJS_22_X,
             Handler = "index.handler",
-            Code = Code.FromAsset("../app/backend/handlers/get-mut/get-mut-nodejs/dist"),
+            Code = Code.FromAsset("../app/backend/handlers/api/get-mut/get-mut-nodejs/dist"),
             Environment = new Dictionary<string, string>
             {
                 { "PARAMETER_NAME", mutParameter.ParameterName }
@@ -137,7 +141,6 @@ public class AdminPanelStack : Stack
         mutParameter.GrantRead(getMutFunction);
 
         #endregion
-
         #region Bucket
 
         // Create an S3 bucket configured for website hosting

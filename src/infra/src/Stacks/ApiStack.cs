@@ -96,7 +96,7 @@ public class ApiStack : Stack
         {
             QueueName = "AppleMusicApiFailedRequestsQueue",
             VisibilityTimeout = Duration.Seconds(1800), // 30 minutes
-            RetentionPeriod = Duration.Days(14)        // Maximum retention period
+            RetentionPeriod = Duration.Days(14) // Maximum retention period
         });
 
         #endregion
@@ -178,7 +178,7 @@ public class ApiStack : Stack
         {
             Runtime = Runtime.NODEJS_22_X,
             Role = nodejsAuthLambdaRole,
-            Code = Code.FromAsset("../app/backend/handlers/music-auth/music-auth-nodejs/dist"),
+            Code = Code.FromAsset("../app/backend/handlers/api/get-developer-token/get-developer-token-nodejs/dist"),
             Handler = "index.handler",
             Environment = new Dictionary<string, string>
             {
@@ -198,7 +198,7 @@ public class ApiStack : Stack
         {
             Runtime = Runtime.NODEJS_22_X,
             Handler = "index.handler",
-            Code = Code.FromAsset("../app/backend/handlers/data-fetching/data-fetching-nodejs/dist"),
+            Code = Code.FromAsset("../app/backend/handlers/api/apple-music-data-fetching/apple-music-data-fetching-nodejs/dist"),
             Role = appleMusicLambdaRole,
             MemorySize = 512,
             Timeout = Duration.Seconds(30),
@@ -216,7 +216,7 @@ public class ApiStack : Stack
         {
             Runtime = Runtime.NODEJS_22_X,
             Handler = "index.handler",
-            Code = Code.FromAsset("../app/backend/handlers/token-refresh/token-refresh-nodejs/dist"),
+            Code = Code.FromAsset("../app/backend/handlers/token-refresh-notification/token-refresh-notification-nodejs/dist"),
             Role = appleMusicLambdaRole,
             MemorySize = 256,
             Timeout = Duration.Seconds(10),
