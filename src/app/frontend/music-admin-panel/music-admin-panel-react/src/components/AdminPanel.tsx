@@ -1,5 +1,3 @@
-import { Authenticator } from '@aws-amplify/ui-react';
-import '@aws-amplify/ui-react/styles.css';
 import { useAppleMusic } from '../contexts/AppleMusicContext';
 import '../styles/components.css';
 import '../styles/theme.css';
@@ -7,6 +5,10 @@ import './AdminPanel.css';
 import { DeveloperTokenManagement } from './DeveloperTokenManagement';
 import { MusicUserTokenManagement } from './MusicUserTokenManagement';
 import { ThemeToggle } from './ThemeToggle';
+
+// Note: Amplify libs are so large! Fix this... eventually?
+import { Authenticator } from '@aws-amplify/ui-react';
+import '@aws-amplify/ui-react/styles.css';
 
 export function AdminPanel() {
   const { setDeveloperToken } = useAppleMusic();
