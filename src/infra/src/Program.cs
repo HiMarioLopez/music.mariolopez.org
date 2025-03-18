@@ -13,7 +13,7 @@ public static class Program
 
         var accountId = configuration["AWS:AccountId"];
         var defaultRegion = configuration["AWS:Region"];
-        
+
         var env = new Environment { Account = accountId, Region = defaultRegion };
 
         var apiStack = new ApiStack(app, "ApiStack", new StackProps
