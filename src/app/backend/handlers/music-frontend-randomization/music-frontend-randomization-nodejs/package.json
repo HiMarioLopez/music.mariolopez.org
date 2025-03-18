@@ -1,7 +1,7 @@
 {
   "name": "music-frontend-randomization-nodejs",
   "version": "1.0.0",
-  "description": "",
+  "description": "Randomizes the frontend to be served on `music.mariolopez.org`.",
   "main": "index.js",
   "type": "module",
   "scripts": {
@@ -12,6 +12,6 @@
   "license": "ISC",
   "devDependencies": {
     "@rollup/plugin-terser": "^0.4.4",
-    "rollup": "^4.35.0"
+    "rollup": "^4.36.0"
   }
 }
