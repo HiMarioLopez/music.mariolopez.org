@@ -31,7 +31,7 @@ export function useMusicUserToken(): TokenManagement {
   const handleCopyToken = () => {
     if (musicUserToken) {
       navigator.clipboard.writeText(musicUserToken);
-      alert('Token copied to clipboard!');
+      alert('Music User Token copied to clipboard!');
     }
   };
 

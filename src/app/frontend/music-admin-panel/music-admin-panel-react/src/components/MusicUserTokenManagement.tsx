@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useMusicUserToken } from '../hooks/useMusicUserToken';
 import './MusicUserTokenManagement.css';
 
@@ -12,6 +13,19 @@ export function MusicUserTokenManagement() {
         handleCopyToken,
         formatTimestamp
     } = useMusicUserToken();
+    const [isTokenVisible, setIsTokenVisible] = useState(false);
+
+    const toggleTokenVisibility = () => {
+        setIsTokenVisible(!isTokenVisible);
+    };
+
+    // Function to mask the token, showing only the first 10 characters
+    const getMaskedToken = (fullToken: string) => {
+        if (!fullToken) return '';
+        const visiblePart = fullToken.substring(0, 10);
+        const maskedPart = '••••••••••••••••••••••••••••••••••••';
+        return visiblePart + maskedPart;
+    };
 
     return (
         <div className="content-card">
@@ -34,7 +48,24 @@ export function MusicUserTokenManagement() {
 
             <div className="token-display">
                 {musicUserToken ? (
-                    <pre>{musicUserToken}</pre>
+                    <div className="secure-token-container">
+                        <div className="token-header">
+                            <span className="token-label">User Token</span>
+                            <button
+                                onClick={toggleTokenVisibility}
+                                className="toggle-visibility-btn"
+                            >
+                                {isTokenVisible ? 'Hide Token' : 'Show Token'}
+                            </button>
+                        </div>
+                        <pre
+                            onClick={handleCopyToken}
+                            title="Click to copy token"
+                            className="clickable-token"
+                        >
+                            {isTokenVisible ? musicUserToken : getMaskedToken(musicUserToken)}
+                        </pre>
+                    </div>
                 ) : (
                     <p>No token available</p>
                 )}
@@ -52,9 +83,6 @@ export function MusicUserTokenManagement() {
                         </button>
                         <button onClick={handleLogout} className="primary-button">
                             Logout from Apple Music
-                        </button>
-                        <button onClick={handleCopyToken} className="primary-button">
-                            Copy Token
                         </button>
                     </>
                 )}

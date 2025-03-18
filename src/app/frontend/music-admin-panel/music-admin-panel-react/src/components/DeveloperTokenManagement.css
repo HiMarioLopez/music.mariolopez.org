@@ -1,5 +1,9 @@
 .developer-token-card {
-    margin-bottom: 2rem !important;
+    margin-bottom: 0 !important;
+    flex: 1 1 400px;
+    /* Allow growing and shrinking with a basis of 400px */
+    max-width: 600px;
+    /* Maximum width to maintain readability */
 }
 
 .error-message {
@@ -38,4 +42,95 @@
     margin: 0;
     white-space: pre-wrap;
     word-break: break-all;
+}
+
+/* Adding mobile responsiveness */
+@media (max-width: 640px) {
+    .developer-token-card {
+        margin-top: 0;
+        flex: 1 1 100%;
+        /* Take full width on mobile */
+    }
+}
+
+/* Add the same styles as above */
+.token-container {
+    display: flex;
+    flex-direction: row;
+    border-radius: 4px;
+    background-color: rgba(0, 0, 0, 0.05);
+    position: relative;
+}
+
+.copy-button-wrapper {
+    display: flex;
+    align-items: center;
+    padding: 8px 4px 8px 8px;
+}
+
+.clickable-token {
+    cursor: pointer;
+    transition: background-color 0.2s;
+    padding: 10px;
+    border-radius: 4px;
+    overflow: auto;
+    white-space: pre-wrap;
+    word-break: break-all;
+}
+
+.clickable-token:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+/* Add these styles */
+.secure-token-container {
+    display: flex;
+    flex-direction: column;
+    border-radius: 4px;
+    overflow: hidden;
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+.token-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 10px;
+    background-color: rgba(0, 0, 0, 0.1);
+}
+
+.token-label {
+    font-size: 12px;
+    font-weight: bold;
+    opacity: 0.8;
+}
+
+.toggle-visibility-btn {
+    background-color: transparent;
+    border: 1px solid rgba(128, 128, 128, 0.4);
+    border-radius: 4px;
+    padding: 4px 8px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: background-color 0.2s, color 0.2s;
+    color: inherit;
+}
+
+.toggle-visibility-btn:hover {
+    background-color: rgba(128, 128, 128, 0.2);
+}
+
+.clickable-token {
+    cursor: pointer;
+    padding: 12px 10px;
+    margin: 0;
+    overflow: auto;
+    white-space: pre-wrap;
+    word-break: break-all;
+    border-radius: 0;
+    background-color: transparent;
+}
+
+.clickable-token:hover {
+    background-color: rgba(0, 0, 0, 0.05);
 }

@@ -13,7 +13,7 @@ export function AdminPanel() {
 
   return (
     <div className="auth-container">
-      <Authenticator>
+      <Authenticator hideSignUp>
         {({ signOut, user }) => (
           <div className="admin-container">
             <nav className="admin-nav">

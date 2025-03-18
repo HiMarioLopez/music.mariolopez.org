@@ -64,9 +64,13 @@
 
 .admin-content {
   width: 100%;
-  max-width: 600px;
+  max-width: 1200px;
   margin: 2rem auto;
   padding: 0 1rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2rem;
+  justify-content: center;
 }
 
 .auth-container {
@@ -117,7 +121,8 @@
   }
 
   .admin-content {
-    margin: 1rem auto;
+    margin: 1.5rem auto;
     padding: 0 0.5rem;
+    gap: 1rem;
   }
 }
