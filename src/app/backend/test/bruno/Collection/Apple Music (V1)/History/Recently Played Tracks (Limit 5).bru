@@ -1,0 +1,23 @@
+meta {
+  name: Recently Played Tracks (Limit 5)
+  type: http
+  seq: 4
+}
+
+get {
+  url: https://api.music.apple.com/v1/me/recent/played/tracks?limit=5
+  body: none
+  auth: bearer
+}
+
+params:query {
+  limit: 5
+}
+
+headers {
+  Music-User-Token: {{MUSIC_USER_TOKEN}}
+}
+
+auth:bearer {
+  token: {{AUTH_TOKEN}}
+}
