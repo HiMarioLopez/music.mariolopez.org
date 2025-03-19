@@ -168,6 +168,31 @@ public class AdminPanelStack : Stack
             Resources = [$"arn:aws:ssm:{Region}:{Account}:parameter/Music/AppleMusicHistory/ScheduleRate"]
         }));
 
+        // Create Lambda function to get schedule rate
+        var getScheduleRateFunction = new Function(this, "Music-GetScheduleRateFunction", new FunctionProps
+        {
+            Runtime = Runtime.NODEJS_22_X,
+            Handler = "index.handler",
+            Code = Code.FromAsset("../app/backend/handlers/api/get-schedule-rate/get-schedule-rate-nodejs/dist"),
+            Environment = new Dictionary<string, string>
+            {
+                ["AWS_NODEJS_CONNECTION_REUSE_ENABLED"] = "1",
+                ["PARAMETER_NAME"] = "/Music/AppleMusicHistory/ScheduleRate"
+            },
+            Description = "Lambda function to get the Apple Music history tracking schedule rate",
+            Architecture = Architecture.ARM_64,
+            MemorySize = 128,
+            Timeout = Duration.Seconds(29),
+        });
+
+        // Grant Lambda permission to read from Parameter Store
+        getScheduleRateFunction.AddToRolePolicy(new PolicyStatement(new PolicyStatementProps
+        {
+            Effect = Effect.ALLOW,
+            Actions = ["ssm:GetParameter"],
+            Resources = [$"arn:aws:ssm:{Region}:{Account}:parameter/Music/AppleMusicHistory/ScheduleRate"]
+        }));
+
         #endregion
 
         #region Bucket
@@ -305,6 +330,16 @@ public class AdminPanelStack : Stack
         scheduleResource.AddResource("update").AddMethod(
             "POST",
             new LambdaIntegration(updateScheduleRateFunction, new LambdaIntegrationOptions
+            {
+                Timeout = Duration.Seconds(29),
+                AllowTestInvoke = true
+            })
+        );
+
+        // GET /api/nodejs/schedule/get
+        scheduleResource.AddResource("get").AddMethod(
+            "GET",
+            new LambdaIntegration(getScheduleRateFunction, new LambdaIntegrationOptions
             {
                 Timeout = Duration.Seconds(29),
                 AllowTestInvoke = true

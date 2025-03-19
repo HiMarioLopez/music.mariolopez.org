@@ -1,31 +1,47 @@
 import { fetchAuthSession } from 'aws-amplify/auth';
 
-export async function updateMusicUserToken(musicUserToken: string) {
+interface ApiOptions {
+    method: 'GET' | 'POST';
+    path: string;
+    body?: any;
+    baseUrl?: string;
+    requiresAuth?: boolean;
+}
+
+async function getAuthToken() {
     const { tokens } = await fetchAuthSession();
-    if (!tokens?.idToken?.toString()) {
+    const idToken = tokens?.idToken?.toString();
+    if (!idToken) {
         throw new Error('No valid authentication token found');
     }
 
-    const idToken = tokens.idToken.toString();
     console.log('Auth Token:', {
-        full: idToken,
         preview: `${idToken.slice(0, 20)}...${idToken.slice(-20)}`,
         length: idToken.length
     });
 
-    const url = `${import.meta.env.VITE_ADMIN_API_BASE_URL}/api/nodejs/mut/update`;
+    return idToken;
+}
+
+async function apiRequest<T>({ method, path, body, baseUrl, requiresAuth = true }: ApiOptions): Promise<T> {
+    const url = `${baseUrl || import.meta.env.VITE_ADMIN_API_BASE_URL}/api/nodejs/${path}`;
     console.log('Making request to:', url);
 
-    const headers = {
+    const headers: Record<string, string> = {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${idToken}`,
     };
+
+    if (requiresAuth) {
+        const idToken = await getAuthToken();
+        headers['Authorization'] = `Bearer ${idToken}`;
+    }
+
     console.log('Request headers:', headers);
 
     const response = await fetch(url, {
-        method: 'POST',
+        method,
         headers,
-        body: JSON.stringify({ musicUserToken }),
+        ...(body && { body: JSON.stringify(body) })
     });
 
     console.log('Response status:', response.status);
@@ -34,77 +50,57 @@ export async function updateMusicUserToken(musicUserToken: string) {
     if (!response.ok) {
         const errorText = await response.text();
         console.error('Error response body:', errorText);
-        throw new Error(`Failed to update music user token: ${response.statusText}`);
+        throw new Error(`API request failed: ${response.statusText}`);
     }
 
-    return response;
+    if (method === 'GET') {
+        const responseText = await response.text();
+        try {
+            return JSON.parse(responseText);
+        } catch (parseError) {
+            console.error('JSON parse error:', parseError);
+            throw new Error('Invalid JSON response from server');
+        }
+    }
+
+    return response as T;
+}
+
+// API Functions
+export async function updateMusicUserToken(musicUserToken: string) {
+    return apiRequest({
+        method: 'POST',
+        path: 'mut/update',
+        body: { musicUserToken }
+    });
 }
 
 export async function fetchDeveloperToken() {
-    const baseUrl = import.meta.env.VITE_MUSIC_API_BASE_URL;
-    console.log('Fetching from:', `${baseUrl}/api/nodejs/auth/token`);
-
-    const response = await fetch(`${baseUrl}/api/nodejs/auth/token`, {
+    const response = await apiRequest<{ token: string }>({
         method: 'GET',
+        path: 'auth/token',
+        baseUrl: import.meta.env.VITE_MUSIC_API_BASE_URL,
+        requiresAuth: false
     });
 
-    console.log('Response status:', response.status);
-    console.log('Response headers:', Object.fromEntries(response.headers.entries()));
-
-    const responseText = await response.text();
-    console.log('Raw response:', responseText);
-
-    if (!response.ok) {
-        throw new Error('Failed to fetch developer token');
-    }
-
-    let data;
-    try {
-        data = JSON.parse(responseText);
-    } catch (parseError) {
-        console.error('JSON parse error:', parseError);
-        throw new Error('Invalid JSON response from server');
-    }
-
-    console.log('Parsed data:', data);
-
-    if (!data.token) {
+    if (!response.token) {
         throw new Error('No token found in response');
     }
 
-    return data.token;
+    return response.token;
 }
 
 export async function updateScheduleRate(rate: string) {
-    const { tokens } = await fetchAuthSession();
-    if (!tokens?.idToken?.toString()) {
-        throw new Error('No valid authentication token found');
-    }
-
-    const idToken = tokens.idToken.toString();
-    const url = `${import.meta.env.VITE_ADMIN_API_BASE_URL}/api/nodejs/schedule/update`;
-    console.log('Making request to:', url);
-
-    const headers = {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${idToken}`,
-    };
-    console.log('Request headers:', headers);
-
-    const response = await fetch(url, {
+    return apiRequest({
         method: 'POST',
-        headers,
-        body: JSON.stringify({ rate }),
+        path: 'schedule/update',
+        body: { rate }
     });
+}
 
-    console.log('Response status:', response.status);
-    console.log('Response headers:', Object.fromEntries(response.headers.entries()));
-
-    if (!response.ok) {
-        const errorText = await response.text();
-        console.error('Error response body:', errorText);
-        throw new Error(`Failed to update schedule: ${response.statusText}`);
-    }
-
-    return response;
+export async function getScheduleRate() {
+    return apiRequest<{ rate: string }>({
+        method: 'GET',
+        path: 'schedule/get'
+    });
 } 

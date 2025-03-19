@@ -65,3 +65,37 @@
         gap: 0.5rem;
     }
 }
+
+.token-display {
+    margin: 1rem 0;
+}
+
+.secure-token-container {
+    background-color: var(--bg-tertiary);
+    border-radius: 4px;
+    padding: 0.5rem;
+    box-shadow: var(--shadow-sm);
+}
+
+.token-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.token-label {
+    font-weight: bold;
+    color: var(--text-secondary);
+}
+
+.clickable-token {
+    background-color: var(--bg-secondary);
+    padding: 0.75rem;
+    border-radius: 4px;
+    margin: 0;
+    word-break: break-all;
+    font-family: monospace;
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+}
