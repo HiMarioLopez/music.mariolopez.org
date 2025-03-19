@@ -1,5 +1,5 @@
 {
-    "name": "record-track-history",
+    "name": "update-track-history-job",
     "version": "1.0.0",
     "description": "Lambda function to fetch and store Apple Music listening history",
     "main": "dist/index.js",

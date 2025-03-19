@@ -40,7 +40,7 @@ public class AppleMusicHistoryStack : Stack
 
         #region IAM Role for Lambda
 
-        var historyLambdaRole = new Role(this, "AppleMusicHistoryLambdaRole", new RoleProps
+        var updateHistoryJobLambdaRole = new Role(this, "UpdateAppleMusicHistoryJobLambdaRole", new RoleProps
         {
             AssumedBy = new ServicePrincipal("lambda.amazonaws.com"),
             Description = "Role for Apple Music History tracking Lambda function",
@@ -51,7 +51,7 @@ public class AppleMusicHistoryStack : Stack
         });
 
         // Add permissions for DynamoDB and SSM
-        historyLambdaRole.AddToPolicy(new PolicyStatement(new PolicyStatementProps
+        updateHistoryJobLambdaRole.AddToPolicy(new PolicyStatement(new PolicyStatementProps
         {
             Effect = Effect.ALLOW,
             Actions =
@@ -71,7 +71,7 @@ public class AppleMusicHistoryStack : Stack
         }));
 
         // Add CloudWatch permissions
-        historyLambdaRole.AddToPolicy(new PolicyStatement(new PolicyStatementProps
+        updateHistoryJobLambdaRole.AddToPolicy(new PolicyStatement(new PolicyStatementProps
         {
             Effect = Effect.ALLOW,
             Actions = ["cloudwatch:PutMetricData"],
@@ -101,12 +101,12 @@ public class AppleMusicHistoryStack : Stack
         #region Lambda Functions
 
         // Scheduler Lambda for fetching and storing history
-        var historyLambda = new Function(this, "AppleMusicHistoryLambda", new FunctionProps
+        var updateHistoryJobLambda = new Function(this, "UpdateAppleMusicHistoryJobLambda", new FunctionProps
         {
             Runtime = Runtime.NODEJS_22_X,
             Handler = "index.handler",
-            Code = Code.FromAsset("../app/backend/handlers/record-track-history/record-track-history-nodejs/dist"),
-            Role = historyLambdaRole,
+            Code = Code.FromAsset("../app/backend/handlers/update-track-history-job/update-track-history-job-nodejs/dist"),
+            Role = updateHistoryJobLambdaRole,
             MemorySize = 256,
             Timeout = Duration.Seconds(60),
             Description = "Fetches and stores Apple Music listening history",
@@ -123,29 +123,29 @@ public class AppleMusicHistoryStack : Stack
 
         #region CloudWatch Event Rule (Scheduler)
 
-        var rule = new Rule(this, "AppleMusicHistorySchedule", new RuleProps
+        var rule = new Rule(this, "UpdateAppleMusicHistoryJobSchedule", new RuleProps
         {
             Schedule = Schedule.Expression(Token.AsString(scheduleRateParameter.StringValue)), // Use SSM parameter value
             Description = "Schedule for fetching Apple Music history"
         });
 
         // Set the Lambda function as the target of the rule
-        rule.AddTarget(new LambdaFunction(historyLambda));
+        rule.AddTarget(new LambdaFunction(updateHistoryJobLambda));
 
         #endregion
 
         #region CloudWatch Dashboard
 
-        var dashboard = new Dashboard(this, "AppleMusicHistoryDashboard", new DashboardProps
+        var dashboard = new Dashboard(this, "UpdateAppleMusicHistoryJobDashboard", new DashboardProps
         {
-            DashboardName = "AppleMusicHistoryDashboard"
+            DashboardName = "UpdateAppleMusicHistoryJobDashboard"
         });
 
         dashboard.AddWidgets(
         [
             new GraphWidget(new GraphWidgetProps
             {
-                Title = "History Tracking Lambda",
+                Title = "Update Apple Music History Job",
                 Width = 12,
                 Height = 6,
                 Left =
@@ -156,7 +156,7 @@ public class AppleMusicHistoryStack : Stack
                         MetricName = "Invocations",
                         DimensionsMap = new Dictionary<string, string>
                         {
-                            { "FunctionName", historyLambda.FunctionName }
+                            { "FunctionName", updateHistoryJobLambda.FunctionName }
                         }
                     }),
                     new Metric(new MetricProps
@@ -165,7 +165,7 @@ public class AppleMusicHistoryStack : Stack
                         MetricName = "Errors",
                         DimensionsMap = new Dictionary<string, string>
                         {
-                            { "FunctionName", historyLambda.FunctionName }
+                            { "FunctionName", updateHistoryJobLambda.FunctionName }
                         }
                     }),
                     new Metric(new MetricProps
@@ -174,7 +174,7 @@ public class AppleMusicHistoryStack : Stack
                         MetricName = "Duration",
                         DimensionsMap = new Dictionary<string, string>
                         {
-                            { "FunctionName", historyLambda.FunctionName }
+                            { "FunctionName", updateHistoryJobLambda.FunctionName }
                         }
                     })
                 ]
@@ -213,7 +213,7 @@ public class AppleMusicHistoryStack : Stack
                 Height = 6,
                 LogGroupNames =
                 [
-                    historyLambda.LogGroup.LogGroupName
+                    updateHistoryJobLambda.LogGroup.LogGroupName
                 ],
                 QueryString = "filter @message like /Error/\n| sort @timestamp desc\n| limit 20"
             }),
@@ -256,7 +256,7 @@ public class AppleMusicHistoryStack : Stack
 
         var appleMusicHistoryLambdaName = new CfnOutput(this, "AppleMusicHistoryLambdaName", new CfnOutputProps
         {
-            Value = historyLambda.FunctionName,
+            Value = updateHistoryJobLambda.FunctionName,
             Description = "Name of the Lambda function fetching Apple Music history",
             ExportName = "AppleMusicHistoryLambdaName"
         });
