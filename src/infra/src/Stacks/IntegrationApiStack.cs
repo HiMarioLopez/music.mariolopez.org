@@ -14,6 +14,8 @@ using Amazon.CDK.AWS.CloudWatch;
 using Constructs;
 using Microsoft.Extensions.Configuration;
 using Music.Infra.Models.Settings;
+using Amazon.CDK.AWS.Events;
+using Amazon.CDK.AWS.Events.Targets;
 
 namespace Music.Infra.Stacks;
 
@@ -26,9 +28,9 @@ namespace Music.Infra.Stacks;
 ///     - https://aws.amazon.com/api-gateway/pricing/
 ///     - https://aws.amazon.com/secrets-manager/pricing/
 /// </remarks>
-public class ApiStack : Stack
+public class IntegrationApiStack : Stack
 {
-    internal ApiStack(Construct scope, string id, IStackProps props = null, IConfiguration configuration = null)
+    internal IntegrationApiStack(Construct scope, string id, IStackProps props = null, IConfiguration configuration = null)
         : base(scope, id, props)
     {
         var corsSettings = configuration?.GetSection("MusicApiSettings").Get<MusicApiSettings>();
@@ -36,7 +38,8 @@ public class ApiStack : Stack
         #region API Gateway
 
         // Certificate for music.mariolopez.org
-        var rootCertificateArn = "arn:aws:acm:us-east-1:851725225504:certificate/70d15630-f6b4-495e-9d0c-572c64804dfc";
+        var awsSettings = configuration?.GetSection("AWS").Get<AwsSettings>();
+        var rootCertificateArn = awsSettings?.CertificateArn;
         var rootCertificate = Certificate.FromCertificateArn(this, "Music-ApiCertificate", rootCertificateArn);
 
         // Create a new REST API
@@ -76,7 +79,7 @@ public class ApiStack : Stack
             SecretName = "AppleAuthKey"
         });
 
-        var appleSettings = configuration.GetSection("AppleSettings").Get<AppleSettings>();
+        var appleSettings = configuration.GetSection("AppleSettings").Get<AppleDeveloperSettings>();
         var teamId = appleSettings.TeamId;
         var keyId = appleSettings.KeyId;
 
@@ -173,7 +176,7 @@ public class ApiStack : Stack
             Effect = Effect.ALLOW
         }));
 
-        // Auth Handler Lambda
+        // Get Developer Token Handler Lambda
         var nodejsAuthHandlerFunction = new Function(this, "Music-NodejsAuthHandlerLambda", new FunctionProps
         {
             Runtime = Runtime.NODEJS_22_X,
@@ -182,9 +185,10 @@ public class ApiStack : Stack
             Handler = "index.handler",
             Environment = new Dictionary<string, string>
             {
-                { "APPLE_AUTH_KEY_SECRET_NAME", appleAuthKey.SecretName },
-                { "APPLE_TEAM_ID", teamId },
-                { "APPLE_KEY_ID", keyId }
+                ["AWS_NODEJS_CONNECTION_REUSE_ENABLED"] = "1",
+                ["APPLE_AUTH_KEY_SECRET_NAME"] = appleAuthKey.SecretName,
+                ["APPLE_TEAM_ID"] = teamId,
+                ["APPLE_KEY_ID"] = keyId
             },
             Description = "Generates a token for use with Apple's Music API. Built with Node.js.",
             Architecture = Architecture.ARM_64,
@@ -193,7 +197,7 @@ public class ApiStack : Stack
             Timeout = Duration.Seconds(29),
         });
 
-        // Data Fetching Lambda
+        // Apple Music API Data Fetching Lambda
         var dataFetchingLambda = new Function(this, "AppleMusicApiDataFetchingLambda", new FunctionProps
         {
             Runtime = Runtime.NODEJS_22_X,
@@ -202,8 +206,10 @@ public class ApiStack : Stack
             Role = appleMusicLambdaRole,
             MemorySize = 512,
             Timeout = Duration.Seconds(30),
+            Description = "Fetches data from Apple Music API and handles caching strategies",
             Environment = new Dictionary<string, string>
             {
+                ["AWS_NODEJS_CONNECTION_REUSE_ENABLED"] = "1",
                 ["TOKEN_REFRESH_SNS_TOPIC_ARN"] = tokenRefreshTopic.TopicArn,
                 ["FAILED_REQUESTS_SQS_URL"] = failedRequestsQueue.QueueUrl,
                 ["UPSTASH_REDIS_URL"] = configuration["AppleMusicApi:UpstashRedis:Url"],
@@ -220,8 +226,10 @@ public class ApiStack : Stack
             Role = appleMusicLambdaRole,
             MemorySize = 256,
             Timeout = Duration.Seconds(10),
+            Description = "Sends notifications when Apple Music API token needs to be refreshed",
             Environment = new Dictionary<string, string>
             {
+                ["AWS_NODEJS_CONNECTION_REUSE_ENABLED"] = "1",
                 ["ADMIN_EMAIL"] = configuration["AppleMusicApi:Email:AdminEmail"],
                 ["SOURCE_EMAIL"] = configuration["AppleMusicApi:Email:SourceEmail"]
             }
@@ -236,8 +244,10 @@ public class ApiStack : Stack
             Role = appleMusicLambdaRole,
             MemorySize = 256,
             Timeout = Duration.Seconds(60),
+            Description = "Processes failed requests from the DLQ and attempts to retry them",
             Environment = new Dictionary<string, string>
             {
+                ["AWS_NODEJS_CONNECTION_REUSE_ENABLED"] = "1",
                 ["API_GATEWAY_URL"] = apiGateway.Url
             }
         });
@@ -274,6 +284,20 @@ public class ApiStack : Stack
                 AllowTestInvoke = true
             })
         );
+
+        // Add history endpoints to API Gateway
+        var historyResource = nodejsResource.AddResource("history");
+        var musicHistoryResource = historyResource.AddResource("music");
+        musicHistoryResource.AddMethod(
+            "GET",
+            new LambdaIntegration(dataFetchingLambda, new LambdaIntegrationOptions
+            {
+                Proxy = true,
+                AllowTestInvoke = true
+            }), new MethodOptions
+            {
+                AuthorizationType = AuthorizationType.NONE
+            });
 
         // Apple Music API endpoints
         var appleMusicResource = nodejsResource.AddResource("apple-music");

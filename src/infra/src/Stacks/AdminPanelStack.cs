@@ -15,6 +15,7 @@ using Music.Infra.Models.Settings;
 
 using Function = Amazon.CDK.AWS.Lambda.Function;
 using FunctionProps = Amazon.CDK.AWS.Lambda.FunctionProps;
+using Amazon.CDK.AWS.IAM;
 
 namespace Music.Infra.Stacks;
 
@@ -108,7 +109,8 @@ public class AdminPanelStack : Stack
             Code = Code.FromAsset("../app/backend/handlers/api/store-mut/store-mut-nodejs/dist"),
             Environment = new Dictionary<string, string>
             {
-                { "PARAMETER_NAME", mutParameter.ParameterName }
+                ["AWS_NODEJS_CONNECTION_REUSE_ENABLED"] = "1",
+                ["PARAMETER_NAME"] = mutParameter.ParameterName
             },
             Description = "Lambda function to store Music User Token in Parameter Store",
             Architecture = Architecture.ARM_64,
@@ -128,7 +130,8 @@ public class AdminPanelStack : Stack
             Code = Code.FromAsset("../app/backend/handlers/api/get-mut/get-mut-nodejs/dist"),
             Environment = new Dictionary<string, string>
             {
-                { "PARAMETER_NAME", mutParameter.ParameterName }
+                ["AWS_NODEJS_CONNECTION_REUSE_ENABLED"] = "1",
+                ["PARAMETER_NAME"] = mutParameter.ParameterName
             },
             Description = "Lambda function to retrieve Music User Token from Parameter Store",
             Architecture = Architecture.ARM_64,
@@ -140,7 +143,33 @@ public class AdminPanelStack : Stack
         // Grant Lambda permission to read from Parameter Store
         mutParameter.GrantRead(getMutFunction);
 
+        // Create Lambda function to update schedule rate
+        var updateScheduleRateFunction = new Function(this, "Music-UpdateScheduleRateFunction", new FunctionProps
+        {
+            Runtime = Runtime.NODEJS_22_X,
+            Handler = "index.handler",
+            Code = Code.FromAsset("../app/backend/handlers/api/update-schedule-rate/update-schedule-rate-nodejs/dist"),
+            Environment = new Dictionary<string, string>
+            {
+                ["AWS_NODEJS_CONNECTION_REUSE_ENABLED"] = "1",
+                ["PARAMETER_NAME"] = "/Music/AppleMusicHistory/ScheduleRate"
+            },
+            Description = "Lambda function to update the Apple Music history tracking schedule rate",
+            Architecture = Architecture.ARM_64,
+            MemorySize = 128,
+            Timeout = Duration.Seconds(29),
+        });
+
+        // Grant Lambda permission to write to Parameter Store
+        updateScheduleRateFunction.AddToRolePolicy(new PolicyStatement(new PolicyStatementProps
+        {
+            Effect = Effect.ALLOW,
+            Actions = ["ssm:PutParameter"],
+            Resources = [$"arn:aws:ssm:{Region}:{Account}:parameter/Music/AppleMusicHistory/ScheduleRate"]
+        }));
+
         #endregion
+
         #region Bucket
 
         // Create an S3 bucket configured for website hosting
@@ -158,7 +187,7 @@ public class AdminPanelStack : Stack
         #region Site Deployment
 
         // Deploy admin panel static site assets
-        new BucketDeployment(this, "Music-DeployAdminSite", new BucketDeploymentProps
+        var deployAdminSite = new BucketDeployment(this, "Music-DeployAdminSite", new BucketDeploymentProps
         {
             Sources = [Source.Asset("../app/frontend/music-admin-panel/music-admin-panel-react/dist")],
             DestinationBucket = adminBucket
@@ -169,8 +198,8 @@ public class AdminPanelStack : Stack
         #region Distribution
 
         // Certificate for `*.music.mariolopez.org`
-        // TODO: Remove this hard-coded ARN - use the same certificate as the main site
-        var rootCertificateArn = "arn:aws:acm:us-east-1:851725225504:certificate/70d15630-f6b4-495e-9d0c-572c64804dfc";
+        var awsSettings = configuration?.GetSection("AWS").Get<AwsSettings>();
+        var rootCertificateArn = awsSettings?.CertificateArn;
         var rootCertificate = Certificate.FromCertificateArn(this, "Music-AdminSiteCertificate", rootCertificateArn);
 
         // Import the API Gateway's custom domain name
@@ -179,6 +208,7 @@ public class AdminPanelStack : Stack
         // Create CloudFront distribution for the admin panel
         var distribution = new Distribution(this, "Music-AdminSiteDistribution", new DistributionProps
         {
+            // Distribution serving the admin panel frontend for music.mariolopez.org
             DefaultBehavior = new BehaviorOptions
             {
                 Origin = new S3StaticWebsiteOrigin(adminBucket),
@@ -247,10 +277,11 @@ public class AdminPanelStack : Stack
         });
 
         // Create API resources and methods
-        var nodejsMutResource = api.Root.AddResource("nodejs").AddResource("mut");
+        var nodejsResource = api.Root.AddResource("nodejs");
+        var mutResource = nodejsResource.AddResource("mut");
 
         // POST /api/nodejs/mut/store
-        nodejsMutResource.AddResource("store").AddMethod(
+        mutResource.AddResource("store").AddMethod(
             "POST",
             new LambdaIntegration(storeMutFunction, new LambdaIntegrationOptions
             {
@@ -260,7 +291,7 @@ public class AdminPanelStack : Stack
         );
 
         // GET /api/nodejs/mut/get
-        nodejsMutResource.AddResource("get").AddMethod(
+        mutResource.AddResource("get").AddMethod(
             "GET",
             new LambdaIntegration(getMutFunction, new LambdaIntegrationOptions
             {
@@ -269,25 +300,39 @@ public class AdminPanelStack : Stack
             })
         );
 
+        // POST /api/nodejs/schedule/update
+        var scheduleResource = nodejsResource.AddResource("schedule");
+        scheduleResource.AddResource("update").AddMethod(
+            "POST",
+            new LambdaIntegration(updateScheduleRateFunction, new LambdaIntegrationOptions
+            {
+                Timeout = Duration.Seconds(29),
+                AllowTestInvoke = true
+            })
+        );
+
         #endregion
 
+        #region Outputs
         // Output Cognito configuration for frontend
-        new CfnOutput(this, "UserPoolId", new CfnOutputProps
+        var userPoolIdOutput = new CfnOutput(this, "UserPoolId", new CfnOutputProps
         {
             Value = userPool.UserPoolId,
             Description = "Cognito User Pool ID"
         });
 
-        new CfnOutput(this, "UserPoolClientId", new CfnOutputProps
+        var userPoolClientIdOutput = new CfnOutput(this, "UserPoolClientId", new CfnOutputProps
         {
             Value = userPoolClient.UserPoolClientId,
             Description = "Cognito User Pool Client ID"
         });
 
-        new CfnOutput(this, "UserPoolDomain", new CfnOutputProps
+        var userPoolDomainOutput = new CfnOutput(this, "UserPoolDomain", new CfnOutputProps
         {
             Value = $"admin-{this.Account}.auth.{this.Region}.amazoncognito.com",
             Description = "Cognito User Pool Domain"
         });
+
+        #endregion
     }
 }

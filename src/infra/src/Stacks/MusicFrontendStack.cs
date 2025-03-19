@@ -10,6 +10,8 @@ using Constructs;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using Microsoft.Extensions.Configuration;
+using Music.Infra.Models.Settings;
 
 namespace Music.Infra.Stacks;
 
@@ -22,9 +24,9 @@ namespace Music.Infra.Stacks;
 ///     - https://aws.amazon.com/cloudfront/pricing/
 ///     - https://aws.amazon.com/s3/pricing/
 /// </remarks>
-public class FrontendStack : Stack
+public class MusicFrontendStack : Stack
 {
-    public FrontendStack(Construct scope, string id, IStackProps props = null) : base(scope, id, props)
+    public MusicFrontendStack(Construct scope, string id, IStackProps props = null, IConfiguration configuration = null) : base(scope, id, props)
     {
         #region Bucket
 
@@ -43,7 +45,7 @@ public class FrontendStack : Stack
         #region Site Deployments
 
         // Deploy Lit static site assets
-        new BucketDeployment(this, "Music-DeployLitSite", new BucketDeploymentProps
+        var deployLitSite = new BucketDeployment(this, "Music-DeployLitSite", new BucketDeploymentProps
         {
             Sources = [Source.Asset("../app/frontend/music/music-lit/dist")],
             DestinationBucket = siteBucket,
@@ -51,7 +53,7 @@ public class FrontendStack : Stack
         });
 
         // Deploy Qwik static site assets
-        new BucketDeployment(this, "Music-DeployQkiwSite", new BucketDeploymentProps
+        var deployQwikSite = new BucketDeployment(this, "Music-DeployQkiwSite", new BucketDeploymentProps
         {
             Sources = [Source.Asset("../app/frontend/music/music-qwik/dist")],
             DestinationBucket = siteBucket,
@@ -59,7 +61,7 @@ public class FrontendStack : Stack
         });
 
         // Deploy React static site assets
-        new BucketDeployment(this, "Music-DeployReactSite", new BucketDeploymentProps
+        var deployReactSite = new BucketDeployment(this, "Music-DeployReactSite", new BucketDeploymentProps
         {
             Sources = [Source.Asset("../app/frontend/music/music-react/dist")],
             DestinationBucket = siteBucket,
@@ -67,7 +69,7 @@ public class FrontendStack : Stack
         });
 
         // Deploy Solid static site assets
-        new BucketDeployment(this, "Music-DeploySolidSite", new BucketDeploymentProps
+        var deploySolidSite = new BucketDeployment(this, "Music-DeploySolidSite", new BucketDeploymentProps
         {
             Sources = [Source.Asset("../app/frontend/music/music-solid/dist")],
             DestinationBucket = siteBucket,
@@ -75,7 +77,7 @@ public class FrontendStack : Stack
         });
 
         // Deploy Svelte static site assets
-        new BucketDeployment(this, "Music-DeploySvelteSite", new BucketDeploymentProps
+        var deploySvelteSite = new BucketDeployment(this, "Music-DeploySvelteSite", new BucketDeploymentProps
         {
             Sources = [Source.Asset("../app/frontend/music/music-svelte/dist")],
             DestinationBucket = siteBucket,
@@ -83,7 +85,7 @@ public class FrontendStack : Stack
         });
 
         // Deploy Vanilla static site assets
-        new BucketDeployment(this, "Music-DeployVanillaSite", new BucketDeploymentProps
+        var deployVanillaSite = new BucketDeployment(this, "Music-DeployVanillaSite", new BucketDeploymentProps
         {
             Sources = [Source.Asset("../app/frontend/music/music-vanilla/dist")],
             DestinationBucket = siteBucket,
@@ -91,7 +93,7 @@ public class FrontendStack : Stack
         });
 
         // Deploy Vue static site assets
-        new BucketDeployment(this, "Music-DeployVueSite", new BucketDeploymentProps
+        var deployVueSite = new BucketDeployment(this, "Music-DeployVueSite", new BucketDeploymentProps
         {
             Sources = [Source.Asset("../app/frontend/music/music-vue/dist")],
             DestinationBucket = siteBucket,
@@ -99,7 +101,7 @@ public class FrontendStack : Stack
         });
 
         // Deploy Preact static site assets
-        new BucketDeployment(this, "Music-DeployPreactSite", new BucketDeploymentProps
+        var deployPreactSite = new BucketDeployment(this, "Music-DeployPreactSite", new BucketDeploymentProps
         {
             Sources = [Source.Asset("../app/frontend/music/music-preact/dist")],
             DestinationBucket = siteBucket,
@@ -107,7 +109,7 @@ public class FrontendStack : Stack
         });
 
         // Deploy Next static site assets
-        new BucketDeployment(this, "Music-DeployNextSite", new BucketDeploymentProps
+        var deployNextSite = new BucketDeployment(this, "Music-DeployNextSite", new BucketDeploymentProps
         {
             Sources = [Source.Asset("../app/frontend/music/music-next/dist")],
             DestinationBucket = siteBucket,
@@ -115,7 +117,7 @@ public class FrontendStack : Stack
         });
 
         // Deploy Angular static site assets
-        new BucketDeployment(this, "Music-DeployAngularSite", new BucketDeploymentProps
+        var deployAngularSite = new BucketDeployment(this, "Music-DeployAngularSite", new BucketDeploymentProps
         {
             Sources = [Source.Asset("../app/frontend/music/music-angular/dist")],
             DestinationBucket = siteBucket,
@@ -123,7 +125,7 @@ public class FrontendStack : Stack
         });
 
         // Deploy Blazor static site assets
-        new BucketDeployment(this, "Music-DeployBlazorSite", new BucketDeploymentProps
+        var deployBlazorSite = new BucketDeployment(this, "Music-DeployBlazorSite", new BucketDeploymentProps
         {
             Sources = [Source.Asset("../app/frontend/music/music-blazor/dist")],
             DestinationBucket = siteBucket,
@@ -131,7 +133,7 @@ public class FrontendStack : Stack
         });
 
         // Deploy Leptos static site assets
-        new BucketDeployment(this, "Music-DeployLeptosSite", new BucketDeploymentProps
+        var deployLeptosSite = new BucketDeployment(this, "Music-DeployLeptosSite", new BucketDeploymentProps
         {
             Sources = [Source.Asset("../app/frontend/music/music-leptos/dist")],
             DestinationBucket = siteBucket,
@@ -144,7 +146,7 @@ public class FrontendStack : Stack
 
         var edgeFunction = new EdgeFunction(this, "Music-EdgeFunction", new EdgeFunctionProps
         {
-            Runtime = Runtime.NODEJS_20_X,
+            Runtime = Runtime.NODEJS_22_X,
             Handler = "index.handler",
             // Use the minified version of the Node.js frontend randomization handler
             Code = Code.FromInline(Encoding.UTF8.GetString(File.ReadAllBytes("../app/backend/handlers/music-frontend-randomization/music-frontend-randomization-nodejs/dist/index.js"))),
@@ -160,8 +162,8 @@ public class FrontendStack : Stack
         #region Distribution
 
         // Certificate for `music.mariolopez.org`
-        // TODO: Remove this hard-coded ARN
-        var rootCertificateArn = "arn:aws:acm:us-east-1:851725225504:certificate/70d15630-f6b4-495e-9d0c-572c64804dfc";
+        var awsSettings = configuration?.GetSection("AWS").Get<AwsSettings>();
+        var rootCertificateArn = awsSettings?.CertificateArn;
         var rootCertificate = Certificate.FromCertificateArn(this, "Music-SiteCertificate", rootCertificateArn);
 
         // Import the API Gateway's custom domain name
