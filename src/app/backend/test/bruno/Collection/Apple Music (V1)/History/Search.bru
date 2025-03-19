@@ -1,0 +1,24 @@
+meta {
+  name: Search
+  type: http
+  seq: 6
+}
+
+get {
+  url: https://api.music.apple.com/v1/catalog/us/search?types=albums&term=lady+gaga+mayhem
+  body: none
+  auth: bearer
+}
+
+params:query {
+  types: albums
+  term: lady gaga mayhem
+}
+
+headers {
+  Music-User-Token: {{MUSIC_USER_TOKEN}}
+}
+
+auth:bearer {
+  token: {{AUTH_TOKEN}}
+}

@@ -1,0 +1,19 @@
+meta {
+  name: Heavy Rotation
+  type: http
+  seq: 5
+}
+
+get {
+  url: https://api.music.apple.com/v1/me/history/heavy-rotation
+  body: none
+  auth: bearer
+}
+
+headers {
+  Music-User-Token: {{MUSIC_USER_TOKEN}}
+}
+
+auth:bearer {
+  token: {{AUTH_TOKEN}}
+}
