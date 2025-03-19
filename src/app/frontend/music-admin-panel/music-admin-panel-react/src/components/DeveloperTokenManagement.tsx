@@ -41,7 +41,7 @@ export function DeveloperTokenManagement({ onTokenFetched }: DeveloperTokenManag
 
     return (
         <div className="content-card developer-token-card">
-            <h2>Apple Developer Token</h2>
+            <h2>Apple Developer Token Management</h2>
 
             {error && (
                 <div className="error-message">

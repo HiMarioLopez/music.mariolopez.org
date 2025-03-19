@@ -73,4 +73,38 @@ export async function fetchDeveloperToken() {
     }
 
     return data.token;
+}
+
+export async function updateScheduleRate(rate: string) {
+    const { tokens } = await fetchAuthSession();
+    if (!tokens?.idToken?.toString()) {
+        throw new Error('No valid authentication token found');
+    }
+
+    const idToken = tokens.idToken.toString();
+    const url = `${import.meta.env.VITE_ADMIN_API_BASE_URL}/api/nodejs/schedule/update`;
+    console.log('Making request to:', url);
+
+    const headers = {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${idToken}`,
+    };
+    console.log('Request headers:', headers);
+
+    const response = await fetch(url, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ rate }),
+    });
+
+    console.log('Response status:', response.status);
+    console.log('Response headers:', Object.fromEntries(response.headers.entries()));
+
+    if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Error response body:', errorText);
+        throw new Error(`Failed to update schedule: ${response.statusText}`);
+    }
+
+    return response;
 } 

@@ -1,14 +1,3 @@
-.content-card {
-    background: var(--bg-secondary);
-    border-radius: 0.5rem;
-    box-shadow: var(--shadow-md);
-    padding: 2rem;
-    width: 100%;
-    max-width: 600px;
-    margin: 0;
-    flex: 1 1 400px;
-}
-
 .content-card h2 {
     margin-bottom: 1.5rem;
     color: var(--text-primary);

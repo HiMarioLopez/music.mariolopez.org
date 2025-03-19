@@ -41,4 +41,31 @@
   display: flex;
   align-items: center;
   justify-content: center;
-} 
+}
+
+/* Add shared card styles */
+.content-card {
+  background: var(--bg-secondary);
+  border-radius: 0.5rem;
+  box-shadow: var(--shadow-md);
+  padding: 2rem;
+  width: 500px;
+  /* Fixed width for desktop */
+  margin: 0;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 1100px) {
+  .content-card {
+    width: calc(50% - 1rem);
+    /* Two cards per row with gap */
+  }
+}
+
+@media (max-width: 640px) {
+  .content-card {
+    width: 100%;
+    /* Full width on mobile */
+    padding: 1.5rem;
+  }
+}

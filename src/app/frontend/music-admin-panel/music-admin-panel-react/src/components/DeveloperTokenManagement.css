@@ -1,11 +1,3 @@
-.developer-token-card {
-    margin-bottom: 0 !important;
-    flex: 1 1 400px;
-    /* Allow growing and shrinking with a basis of 400px */
-    max-width: 600px;
-    /* Maximum width to maintain readability */
-}
-
 .error-message {
     background-color: var(--error-color);
     color: white;

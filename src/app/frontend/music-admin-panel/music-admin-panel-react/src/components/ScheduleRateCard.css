@@ -1,0 +1,67 @@
+.schedule-controls {
+    margin: 1rem 0;
+}
+
+.simple-rate-inputs {
+    display: flex;
+    gap: 1rem;
+    margin: 1rem 0;
+}
+
+.input-container,
+.select-container {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    flex: 1;
+}
+
+.input-container label,
+.select-container label {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+}
+
+.input-container input,
+.select-container select {
+    padding: 0.5rem;
+    border: 1px solid var(--border-color);
+    border-radius: 0.25rem;
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+}
+
+.input-container input:focus,
+.select-container select:focus {
+    outline: none;
+    border-color: var(--primary-color);
+}
+
+.status-message {
+    margin-top: 1rem;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+}
+
+.status-message.error {
+    background-color: var(--error-color);
+    color: white;
+}
+
+.status-message.success {
+    background-color: var(--success-color);
+    color: white;
+}
+
+@media (max-width: 640px) {
+    .schedule-card {
+        margin-top: 0;
+        flex: 1 1 100%;
+    }
+
+    .simple-rate-inputs {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+}

@@ -5,6 +5,7 @@ import './AdminPanel.css';
 import { DeveloperTokenManagement } from './DeveloperTokenManagement';
 import { MusicUserTokenManagement } from './MusicUserTokenManagement';
 import { ThemeToggle } from './ThemeToggle';
+import { ScheduleRateCard } from './ScheduleRateCard';
 
 // Note: Amplify libs are so large! Fix this... eventually?
 import { Authenticator } from '@aws-amplify/ui-react';
@@ -15,7 +16,7 @@ export function AdminPanel() {
 
   return (
     <div className="auth-container">
-      <Authenticator hideSignUp>
+      <Authenticator hideSignUp={true}>
         {({ signOut, user }) => (
           <div className="admin-container">
             <nav className="admin-nav">
@@ -39,6 +40,7 @@ export function AdminPanel() {
               <div className="admin-content">
                 <DeveloperTokenManagement onTokenFetched={setDeveloperToken} />
                 <MusicUserTokenManagement />
+                <ScheduleRateCard />
               </div>
             </main>
           </div>
