@@ -21,7 +21,7 @@ This is meant to be a _very_ long-term project that will grow in many aspects, w
 
 ## (WIP) Solution Architecture
 
-![Draft Solution Architecture](./docs/Solution%20Architecture%20(AWS).png)
+![Draft Solution Architecture](./docs/Solution%20Architecture%20(March%202025).png)
 
 ## References
 
