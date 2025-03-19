@@ -36,7 +36,7 @@ export function useMusicUserToken(): TokenManagement {
   };
 
   const handleRefreshToken = async () => {
-    await logout();
+    logout();
     await authorize();
   };
 

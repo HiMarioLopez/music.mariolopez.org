@@ -3,7 +3,7 @@ import { captureLambdaHandler } from '@aws-lambda-powertools/tracer/middleware';
 import middy from '@middy/core';
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import { getCorsHeaders } from 'shared/nodejs/cors-headers';
-import { logger, metrics, tracer, emitStorageMetric } from './services/powertools';
+import { logger, metrics, tracer, emitUpdateMetric } from './services/powertools';
 import { storeMUT } from './services/mut';
 
 interface Environment {
@@ -39,7 +39,7 @@ const baseHandler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxy
     }
 
     await storeMUT(musicUserToken, { parameterName: env.PARAMETER_NAME });
-    await emitStorageMetric();
+    await emitUpdateMetric();
 
     return {
       statusCode: 200,

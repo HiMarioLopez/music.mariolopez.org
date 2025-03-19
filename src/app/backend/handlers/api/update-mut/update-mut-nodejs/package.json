@@ -1,7 +1,7 @@
 {
-  "name": "store-mut",
+  "name": "update-mut",
   "version": "1.0.0",
-  "description": "Lambda function to store Music User Token in Parameter Store",
+  "description": "Lambda function to update MUT",
   "main": "index.js",
   "scripts": {
     "build": "node build.js"

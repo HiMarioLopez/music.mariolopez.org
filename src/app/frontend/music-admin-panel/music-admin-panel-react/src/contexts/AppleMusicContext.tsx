@@ -1,5 +1,5 @@
 import { createContext, ReactNode, useContext, useEffect, useState } from 'react';
-import { storeMusicUserToken } from '../utils/api';
+import { updateMusicUserToken } from '../utils/api';
 
 interface AppleMusicContextType {
   isAuthorized: boolean;
@@ -61,10 +61,10 @@ export function AppleMusicProvider({ children }: { children: ReactNode }) {
       // Store MUT in backend
       if (musicKit.musicUserToken) {
         try {
-          await storeMusicUserToken(musicKit.musicUserToken);
+          await updateMusicUserToken(musicKit.musicUserToken);
         } catch (error) {
-          console.error('Error storing MUT:', error);
-          alert('Failed to store token in backend. Please try again.');
+          console.error('Error updating MUT:', error);
+          alert('Failed to update token in backend. Please try again.');
         }
       }
     } catch (error) {

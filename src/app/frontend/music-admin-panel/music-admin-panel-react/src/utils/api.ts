@@ -1,6 +1,6 @@
 import { fetchAuthSession } from 'aws-amplify/auth';
 
-export async function storeMusicUserToken(musicUserToken: string) {
+export async function updateMusicUserToken(musicUserToken: string) {
     const { tokens } = await fetchAuthSession();
     if (!tokens?.idToken?.toString()) {
         throw new Error('No valid authentication token found');
@@ -13,7 +13,7 @@ export async function storeMusicUserToken(musicUserToken: string) {
         length: idToken.length
     });
 
-    const url = `${import.meta.env.VITE_ADMIN_API_BASE_URL}/api/nodejs/mut/store`;
+    const url = `${import.meta.env.VITE_ADMIN_API_BASE_URL}/api/nodejs/mut/update`;
     console.log('Making request to:', url);
 
     const headers = {
@@ -34,7 +34,7 @@ export async function storeMusicUserToken(musicUserToken: string) {
     if (!response.ok) {
         const errorText = await response.text();
         console.error('Error response body:', errorText);
-        throw new Error(`Failed to store token: ${response.statusText}`);
+        throw new Error(`Failed to update music user token: ${response.statusText}`);
     }
 
     return response;

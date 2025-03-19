@@ -101,18 +101,18 @@ public class AdminPanelStack : Stack
 
         #region Lambda Functions
 
-        // Create Lambda function to store MUT
-        var storeMutFunction = new Function(this, "Music-StoreMutFunction", new FunctionProps
+        // Create Lambda function to update MUT
+        var updateMutFunction = new Function(this, "Music-UpdateMutFunction", new FunctionProps
         {
             Runtime = Runtime.NODEJS_22_X,
             Handler = "index.handler",
-            Code = Code.FromAsset("../app/backend/handlers/api/store-mut/store-mut-nodejs/dist"),
+            Code = Code.FromAsset("../app/backend/handlers/api/update-mut/update-mut-nodejs/dist"),
             Environment = new Dictionary<string, string>
             {
                 ["AWS_NODEJS_CONNECTION_REUSE_ENABLED"] = "1",
                 ["PARAMETER_NAME"] = mutParameter.ParameterName
             },
-            Description = "Lambda function to store Music User Token in Parameter Store",
+            Description = "Lambda function to update Music User Token",
             Architecture = Architecture.ARM_64,
             MemorySize = 128,
             EphemeralStorageSize = Size.Mebibytes(512),
@@ -120,7 +120,7 @@ public class AdminPanelStack : Stack
         });
 
         // Grant Lambda permission to write to Parameter Store
-        mutParameter.GrantWrite(storeMutFunction);
+        mutParameter.GrantWrite(updateMutFunction);
 
         // Create Lambda function to read MUT
         var getMutFunction = new Function(this, "Music-GetMutFunction", new FunctionProps
@@ -280,10 +280,10 @@ public class AdminPanelStack : Stack
         var nodejsResource = api.Root.AddResource("nodejs");
         var mutResource = nodejsResource.AddResource("mut");
 
-        // POST /api/nodejs/mut/store
-        mutResource.AddResource("store").AddMethod(
+        // POST /api/nodejs/mut/update
+        mutResource.AddResource("update").AddMethod(
             "POST",
-            new LambdaIntegration(storeMutFunction, new LambdaIntegrationOptions
+            new LambdaIntegration(updateMutFunction, new LambdaIntegrationOptions
             {
                 Timeout = Duration.Seconds(29),
                 AllowTestInvoke = true
