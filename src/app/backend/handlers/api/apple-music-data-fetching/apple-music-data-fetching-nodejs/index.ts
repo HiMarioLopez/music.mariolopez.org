@@ -98,7 +98,6 @@ const baseHandler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxy
         if (appleMusicService.isTokenExpirationError(error)) {
             logger.info('Token expiration detected, triggering refresh notification');
             await notificationService.sendTokenRefreshNotification();
-            await notificationService.queueFailedRequest(event);
 
             return {
                 statusCode: 401,

@@ -92,18 +92,6 @@ public class IntegrationApiStack : Stack
 
         #endregion
 
-        #region SQS Queue for Failed Requests
-
-        // Create an SQS queue for failed requests
-        var failedRequestsQueue = new Queue(this, "AppleMusicApiFailedRequestsQueue", new QueueProps
-        {
-            QueueName = "AppleMusicApiFailedRequestsQueue",
-            VisibilityTimeout = Duration.Seconds(1800), // 30 minutes
-            RetentionPeriod = Duration.Days(14) // Maximum retention period
-        });
-
-        #endregion
-
         #region SNS Topic for Token Refresh Notifications
 
         // Create an SNS topic for token refresh notifications
@@ -135,16 +123,11 @@ public class IntegrationApiStack : Stack
             Effect = Effect.ALLOW,
             Actions =
             [
-                "sqs:SendMessage",
-                "sqs:ReceiveMessage",
-                "sqs:DeleteMessage",
-                "sqs:GetQueueAttributes",
                 "sns:Publish",
                 "ses:SendEmail"
             ],
             Resources =
             [
-                failedRequestsQueue.QueueArn,
                 tokenRefreshTopic.TopicArn,
                 $"arn:aws:ses:{Region}:{Account}:identity/*"
             ]
@@ -211,7 +194,6 @@ public class IntegrationApiStack : Stack
             {
                 ["AWS_NODEJS_CONNECTION_REUSE_ENABLED"] = "1",
                 ["TOKEN_REFRESH_SNS_TOPIC_ARN"] = tokenRefreshTopic.TopicArn,
-                ["FAILED_REQUESTS_SQS_URL"] = failedRequestsQueue.QueueUrl,
                 ["UPSTASH_REDIS_URL"] = configuration["AppleMusicApi:UpstashRedis:Url"],
                 ["UPSTASH_REDIS_TOKEN"] = configuration["AppleMusicApi:UpstashRedis:Token"]
             }
@@ -235,36 +217,12 @@ public class IntegrationApiStack : Stack
             }
         });
 
-        // DLQ Processor Lambda
-        var dlqProcessorLambda = new Function(this, "AppleMusicApiDlqProcessorLambda", new FunctionProps
-        {
-            Runtime = Runtime.NODEJS_22_X,
-            Handler = "index.handler",
-            Code = Code.FromAsset("../app/backend/handlers/dlq-processor/dlq-processor-nodejs/dist"),
-            Role = appleMusicLambdaRole,
-            MemorySize = 256,
-            Timeout = Duration.Seconds(60),
-            Description = "Processes failed requests from the DLQ and attempts to retry them",
-            Environment = new Dictionary<string, string>
-            {
-                ["AWS_NODEJS_CONNECTION_REUSE_ENABLED"] = "1",
-                ["API_GATEWAY_URL"] = apiGateway.Url
-            }
-        });
-
         #endregion
 
         #region Event Sources and Subscriptions
 
         // Connect SNS topic to Token Refresh Notification Lambda
         tokenRefreshTopic.AddSubscription(new LambdaSubscription(tokenRefreshNotificationLambda));
-
-        // Connect SQS queue to DLQ Processor Lambda
-        dlqProcessorLambda.AddEventSource(new SqsEventSource(failedRequestsQueue, new SqsEventSourceProps
-        {
-            BatchSize = 10,
-            MaxBatchingWindow = Duration.Seconds(30)
-        }));
 
         #endregion
 
@@ -415,9 +373,7 @@ public class IntegrationApiStack : Stack
                 LogGroupNames =
                 [
                     dataFetchingLambda.LogGroup.LogGroupName,
-                    tokenRefreshNotificationLambda.LogGroup.LogGroupName,
-                    dlqProcessorLambda.LogGroup.LogGroupName
-                ],
+                    tokenRefreshNotificationLambda.LogGroup.LogGroupName                ],
                 QueryString = "filter @message like /Error/\n| sort @timestamp desc\n| limit 20"
             }),
             new GraphWidget(new GraphWidgetProps
