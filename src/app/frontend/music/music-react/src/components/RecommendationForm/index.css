@@ -9,6 +9,12 @@
     display: flex;
 }
 
+.search-container {
+    position: relative;
+    width: 100%;
+    z-index: 1;
+}
+
 .recommendation-form-component input[type="text"] {
     padding: var(--padding-medium) 15px;
     width: calc(100% - 32px);
@@ -49,6 +55,190 @@
     outline: 4px auto -webkit-focus-ring-color;
 }
 
+/* Updated styles for combined search results display */
+.search-results {
+    position: absolute;
+    top: calc(100% + var(--margin-small));
+    left: 0;
+    width: 100%;
+    max-height: 400px;
+    overflow-y: auto;
+    background-color: rgba(30, 30, 30, 0.95);
+    border: 1px solid rgba(252, 60, 68, 0.5);
+    border-radius: var(--border-radius-medium);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4);
+    z-index: 100;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+/* Section headers for different result types */
+.result-section-header {
+    padding: 8px 15px;
+    background-color: rgba(40, 40, 40, 0.8);
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.85em;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border-bottom: 1px solid rgba(252, 60, 68, 0.2);
+}
+
+/* Add this to ensure proper spacing between sections */
+.result-section-header:not(:first-child) {
+    border-top: 1px solid rgba(252, 60, 68, 0.2);
+}
+
+.search-results li {
+    padding: var(--padding-medium) 15px;
+    cursor: pointer;
+    transition: background-color var(--transition-speed);
+    border-bottom: 1px solid rgba(252, 60, 68, 0.2);
+    display: flex;
+    align-items: center;
+}
+
+.search-results li:last-child {
+    border-bottom: none;
+}
+
+.search-results li:hover {
+    background-color: var(--track-bg-color-hover);
+}
+
+.search-results strong {
+    color: #fc3c44;
+    font-weight: 600;
+    display: block;
+}
+
+.search-results span {
+    font-size: 0.9em;
+    color: rgba(240, 248, 255, 0.8);
+}
+
+.result-artwork {
+    width: 40px;
+    height: 40px;
+    border-radius: var(--border-radius-small);
+    margin-right: 15px;
+    object-fit: cover;
+}
+
+.result-info {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.result-info-text {
+    flex: 1;
+}
+
+.hint-result {
+    padding-left: 15px;
+    background-color: rgba(40, 40, 40, 0.4);
+}
+
+.song-result {
+    padding: var(--padding-medium) 15px;
+}
+
+.albums-result,
+.artists-result {
+    padding: var(--padding-medium) 15px;
+}
+
+.artists-result .result-artwork {
+    border-radius: 50%;
+    /* Make artist images circular */
+}
+
+/* Adjust the result info for different types */
+.albums-result .result-info span,
+.artists-result .result-info span {
+    opacity: 0.8;
+    font-size: 0.9em;
+}
+
+/* Loading indicator */
+.input-wrapper {
+    display: flex;
+    gap: 8px;
+    width: 100%;
+}
+
+.input-wrapper input {
+    flex: 1;
+    padding: var(--padding-medium) 15px;
+    border: var(--input-border);
+    border-radius: var(--border-radius-medium);
+    background-color: var(--input-bg-color);
+    color: var(--font-color);
+    outline: none;
+    transition: border-color var(--transition-speed), box-shadow var(--transition-speed);
+    font-size: 16px;
+    /* This is the minimum font size that prevents zoom on iOS */
+}
+
+.search-button {
+    background: none;
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 0 15px;
+    border-radius: var(--border-radius-medium);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--transition-speed);
+    min-width: 42px;
+}
+
+.search-button:hover {
+    border-color: var(--focus-border-color);
+    color: var(--text-primary);
+    background-color: rgba(252, 60, 68, 0.1);
+}
+
+.search-button svg {
+    width: 20px;
+    height: 20px;
+    transition: transform var(--transition-speed);
+}
+
+/* Fix the spinning animation */
+.search-button.spinning svg {
+    animation: spin 1s linear infinite;
+}
+
+/* Ensure the spinning happens from the center */
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Non-spinning hover effect */
+.search-button:not(.spinning):hover svg {
+    transform: scale(1.1);
+}
+
+/* Disable hover effects when spinning */
+.search-button.spinning:hover {
+    cursor: not-allowed;
+}
+
+.search-button.spinning:hover svg {
+    transform: none;
+}
+
 @media (max-width: 680px) {
     .recommendation-form-component {
         width: var(--width-mobile);
@@ -60,6 +250,161 @@
 
     .recommendation-form-component input[type="text"] {
         margin-right: 0;
-        margin-bottom: var(--margin-medium);
     }
+
+    .search-results {
+        max-height: 250px;
+    }
+
+    .input-wrapper input {
+        font-size: 16px;
+        /* Ensure it's 16px on mobile */
+    }
+}
+
+/* Scrollbar styling to match the theme */
+.search-results::-webkit-scrollbar {
+    width: 8px;
+}
+
+.search-results::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: var(--border-radius-small);
+}
+
+.search-results::-webkit-scrollbar-thumb {
+    background: linear-gradient(var(--scrollbar-start-color), var(--scrollbar-end-color));
+    border-radius: var(--border-radius-small);
+}
+
+.search-results::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(#fc3c44, var(--scrollbar-end-color));
+}
+
+/* Authentication error styling */
+.auth-error {
+    background-color: rgba(255, 50, 50, 0.1);
+    border: 1px solid rgba(255, 50, 50, 0.3);
+    border-radius: var(--border-radius-medium);
+    padding: var(--padding-medium);
+    margin: var(--margin-medium) 0;
+    text-align: center;
+}
+
+.auth-error p {
+    color: #ff3232;
+    margin-bottom: var(--margin-medium);
+}
+
+.auth-error button {
+    background-color: #333;
+    border: 1px solid #ff3232;
+    color: white;
+    padding: 8px 16px;
+    border-radius: var(--border-radius-small);
+    cursor: pointer;
+    transition: all var(--transition-speed);
+}
+
+.auth-error button:hover {
+    background-color: #ff3232;
+    color: white;
+}
+
+/* Disabled input state */
+.recommendation-form-component input[type="text"]:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+/* Type indicator base styling */
+.type-indicator {
+    font-size: 0.7em;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border-radius: 12px;
+    margin-left: 8px;
+    letter-spacing: 0.5px;
+    font-weight: 600;
+    transition: all var(--transition-speed);
+}
+
+/* Type-specific colors */
+.type-indicator.songs {
+    background-color: rgba(255, 214, 10, 0.2);
+    color: #ffd60a;
+    border: 1px solid rgba(255, 214, 10, 0.3);
+}
+
+.type-indicator.albums {
+    background-color: rgba(99, 178, 255, 0.2);
+    color: #63b2ff;
+    border: 1px solid rgba(99, 178, 255, 0.3);
+}
+
+.type-indicator.artists {
+    background-color: rgba(30, 215, 96, 0.2);
+    color: #1ed760;
+    border: 1px solid rgba(30, 215, 96, 0.3);
+}
+
+/* Hover effects */
+li:hover .type-indicator.songs {
+    background-color: rgba(255, 214, 10, 0.3);
+}
+
+li:hover .type-indicator.albums {
+    background-color: rgba(99, 178, 255, 0.3);
+}
+
+li:hover .type-indicator.artists {
+    background-color: rgba(30, 215, 96, 0.3);
+}
+
+.show-more {
+    cursor: pointer;
+    color: var(--text-secondary);
+    font-style: italic;
+    opacity: 0.8;
+    transition: all var(--transition-speed);
+    text-align: center;
+    padding: 12px 15px !important;
+}
+
+.show-more:hover {
+    opacity: 1;
+    background-color: rgba(40, 40, 40, 0.6) !important;
+}
+
+.show-more .show-more-text {
+    color: var(--text-secondary);
+    font-size: 0.9em;
+}
+
+/* Add a subtle divider before the show more option */
+.show-more {
+    border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Reset when search changes */
+.search-container {
+    /* ... existing styles ... */
+}
+
+.inline-loader {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    justify-content: center;
+}
+
+.inline-loader svg {
+    width: 16px;
+    height: 16px;
+    animation: spin 1s linear infinite;
+}
+
+.show-more.loading {
+    pointer-events: none;
+    opacity: 0.7;
 }
