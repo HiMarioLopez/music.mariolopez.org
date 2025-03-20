@@ -217,6 +217,42 @@ public class IntegrationApiStack : Stack
             }
         });
 
+        // MusicBrainz API Data Fetching Lambda
+        var musicBrainzLambdaRole = new Role(this, "MusicBrainzApiLambdaRole", new RoleProps
+        {
+            AssumedBy = new ServicePrincipal("lambda.amazonaws.com"),
+            Description = "Role for MusicBrainz API Lambda functions",
+            ManagedPolicies =
+            [
+                ManagedPolicy.FromAwsManagedPolicyName("service-role/AWSLambdaBasicExecutionRole")
+            ]
+        });
+
+        // Add CloudWatch permissions to MusicBrainz Lambda role
+        musicBrainzLambdaRole.AddToPolicy(new PolicyStatement(new PolicyStatementProps
+        {
+            Effect = Effect.ALLOW,
+            Actions = ["cloudwatch:PutMetricData"],
+            Resources = ["*"]
+        }));
+
+        var musicBrainzDataFetchingLambda = new Function(this, "MusicBrainzApiDataFetchingLambda", new FunctionProps
+        {
+            Runtime = Runtime.NODEJS_22_X,
+            Handler = "index.handler",
+            Code = Code.FromAsset("../app/backend/handlers/api/musicbrainz-data-fetching/musicbrainz-data-fetching-nodejs/dist"),
+            Role = musicBrainzLambdaRole,
+            MemorySize = 512,
+            Timeout = Duration.Seconds(30),
+            Description = "Fetches data from MusicBrainz API for music recommendations",
+            Environment = new Dictionary<string, string>
+            {
+                ["AWS_NODEJS_CONNECTION_REUSE_ENABLED"] = "1",
+                ["UPSTASH_REDIS_URL"] = configuration["AppleMusicApi:UpstashRedis:Url"],
+                ["UPSTASH_REDIS_TOKEN"] = configuration["AppleMusicApi:UpstashRedis:Token"]
+            }
+        });
+
         #endregion
 
         #region Event Sources and Subscriptions
@@ -276,6 +312,21 @@ public class IntegrationApiStack : Stack
             }
         });
 
+        // MusicBrainz API endpoints
+        var musicBrainzResource = nodejsResource.AddResource("musicbrainz");
+        var musicBrainzLambdaIntegration = new LambdaIntegration(musicBrainzDataFetchingLambda, new LambdaIntegrationOptions
+        {
+            Proxy = true,
+            PassthroughBehavior = PassthroughBehavior.WHEN_NO_MATCH
+        });
+        var musicBrainzProxyResource = musicBrainzResource.AddResource("{proxy+}");
+
+        musicBrainzProxyResource.AddMethod("ANY", musicBrainzLambdaIntegration, new MethodOptions
+        {
+            AuthorizationType = AuthorizationType.NONE,
+            ApiKeyRequired = false
+        });
+
         nodejsResource.AddMethod("ANY", nodejsLambdaIntegration, new MethodOptions
         {
             AuthorizationType = AuthorizationType.NONE,
@@ -286,12 +337,18 @@ public class IntegrationApiStack : Stack
 
         #region CloudWatch Dashboard
 
-        var dashboard = new Dashboard(this, "AppleMusicApiDashboard", new DashboardProps
+        var appleMusicDashboard = new Dashboard(this, "AppleMusicApiDashboard", new DashboardProps
         {
             DashboardName = "AppleMusicApiDashboard"
         });
 
-        dashboard.AddWidgets(
+        var musicBrainzDashboard = new Dashboard(this, "MusicBrainzApiDashboard", new DashboardProps
+        {
+            DashboardName = "MusicBrainzApiDashboard"
+        });
+
+        // Apple Music Dashboard widgets
+        appleMusicDashboard.AddWidgets(
         [
             new GraphWidget(new GraphWidgetProps
             {
@@ -367,18 +424,19 @@ public class IntegrationApiStack : Stack
             }),
             new LogQueryWidget(new LogQueryWidgetProps
             {
-                Title = "Error Logs (All Lambdas)",
+                Title = "Apple Music API Error Logs",
                 Width = 24,
                 Height = 6,
                 LogGroupNames =
                 [
                     dataFetchingLambda.LogGroup.LogGroupName,
-                    tokenRefreshNotificationLambda.LogGroup.LogGroupName                ],
+                    tokenRefreshNotificationLambda.LogGroup.LogGroupName
+                ],
                 QueryString = "filter @message like /Error/\n| sort @timestamp desc\n| limit 20"
             }),
             new GraphWidget(new GraphWidgetProps
             {
-                Title = "Cache Performance",
+                Title = "Apple Music Cache Performance",
                 Width = 24,
                 Height = 8,
                 Left =
@@ -428,6 +486,95 @@ public class IntegrationApiStack : Stack
             })
         ]);
 
+        // MusicBrainz Dashboard widgets
+        musicBrainzDashboard.AddWidgets(
+        [
+            new GraphWidget(new GraphWidgetProps
+            {
+                Title = "MusicBrainz API Lambda",
+                Width = 24,
+                Height = 6,
+                Left =
+                [
+                    new Metric(new MetricProps
+                    {
+                        Namespace = "AWS/Lambda",
+                        MetricName = "Invocations",
+                        DimensionsMap = new Dictionary<string, string>
+                        {
+                            { "FunctionName", musicBrainzDataFetchingLambda.FunctionName }
+                        }
+                    }),
+                    new Metric(new MetricProps
+                    {
+                        Namespace = "AWS/Lambda",
+                        MetricName = "Errors",
+                        DimensionsMap = new Dictionary<string, string>
+                        {
+                            { "FunctionName", musicBrainzDataFetchingLambda.FunctionName }
+                        }
+                    }),
+                    new Metric(new MetricProps
+                    {
+                        Namespace = "AWS/Lambda",
+                        MetricName = "Duration",
+                        DimensionsMap = new Dictionary<string, string>
+                        {
+                            { "FunctionName", musicBrainzDataFetchingLambda.FunctionName }
+                        }
+                    })
+                ]
+            }),
+            new LogQueryWidget(new LogQueryWidgetProps
+            {
+                Title = "MusicBrainz API Error Logs",
+                Width = 24,
+                Height = 6,
+                LogGroupNames =
+                [
+                    musicBrainzDataFetchingLambda.LogGroup.LogGroupName
+                ],
+                QueryString = "filter @message like /Error/\n| sort @timestamp desc\n| limit 20"
+            }),
+            new GraphWidget(new GraphWidgetProps
+            {
+                Title = "MusicBrainz Cache Performance",
+                Width = 24,
+                Height = 8,
+                Left =
+                [
+                    new Metric(new MetricProps
+                    {
+                        Namespace = "MusicBrainzAPI",
+                        MetricName = "CacheHits",
+                        DimensionsMap = new Dictionary<string, string>
+                        {
+                            { "service", "MusicBrainzDataFetching" },
+                            { "Source", "cache" }
+                        },
+                        Label = "MB Cache Hits",
+                        Statistic = "Sum",
+                        Period = Duration.Minutes(1)
+                    }),
+                    new Metric(new MetricProps
+                    {
+                        Namespace = "MusicBrainzAPI",
+                        MetricName = "CacheHits",
+                        DimensionsMap = new Dictionary<string, string>
+                        {
+                            { "service", "MusicBrainzDataFetching" },
+                            { "Source", "api" }
+                        },
+                        Label = "MB API Calls",
+                        Statistic = "Sum",
+                        Period = Duration.Minutes(1)
+                    })
+                ],
+                View = GraphWidgetView.TIME_SERIES,
+                Stacked = true
+            })
+        ]);
+
         #endregion
 
         #region Outputs
@@ -461,6 +608,13 @@ public class IntegrationApiStack : Stack
             Value = $"{apiGateway.Url}apple-music",
             Description = "Endpoint URL for the Apple Music API integration layer",
             ExportName = "AppleMusicApiEndpoint"
+        });
+
+        var musicBrainzApiEndpoint = new CfnOutput(this, "MusicBrainzApiEndpoint", new CfnOutputProps
+        {
+            Value = $"{apiGateway.Url}musicbrainz",
+            Description = "Endpoint URL for the MusicBrainz API integration layer",
+            ExportName = "MusicBrainzApiEndpoint"
         });
 
         #endregion
