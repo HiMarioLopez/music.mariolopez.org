@@ -1,7 +1,6 @@
 // API Service for music-related requests
 import { SearchResult, SearchSuggestion } from '../components/RecommendationForm/RecommendationForm.types';
 
-// Base API configuration
 const API_BASE_URL = '/api/nodejs';
 
 // Type for authentication response

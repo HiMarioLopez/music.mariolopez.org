@@ -91,7 +91,7 @@
 }
 
 .search-results li {
-    padding: var(--padding-medium) 15px;
+    padding: 10px 15px;
     cursor: pointer;
     transition: background-color var(--transition-speed);
     border-bottom: 1px solid rgba(252, 60, 68, 0.2);
@@ -284,100 +284,92 @@
 
     .input-wrapper input {
         font-size: 16px;
-        /* Ensure it's 16px on mobile */
+    }
+
+    /* Make artwork LARGER for mobile */
+    .result-artwork {
+        width: 60px;
+        height: 60px;
+        margin-right: 12px;
+    }
+
+    /* Make type indicator pills SMALLER on mobile */
+    .type-indicator {
+        font-size: 0.55em;
+        padding: 1px 5px;
+        border-radius: 8px;
+        margin-top: 3px;
+        letter-spacing: 0.3px;
+        font-weight: 600;
+    }
+
+    /* Make result container handle overflow better */
+    .search-results li {
+        box-sizing: border-box;
+        max-width: 100%;
+        overflow: hidden;
+    }
+
+    /* Add word-breaking for extremely long words if needed */
+    .result-info-text strong {
+        overflow-wrap: break-word;
+        word-wrap: break-word;
+        hyphens: auto;
+        max-width: 100%;
+    }
+
+    /* Make artwork slightly smaller for extremely long text */
+    .result-artwork {
+        min-width: 55px;
+        /* Make sure it doesn't shrink too much */
+    }
+
+    /* Ensure layout direction for mobile is right */
+    .result-info {
+        flex-direction: column;
+        align-items: flex-start;
     }
 }
 
-/* Scrollbar styling to match the theme */
-.search-results::-webkit-scrollbar {
-    width: 8px;
+/* Fix text truncation with ellipsis for all screen sizes */
+.result-info-text strong {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 100%;
 }
 
-.search-results::-webkit-scrollbar-track {
-    background: rgba(0, 0, 0, 0.1);
-    border-radius: var(--border-radius-small);
+.result-info-text span {
+    display: inline-block;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
-/* Option 1: Solid color with subtle transparency */
-.search-results::-webkit-scrollbar-thumb {
-    background: rgba(252, 60, 68, 0.7);
-    border-radius: var(--border-radius-small);
+/* Ensure the container has proper overflow handling */
+.result-info {
+    flex: 1;
+    display: flex;
+    gap: 4px;
+    min-width: 0;
+    /* Critical for flex child text truncation */
+    overflow: hidden;
 }
 
-.search-results::-webkit-scrollbar-thumb:hover {
-    background: rgba(252, 60, 68, 0.9);
+.result-info-text {
+    flex: 1;
+    min-width: 0;
+    /* Critical for text truncation in flex layouts */
+    max-width: 100%;
 }
 
-/* Option 2: Subtle component-colored scrollbar */
-/*
-.search-results::-webkit-scrollbar-thumb {
-    background: rgba(75, 75, 75, 0.6);
-    border-radius: var(--border-radius-small);
-    border: 1px solid rgba(252, 60, 68, 0.3);
-}
-
-.search-results::-webkit-scrollbar-thumb:hover {
-    background: rgba(90, 90, 90, 0.7);
-    border-color: rgba(252, 60, 68, 0.5);
-}
-*/
-
-/* Option 3: Flat modern style */
-/*
-.search-results::-webkit-scrollbar-thumb {
-    background: #444;
-    border-radius: var(--border-radius-small);
-    border-left: 2px solid #fc3c44;
-}
-
-.search-results::-webkit-scrollbar-thumb:hover {
-    background: #555;
-}
-*/
-
-/* Authentication error styling */
-.auth-error {
-    background-color: rgba(255, 50, 50, 0.1);
-    border: 1px solid rgba(255, 50, 50, 0.3);
-    border-radius: var(--border-radius-medium);
-    padding: var(--padding-medium);
-    margin: var(--margin-medium) 0;
-    text-align: center;
-}
-
-.auth-error p {
-    color: #ff3232;
-    margin-bottom: var(--margin-medium);
-}
-
-.auth-error button {
-    background-color: #333;
-    border: 1px solid #ff3232;
-    color: white;
-    padding: 8px 16px;
-    border-radius: var(--border-radius-small);
-    cursor: pointer;
-    transition: all var(--transition-speed);
-}
-
-.auth-error button:hover {
-    background-color: #ff3232;
-    color: white;
-}
-
-/* Disabled input state */
-.recommendation-form-component input[type="text"]:disabled {
-    opacity: 0.7;
-    cursor: not-allowed;
-}
-
-/* Type indicator base styling */
 .type-indicator {
     font-size: 0.7em;
     text-transform: uppercase;
     padding: 3px 8px;
     border-radius: 12px;
-    margin-left: 8px;
     letter-spacing: 0.5px;
     font-weight: 600;
     transition: all var(--transition-speed);
@@ -440,11 +432,6 @@ li:hover .type-indicator.artists {
     border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
 }
 
-/* Reset when search changes */
-.search-container {
-    /* ... existing styles ... */
-}
-
 .inline-loader {
     display: flex;
     align-items: center;
@@ -461,4 +448,86 @@ li:hover .type-indicator.artists {
 .show-more.loading {
     pointer-events: none;
     opacity: 0.7;
+}
+
+/* Refine the tablet/medium screen media query */
+@media (min-width: 681px) and (max-width: 1024px),
+(min-width: 1025px) and (max-width: 1299px) {
+    .search-results {
+        position: absolute;
+        overflow-y: auto;
+        z-index: 1000;
+    }
+}
+
+@media (min-width: 681px) and (max-width: 1024px) {
+    .search-results {
+        max-height: min(300px, 40vh);
+    }
+
+    .recommendation-form-component {
+        position: relative;
+        margin-bottom: var(--margin-large);
+    }
+}
+
+@media (min-width: 1025px) and (max-width: 1299px) {
+    .search-results {
+        max-height: min(350px, 45vh);
+    }
+}
+
+/* Scrollbar styling to match the theme */
+.search-results::-webkit-scrollbar {
+    width: 8px;
+}
+
+.search-results::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: var(--border-radius-small);
+}
+
+.search-results::-webkit-scrollbar-thumb {
+    background: rgba(252, 60, 68, 0.7);
+    border-radius: var(--border-radius-small);
+}
+
+.search-results::-webkit-scrollbar-thumb:hover {
+    background: rgba(252, 60, 68, 0.9);
+}
+
+/* Authentication error styling */
+.auth-error {
+    background-color: rgba(255, 50, 50, 0.1);
+    border: 1px solid rgba(255, 50, 50, 0.3);
+    border-radius: var(--border-radius-medium);
+    padding: var(--padding-medium);
+    margin: var(--margin-medium) 0;
+    text-align: center;
+}
+
+.auth-error p {
+    color: #ff3232;
+    margin-bottom: var(--margin-medium);
+}
+
+.auth-error button {
+    background-color: #333;
+    border: 1px solid #ff3232;
+    color: white;
+    padding: 8px 16px;
+    border-radius: var(--border-radius-small);
+    cursor: pointer;
+    transition: all var(--transition-speed);
+}
+
+.auth-error button:hover {
+    background-color: #ff3232;
+    color: white;
+}
+
+/* Disabled input state */
+.recommendation-form-component input[type="text"]:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
 }

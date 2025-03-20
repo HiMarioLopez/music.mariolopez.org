@@ -8,5 +8,14 @@ export default defineConfig({
   build: {
     minify: 'esbuild',
     reportCompressedSize: true
+  },
+  server: {
+    proxy: {
+      '/api': {
+        target: 'https://music.mariolopez.org',
+        changeOrigin: true,
+        secure: true,
+      }
+    }
   }
 })

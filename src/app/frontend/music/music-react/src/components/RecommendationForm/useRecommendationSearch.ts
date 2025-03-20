@@ -42,9 +42,13 @@ export const useRecommendationSearch = ({ onRecommend }: UseRecommendationSearch
             setTokenError(null);
             return true;
         } catch (error) {
+            // Improved error logging
+            console.error('Authentication error details:', error);
+
             const message = error instanceof ApiError
-                ? error.message
+                ? `${error.message} (Status: ${error.status})`
                 : 'Failed to connect to authentication service';
+
             setTokenError(message);
             console.error('Auth error:', error);
             return false;
