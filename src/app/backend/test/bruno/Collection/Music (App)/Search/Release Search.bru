@@ -1,0 +1,20 @@
+meta {
+  name: Release Search
+  type: http
+  seq: 1
+}
+
+get {
+  url: https://music.mariolopez.org/api/nodejs/musicbrainz/release?query=date:[1990%20TO%202000]%20AND%20artist:Nirvana&limit=5
+  body: none
+  auth: bearer
+}
+
+params:query {
+  query: date:[1990 TO 2000] AND artist:Nirvana
+  limit: 5
+}
+
+auth:bearer {
+  token: {{AUTH_TOKEN}}
+}
