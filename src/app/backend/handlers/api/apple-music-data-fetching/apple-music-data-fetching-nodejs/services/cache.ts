@@ -99,7 +99,7 @@ export const cacheService = {
      */
     setInRedis: async (key: string, data: any): Promise<void> => {
         try {
-            await redis.set(key, data, { ex: 3600 });
+            await redis.set(key, data, { ex: 60 });
         } catch (error) {
             logger.error('Redis set error', { error });
         }
