@@ -10,6 +10,7 @@ import { createHash } from 'crypto';
 const DYNAMODB_TABLE_NAME = process.env.DYNAMODB_TABLE_NAME!;
 const LAST_PROCESSED_TRACK_PARAMETER = process.env.LAST_PROCESSED_TRACK_PARAMETER!;
 const MUSIC_USER_TOKEN_PARAMETER = process.env.MUSIC_USER_TOKEN_PARAMETER!;
+const TRACK_LIMIT_PARAMETER = process.env.TRACK_LIMIT_PARAMETER!;
 
 // Clients
 const ssmClient = new SSMClient();
@@ -33,7 +34,14 @@ interface Track {
     url?: string;
     hasLyrics?: boolean;
     isAppleDigitalMaster?: boolean;
-    playedDate: string; // ISO String timestamp of when the track was played
+    processedTimestamp: string; // Changed to processedTimestamp
+    artworkColors?: {
+        backgroundColor: string;
+        textColor1: string;
+        textColor2: string;
+        textColor3: string;
+        textColor4: string;
+    };
 }
 
 /**
@@ -124,30 +132,66 @@ async function updateLastProcessedTrackId(trackId: string): Promise<void> {
 }
 
 /**
+ * Fetch developer token from auth endpoint
+ */
+async function getDeveloperToken(): Promise<string> {
+    try {
+        const response = await axios.get('https://music.mariolopez.org/api/nodejs/auth/token', {
+            timeout: 5000
+        });
+
+        if (!response.data?.token) {
+            throw new Error('Invalid token response format');
+        }
+
+        return response.data.token;
+    } catch (error) {
+        console.error('Error fetching developer token:', error);
+        if (axios.isAxiosError(error)) {
+            console.error('Axios error details:', {
+                status: error.response?.status,
+                data: error.response?.data,
+                message: error.message
+            });
+        }
+        throw new Error('Failed to retrieve developer token');
+    }
+}
+
+/**
  * Fetch recent tracks from Apple Music API
  */
 async function fetchRecentTracks(musicUserToken: string): Promise<Track[]> {
     try {
-        // Note: Using a proxy URL instead of direct Apple Music API 
-        // to leverage existing API Gateway and token handling
-        const apiUrl = 'https://music.mariolopez.org/api/nodejs/apple-music/v1/me/recent/played/tracks';
+        // Get developer token first
+        const developerToken = await getDeveloperToken();
+
+        // Get track limit from SSM
+        const trackLimit = await getParameter(TRACK_LIMIT_PARAMETER);
+        if (!trackLimit) {
+            console.warn('Track limit not found, using default value of 25');
+        }
+        const limit = trackLimit ? parseInt(trackLimit, 10) : 25;
+
+        const apiUrl = 'https://music.mariolopez.org/api/nodejs/apple-music/me/recent/played/tracks';
         const response = await axios.get(apiUrl, {
             headers: {
+                'Authorization': `Bearer ${developerToken}`,
                 'Music-User-Token': musicUserToken
             },
             params: {
-                limit: 25 // Adjust as needed
+                limit
             },
-            timeout: 10000 // 10 second timeout
+            timeout: 10000
         });
 
-        // Validate response structure
-        if (!response.data || !response.data.data || !Array.isArray(response.data.data)) {
+        // Update validation to handle the actual response structure
+        if (!response.data?.data?.data || !Array.isArray(response.data.data.data)) {
             console.error('Invalid response structure from Apple Music API:', JSON.stringify(response.data));
             return [];
         }
 
-        return response.data.data.map((track: any) => {
+        return response.data.data.data.map((track: any) => {
             try {
                 const { attributes, id } = track;
 
@@ -166,18 +210,25 @@ async function fetchRecentTracks(musicUserToken: string): Promise<Track[]> {
                     durationInMillis: attributes.durationInMillis,
                     releaseDate: attributes.releaseDate,
                     isrc: attributes.isrc,
-                    artworkUrl: attributes.artwork?.url?.replace('{w}', '300').replace('{h}', '300'),
+                    artworkUrl: attributes.artwork?.url,
                     composerName: attributes.composerName,
                     url: attributes.url,
                     hasLyrics: attributes.hasLyrics,
                     isAppleDigitalMaster: attributes.isAppleDigitalMaster,
-                    playedDate: new Date().toISOString() // Using current time as Apple doesn't provide play timestamp
+                    processedTimestamp: new Date().toISOString(),
+                    artworkColors: attributes.artwork ? {
+                        backgroundColor: `#${attributes.artwork.bgColor}`,
+                        textColor1: `#${attributes.artwork.textColor1}`,
+                        textColor2: `#${attributes.artwork.textColor2}`,
+                        textColor3: `#${attributes.artwork.textColor3}`,
+                        textColor4: `#${attributes.artwork.textColor4}`
+                    } : undefined
                 };
             } catch (err) {
                 console.warn('Error processing track:', err);
                 return null;
             }
-        }).filter(Boolean) as Track[]; // Remove null entries
+        }).filter(Boolean) as Track[];
     } catch (error) {
         console.error('Error fetching tracks from Apple Music API:', error);
 

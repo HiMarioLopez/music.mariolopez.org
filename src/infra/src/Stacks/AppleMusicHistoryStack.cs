@@ -66,7 +66,9 @@ public class AppleMusicHistoryStack : Stack
             Resources =
             [
                 historyTable.TableArn,
-                $"arn:aws:ssm:{Region}:{Account}:parameter/Music/AppleMusicHistory/LastProcessedTrackId"
+                $"arn:aws:ssm:{Region}:{Account}:parameter/Music/AppleMusicHistory/LastProcessedTrackId",
+                $"arn:aws:ssm:{Region}:{Account}:parameter/Music/AdminPanel/MUT",
+                $"arn:aws:ssm:{Region}:{Account}:parameter/Music/AppleMusicHistory/TrackLimit"
             ]
         }));
 
@@ -96,6 +98,13 @@ public class AppleMusicHistoryStack : Stack
             Description = "Schedule rate for Apple Music history tracking (using Schedule expression syntax)",
         });
 
+        var trackLimitParameter = new StringParameter(this, "TrackLimit", new StringParameterProps
+        {
+            ParameterName = "/Music/AppleMusicHistory/TrackLimit",
+            StringValue = "25", // Default value
+            Description = "Number of tracks to fetch from Apple Music API",
+        });
+
         #endregion
 
         #region Lambda Functions
@@ -115,7 +124,8 @@ public class AppleMusicHistoryStack : Stack
                 ["AWS_NODEJS_CONNECTION_REUSE_ENABLED"] = "1",
                 ["DYNAMODB_TABLE_NAME"] = historyTable.TableName,
                 ["LAST_PROCESSED_TRACK_PARAMETER"] = lastProcessedTrackIdParameter.ParameterName,
-                ["MUSIC_USER_TOKEN_PARAMETER"] = "/Music/AdminPanel/MUT"
+                ["MUSIC_USER_TOKEN_PARAMETER"] = "/Music/AdminPanel/MUT",
+                ["TRACK_LIMIT_PARAMETER"] = trackLimitParameter.ParameterName
             }
         });
 
@@ -125,8 +135,55 @@ public class AppleMusicHistoryStack : Stack
 
         var rule = new Rule(this, "UpdateAppleMusicHistoryJobSchedule", new RuleProps
         {
-            Schedule = Schedule.Expression(Token.AsString(scheduleRateParameter.StringValue)), // Use SSM parameter value
+            Schedule = Schedule.Expression(Token.AsString(scheduleRateParameter.StringValue)),
             Description = "Schedule for fetching Apple Music history"
+        });
+
+        // Add Lambda to update the rule schedule
+        var updateScheduleLambda = new Function(this, "UpdateScheduleLambda", new FunctionProps
+        {
+            Runtime = Runtime.NODEJS_22_X,
+            Handler = "index.handler",
+            Code = Code.FromAsset("../app/backend/handlers/update-schedule/update-schedule-nodejs/dist"),
+            MemorySize = 128,
+            Timeout = Duration.Seconds(30),
+            Description = "Updates EventBridge rule schedule when SSM parameter changes",
+            Environment = new Dictionary<string, string>
+            {
+                ["RULE_NAME"] = rule.RuleName
+            }
+        });
+
+        // Grant permissions to the Lambda to modify the rule and read SSM parameter
+        updateScheduleLambda.AddToRolePolicy(new PolicyStatement(new PolicyStatementProps
+        {
+            Effect = Effect.ALLOW,
+            Actions = ["events:PutRule"],
+            Resources = [rule.RuleArn]
+        }));
+
+        // Add SSM parameter read permission
+        updateScheduleLambda.AddToRolePolicy(new PolicyStatement(new PolicyStatementProps
+        {
+            Effect = Effect.ALLOW,
+            Actions = ["ssm:GetParameter"],
+            Resources = [$"arn:aws:ssm:{Region}:{Account}:parameter/Music/AppleMusicHistory/ScheduleRate"]
+        }));
+
+        // Create EventBridge rule to trigger Lambda when parameter changes
+        var scheduleParameterChangeRule = new Rule(this, "ScheduleParameterChangeRule", new RuleProps
+        {
+            EventPattern = new EventPattern
+            {
+                Source = ["aws.ssm"],
+                DetailType = ["Parameter Store Change"],
+                Detail = new Dictionary<string, object>
+                {
+                    ["name"] = new[] { scheduleRateParameter.ParameterName },
+                    ["operation"] = new[] { "Update" }
+                }
+            },
+            Targets = [new LambdaFunction(updateScheduleLambda)]
         });
 
         // Set the Lambda function as the target of the rule

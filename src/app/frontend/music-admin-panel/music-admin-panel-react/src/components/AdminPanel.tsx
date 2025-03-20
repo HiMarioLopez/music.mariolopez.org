@@ -4,8 +4,9 @@ import '../styles/theme.css';
 import './AdminPanel.css';
 import { DeveloperTokenManagement } from './DeveloperTokenManagement';
 import { MusicUserTokenManagement } from './MusicUserTokenManagement';
-import { ThemeToggle } from './ThemeToggle';
 import { ScheduleRateCard } from './ScheduleRateCard';
+import { ThemeToggle } from './ThemeToggle';
+import { TrackLimitCard } from './TrackLimitCard';
 
 // Note: Amplify libs are so large! Fix this... eventually?
 import { Authenticator } from '@aws-amplify/ui-react';
@@ -41,6 +42,7 @@ export function AdminPanel() {
                 <DeveloperTokenManagement onTokenFetched={setDeveloperToken} />
                 <MusicUserTokenManagement />
                 <ScheduleRateCard />
+                <TrackLimitCard />
               </div>
             </main>
           </div>

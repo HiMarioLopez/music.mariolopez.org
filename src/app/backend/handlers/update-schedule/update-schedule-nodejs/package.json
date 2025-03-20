@@ -1,0 +1,21 @@
+{
+    "name": "update-schedule",
+    "version": "1.0.0",
+    "description": "Lambda function to update the schedule for the Apple Music history tracking job",
+    "main": "dist/index.js",
+    "scripts": {
+        "build": "esbuild index.ts --bundle --minify --platform=node --target=node22 --outfile=dist/index.js"
+    },
+    "author": "Mario Lopez",
+    "license": "MIT",
+    "dependencies": {
+        "@aws-sdk/client-eventbridge": "^3.758.0",
+        "@aws-sdk/client-ssm": "^3.759.0"
+    },
+    "devDependencies": {
+        "@types/aws-lambda": "^8.10.147",
+        "@types/node": "^22.13.10",
+        "esbuild": "^0.25.1",
+        "typescript": "^5.8.2"
+    }
+}

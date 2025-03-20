@@ -2,11 +2,41 @@ import React from 'react';
 import { RateUnit, useScheduleRate } from '../hooks/useScheduleRate';
 import './ScheduleRateCard.css';
 
+const UNIT_OPTIONS = [
+    { value: 'minute', label: 'Minute', plural: 'minutes' },
+    { value: 'hour', label: 'Hour', plural: 'hours' },
+    { value: 'day', label: 'Day', plural: 'days' },
+] as const;
+
 export const ScheduleRateCard: React.FC = () => {
     const [
         { rateType, value, unit, cronExpression, status, isLoading },
-        { setRateType, setValue, setUnit, setCronExpression, handleUpdate }
+        { setRateType, setValue, setUnit, setCronExpression, handleUpdate, refresh }
     ] = useScheduleRate();
+
+    // Helper to determine if we should use singular or plural form
+    const getUnitOptions = () => {
+        const numValue = parseInt(value, 10);
+        return UNIT_OPTIONS.map(option => ({
+            value: numValue === 1 ? option.value : option.plural,
+            label: option.label + (numValue === 1 ? '' : 's')
+        }));
+    };
+
+    // Update unit when value changes between 1 and other numbers
+    const handleValueChange = (newValue: string) => {
+        setValue(newValue);
+
+        // Find current unit's base form
+        const currentBase = UNIT_OPTIONS.find(
+            opt => opt.value === unit || opt.plural === unit
+        );
+
+        if (currentBase) {
+            const numValue = parseInt(newValue, 10);
+            setUnit(numValue === 1 ? currentBase.value : currentBase.plural as RateUnit);
+        }
+    };
 
     return (
         <div className="content-card schedule-card">
@@ -16,6 +46,19 @@ export const ScheduleRateCard: React.FC = () => {
                 <div className="secure-token-container">
                     <div className="token-header">
                         <span className="token-label">Current Schedule</span>
+                        <button
+                            className={`refresh-button ${isLoading ? 'spinning' : ''}`}
+                            onClick={refresh}
+                            disabled={isLoading}
+                            title="Refresh schedule rate"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M21 2v6h-6"></path>
+                                <path d="M3 12a9 9 0 0 1 15-6.7L21 8"></path>
+                                <path d="M3 22v-6h6"></path>
+                                <path d="M21 12a9 9 0 0 1-15 6.7L3 16"></path>
+                            </svg>
+                        </button>
                     </div>
                     <pre className="clickable-token">
                         {isLoading
@@ -48,8 +91,9 @@ export const ScheduleRateCard: React.FC = () => {
                                 <input
                                     id="value"
                                     type="number"
+                                    min="1"
                                     value={value}
-                                    onChange={(e) => setValue(e.target.value)}
+                                    onChange={(e) => handleValueChange(e.target.value)}
                                 />
                             </div>
                             <div className="select-container">
@@ -59,9 +103,11 @@ export const ScheduleRateCard: React.FC = () => {
                                     value={unit}
                                     onChange={(e) => setUnit(e.target.value as RateUnit)}
                                 >
-                                    <option value="minutes">Minutes</option>
-                                    <option value="hours">Hours</option>
-                                    <option value="days">Days</option>
+                                    {getUnitOptions().map(option => (
+                                        <option key={option.value} value={option.value}>
+                                            {option.label}
+                                        </option>
+                                    ))}
                                 </select>
                             </div>
                         </div>

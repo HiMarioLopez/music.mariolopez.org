@@ -89,6 +89,43 @@
     color: var(--text-secondary);
 }
 
+.refresh-button {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.refresh-button:hover {
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
+}
+
+.refresh-button svg {
+    width: 16px;
+    height: 16px;
+}
+
+.refresh-button.spinning svg {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
 .clickable-token {
     background-color: var(--bg-secondary);
     padding: 0.75rem;

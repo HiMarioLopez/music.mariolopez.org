@@ -27,9 +27,7 @@ async function apiRequest<T>({ method, path, body, baseUrl, requiresAuth = true 
     const url = `${baseUrl || import.meta.env.VITE_ADMIN_API_BASE_URL}/api/nodejs/${path}`;
     console.log('Making request to:', url);
 
-    const headers: Record<string, string> = {
-        'Content-Type': 'application/json',
-    };
+    const headers: Record<string, string> = {};
 
     if (requiresAuth) {
         const idToken = await getAuthToken();
@@ -102,5 +100,20 @@ export async function getScheduleRate() {
     return apiRequest<{ rate: string }>({
         method: 'GET',
         path: 'schedule/get'
+    });
+}
+
+export async function updateTrackLimit(trackLimit: number) {
+    return apiRequest({
+        method: 'POST',
+        path: 'track-limit/update',
+        body: { trackLimit }
+    });
+}
+
+export async function getTrackLimit() {
+    return apiRequest<{ trackLimit: number }>({
+        method: 'GET',
+        path: 'track-limit/get'
     });
 } 
