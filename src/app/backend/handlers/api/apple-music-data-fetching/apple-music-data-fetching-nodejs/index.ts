@@ -77,7 +77,22 @@ const baseHandler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxy
         // Cache miss - fetch from API
         await emitCacheMetric('api');
         const musicUserToken = await appleMusicService.getMusicUserToken();
-        const apiData = await appleMusicService.fetchFromApi(event.path, developerToken, musicUserToken);
+
+        // Create a properly typed object from queryStringParameters
+        const queryParams = event.queryStringParameters ?
+            Object.fromEntries(
+                Object.entries(event.queryStringParameters)
+                    .filter(([_, v]) => v !== undefined)
+                    .map(([k, v]) => [k, v as string])
+            ) :
+            null;
+
+        const apiData = await appleMusicService.fetchFromApi(
+            event.path,
+            queryParams,
+            developerToken,
+            musicUserToken
+        );
 
         // Store in both caches
         cacheService.setInMemory(requestKey, apiData);

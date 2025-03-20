@@ -21,7 +21,7 @@ export const appleMusicService = {
         }
     },
 
-    fetchFromApi: async (path: string, developerToken: string, musicUserToken: string): Promise<any> => {
+    fetchFromApi: async (path: string, queryParams: Record<string, string> | null, developerToken: string, musicUserToken: string): Promise<any> => {
         try {
             const apiPath = path.replace(/^\/(?:api\/)?(?:nodejs\/)?(?:apple-music\/)?/, '');
             logger.info(`Calling Apple Music API with path: ${apiPath}`);
@@ -31,7 +31,8 @@ export const appleMusicService = {
                     'Authorization': `Bearer ${developerToken}`,
                     'Music-User-Token': musicUserToken,
                     'Content-Type': 'application/json'
-                }
+                },
+                params: queryParams
             });
 
             return response.data;
