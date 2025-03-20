@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import './App.css';
 import NowPlaying from './components/NowPlaying/index';
 import RecentlyPlayedList from './components/RecentlyPlayedList/index';
-import RecommendationForm from './components/RecommendationForm/index';
+import RecommendationForm from './components/RecommendationForm/RecommendationForm';
 import RecommendationList from './components/RecommendationList/index';
 import Navbar from './components/Navbar';
 import { Song } from './types/Song';
