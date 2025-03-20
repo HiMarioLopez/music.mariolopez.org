@@ -429,10 +429,11 @@ public class IntegrationApiStack : Stack
                 [
                     new Metric(new MetricProps
                     {
-                        Namespace = "AppleMusicAPI/Cache",
+                        Namespace = "AppleMusicAPI",
                         MetricName = "CacheHits",
                         DimensionsMap = new Dictionary<string, string>
                         {
+                            { "service", "AppleMusicDataFetching" },
                             { "Source", "l1-cache" }
                         },
                         Label = "L1 Cache Hits",
@@ -441,10 +442,11 @@ public class IntegrationApiStack : Stack
                     }),
                     new Metric(new MetricProps
                     {
-                        Namespace = "AppleMusicAPI/Cache",
+                        Namespace = "AppleMusicAPI",
                         MetricName = "CacheHits",
                         DimensionsMap = new Dictionary<string, string>
                         {
+                            { "service", "AppleMusicDataFetching" },
                             { "Source", "l2-cache" }
                         },
                         Label = "L2 Cache Hits",
@@ -453,10 +455,11 @@ public class IntegrationApiStack : Stack
                     }),
                     new Metric(new MetricProps
                     {
-                        Namespace = "AppleMusicAPI/Cache",
+                        Namespace = "AppleMusicAPI",
                         MetricName = "CacheHits",
                         DimensionsMap = new Dictionary<string, string>
                         {
+                            { "service", "AppleMusicDataFetching" },
                             { "Source", "api" }
                         },
                         Label = "API Calls",
