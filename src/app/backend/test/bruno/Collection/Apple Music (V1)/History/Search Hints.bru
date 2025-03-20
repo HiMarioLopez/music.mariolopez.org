@@ -1,0 +1,23 @@
+meta {
+  name: Search Hints
+  type: http
+  seq: 7
+}
+
+get {
+  url: https://api.music.apple.com/v1/catalog/us/search/hints?term=beach+bunny
+  body: none
+  auth: bearer
+}
+
+params:query {
+  term: beach bunny
+}
+
+headers {
+  Music-User-Token: {{MUSIC_USER_TOKEN}}
+}
+
+auth:bearer {
+  token: {{AUTH_TOKEN}}
+}

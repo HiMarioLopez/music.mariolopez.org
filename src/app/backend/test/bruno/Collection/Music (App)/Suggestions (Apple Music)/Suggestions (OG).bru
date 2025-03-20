@@ -1,0 +1,25 @@
+meta {
+  name: Suggestions (OG)
+  type: http
+  seq: 2
+}
+
+get {
+  url: https://api.music.apple.com/v1/catalog/us/search/suggestions?term=beach+bunny&kinds=topResults&types=songs
+  body: none
+  auth: bearer
+}
+
+params:query {
+  term: beach bunny
+  kinds: topResults
+  types: songs
+}
+
+headers {
+  Music-User-Token: {{MUSIC_USER_TOKEN}}
+}
+
+auth:bearer {
+  token: {{AUTH_TOKEN}}
+}

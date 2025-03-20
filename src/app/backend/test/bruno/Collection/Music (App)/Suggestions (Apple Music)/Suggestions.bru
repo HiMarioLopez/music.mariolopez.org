@@ -1,0 +1,23 @@
+meta {
+  name: Suggestions
+  type: http
+  seq: 1
+}
+
+get {
+  url: https://music.mariolopez.org/api/nodejs/apple-music/catalog/us/search/hints?term=beach+bunny
+  body: none
+  auth: bearer
+}
+
+params:query {
+  term: beach bunny
+}
+
+headers {
+  Music-User-Token: {{MUSIC_USER_TOKEN}}
+}
+
+auth:bearer {
+  token: {{AUTH_TOKEN}}
+}
