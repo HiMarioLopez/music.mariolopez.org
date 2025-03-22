@@ -5,13 +5,16 @@ meta {
 }
 
 get {
-  url: https://music.mariolopez.org/api/nodejs/apple-music/catalog/us/search/hints?term=beach+bunny
+  url: https://music.mariolopez.org/api/nodejs/apple-music/catalog/us/search/suggestions?term=the+lumineers&limit=10&kinds=terms,topResults&types=songs,albums,artists
   body: none
   auth: bearer
 }
 
 params:query {
-  term: beach bunny
+  term: the lumineers
+  limit: 10
+  kinds: terms,topResults
+  types: songs,albums,artists
 }
 
 headers {
