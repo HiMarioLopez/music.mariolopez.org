@@ -20,3 +20,10 @@ export const SearchIcon = () => (
         <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
     </svg>
 );
+
+export const UpArrowIcon = () => (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" width="16" height="16">
+        <path d="M12 10 L6 16" />
+        <path d="M12 10 L18 16" />
+    </svg>
+);

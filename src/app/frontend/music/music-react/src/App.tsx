@@ -3,15 +3,15 @@ import './App.css';
 import NowPlaying from './components/NowPlaying/index';
 import RecentlyPlayedList from './components/RecentlyPlayedList/index';
 import RecommendationForm from './components/RecommendationForm/RecommendationForm';
-import RecommendationList from './components/RecommendationList/index';
 import Navbar from './components/Navbar';
-import { Song } from './types/Song';
+import { RecommendedSong, RecommendedAlbum, RecommendedArtist } from './types/Recommendations';
 import placeholderAlbumArt from './assets/50.png';
 import Footer from './components/Footer';
+import CombinedRecommendationList from './components/CombinedRecommendationList';
 
 const App: React.FC = () => {
-  // State to hold the list of recommendations with initial mock data
-  const [recommendations, setRecommendations] = useState<Song[]>([
+  // Separate state for each recommendation type
+  const [songRecommendations, setSongRecommendations] = useState<RecommendedSong[]>([
     {
       songTitle: 'Song One',
       artistName: 'Artist One',
@@ -24,19 +24,181 @@ const App: React.FC = () => {
       albumName: 'Album Two',
       albumCoverUrl: placeholderAlbumArt
     },
+    {
+      songTitle: 'Song Three',
+      artistName: 'Artist Three',
+      albumName: 'Album Three',
+      albumCoverUrl: placeholderAlbumArt
+    },
+    {
+      songTitle: 'Song Four',
+      artistName: 'Artist Four',
+      albumName: 'Album Four',
+      albumCoverUrl: placeholderAlbumArt
+    },
+    {
+      songTitle: 'Song Five',
+      artistName: 'Artist Five',
+      albumName: 'Album Five',
+      albumCoverUrl: placeholderAlbumArt
+    },
+    {
+      songTitle: 'Song Six',
+      artistName: 'Artist Six',
+      albumName: 'Album Six',
+      albumCoverUrl: placeholderAlbumArt
+    },
+    {
+      songTitle: 'Song Seven',
+      artistName: 'Artist Seven',
+      albumName: 'Album Seven',
+      albumCoverUrl: placeholderAlbumArt
+    },
+    {
+      songTitle: 'Song Eight',
+      artistName: 'Artist Eight',
+      albumName: 'Album Eight',
+      albumCoverUrl: placeholderAlbumArt
+    },
+    {
+      songTitle: 'Song Nine',
+      artistName: 'Artist Nine',
+      albumName: 'Album Nine',
+      albumCoverUrl: placeholderAlbumArt
+    },
   ]);
 
-  // Function to handle new recommendations
-  const handleNewRecommendation = (songTitle: string) => {
-    // Mock additional data
-    const newRecommendation = {
-      songTitle: songTitle,
-      artistName: 'Mock Artist',
-      albumName: 'Mock Album',
-      albumCoverUrl: placeholderAlbumArt
-    };
+  const [albumRecommendations, setAlbumRecommendations] = useState<RecommendedAlbum[]>([
+    {
+      albumTitle: 'Album One',
+      artistName: 'Artist One',
+      albumCoverUrl: placeholderAlbumArt,
+      trackCount: 10
+    },
+    {
+      albumTitle: 'Album Two',
+      artistName: 'Artist Two',
+      albumCoverUrl: placeholderAlbumArt,
+      trackCount: 10
+    },
+    {
+      albumTitle: 'Album Three',
+      artistName: 'Artist Three',
+      albumCoverUrl: placeholderAlbumArt,
+      trackCount: 10
+    },
+    {
+      albumTitle: 'Album Four',
+      artistName: 'Artist Four',
+      albumCoverUrl: placeholderAlbumArt,
+      trackCount: 10
+    },
+    {
+      albumTitle: 'Album Five',
+      artistName: 'Artist Five',
+      albumCoverUrl: placeholderAlbumArt,
+      trackCount: 10
+    },
+    {
+      albumTitle: 'Album Six',
+      artistName: 'Artist Six',
+      albumCoverUrl: placeholderAlbumArt,
+      trackCount: 10
+    },
+    {
+      albumTitle: 'Album Seven',
+      artistName: 'Artist Seven',
+      albumCoverUrl: placeholderAlbumArt,
+      trackCount: 10
+    },
+    {
+      albumTitle: 'Album Eight',
+      artistName: 'Artist Eight',
+      albumCoverUrl: placeholderAlbumArt,
+      trackCount: 10
+    },
+    {
+      albumTitle: 'Album Nine',
+      artistName: 'Artist Nine',
+      albumCoverUrl: placeholderAlbumArt,
+      trackCount: 10
+    },
+  ]);
 
-    setRecommendations(prevRecommendations => [...prevRecommendations, newRecommendation]);
+  const [artistRecommendations, setArtistRecommendations] = useState<RecommendedArtist[]>([
+    {
+      artistName: 'Artist One',
+      artistImageUrl: placeholderAlbumArt,
+      genres: ['Genre One', 'Genre Two']
+    },
+    {
+      artistName: 'Artist Two',
+      artistImageUrl: placeholderAlbumArt,
+      genres: ['Genre Three', 'Genre Four']
+    },
+    {
+      artistName: 'Artist Three',
+      artistImageUrl: placeholderAlbumArt,
+      genres: ['Genre Five', 'Genre Six']
+    },
+    {
+      artistName: 'Artist Four',
+      artistImageUrl: placeholderAlbumArt,
+      genres: ['Genre Seven', 'Genre Eight']
+    },
+    {
+      artistName: 'Artist Five',
+      artistImageUrl: placeholderAlbumArt,
+      genres: ['Genre Nine', 'Genre Ten']
+    },
+    {
+      artistName: 'Artist Six',
+      artistImageUrl: placeholderAlbumArt,
+      genres: ['Genre Eleven', 'Genre Twelve']
+    },
+    {
+      artistName: 'Artist Seven',
+      artistImageUrl: placeholderAlbumArt,
+      genres: ['Genre Thirteen', 'Genre Fourteen']
+    },
+    {
+      artistName: 'Artist Eight',
+      artistImageUrl: placeholderAlbumArt,
+      genres: ['Genre Fifteen', 'Genre Sixteen']
+    },
+    {
+      artistName: 'Artist Nine',
+      artistImageUrl: placeholderAlbumArt,
+      genres: ['Genre Seventeen', 'Genre Eighteen']
+    },
+    {
+      artistName: 'Artist Ten',
+      artistImageUrl: placeholderAlbumArt,
+      genres: ['Genre Nineteen', 'Genre Twenty']
+    },
+    {
+      artistName: 'Artist Eleven',
+      artistImageUrl: placeholderAlbumArt,
+      genres: ['Genre Twenty-One', 'Genre Twenty-Two']
+    },
+  ]);
+
+  // Handle new recommendations based on type
+  const handleNewRecommendation = (
+    type: 'song' | 'album' | 'artist',
+    data: RecommendedSong | RecommendedAlbum | RecommendedArtist
+  ) => {
+    switch (type) {
+      case 'song':
+        setSongRecommendations(prev => [...prev, data as RecommendedSong]);
+        break;
+      case 'album':
+        setAlbumRecommendations(prev => [...prev, data as RecommendedAlbum]);
+        break;
+      case 'artist':
+        setArtistRecommendations(prev => [...prev, data as RecommendedArtist]);
+        break;
+    }
   };
 
   return (
@@ -56,7 +218,11 @@ const App: React.FC = () => {
               <RecommendationForm onRecommend={handleNewRecommendation} />
             </div>
             <div className="recommendations-list-container">
-              <RecommendationList recommendations={recommendations} />
+              <CombinedRecommendationList
+                songRecommendations={songRecommendations}
+                albumRecommendations={albumRecommendations}
+                artistRecommendations={artistRecommendations}
+              />
             </div>
           </div>
         </div>
