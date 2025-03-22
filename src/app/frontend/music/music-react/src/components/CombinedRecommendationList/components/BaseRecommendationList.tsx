@@ -79,7 +79,9 @@ function BaseRecommendationList<T>({
       {recommendations.map((recommendation, index) => (
         <li key={index}>
           <div className="recommendation-item-actions">
-            <span className="vote-count">{formatNumber(getVotes(recommendation))}</span>
+            <span className={`vote-count ${animatingItems[index] ? 'vote-count-highlight' : ''} ${votedItems[index] ? 'vote-count-permanent' : ''}`}>
+              {formatNumber(getVotes(recommendation))}
+            </span>
             <button
               className={`upvote-button ${animatingItems[index] ? 'voted' : ''} ${votedItems[index] ? 'voted-permanent' : ''}`}
               onClick={() => handleUpvote(index)}

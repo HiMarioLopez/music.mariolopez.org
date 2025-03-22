@@ -2,9 +2,13 @@ import { useState, useRef, useEffect } from 'react';
 
 type RecommendationType = 'songs' | 'albums' | 'artists';
 
+// Add this new utility function for artificial delay
+export const simulateNetworkDelay = (ms: number = 1500): Promise<void> => {
+  return new Promise(resolve => setTimeout(resolve, ms));
+};
+
 export const useRecommendationSelector = (initialType: RecommendationType = 'songs') => {
   const [selectedType, setSelectedType] = useState<RecommendationType>(initialType);
-  const [animating, setAnimating] = useState(false);
 
   // Create refs for labels and container
   const selectorContainerRef = useRef<HTMLDivElement>(null);
@@ -54,21 +58,17 @@ export const useRecommendationSelector = (initialType: RecommendationType = 'son
 
   const handleTypeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const newType = event.target.value as RecommendationType;
-    setAnimating(true);
     setSelectedType(newType);
 
     // Scroll the selected label into view
     scrollLabelIntoView(newType);
-
-    // Reset animation state after animation completes
-    setTimeout(() => setAnimating(false), 450);
   };
 
   return {
     selectedType,
-    animating,
     selectorContainerRef,
     labelRefs,
-    handleTypeChange
+    handleTypeChange,
+    simulateNetworkDelay
   };
 };

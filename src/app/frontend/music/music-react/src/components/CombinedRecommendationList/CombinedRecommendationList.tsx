@@ -1,100 +1,78 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { RecommendedAlbum, RecommendedArtist, RecommendedSong } from '../../types/Recommendations';
 import './CombinedRecommendationList.styles.css';
 import { RecommendationStateMap, RecommendationType } from './CombinedRecommendationList.types';
-import { AlbumRecommendationList, ArtistRecommendationList, SongRecommendationList } from './components';
-import { useRecommendationSelector } from './useRecommendationSelector';
+import { AlbumRecommendationList, ArtistRecommendationList, SkeletonLoader, SongRecommendationList } from './components';
+import { useRecommendationSelector, simulateNetworkDelay } from './useRecommendationSelector';
+import { useRecommendations } from '../../context/RecommendationsContext';
 
-type CombinedRecommendationListProps = {
-    songRecommendations: RecommendedSong[];
-    albumRecommendations: RecommendedAlbum[];
-    artistRecommendations: RecommendedArtist[];
-    loading?: boolean;
-    error?: string;
-};
+const CombinedRecommendationList: React.FC = () => {
+    const { state, fetchRecommendations, upvoteRecommendation } = useRecommendations();
 
-const CombinedRecommendationList: React.FC<CombinedRecommendationListProps> = ({
-    songRecommendations: initialSongRecommendations,
-    albumRecommendations: initialAlbumRecommendations,
-    artistRecommendations: initialArtistRecommendations,
-    loading = false,
-    error
-}) => {
-    // Use the custom hook
     const {
         selectedType,
-        animating,
         selectorContainerRef,
         labelRefs,
         handleTypeChange
     } = useRecommendationSelector('songs');
 
-    // State for songs, albums, and artists
-    const [songRecommendations, setSongRecommendations] = useState<RecommendedSong[]>(
-        [...initialSongRecommendations].sort((a, b) => (b.votes || 0) - (a.votes || 0))
-    );
-    const [albumRecommendations, setAlbumRecommendations] = useState<RecommendedAlbum[]>(
-        [...initialAlbumRecommendations].sort((a, b) => (b.votes || 0) - (a.votes || 0))
-    );
-    const [artistRecommendations, setArtistRecommendations] = useState<RecommendedArtist[]>(
-        [...initialArtistRecommendations].sort((a, b) => (b.votes || 0) - (a.votes || 0))
-    );
-
-    // Update recommendations when props change
-    useEffect(() => {
-        setSongRecommendations([...initialSongRecommendations].sort((a, b) => (b.votes || 0) - (a.votes || 0)));
-    }, [initialSongRecommendations]);
-
-    useEffect(() => {
-        setAlbumRecommendations([...initialAlbumRecommendations].sort((a, b) => (b.votes || 0) - (a.votes || 0)));
-    }, [initialAlbumRecommendations]);
-
-    useEffect(() => {
-        setArtistRecommendations([...initialArtistRecommendations].sort((a, b) => (b.votes || 0) - (a.votes || 0)));
-    }, [initialArtistRecommendations]);
-
-    // Track voted items for each recommendation type
     const [songVotedItems, setSongVotedItems] = useState<Record<number, boolean>>({});
     const [albumVotedItems, setAlbumVotedItems] = useState<Record<number, boolean>>({});
     const [artistVotedItems, setArtistVotedItems] = useState<Record<number, boolean>>({});
-
-    // Add state for screen reader announcements
     const [announcement, setAnnouncement] = useState('');
+    const [artificialLoading, setArtificialLoading] = useState(false);
 
-    // Unified data structure for recommendation types
+    useEffect(() => {
+        const type = selectedType === 'songs' ? 'songs' :
+            selectedType === 'albums' ? 'albums' : 'artists';
+
+        // Only run this effect when the selected type changes or loading state changes
+        if (!state[type].loaded && !state[type].loading) {
+            const loadRecommendations = async () => {
+                setArtificialLoading(true);
+                await simulateNetworkDelay(500);
+                fetchRecommendations(type);
+                setArtificialLoading(false);
+            };
+
+            loadRecommendations();
+        }
+    }, [selectedType, fetchRecommendations, state]);
+
     const recommendationData: RecommendationStateMap = useMemo(() => ({
         songs: {
-            recommendations: songRecommendations,
-            setRecommendations: setSongRecommendations,
+            recommendations: state.songs.items,
             votedItems: songVotedItems,
             setVotedItems: setSongVotedItems,
             component: SongRecommendationList
         },
         albums: {
-            recommendations: albumRecommendations,
-            setRecommendations: setAlbumRecommendations,
+            recommendations: state.albums.items,
             votedItems: albumVotedItems,
             setVotedItems: setAlbumVotedItems,
             component: AlbumRecommendationList
         },
         artists: {
-            recommendations: artistRecommendations,
-            setRecommendations: setArtistRecommendations,
+            recommendations: state.artists.items,
             votedItems: artistVotedItems,
             setVotedItems: setArtistVotedItems,
             component: ArtistRecommendationList
         }
     }), [
-        songRecommendations, setSongRecommendations, songVotedItems, setSongVotedItems,
-        albumRecommendations, setAlbumRecommendations, albumVotedItems, setAlbumVotedItems,
-        artistRecommendations, setArtistRecommendations, artistVotedItems, setArtistVotedItems
+        state.songs.items, songVotedItems, setSongVotedItems,
+        state.albums.items, albumVotedItems, setAlbumVotedItems,
+        state.artists.items, artistVotedItems, setArtistVotedItems
     ]);
 
-    // Use useCallback to memoize the handleUpvote function
     const handleUpvote = useCallback((index: number) => {
         const currentType = selectedType;
-        const { votedItems, setVotedItems, setRecommendations, recommendations } =
-            recommendationData[currentType as keyof RecommendationStateMap];
+        const typeMapping = {
+            'songs': 'songs',
+            'albums': 'albums',
+            'artists': 'artists'
+        } as const;
+
+        const { votedItems, setVotedItems } = recommendationData[currentType];
+        const recommendations = recommendationData[currentType].recommendations;
 
         // Skip if already voted
         if (votedItems[index]) return;
@@ -108,32 +86,25 @@ const CombinedRecommendationList: React.FC<CombinedRecommendationListProps> = ({
         // Get item name for announcement
         let itemName = '';
         if (currentType === 'songs' && 'songTitle' in recommendations[index]) {
-            itemName = (recommendations[index] as RecommendedSong).songTitle;
+            itemName = recommendations[index].songTitle;
         } else if (currentType === 'albums' && 'albumTitle' in recommendations[index]) {
-            itemName = (recommendations[index] as RecommendedAlbum).albumTitle;
+            itemName = recommendations[index].albumTitle;
         } else if (currentType === 'artists' && 'artistName' in recommendations[index]) {
-            itemName = (recommendations[index] as RecommendedArtist).artistName;
+            itemName = recommendations[index].artistName;
         }
 
-        // Update vote count and sort
-        setRecommendations((prevRecommendations: any) => {
-            const updatedRecommendations = [...prevRecommendations];
-            const item = updatedRecommendations[index];
-            const votes = item.votes || 0;
-            updatedRecommendations[index] = { ...item, votes: votes + 1 };
+        // Update vote via context
+        upvoteRecommendation(typeMapping[currentType], index);
 
-            // Announce the upvote
-            setAnnouncement(`You upvoted ${itemName}. New vote count: ${votes + 1}.`);
-
-            // Sort by vote count
-            return updatedRecommendations.sort((a, b) => (b.votes || 0) - (a.votes || 0));
-        });
-    }, [selectedType, recommendationData]);
+        // Announce the upvote
+        const votes = recommendations[index].votes || 0;
+        setAnnouncement(`You upvoted ${itemName}. New vote count: ${votes + 1}.`);
+    }, [selectedType, recommendationData, upvoteRecommendation]);
 
     // Memoize the recommendation component render
     const currentRecommendationList = useMemo(() => {
         const { component: RecommendationComponent, recommendations, votedItems } =
-            recommendationData[selectedType as keyof RecommendationStateMap];
+            recommendationData[selectedType];
 
         if (recommendations.length === 0) {
             return (
@@ -152,6 +123,14 @@ const CombinedRecommendationList: React.FC<CombinedRecommendationListProps> = ({
         );
     }, [selectedType, recommendationData, handleUpvote]);
 
+    // Update the loading check to include artificial loading
+    const isLoading = state[selectedType === 'songs' ? 'songs' :
+        selectedType === 'albums' ? 'albums' : 'artists'].loading || artificialLoading;
+
+    // Get loading and error states from context
+    const error = state[selectedType === 'songs' ? 'songs' :
+        selectedType === 'albums' ? 'albums' : 'artists'].error;
+
     // Error display component
     const errorDisplay = useMemo(() => {
         if (!error) return null;
@@ -159,10 +138,13 @@ const CombinedRecommendationList: React.FC<CombinedRecommendationListProps> = ({
         return (
             <div className="recommendation-error" role="alert">
                 <p>{error}</p>
-                <button onClick={() => window.location.reload()}>Retry</button>
+                <button onClick={() => fetchRecommendations(selectedType === 'songs' ? 'songs' :
+                    selectedType === 'albums' ? 'albums' : 'artists')}>
+                    Retry
+                </button>
             </div>
         );
-    }, [error]);
+    }, [error, fetchRecommendations, selectedType]);
 
     return (
         <div className="recommendation-list-component styled-container">
@@ -201,16 +183,14 @@ const CombinedRecommendationList: React.FC<CombinedRecommendationListProps> = ({
 
             {errorDisplay}
 
-            {loading ? (
-                <div className="loading-container" role="status" aria-live="polite">
-                    <div className="loading-spinner" aria-hidden="true"></div>
-                    <p>Loading recommendations...</p>
+            {isLoading ? (
+                <div className="recommendation-content">
+                    <SkeletonLoader />
                 </div>
             ) : (
                 <div
-                    className={`recommendation-content ${animating ? 'animating' : ''}`}
+                    className="recommendation-content"
                     aria-live="polite"
-                    aria-busy={animating}
                 >
                     {currentRecommendationList}
                 </div>
