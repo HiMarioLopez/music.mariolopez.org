@@ -5,6 +5,7 @@ import './RecommendationForm.styles.css';
 import { Result } from './RecommendationForm.types';
 import { ResultSectionHeader, SearchButton, SearchHint, SearchResult, ShowMoreButton } from './components';
 import { useRecommendationSearch } from './useRecommendationSearch';
+import { useRecommendations } from '../../context/RecommendationsContext';
 
 // Create a stable ID to reduce unnecessary re-renders
 // See: https://stackoverflow.com/a/49688084
@@ -12,14 +13,7 @@ const SEARCH_INPUT_ID = "song-search-input";
 const RESULTS_LIST_ID = "search-results-list";
 const DEFAULT_VISIBLE_ITEMS_COUNT = 3;
 
-export type RecommendationFormProps = {
-  onRecommend: (
-    type: 'song' | 'album' | 'artist',
-    recommendation: RecommendedSong | RecommendedAlbum | RecommendedArtist
-  ) => void;
-};
-
-const RecommendationForm: React.FC<RecommendationFormProps> = ({ onRecommend }) => {
+const RecommendationForm: React.FC = () => {
   const searchContainerRef = useRef<HTMLDivElement>(null);
   const resultsRef = useRef<HTMLUListElement>(null);
   const [activeResultIndex, setActiveResultIndex] = React.useState<number>(-1);
@@ -44,6 +38,9 @@ const RecommendationForm: React.FC<RecommendationFormProps> = ({ onRecommend }) 
     setSearchTerm,
   } = useRecommendationSearch();
 
+  // Use the recommendations context
+  const { addRecommendation } = useRecommendations();
+
   // Create a wrapper for handleSongSelect that formats the recommendation correctly
   const handleSongSelect = useCallback((result: Result) => {
     if (result.type === 'songs') {
@@ -54,7 +51,7 @@ const RecommendationForm: React.FC<RecommendationFormProps> = ({ onRecommend }) 
         albumName: result.album || 'Unknown Album',
         albumCoverUrl: result.artworkUrl || placeholderAlbumArt
       };
-      onRecommend('song', songRecommendation);
+      addRecommendation('songs', songRecommendation);
     }
     else if (result.type === 'albums') {
       // Create an Album recommendation
@@ -64,7 +61,7 @@ const RecommendationForm: React.FC<RecommendationFormProps> = ({ onRecommend }) 
         albumCoverUrl: result.artworkUrl || placeholderAlbumArt,
         trackCount: result.trackCount
       };
-      onRecommend('album', albumRecommendation);
+      addRecommendation('albums', albumRecommendation);
     }
     else if (result.type === 'artists') {
       // Create an Artist recommendation
@@ -73,13 +70,13 @@ const RecommendationForm: React.FC<RecommendationFormProps> = ({ onRecommend }) 
         artistImageUrl: result.artworkUrl || placeholderAlbumArt,
         genres: result.genres
       };
-      onRecommend('artist', artistRecommendation);
+      addRecommendation('artists', artistRecommendation);
     }
 
     // Clean up the UI state
     setSearchTerm('');
     handleResultsVisibility(false);
-  }, [onRecommend, setSearchTerm, handleResultsVisibility]);
+  }, [addRecommendation, setSearchTerm, handleResultsVisibility]);
 
   // Combined results for keyboard navigation
   const allVisibleResults = useMemo(() => {
