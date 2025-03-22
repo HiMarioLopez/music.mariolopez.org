@@ -16,7 +16,9 @@ const Footer: React.FC = () => {
                     React
                 </a>
             </div>
-            <div className="footer-component-copyright-container">© 2024 Mario Lopez</div>
+            <div className="footer-component-copyright-container">
+                <a href="https://mariolopez.org" target="_blank" rel="noopener noreferrer">© {new Date().getFullYear()} Mario Lopez</a>
+            </div>
         </footer>
     );
 };
