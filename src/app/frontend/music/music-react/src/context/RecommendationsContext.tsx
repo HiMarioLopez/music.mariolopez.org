@@ -1,6 +1,6 @@
 import React, { createContext, useReducer, useContext, ReactNode, useCallback, useMemo } from 'react';
 import { RecommendedSong, RecommendedAlbum, RecommendedArtist } from '../types/Recommendations';
-import placeholderAlbumArt from '../assets/50.png';
+import { mockSongs, mockAlbums, mockArtists } from '../mocks/mockRecommendationsData';
 
 // Define the context state shape
 type RecommendationsState = {
@@ -24,151 +24,30 @@ type RecommendationsState = {
   };
 };
 
-// Define action types
+// Improve type safety for action creators with generics
+type FetchSuccessAction<T extends 'songs' | 'albums' | 'artists'> = {
+  type: 'FETCH_RECOMMENDATIONS_SUCCESS';
+  recommendationType: T;
+  items: T extends 'songs' ? RecommendedSong[] :
+  T extends 'albums' ? RecommendedAlbum[] :
+  RecommendedArtist[];
+};
+
 type RecommendationsAction =
   | { type: 'FETCH_RECOMMENDATIONS_REQUEST'; recommendationType: 'songs' | 'albums' | 'artists' }
-  | { type: 'FETCH_RECOMMENDATIONS_SUCCESS'; recommendationType: 'songs' | 'albums' | 'artists'; items: RecommendedSong[] | RecommendedAlbum[] | RecommendedArtist[] }
+  | FetchSuccessAction<'songs' | 'albums' | 'artists'>
   | { type: 'FETCH_RECOMMENDATIONS_FAILURE'; recommendationType: 'songs' | 'albums' | 'artists'; error: string }
   | { type: 'ADD_RECOMMENDATION'; recommendationType: 'songs' | 'albums' | 'artists'; item: RecommendedSong | RecommendedAlbum | RecommendedArtist }
   | { type: 'UPVOTE_RECOMMENDATION'; recommendationType: 'songs' | 'albums' | 'artists'; index: number };
 
-// Define the context API shape
 type RecommendationsContextType = {
   state: RecommendationsState;
   fetchRecommendations: (type: 'songs' | 'albums' | 'artists') => void;
   addRecommendation: (type: 'songs' | 'albums' | 'artists', item: RecommendedSong | RecommendedAlbum | RecommendedArtist) => void;
   upvoteRecommendation: (type: 'songs' | 'albums' | 'artists', index: number) => void;
+  isLoading: (type: 'songs' | 'albums' | 'artists') => boolean;
+  getError: (type: 'songs' | 'albums' | 'artists') => string | null;
 };
-
-// Create mock data for initial state
-const mockSongs: RecommendedSong[] = [
-  {
-    songTitle: 'Bohemian Rhapsody',
-    artistName: 'Queen',
-    albumName: 'A Night at the Opera',
-    albumCoverUrl: placeholderAlbumArt,
-    votes: 15
-  },
-  {
-    songTitle: 'Hotel California',
-    artistName: 'Eagles',
-    albumName: 'Hotel California',
-    albumCoverUrl: placeholderAlbumArt,
-    votes: 12
-  },
-  {
-    songTitle: 'Stairway to Heaven',
-    artistName: 'Led Zeppelin',
-    albumName: 'Led Zeppelin IV',
-    albumCoverUrl: placeholderAlbumArt,
-    votes: 10
-  },
-  {
-    songTitle: 'Bohemian Rhapsody',
-    artistName: 'Queen',
-    albumName: 'A Night at the Opera',
-    albumCoverUrl: placeholderAlbumArt,
-    votes: 15
-  },
-  {
-    songTitle: 'Hotel California',
-    artistName: 'Eagles',
-    albumName: 'Hotel California',
-    albumCoverUrl: placeholderAlbumArt,
-    votes: 12
-  },
-  {
-    songTitle: 'Stairway to Heaven',
-    artistName: 'Led Zeppelin',
-    albumName: 'Led Zeppelin IV',
-    albumCoverUrl: placeholderAlbumArt,
-    votes: 10
-  }
-];
-
-const mockAlbums: RecommendedAlbum[] = [
-  {
-    albumTitle: 'Dark Side of the Moon',
-    artistName: 'Pink Floyd',
-    albumCoverUrl: placeholderAlbumArt,
-    trackCount: 10,
-    votes: 18
-  },
-  {
-    albumTitle: 'Thriller',
-    artistName: 'Michael Jackson',
-    albumCoverUrl: placeholderAlbumArt,
-    trackCount: 9,
-    votes: 14
-  },
-  {
-    albumTitle: 'Abbey Road',
-    artistName: 'The Beatles',
-    albumCoverUrl: placeholderAlbumArt,
-    trackCount: 17,
-    votes: 11
-  },
-  {
-    albumTitle: 'The Dark Side of the Moon',
-    artistName: 'Pink Floyd',
-    albumCoverUrl: placeholderAlbumArt,
-    trackCount: 10,
-    votes: 11
-  },
-  {
-    albumTitle: 'The Dark Side of the Moon',
-    artistName: 'Pink Floyd',
-    albumCoverUrl: placeholderAlbumArt,
-    trackCount: 10,
-    votes: 11
-  },
-  {
-    albumTitle: 'The Dark Side of the Moon',
-    artistName: 'Pink Floyd',
-    albumCoverUrl: placeholderAlbumArt,
-    trackCount: 10,
-    votes: 11
-  },
-];
-
-const mockArtists: RecommendedArtist[] = [
-  {
-    artistName: 'David Bowie',
-    artistImageUrl: placeholderAlbumArt,
-    genres: ['Rock', 'Art Rock', 'Glam Rock'],
-    votes: 20
-  },
-  {
-    artistName: 'Prince',
-    artistImageUrl: placeholderAlbumArt,
-    genres: ['Pop', 'Funk', 'R&B'],
-    votes: 16
-  },
-  {
-    artistName: 'Fleetwood Mac',
-    artistImageUrl: placeholderAlbumArt,
-    genres: ['Rock', 'Pop Rock'],
-    votes: 13
-  },
-  {
-    artistName: 'The Beatles',
-    artistImageUrl: placeholderAlbumArt,
-    genres: ['Rock', 'Pop Rock'],
-    votes: 13
-  },
-  {
-    artistName: 'The Beatles',
-    artistImageUrl: placeholderAlbumArt,
-    genres: ['Rock', 'Pop Rock'],
-    votes: 13
-  },
-  {
-    artistName: 'The Beatles',
-    artistImageUrl: placeholderAlbumArt,
-    genres: ['Rock', 'Pop Rock'],
-    votes: 13
-  },
-];
 
 const initialState: RecommendationsState = {
   songs: { items: [], loading: false, error: null, loaded: false },
@@ -176,10 +55,8 @@ const initialState: RecommendationsState = {
   artists: { items: [], loading: false, error: null, loaded: false },
 };
 
-// Create the context
 const RecommendationsContext = createContext<RecommendationsContextType | undefined>(undefined);
 
-// Reducer function
 function recommendationsReducer(state: RecommendationsState, action: RecommendationsAction): RecommendationsState {
   switch (action.type) {
     case 'FETCH_RECOMMENDATIONS_REQUEST':
@@ -225,15 +102,18 @@ function recommendationsReducer(state: RecommendationsState, action: Recommendat
     case 'UPVOTE_RECOMMENDATION': {
       const items = [...state[action.recommendationType].items];
       const item = items[action.index];
+      const newVotes = (item.votes || 0) + 1;
 
       // Update vote count
       items[action.index] = {
         ...item,
-        votes: (item.votes || 0) + 1
+        votes: newVotes
       };
 
-      // Sort by votes
-      items.sort((a, b) => (b.votes || 0) - (a.votes || 0));
+      // Only sort if this item might move up in ranking
+      if (action.index > 0 && newVotes > (items[action.index - 1].votes || 0)) {
+        items.sort((a, b) => (b.votes || 0) - (a.votes || 0));
+      }
 
       return {
         ...state,
@@ -248,34 +128,55 @@ function recommendationsReducer(state: RecommendationsState, action: Recommendat
   }
 }
 
-// Provider component
-export const RecommendationsProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+export const RecommendationsProvider: React.FC<{
+  children: ReactNode;
+  useMockData?: boolean;
+}> = ({ children, useMockData = true }) => {
   const [state, dispatch] = useReducer(recommendationsReducer, initialState);
 
   // Memoize callback functions so they don't change on every render
   const fetchRecommendations = useCallback((type: 'songs' | 'albums' | 'artists') => {
-    // Simulate a loading state briefly for UI testing
     dispatch({ type: 'FETCH_RECOMMENDATIONS_REQUEST', recommendationType: type });
 
-    // Select the appropriate mock data based on type
-    const mockData = type === 'songs' ? mockSongs :
-      type === 'albums' ? mockAlbums : mockArtists;
+    if (useMockData) {
+      // Mock data implementation
+      const mockData = type === 'songs' ? mockSongs :
+        type === 'albums' ? mockAlbums : mockArtists;
 
-    // Simulate success with a delay to see the loader
-    setTimeout(() => {
-      dispatch({
-        type: 'FETCH_RECOMMENDATIONS_SUCCESS',
-        recommendationType: type,
-        items: mockData
-      });
-    }, 2000);
-  }, []); // Empty dependency array since this doesn't depend on any props or state
+      setTimeout(() => {
+        dispatch({
+          type: 'FETCH_RECOMMENDATIONS_SUCCESS',
+          recommendationType: type,
+          items: mockData
+        });
+      }, 750);
+    } else {
+      // Real API implementation (to be added later)
+      // Example:
+      // api.getRecommendations(type)
+      //   .then(data => dispatch({
+      //     type: 'FETCH_RECOMMENDATIONS_SUCCESS',
+      //     recommendationType: type,
+      //     items: data
+      //   }))
+      //   .catch(error => dispatch({
+      //     type: 'FETCH_RECOMMENDATIONS_FAILURE',
+      //     recommendationType: type,
+      //     error: error.message
+      //   }));
+    }
+  }, [useMockData]);
 
-  const addRecommendation = useCallback((type: 'songs' | 'albums' | 'artists', item: RecommendedSong | RecommendedAlbum | RecommendedArtist) => {
+  const addRecommendation = useCallback(<T extends 'songs' | 'albums' | 'artists'>(
+    type: T,
+    item: T extends 'songs' ? RecommendedSong :
+      T extends 'albums' ? RecommendedAlbum :
+      RecommendedArtist
+  ) => {
     dispatch({
       type: 'ADD_RECOMMENDATION',
       recommendationType: type,
-      item
+      item: item as any // Cast needed due to TypeScript limitations, but our runtime logic is correct
     });
   }, []);
 
@@ -287,13 +188,23 @@ export const RecommendationsProvider: React.FC<{ children: ReactNode }> = ({ chi
     });
   }, []);
 
+  const isLoading = useCallback((type: 'songs' | 'albums' | 'artists') => {
+    return state[type].loading;
+  }, [state]);
+
+  const getError = useCallback((type: 'songs' | 'albums' | 'artists') => {
+    return state[type].error;
+  }, [state]);
+
   // Memoize the context value to prevent unnecessary re-renders
   const contextValue = useMemo(() => ({
     state,
     fetchRecommendations,
     addRecommendation,
-    upvoteRecommendation
-  }), [state, fetchRecommendations, addRecommendation, upvoteRecommendation]);
+    upvoteRecommendation,
+    isLoading,
+    getError
+  }), [state, fetchRecommendations, addRecommendation, upvoteRecommendation, isLoading, getError]);
 
   return (
     <RecommendationsContext.Provider value={contextValue}>
@@ -302,7 +213,6 @@ export const RecommendationsProvider: React.FC<{ children: ReactNode }> = ({ chi
   );
 };
 
-// Custom hook for using the context
 export const useRecommendations = () => {
   const context = useContext(RecommendationsContext);
   if (context === undefined) {
