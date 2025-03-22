@@ -1,6 +1,6 @@
 import React, { KeyboardEvent, memo, useCallback, useEffect, useMemo, useRef } from 'react';
 import placeholderAlbumArt from '../../assets/50.png';
-import { RecommendationAlbum, RecommendationArtist, RecommendationSong } from '../../types/Recommendations';
+import { RecommendedAlbum, RecommendedArtist, RecommendedSong } from '../../types/Recommendations';
 import './RecommendationForm.styles.css';
 import { Result } from './RecommendationForm.types';
 import { ResultSectionHeader, SearchButton, SearchHint, SearchResult, ShowMoreButton } from './components';
@@ -15,7 +15,7 @@ const DEFAULT_VISIBLE_ITEMS_COUNT = 3;
 export type RecommendationFormProps = {
   onRecommend: (
     type: 'song' | 'album' | 'artist',
-    recommendation: RecommendationSong | RecommendationAlbum | RecommendationArtist
+    recommendation: RecommendedSong | RecommendedAlbum | RecommendedArtist
   ) => void;
 };
 
@@ -48,7 +48,7 @@ const RecommendationForm: React.FC<RecommendationFormProps> = ({ onRecommend }) 
   const handleSongSelect = useCallback((result: Result) => {
     if (result.type === 'songs') {
       // Create a Song recommendation
-      const songRecommendation: RecommendationSong = {
+      const songRecommendation: RecommendedSong = {
         songTitle: result.name,
         artistName: result.artist || 'Unknown Artist',
         albumName: result.album || 'Unknown Album',
@@ -58,7 +58,7 @@ const RecommendationForm: React.FC<RecommendationFormProps> = ({ onRecommend }) 
     }
     else if (result.type === 'albums') {
       // Create an Album recommendation
-      const albumRecommendation: RecommendationAlbum = {
+      const albumRecommendation: RecommendedAlbum = {
         albumTitle: result.name,
         artistName: result.artist || 'Unknown Artist',
         albumCoverUrl: result.artworkUrl || placeholderAlbumArt,
@@ -68,7 +68,7 @@ const RecommendationForm: React.FC<RecommendationFormProps> = ({ onRecommend }) 
     }
     else if (result.type === 'artists') {
       // Create an Artist recommendation
-      const artistRecommendation: RecommendationArtist = {
+      const artistRecommendation: RecommendedArtist = {
         artistName: result.name,
         artistImageUrl: result.artworkUrl || placeholderAlbumArt,
         genres: result.genres
