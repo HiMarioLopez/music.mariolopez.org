@@ -1,175 +1,23 @@
-import React, { KeyboardEvent, memo, useEffect, useMemo, useRef } from 'react';
-import { ClearIcon, LoadingIcon, SearchIcon } from '../Icons';
+import React, { KeyboardEvent, memo, useCallback, useEffect, useMemo, useRef } from 'react';
+import placeholderAlbumArt from '../../assets/50.png';
+import { RecommendationAlbum, RecommendationArtist, RecommendationSong } from '../../types/Recommendations';
 import './RecommendationForm.styles.css';
-import { SearchResult } from './RecommendationForm.types';
+import { Result } from './RecommendationForm.types';
+import { ResultSectionHeader, SearchButton, SearchHint, SearchResult, ShowMoreButton } from './components';
 import { useRecommendationSearch } from './useRecommendationSearch';
-
-export type RecommendationFormProps = {
-  onRecommend: (songTitle: string) => void;
-};
-
-// Memoized sub-components for better performance
-const ResultSectionHeader = memo(({ title }: { title: string }) => (
-  <div className="result-section-header" role="presentation">
-    {title}
-  </div>
-));
-
-const HintResult = memo(({
-  hint,
-  index,
-  isActive,
-  onSelect
-}: {
-  hint: SearchResult;
-  index: number;
-  isActive: boolean;
-  onSelect: (name: string) => void;
-}) => (
-  <li
-    key={`hint-${hint.id}`}
-    id={`result-${index}`}
-    data-index={index}
-    onClick={() => onSelect(hint.name)}
-    className={`hint-result ${isActive ? 'active' : ''}`}
-    role="option"
-    aria-selected={isActive}
-    tabIndex={-1}
-  >
-    <div className="result-info">
-      <strong>{hint.name}</strong>
-    </div>
-  </li>
-));
-
-const ShowMoreButton = memo(({
-  index,
-  isActive,
-  onClick,
-  text,
-  isLoading
-}: {
-  index: number;
-  isActive: boolean;
-  onClick: () => void;
-  text: string;
-  isLoading?: boolean;
-}) => (
-  <li
-    id={`result-${index}`}
-    data-index={index}
-    className={`hint-result show-more ${isActive ? 'active' : ''} ${isLoading ? 'loading' : ''}`}
-    onClick={onClick}
-    role="option"
-    aria-selected={isActive}
-    tabIndex={-1}
-  >
-    <div className="result-info">
-      {isLoading ? (
-        <div className="inline-loader">
-          <LoadingIcon />
-          <span>Loading more results...</span>
-        </div>
-      ) : (
-        <span className="show-more-text">{text}</span>
-      )}
-    </div>
-  </li>
-));
-
-const SongResult = memo(({
-  result,
-  index,
-  isActive,
-  onSelect
-}: {
-  result: SearchResult;
-  index: number;
-  isActive: boolean;
-  onSelect: (result: SearchResult) => void;
-}) => (
-  <li
-    key={`${result.type}-${result.id}`}
-    id={`result-${index}`}
-    data-index={index}
-    onClick={() => onSelect(result)}
-    className={`${result.type}-result ${isActive ? 'active' : ''}`}
-    role="option"
-    aria-selected={isActive}
-    tabIndex={-1}
-  >
-    {result.artworkUrl && (
-      <img
-        src={result.artworkUrl}
-        alt=""
-        className="result-artwork"
-        aria-hidden="true"
-        loading="lazy"
-      />
-    )}
-    <div className="result-info">
-      <div className="result-info-text">
-        <strong>{result.name}</strong>
-        {result.type === 'songs' && (
-          <>
-            {result.artist && <span> by {result.artist}</span>}
-            {result.album && <span> • {result.album}</span>}
-          </>
-        )}
-        {result.type === 'albums' && (
-          <>
-            {result.artist && <span> by {result.artist}</span>}
-            {result.trackCount && <span> • {result.trackCount} tracks</span>}
-          </>
-        )}
-        {result.type === 'artists' && (
-          result.genres && <span>{result.genres[0]}</span>
-        )}
-      </div>
-      <span className={`type-indicator ${result.type}`}>
-        {result.type === 'songs' ? 'Song' :
-          result.type === 'albums' ? 'Album' : 'Artist'}
-      </span>
-    </div>
-  </li>
-));
-
-const SearchButton = memo(({
-  isLoading,
-  isAuthenticating,
-  searchTerm,
-  onClear,
-  disabled
-}: {
-  isLoading: boolean;
-  isAuthenticating: boolean;
-  searchTerm: string;
-  onClear: () => void;
-  disabled: boolean;
-}) => (
-  <button
-    className={`search-button ${(isLoading || isAuthenticating) ? 'spinning' : ''}`}
-    disabled={disabled}
-    onClick={() => {
-      if (searchTerm && !isLoading && !isAuthenticating) {
-        onClear();
-      }
-    }}
-    type="button"
-    title={isLoading ? "Searching..." :
-      searchTerm ? "Clear search" : "Search"}
-    aria-label={isLoading ? "Searching..." :
-      searchTerm ? "Clear search" : "Search"}
-  >
-    {(isLoading || isAuthenticating) ? <LoadingIcon /> :
-      searchTerm ? <ClearIcon /> : <SearchIcon />}
-  </button>
-));
 
 // Create a stable ID to reduce unnecessary re-renders
 // See: https://stackoverflow.com/a/49688084
 const SEARCH_INPUT_ID = "song-search-input";
 const RESULTS_LIST_ID = "search-results-list";
+const DEFAULT_VISIBLE_ITEMS_COUNT = 3;
+
+export type RecommendationFormProps = {
+  onRecommend: (
+    type: 'song' | 'album' | 'artist',
+    recommendation: RecommendationSong | RecommendationAlbum | RecommendationArtist
+  ) => void;
+};
 
 const RecommendationForm: React.FC<RecommendationFormProps> = ({ onRecommend }) => {
   const searchContainerRef = useRef<HTMLDivElement>(null);
@@ -178,8 +26,8 @@ const RecommendationForm: React.FC<RecommendationFormProps> = ({ onRecommend }) 
 
   const {
     searchTerm,
-    hintResults,
-    songResults,
+    searchHints,
+    results,
     isLoading,
     isAuthenticating,
     isLoadingMore,
@@ -189,28 +37,64 @@ const RecommendationForm: React.FC<RecommendationFormProps> = ({ onRecommend }) 
     showAllResults,
     inputRef,
     handleHintSelect,
-    handleSongSelect,
     handleLoadMore,
     handleClearSearch,
     handleResultsVisibility,
     setShowAllResults,
     setSearchTerm,
-  } = useRecommendationSearch({ onRecommend });
+  } = useRecommendationSearch();
+
+  // Create a wrapper for handleSongSelect that formats the recommendation correctly
+  const handleSongSelect = useCallback((result: Result) => {
+    if (result.type === 'songs') {
+      // Create a Song recommendation
+      const songRecommendation: RecommendationSong = {
+        songTitle: result.name,
+        artistName: result.artist || 'Unknown Artist',
+        albumName: result.album || 'Unknown Album',
+        albumCoverUrl: result.artworkUrl || placeholderAlbumArt
+      };
+      onRecommend('song', songRecommendation);
+    }
+    else if (result.type === 'albums') {
+      // Create an Album recommendation
+      const albumRecommendation: RecommendationAlbum = {
+        albumTitle: result.name,
+        artistName: result.artist || 'Unknown Artist',
+        albumCoverUrl: result.artworkUrl || placeholderAlbumArt,
+        trackCount: result.trackCount
+      };
+      onRecommend('album', albumRecommendation);
+    }
+    else if (result.type === 'artists') {
+      // Create an Artist recommendation
+      const artistRecommendation: RecommendationArtist = {
+        artistName: result.name,
+        artistImageUrl: result.artworkUrl || placeholderAlbumArt,
+        genres: result.genres
+      };
+      onRecommend('artist', artistRecommendation);
+    }
+
+    // Clean up the UI state
+    setSearchTerm('');
+    handleResultsVisibility(false);
+  }, [onRecommend, setSearchTerm, handleResultsVisibility]);
 
   // Combined results for keyboard navigation
   const allVisibleResults = useMemo(() => {
-    const visibleHints = showAllResults ? hintResults : hintResults.slice(0, 3);
-    const visibleSongs = showAllResults ? songResults : songResults.slice(0, 3);
-    const results = [...visibleHints, ...visibleSongs];
+    const visibleHints = showAllResults ? searchHints : searchHints.slice(0, DEFAULT_VISIBLE_ITEMS_COUNT);
+    const visibleSongs = showAllResults ? results : results.slice(0, DEFAULT_VISIBLE_ITEMS_COUNT);
+    const allResults = [...visibleHints, ...visibleSongs];
 
     // Add the "Show more" options if applicable
     if (!showAllResults) {
-      if (hintResults.length > 3) results.push({ id: 'show-more-hints', name: 'Show more suggestions...', type: 'hint' });
-      if (songResults.length === 3) results.push({ id: 'show-more-songs', name: 'Show more results...', type: 'hint' });
+      if (searchHints.length > DEFAULT_VISIBLE_ITEMS_COUNT) allResults.push({ id: 'show-more-hints', name: 'Show more suggestions...', type: 'hint' });
+      if (results.length === DEFAULT_VISIBLE_ITEMS_COUNT) allResults.push({ id: 'show-more-results', name: 'Show more results...', type: 'hint' });
     }
 
-    return results;
-  }, [hintResults, songResults, showAllResults]);
+    return allResults;
+  }, [searchHints, results, showAllResults]);
 
   const handleClickOutside = (event: MouseEvent) => {
     if (
@@ -265,7 +149,7 @@ const RecommendationForm: React.FC<RecommendationFormProps> = ({ onRecommend }) 
 
           if (selected.id === 'show-more-hints') {
             setShowAllResults(true);
-          } else if (selected.id === 'show-more-songs') {
+          } else if (selected.id === 'show-more-results') {
             handleLoadMore();
           } else if (selected.type === 'hint') {
             handleHintSelect(selected.name);
@@ -320,13 +204,13 @@ const RecommendationForm: React.FC<RecommendationFormProps> = ({ onRecommend }) 
 
   // Memoize rendering the hint results
   const renderHints = useMemo(() => {
-    if (!hintResults.length) return null;
+    if (!searchHints.length) return null;
 
     return (
       <>
         <ResultSectionHeader title="Suggested Searches" />
-        {(showAllResults ? hintResults : hintResults.slice(0, 3)).map((hint, index) => (
-          <HintResult
+        {(showAllResults ? searchHints : searchHints.slice(0, DEFAULT_VISIBLE_ITEMS_COUNT)).map((hint, index) => (
+          <SearchHint
             key={hint.id}
             hint={hint}
             index={index}
@@ -334,32 +218,32 @@ const RecommendationForm: React.FC<RecommendationFormProps> = ({ onRecommend }) 
             onSelect={handleHintSelect}
           />
         ))}
-        {!showAllResults && hintResults.length > 3 && (
+        {!showAllResults && searchHints.length > DEFAULT_VISIBLE_ITEMS_COUNT && (
           <ShowMoreButton
-            index={hintResults.slice(0, 3).length}
-            isActive={hintResults.slice(0, 3).length === activeResultIndex}
+            index={searchHints.slice(0, DEFAULT_VISIBLE_ITEMS_COUNT).length}
+            isActive={searchHints.slice(0, DEFAULT_VISIBLE_ITEMS_COUNT).length === activeResultIndex}
             onClick={() => setShowAllResults(true)}
             text="Show more suggestions..."
           />
         )}
       </>
     );
-  }, [hintResults, showAllResults, activeResultIndex, handleHintSelect]);
+  }, [searchHints, showAllResults, activeResultIndex, handleHintSelect]);
 
   // Memoize rendering the song results
-  const renderSongs = useMemo(() => {
-    if (!songResults.length) return null;
+  const renderResults = useMemo(() => {
+    if (!results.length) return null;
 
-    const hintsCount = hintResults.length;
-    const showMoreHints = !showAllResults && hintsCount > 3;
+    const hintsCount = searchHints.length;
+    const showMoreHints = !showAllResults && hintsCount > DEFAULT_VISIBLE_ITEMS_COUNT;
 
     return (
       <>
         <ResultSectionHeader title="Search Results" />
-        {(showAllResults ? songResults : songResults.slice(0, 3)).map((result, index) => {
+        {(showAllResults ? results : results.slice(0, DEFAULT_VISIBLE_ITEMS_COUNT)).map((result, index) => {
           const resultIndex = hintsCount + (showAllResults ? 0 : (showMoreHints ? 1 : 0)) + index;
           return (
-            <SongResult
+            <SearchResult
               key={result.id}
               result={result}
               index={resultIndex}
@@ -368,10 +252,10 @@ const RecommendationForm: React.FC<RecommendationFormProps> = ({ onRecommend }) 
             />
           );
         })}
-        {!showAllResults && songResults.length === 3 && (
+        {!showAllResults && results.length === DEFAULT_VISIBLE_ITEMS_COUNT && (
           <ShowMoreButton
-            index={hintsCount + (showMoreHints ? 1 : 0) + 3}
-            isActive={hintsCount + (showMoreHints ? 1 : 0) + 3 === activeResultIndex}
+            index={hintsCount + (showMoreHints ? 1 : 0) + DEFAULT_VISIBLE_ITEMS_COUNT}
+            isActive={hintsCount + (showMoreHints ? 1 : 0) + DEFAULT_VISIBLE_ITEMS_COUNT === activeResultIndex}
             onClick={handleLoadMore}
             text="Show more results..."
             isLoading={isLoadingMore}
@@ -379,7 +263,7 @@ const RecommendationForm: React.FC<RecommendationFormProps> = ({ onRecommend }) 
         )}
       </>
     );
-  }, [songResults, hintResults, showAllResults, activeResultIndex, handleSongSelect, handleLoadMore, isLoadingMore]);
+  }, [results, searchHints, showAllResults, activeResultIndex, handleSongSelect, handleLoadMore, isLoadingMore]);
 
   return (
     <div className="recommendation-form-component styled-container" key="rec-form-container">
@@ -387,7 +271,7 @@ const RecommendationForm: React.FC<RecommendationFormProps> = ({ onRecommend }) 
       <div className="search-container" ref={searchContainerRef} key="search-container">
         <div className="input-wrapper" key="input-wrapper">
           <label htmlFor={SEARCH_INPUT_ID} className="visually-hidden">
-            Search for a song
+            Search for a song, album, or artist
           </label>
           <input
             ref={inputRef}
@@ -397,7 +281,7 @@ const RecommendationForm: React.FC<RecommendationFormProps> = ({ onRecommend }) 
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="Search for a song..."
+            placeholder="Search for a song, album, or artist..."
             required
             disabled={isAuthenticating}
             onFocus={() => hasResults && handleResultsVisibility(true)}
@@ -428,7 +312,7 @@ const RecommendationForm: React.FC<RecommendationFormProps> = ({ onRecommend }) 
             aria-labelledby="form-title"
           >
             {renderHints}
-            {renderSongs}
+            {renderResults}
           </ul>
         )}
       </div>

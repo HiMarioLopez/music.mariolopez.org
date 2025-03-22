@@ -1,5 +1,5 @@
 // API Service for music-related requests
-import { SearchResult, SearchSuggestion } from '../components/RecommendationForm/RecommendationForm.types';
+import { Result, Hint } from '../components/RecommendationForm/RecommendationForm.types';
 
 const API_BASE_URL = '/api/nodejs';
 
@@ -13,7 +13,7 @@ interface AuthResponse {
 interface SearchSuggestionsResponse {
     data: {
         results: {
-            suggestions: SearchSuggestion[];
+            suggestions: Hint[];
         };
     };
 }
@@ -206,8 +206,8 @@ export const apiService = {
             types: string[] = ['songs', 'albums', 'artists'],
             kinds: string[] = ['terms', 'topResults']
         ): Promise<{
-            termSuggestions: SearchResult[],
-            contentResults: SearchResult[]
+            termSuggestions: Result[],
+            contentResults: Result[]
         }> {
             const queryParams = new URLSearchParams({
                 term: term,
@@ -224,8 +224,8 @@ export const apiService = {
 
             // Parse term suggestions
             const termSuggestions = data.data.results.suggestions
-                .filter((suggestion: SearchSuggestion) => suggestion.kind === 'terms')
-                .map((suggestion: SearchSuggestion) => ({
+                .filter((suggestion: Hint) => suggestion.kind === 'terms')
+                .map((suggestion: Hint) => ({
                     id: suggestion.searchTerm || suggestion.displayTerm || '',
                     name: suggestion.displayTerm || suggestion.searchTerm || '',
                     type: 'hint' as const
@@ -233,9 +233,9 @@ export const apiService = {
 
             // Parse content results
             const contentResults = data.data.results.suggestions
-                .filter((suggestion: SearchSuggestion) =>
+                .filter((suggestion: Hint) =>
                     suggestion.kind === 'topResults' && suggestion.content)
-                .map((suggestion: SearchSuggestion) => {
+                .map((suggestion: Hint) => {
                     const content = suggestion.content!;
                     return {
                         id: content.id,

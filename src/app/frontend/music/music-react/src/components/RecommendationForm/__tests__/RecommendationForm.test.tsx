@@ -127,7 +127,12 @@ describe('RecommendationForm', () => {
         });
 
         // Check if onRecommend was called with the correct song
-        expect(mockOnRecommend).toHaveBeenCalledWith('Bohemian Rhapsody');
+        expect(mockOnRecommend).toHaveBeenCalledWith('song', expect.objectContaining({
+            songTitle: 'Bohemian Rhapsody',
+            artistName: expect.any(String),
+            albumName: expect.any(String),
+            albumCoverUrl: expect.any(String)
+        }));
     });
 
     it('updates search when hint is selected', async () => {

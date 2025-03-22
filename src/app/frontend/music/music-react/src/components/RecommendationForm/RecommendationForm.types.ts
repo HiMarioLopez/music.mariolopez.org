@@ -1,4 +1,4 @@
-export type SearchResult = {
+export type Result = {
     id: string;
     name: string;
     artist?: string;
@@ -28,7 +28,7 @@ export type TopResult = {
     };
 };
 
-export type SearchSuggestion = {
+export type Hint = {
     kind: 'terms' | 'topResults';
     searchTerm?: string;
     displayTerm?: string;
