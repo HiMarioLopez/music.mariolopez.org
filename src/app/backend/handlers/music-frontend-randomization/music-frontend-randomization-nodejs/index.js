@@ -6,18 +6,18 @@
  * @type {string[]}
  */
 const siteVersions = [
-    '/lit',
-    '/qwik',
     '/react',
-    '/solid',
-    '/svelte',
-    '/vanilla',
-    '/vue',
-    '/preact',
-    '/next',
-    '/angular',
-    '/blazor',
-    '/leptos'
+    // '/vanilla', // Under construction
+    // '/lit', // Under construction
+    // '/qwik', // Under construction
+    // '/solid', // Under construction
+    // '/svelte', // Under construction
+    // '/vue', // Under construction
+    // '/preact', // Under construction
+    // '/next',
+    // '/angular',
+    // '/blazor',
+    // '/leptos'
 ];
 
 /**
