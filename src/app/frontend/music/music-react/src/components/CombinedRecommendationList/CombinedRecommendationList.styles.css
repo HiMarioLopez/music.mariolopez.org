@@ -131,11 +131,12 @@
     align-items: center;
     padding: var(--padding-medium);
     border-radius: var(--border-radius-medium);
-    margin-bottom: var(--margin-small);
     height: auto;
     min-height: 60px;
     transition: all var(--transition-speed);
     border: 2px solid transparent;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .recommendation-items li:last-child {
@@ -191,17 +192,28 @@
     font-size: 1em;
     color: var(--font-color);
     margin-bottom: 4px;
-    transition: transform 0.2s ease, color 0.2s ease;
+    margin-top: 4px;
+    transition: transform 0.1s ease, color 0.1s ease;
 }
 
 .vote-count-highlight {
     color: #1ed760;
     transform: scale(1.05);
-    animation: pulse 0.2s ease-in-out;
+    animation: pulse 0.1s ease-in-out;
+}
+
+.vote-count-highlight-down {
+    color: #e74c3c;
+    transform: scale(1.05);
+    animation: pulse 0.1s ease-in-out;
 }
 
 .vote-count-permanent {
     color: #1ed760;
+}
+
+.vote-count-permanent-down {
+    color: #e74c3c;
 }
 
 @keyframes pulse {
@@ -218,7 +230,8 @@
     }
 }
 
-.upvote-button {
+.upvote-button,
+.downvote-button {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -227,27 +240,53 @@
     width: 16px;
     height: 16px;
     cursor: pointer;
-    transition: transform 0.2s ease;
+    transition: transform 0.1s ease;
     padding: 0;
-    color: #FFD60A;
     will-change: transform;
+}
+
+.upvote-button {
+    color: #FFD60A;
+}
+
+.downvote-button {
+    color: #FFD60A;
 }
 
 .upvote-button:hover {
     transform: translateY(-2px);
 }
 
-.upvote-button:active {
+.downvote-button:hover {
+    transform: translateY(2px);
+}
+
+.upvote-button:active,
+.downvote-button:active {
     transform: scale(0.95);
 }
 
 /* Disable hover and active effects when voted or disabled */
-.upvote-button.voted-permanent:hover,
 .upvote-button[disabled]:hover,
-.upvote-button.voted-permanent:active,
-.upvote-button[disabled]:active {
+.upvote-button[disabled]:active,
+.downvote-button[disabled]:hover,
+.downvote-button[disabled]:active {
     transform: none;
     cursor: default;
+}
+
+/* Voted buttons still have hover effects now */
+.upvote-button.voted-permanent:hover {
+    transform: translateY(-2px);
+}
+
+.downvote-button.downvoted-permanent:hover {
+    transform: translateY(2px);
+}
+
+.upvote-button.voted-permanent:active,
+.downvote-button.downvoted-permanent:active {
+    transform: scale(0.95);
 }
 
 .upvote-button.voted,
@@ -255,7 +294,13 @@
     color: #1ed760;
 }
 
-.upvote-button svg {
+.downvote-button.downvoted,
+.downvote-button.downvoted-permanent {
+    color: #e74c3c;
+}
+
+.upvote-button svg,
+.downvote-button svg {
     fill: currentColor;
     width: 16px;
     height: 16px;
@@ -426,5 +471,46 @@
 
     100% {
         transform: translateX(100%);
+    }
+}
+
+/* Add styles for the recommendation highlight wrappers */
+.song-item,
+.album-item,
+.artist-item,
+.recommendation-item {
+    display: block;
+    width: 100%;
+    margin-bottom: var(--margin-small);
+    border-radius: var(--border-radius-medium);
+    overflow: hidden;
+}
+
+.song-item:last-child,
+.album-item:last-child,
+.artist-item:last-child,
+.recommendation-item:last-child {
+    margin-bottom: 0;
+}
+
+/* Add highlight animations for the item wrappers */
+.song-item-updating,
+.album-item-updating,
+.artist-item-updating,
+.recommendation-item-updating {
+    animation: highlight 1.5s ease-out;
+}
+
+@keyframes highlight {
+    0% {
+        background-color: rgba(170, 175, 76, 0.2);
+        /* Yellow background */
+        box-shadow: 0 0 8px rgba(170, 175, 76, 0.6);
+        /* Yellow shadow */
+    }
+
+    100% {
+        background-color: transparent;
+        box-shadow: none;
     }
 }

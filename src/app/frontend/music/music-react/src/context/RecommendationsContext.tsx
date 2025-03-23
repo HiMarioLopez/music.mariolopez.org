@@ -38,13 +38,17 @@ type RecommendationsAction =
   | FetchSuccessAction<'songs' | 'albums' | 'artists'>
   | { type: 'FETCH_RECOMMENDATIONS_FAILURE'; recommendationType: 'songs' | 'albums' | 'artists'; error: string }
   | { type: 'ADD_RECOMMENDATION'; recommendationType: 'songs' | 'albums' | 'artists'; item: RecommendedSong | RecommendedAlbum | RecommendedArtist }
-  | { type: 'UPVOTE_RECOMMENDATION'; recommendationType: 'songs' | 'albums' | 'artists'; index: number };
+  | { type: 'UPVOTE_RECOMMENDATION'; recommendationType: 'songs' | 'albums' | 'artists'; index: number }
+  | { type: 'DOWNVOTE_RECOMMENDATION'; recommendationType: 'songs' | 'albums' | 'artists'; index: number }
+  | { type: 'REALTIME_UPDATE_RECOMMENDATION'; recommendationType: 'songs' | 'albums' | 'artists'; index: number; voteIncrement: number };
 
 type RecommendationsContextType = {
   state: RecommendationsState;
   fetchRecommendations: (type: 'songs' | 'albums' | 'artists') => void;
   addRecommendation: (type: 'songs' | 'albums' | 'artists', item: RecommendedSong | RecommendedAlbum | RecommendedArtist) => void;
   upvoteRecommendation: (type: 'songs' | 'albums' | 'artists', index: number) => void;
+  downvoteRecommendation: (type: 'songs' | 'albums' | 'artists', index: number) => void;
+  updateRecommendationInRealTime: (type: 'songs' | 'albums' | 'artists', index: number, voteIncrement: number) => void;
   isLoading: (type: 'songs' | 'albums' | 'artists') => boolean;
   getError: (type: 'songs' | 'albums' | 'artists') => string | null;
 };
@@ -57,6 +61,19 @@ const initialState: RecommendationsState = {
 
 const RecommendationsContext = createContext<RecommendationsContextType | undefined>(undefined);
 
+// Helper to generate a unique ID
+const generateId = () => `id_${Math.random().toString(36).substring(2, 9)}`;
+
+// Helper to ensure each item has an ID
+function ensureIds<T>(items: T[]): (T & { id: string })[] {
+  return items.map(item => {
+    if (typeof item === 'object' && item !== null && !('id' in item)) {
+      return { ...item as object, id: generateId() } as T & { id: string };
+    }
+    return item as T & { id: string };
+  });
+}
+
 function recommendationsReducer(state: RecommendationsState, action: RecommendationsAction): RecommendationsState {
   switch (action.type) {
     case 'FETCH_RECOMMENDATIONS_REQUEST':
@@ -68,16 +85,26 @@ function recommendationsReducer(state: RecommendationsState, action: Recommendat
           error: null
         }
       };
-    case 'FETCH_RECOMMENDATIONS_SUCCESS':
+    case 'FETCH_RECOMMENDATIONS_SUCCESS': {
+      let typedItems;
+      if (action.recommendationType === 'songs') {
+        typedItems = ensureIds(action.items as RecommendedSong[]);
+      } else if (action.recommendationType === 'albums') {
+        typedItems = ensureIds(action.items as RecommendedAlbum[]);
+      } else {
+        typedItems = ensureIds(action.items as RecommendedArtist[]);
+      }
+
       return {
         ...state,
         [action.recommendationType]: {
-          items: action.items,
+          items: typedItems,
           loading: false,
           error: null,
           loaded: true
         }
       };
+    }
     case 'FETCH_RECOMMENDATIONS_FAILURE':
       return {
         ...state,
@@ -94,7 +121,7 @@ function recommendationsReducer(state: RecommendationsState, action: Recommendat
         [action.recommendationType]: {
           ...state[action.recommendationType],
           items: [
-            { ...action.item, votes: 1 }, // Initialize new recommendations with 1 vote
+            { ...action.item, votes: 1, id: generateId() }, // Initialize new recommendations with 1 vote and an ID
             ...state[action.recommendationType].items
           ]
         }
@@ -102,7 +129,112 @@ function recommendationsReducer(state: RecommendationsState, action: Recommendat
     case 'UPVOTE_RECOMMENDATION': {
       const items = [...state[action.recommendationType].items];
       const item = items[action.index];
-      const newVotes = (item.votes || 0) + 1;
+      let newVotes = (item.votes || 0);
+
+      // If already upvoted, remove the upvote (reset)
+      if (state[action.recommendationType].items[action.index].userVoted === 'up') {
+        items[action.index] = {
+          ...item,
+          votes: Math.max(0, newVotes - 1),
+          userVoted: undefined
+        };
+
+        // Sort items by votes
+        items.sort((a, b) => (b.votes || 0) - (a.votes || 0));
+
+        return {
+          ...state,
+          [action.recommendationType]: {
+            ...state[action.recommendationType],
+            items
+          }
+        };
+      }
+
+      // If previously downvoted, add 2 (remove the downvote and add an upvote)
+      if (state[action.recommendationType].items[action.index].userVoted === 'down') {
+        newVotes += 2;
+      } else {
+        // Otherwise just add 1
+        newVotes += 1;
+      }
+
+      // Update vote count and userVoted status
+      items[action.index] = {
+        ...item,
+        votes: newVotes,
+        userVoted: 'up'
+      };
+
+      // Sort items by votes
+      items.sort((a, b) => (b.votes || 0) - (a.votes || 0));
+
+      return {
+        ...state,
+        [action.recommendationType]: {
+          ...state[action.recommendationType],
+          items
+        }
+      };
+    }
+    case 'DOWNVOTE_RECOMMENDATION': {
+      const items = [...state[action.recommendationType].items];
+      const item = items[action.index];
+      let newVotes = (item.votes || 0);
+
+      // If already downvoted, remove the downvote (reset)
+      if (state[action.recommendationType].items[action.index].userVoted === 'down') {
+        items[action.index] = {
+          ...item,
+          votes: (item.votes || 0) + 1, // Always add 1 when removing a downvote
+          userVoted: undefined
+        };
+
+        // Sort items by votes
+        items.sort((a, b) => (b.votes || 0) - (a.votes || 0));
+
+        return {
+          ...state,
+          [action.recommendationType]: {
+            ...state[action.recommendationType],
+            items
+          }
+        };
+      }
+
+      // If previously upvoted, subtract 2 (remove the upvote and add a downvote)
+      if (state[action.recommendationType].items[action.index].userVoted === 'up') {
+        newVotes -= 2;
+      } else {
+        // Otherwise just subtract 1
+        newVotes -= 1;
+      }
+
+      // Ensure votes don't go below 0
+      newVotes = Math.max(0, newVotes);
+
+      // Update vote count and userVoted status
+      items[action.index] = {
+        ...item,
+        votes: newVotes,
+        userVoted: 'down'
+      };
+
+      // Sort items by votes
+      items.sort((a, b) => (b.votes || 0) - (a.votes || 0));
+
+      return {
+        ...state,
+        [action.recommendationType]: {
+          ...state[action.recommendationType],
+          items
+        }
+      };
+    }
+    case 'REALTIME_UPDATE_RECOMMENDATION': {
+      const items = [...state[action.recommendationType].items];
+      const item = items[action.index];
+      const newVotes = (item.votes || 0) + action.voteIncrement;
 
       // Update vote count
       items[action.index] = {
@@ -110,10 +242,8 @@ function recommendationsReducer(state: RecommendationsState, action: Recommendat
         votes: newVotes
       };
 
-      // Only sort if this item might move up in ranking
-      if (action.index > 0 && newVotes > (items[action.index - 1].votes || 0)) {
-        items.sort((a, b) => (b.votes || 0) - (a.votes || 0));
-      }
+      // Sort items by votes after real-time update
+      items.sort((a, b) => (b.votes || 0) - (a.votes || 0));
 
       return {
         ...state,
@@ -188,6 +318,26 @@ export const RecommendationsProvider: React.FC<{
     });
   }, []);
 
+  const downvoteRecommendation = useCallback((type: 'songs' | 'albums' | 'artists', index: number) => {
+    dispatch({
+      type: 'DOWNVOTE_RECOMMENDATION',
+      recommendationType: type,
+      index
+    });
+  }, []);
+
+  const updateRecommendationInRealTime = useCallback(
+    (type: 'songs' | 'albums' | 'artists', index: number, voteIncrement: number) => {
+      dispatch({
+        type: 'REALTIME_UPDATE_RECOMMENDATION',
+        recommendationType: type,
+        index,
+        voteIncrement
+      });
+    },
+    []
+  );
+
   const isLoading = useCallback((type: 'songs' | 'albums' | 'artists') => {
     return state[type].loading;
   }, [state]);
@@ -202,9 +352,11 @@ export const RecommendationsProvider: React.FC<{
     fetchRecommendations,
     addRecommendation,
     upvoteRecommendation,
+    downvoteRecommendation,
+    updateRecommendationInRealTime,
     isLoading,
     getError
-  }), [state, fetchRecommendations, addRecommendation, upvoteRecommendation, isLoading, getError]);
+  }), [state, fetchRecommendations, addRecommendation, upvoteRecommendation, downvoteRecommendation, updateRecommendationInRealTime, isLoading, getError]);
 
   return (
     <RecommendationsContext.Provider value={contextValue}>

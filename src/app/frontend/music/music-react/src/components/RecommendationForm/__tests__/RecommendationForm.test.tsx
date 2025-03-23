@@ -22,9 +22,21 @@ vi.mock('../../../services/apiService', () => ({
     }
 }));
 
-describe('RecommendationForm', () => {
-    const mockOnRecommend = vi.fn();
+// Mock the context
+const mockAddRecommendation = vi.fn();
+vi.mock('../../../context/RecommendationsContext', () => ({
+    RecommendationsProvider: ({ children }: { children: React.ReactNode }) => children,
+    useRecommendations: () => ({
+        addRecommendation: mockAddRecommendation,
+        state: {
+            songs: { items: [], loading: false, error: null, loaded: false },
+            albums: { items: [], loading: false, error: null, loaded: false },
+            artists: { items: [], loading: false, error: null, loaded: false },
+        }
+    }),
+}));
 
+describe('RecommendationForm', () => {
     beforeEach(() => {
         vi.clearAllMocks();
         // Set up default mock implementation
@@ -33,7 +45,7 @@ describe('RecommendationForm', () => {
 
     it('renders the component correctly', async () => {
         await act(async () => {
-            render(<RecommendationForm onRecommend={mockOnRecommend} />);
+            render(<RecommendationForm />);
         });
 
         // Wait for component to fully render
@@ -47,7 +59,7 @@ describe('RecommendationForm', () => {
 
     it('calls the API when user types in search box', async () => {
         await act(async () => {
-            render(<RecommendationForm onRecommend={mockOnRecommend} />);
+            render(<RecommendationForm />);
         });
 
         // Wait for authentication to complete
@@ -71,7 +83,7 @@ describe('RecommendationForm', () => {
     it('displays search results when API returns data', async () => {
         // Wrap render in act
         await act(async () => {
-            render(<RecommendationForm onRecommend={mockOnRecommend} />);
+            render(<RecommendationForm />);
         });
 
         // Wait for authentication to complete first
@@ -99,9 +111,9 @@ describe('RecommendationForm', () => {
         expect(screen.getByText(/Queen/)).toBeInTheDocument();
     });
 
-    it('calls onRecommend when a song is selected', async () => {
+    it('calls addRecommendation when a song is selected', async () => {
         await act(async () => {
-            render(<RecommendationForm onRecommend={mockOnRecommend} />);
+            render(<RecommendationForm />);
         });
 
         // Wait for authentication to complete first
@@ -126,8 +138,8 @@ describe('RecommendationForm', () => {
             fireEvent.click(screen.getByText('Bohemian Rhapsody'));
         });
 
-        // Check if onRecommend was called with the correct song
-        expect(mockOnRecommend).toHaveBeenCalledWith('song', expect.objectContaining({
+        // Check if addRecommendation was called with the correct song
+        expect(mockAddRecommendation).toHaveBeenCalledWith('songs', expect.objectContaining({
             songTitle: 'Bohemian Rhapsody',
             artistName: expect.any(String),
             albumName: expect.any(String),
@@ -137,7 +149,7 @@ describe('RecommendationForm', () => {
 
     it('updates search when hint is selected', async () => {
         await act(async () => {
-            render(<RecommendationForm onRecommend={mockOnRecommend} />);
+            render(<RecommendationForm />);
         });
 
         // Wait for authentication to complete first
@@ -178,7 +190,7 @@ describe('RecommendationForm', () => {
 
         // Wrap render in act
         await act(async () => {
-            render(<RecommendationForm onRecommend={mockOnRecommend} />);
+            render(<RecommendationForm />);
         });
 
         // Wait for authentication to complete first
@@ -268,7 +280,7 @@ describe('RecommendationForm', () => {
 
         // Wrap render in act
         await act(async () => {
-            render(<RecommendationForm onRecommend={mockOnRecommend} />);
+            render(<RecommendationForm />);
         });
 
         // Wait for authentication to complete
@@ -337,7 +349,7 @@ describe('RecommendationForm', () => {
         };
 
         await act(async () => {
-            render(<RecommendationForm onRecommend={mockOnRecommend} />);
+            render(<RecommendationForm />);
         });
 
         // Get the search input and focus it
@@ -392,7 +404,7 @@ describe('RecommendationForm', () => {
 
         // Render component
         await act(async () => {
-            render(<RecommendationForm onRecommend={mockOnRecommend} />);
+            render(<RecommendationForm />);
         });
 
         // Check that auth was not called on mount
@@ -413,7 +425,7 @@ describe('RecommendationForm', () => {
 
     it('clears search when the clear button is clicked', async () => {
         await act(async () => {
-            render(<RecommendationForm onRecommend={mockOnRecommend} />);
+            render(<RecommendationForm />);
         });
 
         // Type in the search box
@@ -441,7 +453,7 @@ describe('RecommendationForm', () => {
         Element.prototype.scrollIntoView = vi.fn();
 
         await act(async () => {
-            render(<RecommendationForm onRecommend={mockOnRecommend} />);
+            render(<RecommendationForm />);
         });
 
         // Wait for component to be ready

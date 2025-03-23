@@ -6,7 +6,7 @@ import { useRecommendationSelector, simulateNetworkDelay } from './useRecommenda
 import { useRecommendations } from '../../context/RecommendationsContext';
 
 const CombinedRecommendationList: React.FC = () => {
-    const { state, fetchRecommendations, upvoteRecommendation } = useRecommendations();
+    const { state, fetchRecommendations, upvoteRecommendation, downvoteRecommendation } = useRecommendations();
 
     const {
         selectedType,
@@ -15,9 +15,15 @@ const CombinedRecommendationList: React.FC = () => {
         handleTypeChange
     } = useRecommendationSelector('songs');
 
-    const [songVotedItems, setSongVotedItems] = useState<Record<number, boolean>>({});
-    const [albumVotedItems, setAlbumVotedItems] = useState<Record<number, boolean>>({});
-    const [artistVotedItems, setArtistVotedItems] = useState<Record<number, boolean>>({});
+    // Track voted items by ID instead of index
+    const [songVotedItems, setSongVotedItems] = useState<Record<string, boolean>>({});
+    const [albumVotedItems, setAlbumVotedItems] = useState<Record<string, boolean>>({});
+    const [artistVotedItems, setArtistVotedItems] = useState<Record<string, boolean>>({});
+
+    const [songDownvotedItems, setSongDownvotedItems] = useState<Record<string, boolean>>({});
+    const [albumDownvotedItems, setAlbumDownvotedItems] = useState<Record<string, boolean>>({});
+    const [artistDownvotedItems, setArtistDownvotedItems] = useState<Record<string, boolean>>({});
+
     const [announcement, setAnnouncement] = useState('');
     const [artificialLoading, setArtificialLoading] = useState(false);
 
@@ -42,25 +48,31 @@ const CombinedRecommendationList: React.FC = () => {
         songs: {
             recommendations: state.songs.items,
             votedItems: songVotedItems,
+            downvotedItems: songDownvotedItems,
             setVotedItems: setSongVotedItems,
+            setDownvotedItems: setSongDownvotedItems,
             component: SongRecommendationList
         },
         albums: {
             recommendations: state.albums.items,
             votedItems: albumVotedItems,
+            downvotedItems: albumDownvotedItems,
             setVotedItems: setAlbumVotedItems,
+            setDownvotedItems: setAlbumDownvotedItems,
             component: AlbumRecommendationList
         },
         artists: {
             recommendations: state.artists.items,
             votedItems: artistVotedItems,
+            downvotedItems: artistDownvotedItems,
             setVotedItems: setArtistVotedItems,
+            setDownvotedItems: setArtistDownvotedItems,
             component: ArtistRecommendationList
         }
     }), [
-        state.songs.items, songVotedItems, setSongVotedItems,
-        state.albums.items, albumVotedItems, setAlbumVotedItems,
-        state.artists.items, artistVotedItems, setArtistVotedItems
+        state.songs.items, songVotedItems, setSongVotedItems, songDownvotedItems, setSongDownvotedItems,
+        state.albums.items, albumVotedItems, setAlbumVotedItems, albumDownvotedItems, setAlbumDownvotedItems,
+        state.artists.items, artistVotedItems, setArtistVotedItems, artistDownvotedItems, setArtistDownvotedItems
     ]);
 
     const handleUpvote = useCallback((index: number) => {
@@ -71,39 +83,132 @@ const CombinedRecommendationList: React.FC = () => {
             'artists': 'artists'
         } as const;
 
-        const { votedItems, setVotedItems } = recommendationData[currentType];
+        const { votedItems, setVotedItems, downvotedItems, setDownvotedItems } = recommendationData[currentType];
         const recommendations = recommendationData[currentType].recommendations;
+        const item = recommendations[index];
 
-        // Skip if already voted
-        if (votedItems[index]) return;
-
-        // Mark as voted
-        setVotedItems((prev: Record<number, boolean>) => ({
-            ...prev,
-            [index]: true
-        }));
+        // Get item ID or use index as fallback
+        const itemId = (item as any).id || `index_${index}`;
 
         // Get item name for announcement
         let itemName = '';
-        if (currentType === 'songs' && 'songTitle' in recommendations[index]) {
-            itemName = recommendations[index].songTitle;
-        } else if (currentType === 'albums' && 'albumTitle' in recommendations[index]) {
-            itemName = recommendations[index].albumTitle;
-        } else if (currentType === 'artists' && 'artistName' in recommendations[index]) {
-            itemName = recommendations[index].artistName;
+        if (currentType === 'songs' && 'songTitle' in item) {
+            itemName = item.songTitle;
+        } else if (currentType === 'albums' && 'albumTitle' in item) {
+            itemName = item.albumTitle;
+        } else if (currentType === 'artists' && 'artistName' in item) {
+            itemName = item.artistName;
         }
+
+        // If already upvoted, remove the vote
+        if (votedItems[itemId]) {
+            setVotedItems((prev: Record<string, boolean>) => {
+                const updated = { ...prev };
+                delete updated[itemId];
+                return updated;
+            });
+
+            // Update vote via context
+            upvoteRecommendation(typeMapping[currentType], index);
+
+            // Announce the vote removal
+            setAnnouncement(`You removed your upvote from ${itemName}.`);
+            return;
+        }
+
+        // If previously downvoted, need to remove the downvote status
+        if (downvotedItems[itemId]) {
+            setDownvotedItems((prev: Record<string, boolean>) => {
+                const updated = { ...prev };
+                delete updated[itemId];
+                return updated;
+            });
+        }
+
+        // Mark as upvoted
+        setVotedItems((prev: Record<string, boolean>) => ({
+            ...prev,
+            [itemId]: true
+        }));
 
         // Update vote via context
         upvoteRecommendation(typeMapping[currentType], index);
 
         // Announce the upvote
-        const votes = recommendations[index].votes || 0;
-        setAnnouncement(`You upvoted ${itemName}. New vote count: ${votes + 1}.`);
+        const votes = item.votes || 0;
+        const voteChange = downvotedItems[itemId] ? "+2" : "+1";
+        setAnnouncement(`You upvoted ${itemName}. New vote count: ${votes + (downvotedItems[itemId] ? 2 : 1)} (${voteChange}).`);
     }, [selectedType, recommendationData, upvoteRecommendation]);
+
+    const handleDownvote = useCallback((index: number) => {
+        const currentType = selectedType;
+        const typeMapping = {
+            'songs': 'songs',
+            'albums': 'albums',
+            'artists': 'artists'
+        } as const;
+
+        const { votedItems, setVotedItems, downvotedItems, setDownvotedItems } = recommendationData[currentType];
+        const recommendations = recommendationData[currentType].recommendations;
+        const item = recommendations[index];
+
+        // Get item ID or use index as fallback
+        const itemId = (item as any).id || `index_${index}`;
+
+        // Get item name for announcement
+        let itemName = '';
+        if (currentType === 'songs' && 'songTitle' in item) {
+            itemName = item.songTitle;
+        } else if (currentType === 'albums' && 'albumTitle' in item) {
+            itemName = item.albumTitle;
+        } else if (currentType === 'artists' && 'artistName' in item) {
+            itemName = item.artistName;
+        }
+
+        // If already downvoted, remove the vote
+        if (downvotedItems[itemId]) {
+            setDownvotedItems((prev: Record<string, boolean>) => {
+                const updated = { ...prev };
+                delete updated[itemId];
+                return updated;
+            });
+
+            // Update vote via context
+            downvoteRecommendation(typeMapping[currentType], index);
+
+            // Announce the vote removal
+            setAnnouncement(`You removed your downvote from ${itemName}.`);
+            return;
+        }
+
+        // If previously upvoted, need to remove the upvote status
+        if (votedItems[itemId]) {
+            setVotedItems((prev: Record<string, boolean>) => {
+                const updated = { ...prev };
+                delete updated[itemId];
+                return updated;
+            });
+        }
+
+        // Mark as downvoted
+        setDownvotedItems((prev: Record<string, boolean>) => ({
+            ...prev,
+            [itemId]: true
+        }));
+
+        // Update vote via context
+        downvoteRecommendation(typeMapping[currentType], index);
+
+        // Announce the downvote
+        const votes = item.votes || 0;
+        const voteChange = votedItems[itemId] ? "-2" : "-1";
+        const newVotes = Math.max(0, votes - (votedItems[itemId] ? 2 : 1));
+        setAnnouncement(`You downvoted ${itemName}. New vote count: ${newVotes} (${voteChange}).`);
+    }, [selectedType, recommendationData, downvoteRecommendation]);
 
     // Memoize the recommendation component render
     const currentRecommendationList = useMemo(() => {
-        const { component: RecommendationComponent, recommendations, votedItems } =
+        const { component: RecommendationComponent, recommendations, votedItems, downvotedItems } =
             recommendationData[selectedType];
 
         if (recommendations.length === 0) {
@@ -118,10 +223,12 @@ const CombinedRecommendationList: React.FC = () => {
             <RecommendationComponent
                 recommendations={recommendations}
                 onUpvote={handleUpvote}
+                onDownvote={handleDownvote}
                 votedItems={votedItems}
+                downvotedItems={downvotedItems}
             />
         );
-    }, [selectedType, recommendationData, handleUpvote]);
+    }, [selectedType, recommendationData, handleUpvote, handleDownvote]);
 
     // Update the loading check to include artificial loading
     const isLoading = state[selectedType === 'songs' ? 'songs' :

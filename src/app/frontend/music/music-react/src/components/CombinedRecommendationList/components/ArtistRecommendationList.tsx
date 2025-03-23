@@ -5,19 +5,25 @@ import BaseRecommendationList from './BaseRecommendationList';
 type ArtistRecommendationListProps = {
     recommendations: RecommendedArtist[];
     onUpvote?: (index: number) => void;
-    votedItems: Record<number, boolean>;
+    onDownvote?: (index: number) => void;
+    votedItems: Record<string, boolean>;
+    downvotedItems: Record<string, boolean>;
 };
 
 const ArtistRecommendationList: React.FC<ArtistRecommendationListProps> = ({
     recommendations,
     onUpvote,
-    votedItems
+    onDownvote,
+    votedItems,
+    downvotedItems = {}
 }) => {
     return (
         <BaseRecommendationList
             recommendations={recommendations}
             onUpvote={onUpvote}
+            onDownvote={onDownvote}
             votedItems={votedItems}
+            downvotedItems={downvotedItems}
             getImageUrl={(item) => item.artistImageUrl}
             getImageAlt={() => "Artist"}
             getVotes={(item) => item.votes || 0}

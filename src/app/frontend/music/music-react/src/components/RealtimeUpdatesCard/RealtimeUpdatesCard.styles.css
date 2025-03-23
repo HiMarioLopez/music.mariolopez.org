@@ -1,0 +1,114 @@
+.realtime-updates-card {
+  background-color: var(--card-bg-color, white);
+  border-radius: var(--border-radius, 8px);
+  padding: var(--padding-large, 16px);
+  box-shadow: var(--card-shadow, 0 2px 4px rgba(0, 0, 0, 0.1));
+}
+
+.realtime-updates-card h1 {
+  margin-top: 0;
+  margin-bottom: 16px;
+}
+
+.realtime-instructions {
+  margin-top: 16px;
+  padding: 12px;
+  background-color: #f5f5f5;
+  border-radius: 4px;
+  line-height: 1.5;
+}
+
+.realtime-instructions p {
+  margin: 0 0 8px 0;
+  color: #555;
+}
+
+.realtime-instructions p:last-child {
+  margin-bottom: 0;
+}
+
+.real-time-control {
+  display: flex;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.real-time-button {
+  padding: 8px 12px;
+  background-color: #f0f0f0;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.3s ease;
+}
+
+.real-time-button.active {
+  background-color: #4CAF50;
+  color: white;
+  border-color: #4CAF50;
+}
+
+.real-time-status {
+  margin-left: 12px;
+  display: flex;
+  align-items: center;
+}
+
+.real-time-indicator {
+  display: inline-flex;
+  align-items: center;
+  color: #ff3b30;
+  font-weight: 600;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.5;
+  }
+
+  100% {
+    opacity: 1;
+  }
+}
+
+/* Add these mobile-specific styles to the end of the file */
+@media (max-width: 680px) {
+  .realtime-updates-card {
+    padding: var(--padding-medium, 12px);
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .realtime-instructions {
+    padding: 10px;
+  }
+
+  .realtime-instructions p {
+    font-size: 14px;
+    white-space: normal;
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+    line-height: 1.4;
+  }
+
+  .real-time-control {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .real-time-button {
+    width: 100%;
+    margin-bottom: 8px;
+  }
+
+  .real-time-status {
+    margin-left: 0;
+    margin-top: 4px;
+  }
+}
