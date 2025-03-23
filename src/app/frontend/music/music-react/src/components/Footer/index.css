@@ -1,6 +1,4 @@
 footer {
-    position: absolute;
-    bottom: 0;
     width: 100%;
     height: var(--footer-height-desktop);
     display: flex;
@@ -9,6 +7,23 @@ footer {
     padding: var(--padding-medium) 0;
     background-color: var(--navbar-bg-color);
     color: var(--font-color);
+}
+
+/* Desktop - fixed at bottom */
+@media (min-width: 1200px) {
+    footer {
+        position: absolute;
+        bottom: 0;
+    }
+}
+
+/* Tablet and Mobile - sticky scrolling footer */
+@media (max-width: 1199px) {
+    footer {
+        position: sticky;
+        bottom: 0;
+        z-index: 10;
+    }
 }
 
 footer a {
@@ -25,13 +40,11 @@ footer .footer-component-copyright-container {
     margin: 0 var(--margin-medium);
 }
 
-@media (max-height: 1000px) and (max-width: 680px),
-(max-width: 1299px) and (max-height: 1080px),
-(max-width: 680px) {
+/* Visual styling for smaller screens */
+@media (max-width: 680px) {
     footer {
         flex-direction: column;
-        height: auto;
-        position: relative;
+        height: var(--footer-height-mobile);
         font-size: small;
     }
 

@@ -5,6 +5,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    overflow-y: scroll;
 }
 
 @keyframes gradient {
@@ -34,29 +35,121 @@
     z-index: -1;
 }
 
-@media (min-width: 1300px) {
+/* Three-column layout for larger screens */
+@media (min-width: 1500px) {
     .main-content {
-        max-width: 1200px;
+        max-width: 1400px;
         display: flex;
     }
 
-    .left-column,
-    .right-column {
-        width: 50%;
+    .queue-column {
+        width: 25%;
+        margin-right: var(--margin-large);
     }
 
-    .left-column {
+    .middle-column,
+    .right-column {
+        width: 37.5%;
+    }
+
+    .middle-column {
         margin-right: var(--margin-large);
     }
 
     .now-playing-container,
     .recommendation-form-container,
-    .recommendations-list-container {
+    .recommendations-list-container,
+    .recently-played-container,
+    .queued-songs-container {
         margin-bottom: var(--margin-large);
     }
 
-    .recommendations-list-container:last-child {
+    .recommendations-list-container:last-child,
+    .queued-songs-container:last-child {
         margin-bottom: 0;
+    }
+}
+
+/* Medium desktop - still 3 columns but narrower */
+@media (min-width: 1200px) and (max-width: 1499px) {
+    .main-content {
+        max-width: 1100px;
+        display: flex;
+    }
+
+    .queue-column {
+        width: 25%;
+        margin-right: var(--margin-medium);
+    }
+
+    .middle-column,
+    .right-column {
+        width: 37.5%;
+    }
+
+    .middle-column {
+        margin-right: var(--margin-medium);
+    }
+
+    .now-playing-container,
+    .recommendation-form-container,
+    .recommendations-list-container,
+    .recently-played-container,
+    .queued-songs-container {
+        margin-bottom: var(--margin-medium);
+    }
+}
+
+/* Stack all columns for tablets and smaller screens */
+@media (max-width: 1199px) {
+    .app {
+        flex-direction: column;
+    }
+
+    .main-content {
+        padding-top: calc(var(--navbar-height-desktop) + var(--padding-large));
+        padding-bottom: 0;
+        width: 600px;
+        /* Fixed width */
+        max-width: 90%;
+        /* For smaller screens */
+        margin: 0 auto;
+        /* Center horizontally */
+        display: flex;
+        flex-direction: column;
+    }
+
+    /* Reordering elements for the single column layout */
+    .queue-column {
+        order: 2;
+    }
+
+    .middle-column {
+        order: 1;
+    }
+
+    .right-column {
+        order: 3;
+    }
+
+    .queue-column,
+    .middle-column,
+    .right-column {
+        width: 100%;
+    }
+
+    .now-playing-container,
+    .recommendations-list-container,
+    .recently-played-container,
+    .realtime-updates-container {
+        width: 100%;
+        margin: var(--margin-large) 0;
+    }
+
+    .queued-songs-container,
+    .recommendation-form-container {
+        width: 100%;
+        margin: 0 0 var(--margin-large) 0;
     }
 }
 
@@ -68,32 +161,14 @@
     }
 }
 
-@media (min-width: 1300px) and (max-height: 1000px),
-(max-width: 1299px) and (max-height: 1000px) {
+@media (min-width: 700px) and (max-height: 1000px) {
     .main-content {
         padding-top: calc(var(--navbar-height-desktop) + 40px);
         padding-bottom: 0;
     }
 }
 
-@media (max-width: 1299px) {
-    .app {
-        flex-direction: column;
-    }
-
-    .now-playing-container,
-    .recommendation-form-container,
-    .recommendations-list-container {
-        width: 100%;
-        margin: var(--margin-large) 0;
-    }
-
-    .main-content {
-        padding-top: calc(var(--navbar-height-desktop) + var(--padding-large));
-        padding-bottom: 0;
-    }
-}
-
+/* Smaller mobile adjustments */
 @media (max-width: 680px) {
     .app {
         flex-direction: column;
@@ -104,5 +179,18 @@
     .main-content {
         padding-top: calc(var(--navbar-height-mobile) + var(--padding-large));
         padding-bottom: 0;
+    }
+
+    .realtime-updates-container {
+        width: 100%;
+    }
+
+    .realtime-updates-container p {
+        white-space: normal;
+        overflow-wrap: break-word;
+        word-wrap: break-word;
+        hyphens: auto;
+        max-width: 100%;
+        line-height: 1.5;
     }
 }

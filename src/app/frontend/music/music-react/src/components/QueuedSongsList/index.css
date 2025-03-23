@@ -1,0 +1,77 @@
+.queued-songs-component {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.queued-songs-component h1 {
+  margin-top: 0;
+  margin-bottom: var(--margin-large);
+}
+
+.queued-songs-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--margin-medium);
+  overflow-y: auto;
+  max-height: 600px;
+}
+
+.queued-song-item {
+  display: flex;
+  align-items: center;
+  background: var(--track-bg-color);
+  border-radius: var(--border-radius-medium);
+  padding: var(--padding-medium);
+  transition: background-color var(--transition-speed);
+}
+
+.queued-song-item:hover {
+  background: var(--track-bg-color-hover);
+}
+
+.queued-song-item img {
+  width: var(--album-art-size-small);
+  height: var(--album-art-size-small);
+  border-radius: var(--border-radius-small);
+  margin-right: var(--margin-medium);
+}
+
+.queued-song-info {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  flex-grow: 1;
+}
+
+.queued-song-info h3,
+.queued-song-info p {
+  margin: 0;
+}
+
+.queued-song-info h3 {
+  font-size: 1rem;
+}
+
+.queued-song-info p {
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.queued-song-info .album-name {
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+/* Media Queries */
+@media (max-width: 1000px) {
+  .queued-songs-list {
+    max-height: 300px;
+  }
+}
+
+@media (max-width: 680px) {
+  .queued-songs-component {
+    width: var(--width-mobile);
+  }
+}
