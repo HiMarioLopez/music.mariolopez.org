@@ -1,11 +1,11 @@
 meta {
-  name: Release Search
+  name: Release Search (Raw)
   type: http
-  seq: 2
+  seq: 1
 }
 
 get {
-  url: https://music.mariolopez.org/api/nodejs/musicbrainz/release?query=date:[1990%20TO%202000]%20AND%20artist:Nirvana&limit=5
+  url: {{MUSIC_API_GATEWAY_URL}}/prod/nodejs/musicbrainz/release?query=date:[1990%20TO%202000]%20AND%20artist:Nirvana&limit=5
   body: none
   auth: bearer
 }
