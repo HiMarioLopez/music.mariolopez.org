@@ -43,13 +43,13 @@ export const TrackLimitCard: React.FC = () => {
                         <input
                             id="track-limit"
                             type="number"
-                            min="1"
+                            min="5"
                             max="30"
                             value={value}
                             onChange={(e) => setValue(parseInt(e.target.value, 10))}
                         />
                         <small style={{ color: 'var(--text-secondary)' }}>
-                            Enter a value between 1 and 30
+                            Enter a value between 5 and 30
                         </small>
                     </div>
                 </div>

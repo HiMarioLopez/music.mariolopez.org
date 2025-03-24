@@ -32,7 +32,7 @@ export function useTrackLimit(): [TrackLimitState, TrackLimitActions] {
     };
 
     const validateTrackLimit = (value: number): string | null => {
-        if (value < 1) return "Track limit must be at least 1";
+        if (value < 5) return "Track limit must be at least 5";
         if (value > 30) return "Track limit cannot exceed 30";
         return null;
     };

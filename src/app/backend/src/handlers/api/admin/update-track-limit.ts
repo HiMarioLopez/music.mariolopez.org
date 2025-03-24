@@ -9,7 +9,7 @@ const logger = new Logger({ serviceName: 'update-track-limit' });
 const tracer = new Tracer({ serviceName: 'update-track-limit' });
 const metrics = new Metrics({ namespace: 'update-track-limit' });
 
-const MIN_TRACK_LIMIT = 1;
+const MIN_TRACK_LIMIT = 5;
 const MAX_TRACK_LIMIT = 30;
 
 /**
