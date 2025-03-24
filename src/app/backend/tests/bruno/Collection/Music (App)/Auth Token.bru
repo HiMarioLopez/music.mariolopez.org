@@ -9,3 +9,31 @@ get {
   body: none
   auth: none
 }
+
+script:post-response {
+  // Post-request script
+  let responseBody;
+  
+  // Check if res.body is already an object or needs to be parsed
+  if (typeof res.body === 'string') {
+    try {
+      responseBody = JSON.parse(res.body);
+    } catch (e) {
+      console.log("❌ Error parsing response body:", e.message);
+      return;
+    }
+  } else {
+    // If res.body is already an object
+    responseBody = res.body;
+  }
+  
+  const token = responseBody.token;
+  
+  if (token) {
+    // Set the AUTH_TOKEN environment variable
+    bru.setEnvVar("AUTH_TOKEN", token);
+    console.log("✅ AUTH_TOKEN has been set successfully");
+  } else {
+    console.log("❌ Failed to set AUTH_TOKEN: token not found in response");
+  }
+}
