@@ -259,6 +259,71 @@ public class IntegrationApiStack : Stack
             Tracing = Tracing.ACTIVE
         });
 
+        var getTrackHistoryLambdaRole = new Role(this, "GetTrackHistoryLambdaRole", new RoleProps
+        {
+            AssumedBy = new ServicePrincipal("lambda.amazonaws.com"),
+            Description = "Role for get-track-history Lambda function",
+            ManagedPolicies =
+            [
+                ManagedPolicy.FromAwsManagedPolicyName("service-role/AWSLambdaBasicExecutionRole")
+            ]
+        });
+
+        // Add CloudWatch permissions to MusicBrainz Lambda role
+        getTrackHistoryLambdaRole.AddToPolicy(new PolicyStatement(new PolicyStatementProps
+        {
+            Effect = Effect.ALLOW,
+            Actions = ["cloudwatch:PutMetricData"],
+            Resources = ["*"]
+        }));
+
+        // Add DynamoDB permissions for track history
+        getTrackHistoryLambdaRole.AddToPolicy(new PolicyStatement(new PolicyStatementProps
+        {
+            Effect = Effect.ALLOW,
+            Actions = [
+                "dynamodb:Query",
+                "dynamodb:Scan",
+                "dynamodb:GetItem"
+            ],
+            Resources = [
+                Fn.Join("", [
+                    "arn:aws:dynamodb:",
+                    Region,
+                    ":",
+                    Account,
+                    ":table/AppleMusicHistory"
+                ])
+            ]
+        }));
+
+        // Add SSM Parameter Store read permission
+        getTrackHistoryLambdaRole.AddToPolicy(new PolicyStatement(new PolicyStatementProps
+        {
+            Effect = Effect.ALLOW,
+            Actions = ["ssm:GetParameter"],
+            Resources = [$"arn:aws:ssm:{Region}:{Account}:parameter/Music/AppleMusicHistory/TableName"]
+        }));
+
+        var getTrackHistoryLambda = new Function(this, "GetTrackHistoryFunction", new FunctionProps
+        {
+            Runtime = Runtime.NODEJS_22_X,
+            Handler = "get-track-history.handler",
+            Code = Code.FromAsset("../app/backend/dist/handlers/api/integration"),
+            Role = getTrackHistoryLambdaRole,
+            MemorySize = 128,
+            Timeout = Duration.Seconds(29),
+            Description = "Fetches track history from DynamoDB",
+            Environment = new Dictionary<string, string>
+            {
+                ["AWS_NODEJS_CONNECTION_REUSE_ENABLED"] = "1",
+                ["DYNAMODB_TABLE_NAME_PARAMETER"] = "/Music/AppleMusicHistory/TableName",
+                ["UPSTASH_REDIS_URL"] = configuration["AppleMusicApi:UpstashRedis:Url"],
+                ["UPSTASH_REDIS_TOKEN"] = configuration["AppleMusicApi:UpstashRedis:Token"]
+            },
+            Tracing = Tracing.ACTIVE
+        });
+
         #endregion
 
         #region Event Sources and Subscriptions
@@ -290,7 +355,7 @@ public class IntegrationApiStack : Stack
         var musicHistoryResource = historyResource.AddResource("music");
         musicHistoryResource.AddMethod(
             "GET",
-            new LambdaIntegration(dataFetchingLambda, new LambdaIntegrationOptions
+            new LambdaIntegration(getTrackHistoryLambda, new LambdaIntegrationOptions
             {
                 Proxy = true,
                 AllowTestInvoke = true

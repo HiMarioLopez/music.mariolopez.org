@@ -3,6 +3,7 @@ import { Metrics, MetricUnit } from '@aws-lambda-powertools/metrics';
 import { Tracer } from '@aws-lambda-powertools/tracer';
 import { APIGatewayProxyEventV2, APIGatewayProxyResultV2, Context } from 'aws-lambda';
 import { getAllTracks, getTracksByArtist } from '../../../services/dynamodb/track-history';
+import { getParameter } from '../../../services/parameter';
 import { getCorsHeaders } from '../../../utils/cors';
 
 const logger = new Logger({ serviceName: 'get-track-history' });
@@ -41,9 +42,16 @@ export const handler = async (
 
     try {
         // Get environment variables
-        const tableName = process.env.DYNAMODB_TABLE_NAME;
+        const tableNameParameter = process.env.DYNAMODB_TABLE_NAME_PARAMETER;
+        if (!tableNameParameter) {
+            throw new Error('Missing required environment variable: DYNAMODB_TABLE_NAME_PARAMETER');
+        }
+
+        // Get the table name from SSM Parameter Store using our parameter service
+        const tableName = await getParameter(tableNameParameter);
+        
         if (!tableName) {
-            throw new Error('Missing required environment variable: DYNAMODB_TABLE_NAME');
+            throw new Error(`Failed to retrieve DynamoDB table name from parameter: ${tableNameParameter}`);
         }
 
         // Get query parameters

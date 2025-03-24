@@ -105,6 +105,14 @@ public class AppleMusicHistoryStack : Stack
             Description = "Number of tracks to fetch from Apple Music API",
         });
 
+        // Store the table name in SSM Parameter Store instead of using CloudFormation exports
+        var historyTableNameParameter = new StringParameter(this, "HistoryTableNameParameter", new StringParameterProps
+        {
+            ParameterName = "/Music/AppleMusicHistory/TableName",
+            StringValue = historyTable.TableName,
+            Description = "Name of the DynamoDB table storing Apple Music history"
+        });
+
         #endregion
 
         #region Lambda Functions
@@ -305,13 +313,6 @@ public class AppleMusicHistoryStack : Stack
         #endregion
 
         #region Outputs
-
-        var appleMusicHistoryTableName = new CfnOutput(this, "AppleMusicHistoryTableName", new CfnOutputProps
-        {
-            Value = historyTable.TableName,
-            Description = "Name of the DynamoDB table storing Apple Music history",
-            ExportName = "AppleMusicHistoryTableName"
-        });
 
         var appleMusicHistoryLambdaName = new CfnOutput(this, "AppleMusicHistoryLambdaName", new CfnOutputProps
         {
