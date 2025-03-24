@@ -164,8 +164,8 @@ public class IntegrationApiStack : Stack
         {
             Runtime = Runtime.NODEJS_22_X,
             Role = nodejsAuthLambdaRole,
-            Code = Code.FromAsset("../app/backend/handlers/api/get-developer-token/get-developer-token-nodejs/dist"),
-            Handler = "index.handler",
+            Handler = "get-developer-token.handler",
+            Code = Code.FromAsset("../app/backend/dist/handlers/api/integration"),
             Environment = new Dictionary<string, string>
             {
                 ["AWS_NODEJS_CONNECTION_REUSE_ENABLED"] = "1",
@@ -184,8 +184,8 @@ public class IntegrationApiStack : Stack
         var dataFetchingLambda = new Function(this, "AppleMusicApiDataFetchingLambda", new FunctionProps
         {
             Runtime = Runtime.NODEJS_22_X,
-            Handler = "index.handler",
-            Code = Code.FromAsset("../app/backend/handlers/api/apple-music-data-fetching/apple-music-data-fetching-nodejs/dist"),
+            Handler = "apple-music-data-fetching.handler",
+            Code = Code.FromAsset("../app/backend/dist/handlers/api/integration"),
             Role = appleMusicLambdaRole,
             MemorySize = 512,
             Timeout = Duration.Seconds(30),
@@ -203,8 +203,8 @@ public class IntegrationApiStack : Stack
         var tokenRefreshNotificationLambda = new Function(this, "AppleMusicApiTokenRefreshNotificationLambda", new FunctionProps
         {
             Runtime = Runtime.NODEJS_22_X,
-            Handler = "index.handler",
-            Code = Code.FromAsset("../app/backend/handlers/token-refresh-notification/token-refresh-notification-nodejs/dist"),
+            Handler = "token-refresh-notification.handler",
+            Code = Code.FromAsset("../app/backend/dist/handlers/event-handlers"),
             Role = appleMusicLambdaRole,
             MemorySize = 256,
             Timeout = Duration.Seconds(10),
@@ -239,8 +239,8 @@ public class IntegrationApiStack : Stack
         var musicBrainzDataFetchingLambda = new Function(this, "MusicBrainzApiDataFetchingLambda", new FunctionProps
         {
             Runtime = Runtime.NODEJS_22_X,
-            Handler = "index.handler",
-            Code = Code.FromAsset("../app/backend/handlers/api/musicbrainz-data-fetching/musicbrainz-data-fetching-nodejs/dist"),
+            Handler = "musicbrainz-data-fetching.handler",
+            Code = Code.FromAsset("../app/backend/dist/handlers/api/integration"),
             Role = musicBrainzLambdaRole,
             MemorySize = 512,
             Timeout = Duration.Seconds(30),

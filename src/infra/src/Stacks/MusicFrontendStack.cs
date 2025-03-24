@@ -147,9 +147,8 @@ public class MusicFrontendStack : Stack
         var edgeFunction = new EdgeFunction(this, "Music-EdgeFunction", new EdgeFunctionProps
         {
             Runtime = Runtime.NODEJS_22_X,
-            Handler = "index.handler",
-            // Use the minified version of the Node.js frontend randomization handler
-            Code = Code.FromInline(Encoding.UTF8.GetString(File.ReadAllBytes("../app/backend/handlers/music-frontend-randomization/music-frontend-randomization-nodejs/dist/index.js"))),
+            Handler = "music-frontend-randomization.handler",
+            Code = Code.FromAsset("../app/backend/dist/handlers/frontend"),
             Description = "Randomizes the frontend to be served on `music.mariolopez.org`.",
             CurrentVersionOptions = new VersionOptions
             {

@@ -105,8 +105,8 @@ public class AdminPanelStack : Stack
         var updateMutFunction = new Function(this, "Music-UpdateMutFunction", new FunctionProps
         {
             Runtime = Runtime.NODEJS_22_X,
-            Handler = "index.handler",
-            Code = Code.FromAsset("../app/backend/handlers/api/update-mut/update-mut-nodejs/dist"),
+            Handler = "update-mut.handler",
+            Code = Code.FromAsset("../app/backend/dist/handlers/api/admin"),
             Environment = new Dictionary<string, string>
             {
                 ["AWS_NODEJS_CONNECTION_REUSE_ENABLED"] = "1",
@@ -126,8 +126,8 @@ public class AdminPanelStack : Stack
         var getMutFunction = new Function(this, "Music-GetMutFunction", new FunctionProps
         {
             Runtime = Runtime.NODEJS_22_X,
-            Handler = "index.handler",
-            Code = Code.FromAsset("../app/backend/handlers/api/get-mut/get-mut-nodejs/dist"),
+            Handler = "get-mut.handler",
+            Code = Code.FromAsset("../app/backend/dist/handlers/api/admin"),
             Environment = new Dictionary<string, string>
             {
                 ["AWS_NODEJS_CONNECTION_REUSE_ENABLED"] = "1",
@@ -147,8 +147,8 @@ public class AdminPanelStack : Stack
         var updateScheduleRateFunction = new Function(this, "Music-UpdateScheduleRateFunction", new FunctionProps
         {
             Runtime = Runtime.NODEJS_22_X,
-            Handler = "index.handler",
-            Code = Code.FromAsset("../app/backend/handlers/api/update-schedule-rate/update-schedule-rate-nodejs/dist"),
+            Handler = "update-schedule-rate.handler",
+            Code = Code.FromAsset("../app/backend/dist/handlers/api/admin"),
             Environment = new Dictionary<string, string>
             {
                 ["AWS_NODEJS_CONNECTION_REUSE_ENABLED"] = "1",
@@ -172,8 +172,8 @@ public class AdminPanelStack : Stack
         var getScheduleRateFunction = new Function(this, "Music-GetScheduleRateFunction", new FunctionProps
         {
             Runtime = Runtime.NODEJS_22_X,
-            Handler = "index.handler",
-            Code = Code.FromAsset("../app/backend/handlers/api/get-schedule-rate/get-schedule-rate-nodejs/dist"),
+            Handler = "get-schedule-rate.handler",
+            Code = Code.FromAsset("../app/backend/dist/handlers/api/admin"),
             Environment = new Dictionary<string, string>
             {
                 ["AWS_NODEJS_CONNECTION_REUSE_ENABLED"] = "1",
@@ -197,8 +197,8 @@ public class AdminPanelStack : Stack
         var updateTrackLimitFunction = new Function(this, "Music-UpdateTrackLimitFunction", new FunctionProps
         {
             Runtime = Runtime.NODEJS_22_X,
-            Handler = "index.handler",
-            Code = Code.FromAsset("../app/backend/handlers/api/update-track-limit/update-track-limit-nodejs/dist"),
+            Handler = "update-track-limit.handler",
+            Code = Code.FromAsset("../app/backend/dist/handlers/api/admin"),
             Environment = new Dictionary<string, string>
             {
                 ["AWS_NODEJS_CONNECTION_REUSE_ENABLED"] = "1",
@@ -214,8 +214,8 @@ public class AdminPanelStack : Stack
         var getTrackLimitFunction = new Function(this, "Music-GetTrackLimitFunction", new FunctionProps
         {
             Runtime = Runtime.NODEJS_22_X,
-            Handler = "index.handler",
-            Code = Code.FromAsset("../app/backend/handlers/api/get-track-limit/get-track-limit-nodejs/dist"),
+            Handler = "get-track-limit.handler",
+            Code = Code.FromAsset("../app/backend/dist/handlers/api/admin"),
             Environment = new Dictionary<string, string>
             {
                 ["AWS_NODEJS_CONNECTION_REUSE_ENABLED"] = "1",

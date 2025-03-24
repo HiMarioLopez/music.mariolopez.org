@@ -113,8 +113,8 @@ public class AppleMusicHistoryStack : Stack
         var updateHistoryJobLambda = new Function(this, "UpdateAppleMusicHistoryJobLambda", new FunctionProps
         {
             Runtime = Runtime.NODEJS_22_X,
-            Handler = "index.handler",
-            Code = Code.FromAsset("../app/backend/handlers/update-track-history-job/update-track-history-job-nodejs/dist"),
+            Handler = "update-track-history.handler",
+            Code = Code.FromAsset("../app/backend/dist/handlers/jobs"),
             Role = updateHistoryJobLambdaRole,
             MemorySize = 256,
             Timeout = Duration.Seconds(60),
@@ -143,8 +143,8 @@ public class AppleMusicHistoryStack : Stack
         var updateScheduleLambda = new Function(this, "UpdateScheduleLambda", new FunctionProps
         {
             Runtime = Runtime.NODEJS_22_X,
-            Handler = "index.handler",
-            Code = Code.FromAsset("../app/backend/handlers/update-schedule/update-schedule-nodejs/dist"),
+            Handler = "update-schedule.handler",
+            Code = Code.FromAsset("../app/backend/dist/handlers/api/admin"),
             MemorySize = 128,
             Timeout = Duration.Seconds(30),
             Description = "Updates EventBridge rule schedule when SSM parameter changes",
