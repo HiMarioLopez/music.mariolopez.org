@@ -1,0 +1,19 @@
+meta {
+  name: Music History (Limit 5)
+  type: http
+  seq: 1
+}
+
+get {
+  url: https://music.mariolopez.org/api/nodejs/history/music?limit=5
+  body: none
+  auth: bearer
+}
+
+params:query {
+  limit: 5
+}
+
+auth:bearer {
+  token: {{AUTH_TOKEN}}
+}
