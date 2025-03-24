@@ -53,16 +53,19 @@ export const fetchFromApi = async (
   developerToken: string,
   musicUserToken: string
 ): Promise<any> => {
-  // Clean up the path by removing any API prefix
+  // Clean up the path using regex to handle both API Gateway and custom domain patterns
   let cleanPath = path;
-  const apiPrefixes = ['/api', '/api/nodejs', '/api/v1'];
-
-  for (const prefix of apiPrefixes) {
-    if (cleanPath.startsWith(prefix)) {
-      cleanPath = cleanPath.substring(prefix.length);
-      break;
-    }
-  }
+  
+  // This regex will match and remove any of these patterns:
+  // 1. /api/nodejs/apple-music/
+  // 2. /api/v1/nodejs/apple-music/
+  // 3. /prod/nodejs/apple-music/
+  // 4. /nodejs/apple-music/
+  // 5. /api/ at the beginning of the path
+  const pathCleaningRegex = /^(?:\/api(?:\/v1)?|\/prod)?(?:\/nodejs\/apple-music)?/;
+  
+  // Apply the regex to clean the path
+  cleanPath = cleanPath.replace(pathCleaningRegex, '');
 
   // Ensure path starts with a slash
   if (!cleanPath.startsWith('/')) {
@@ -70,6 +73,12 @@ export const fetchFromApi = async (
   }
 
   const url = `${APPLE_MUSIC_API_BASE_URL}${cleanPath}`;
+
+  logger.info('Processing Apple Music API request', {
+    originalPath: path,
+    cleanedPath: cleanPath,
+    fullUrl: url
+  });
 
   try {
     logger.info('Fetching data from Apple Music API', {

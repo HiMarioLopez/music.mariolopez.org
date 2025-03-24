@@ -418,6 +418,7 @@ public class AdminPanelStack : Stack
         #endregion
 
         #region Outputs
+
         // Output Cognito configuration for frontend
         var userPoolIdOutput = new CfnOutput(this, "UserPoolId", new CfnOutputProps
         {

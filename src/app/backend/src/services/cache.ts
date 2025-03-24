@@ -1,28 +1,31 @@
 import { APIGatewayProxyEvent } from 'aws-lambda';
 import { Logger } from '@aws-lambda-powertools/logger';
-import { createClient } from 'redis';
+import { Redis } from "@upstash/redis"
 
 const logger = new Logger({ serviceName: 'cache-service' });
 
 // In-memory cache Map
 const memoryCache = new Map<string, { data: any; timestamp: number }>();
-const MEMORY_CACHE_TTL = 5 * 60 * 1000; // 5 minutes in milliseconds
+const MEMORY_CACHE_TTL = 5 * 60 * 1000; // 1 minute in milliseconds
 
 // Redis client setup
 const getRedisClient = () => {
-  const redisUrl = process.env.REDIS_URL;
+  const redisUrl = process.env.UPSTASH_REDIS_URL;
   if (!redisUrl) {
-    logger.warn('No REDIS_URL environment variable found, Redis caching disabled');
+    logger.warn('No UPSTASH_REDIS_URL environment variable found, Redis caching disabled');
+    return null;
+  }
+
+  const redisToken = process.env.UPSTASH_REDIS_TOKEN;
+  if (!redisToken) {
+    logger.warn('No UPSTASH_REDIS_TOKEN environment variable found, Redis caching disabled');
     return null;
   }
 
   try {
-    const client = createClient({
-      url: redisUrl
-    });
-    
-    client.on('error', (err) => {
-      logger.error('Redis client error', { error: err });
+    const client = new Redis({
+      url: redisUrl,
+      token: redisToken
     });
     
     return client;
@@ -112,26 +115,15 @@ export const getFromRedis = async (key: string): Promise<any | null> => {
   if (!client) return null;
   
   try {
-    await client.connect();
     const value = await client.get(key);
-    await client.disconnect();
     
     if (value) {
-      return JSON.parse(value);
+      return value;
     }
     
     return null;
   } catch (error) {
-    logger.error('Error getting data from Redis', { key, error });
-    
-    try {
-      if (client.isOpen) {
-        await client.disconnect();
-      }
-    } catch (disconnectError) {
-      logger.error('Error disconnecting Redis client', { error: disconnectError });
-    }
-    
+    logger.error('Error getting data from Redis', { key, error });    
     return null;
   }
 };
@@ -144,19 +136,9 @@ export const setInRedis = async (key: string, data: any, ttl = 300): Promise<voi
   if (!client) return;
   
   try {
-    await client.connect();
-    await client.set(key, JSON.stringify(data), { EX: ttl });
-    await client.disconnect();
+    await client.set(key, JSON.stringify(data), { ex: ttl });
   } catch (error) {
     logger.error('Error setting data in Redis', { key, error });
-    
-    try {
-      if (client.isOpen) {
-        await client.disconnect();
-      }
-    } catch (disconnectError) {
-      logger.error('Error disconnecting Redis client', { error: disconnectError });
-    }
   }
 };
 
@@ -167,28 +149,16 @@ export const incrementCounter = async (key: string, ttl = 60): Promise<number> =
   const client = getRedisClient();
   if (!client) return 1; // If Redis is not available, allow the request
   
-  try {
-    await client.connect();
-    
+  try {     
     // Increment the counter and set expiration if it's a new key
     const count = await client.incr(key);
     if (count === 1) {
       await client.expire(key, ttl);
     }
-    
-    await client.disconnect();
+
     return count;
   } catch (error) {
-    logger.error('Error incrementing counter in Redis', { key, error });
-    
-    try {
-      if (client.isOpen) {
-        await client.disconnect();
-      }
-    } catch (disconnectError) {
-      logger.error('Error disconnecting Redis client', { error: disconnectError });
-    }
-    
+    logger.error('Error incrementing counter in Redis', { key, error });    
     return 1; // If there's an error, allow the request
   }
 };

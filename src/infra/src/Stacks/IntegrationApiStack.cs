@@ -195,7 +195,8 @@ public class IntegrationApiStack : Stack
                 ["AWS_NODEJS_CONNECTION_REUSE_ENABLED"] = "1",
                 ["TOKEN_REFRESH_SNS_TOPIC_ARN"] = tokenRefreshTopic.TopicArn,
                 ["UPSTASH_REDIS_URL"] = configuration["AppleMusicApi:UpstashRedis:Url"],
-                ["UPSTASH_REDIS_TOKEN"] = configuration["AppleMusicApi:UpstashRedis:Token"]
+                ["UPSTASH_REDIS_TOKEN"] = configuration["AppleMusicApi:UpstashRedis:Token"],
+                ["MUSIC_USER_TOKEN_PARAMETER"] = "/Music/AdminPanel/MUT"
             }
         });
 

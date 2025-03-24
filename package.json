@@ -57,6 +57,7 @@
     "build:admin": "cd src/app/frontend/music-admin-panel/music-admin-panel-react && pnpm build",
     "------------Backend------------": "--------------------------------",
     "update-build-deploy:backend": "pnpm run-s update:backend build:backend && cd src/infra && cdk deploy --all",
+    "update-and-build:backend": "pnpm run-s update:backend build:backend",
     "update:backend": "cd src/app/backend && pnpm install",
     "build:backend": "cd src/app/backend && pnpm build"
   },
