@@ -1,0 +1,118 @@
+import { Logger } from '@aws-lambda-powertools/logger';
+import { Metrics, MetricUnit } from '@aws-lambda-powertools/metrics';
+import { Tracer } from '@aws-lambda-powertools/tracer';
+import { APIGatewayProxyEventV2, APIGatewayProxyResultV2, Context } from 'aws-lambda';
+import { getAllTracks, getTracksByArtist } from '../../../services/dynamodb/track-history';
+import { getCorsHeaders } from '../../../utils/cors';
+
+const logger = new Logger({ serviceName: 'get-track-history' });
+const tracer = new Tracer({ serviceName: 'get-track-history' });
+const metrics = new Metrics({ namespace: 'get-track-history' });
+
+// Default limit for queries
+const DEFAULT_LIMIT = 50;
+
+// Define response type
+interface PaginatedResponse {
+    items: any[];
+    pagination: {
+        count: number;
+        hasMore: boolean;
+        nextToken?: string;
+    };
+}
+
+/**
+ * API Gateway handler function to fetch music history
+ */
+export const handler = async (
+    event: APIGatewayProxyEventV2,
+    context: Context
+): Promise<APIGatewayProxyResultV2> => {
+    logger.appendKeys({
+        requestId: context.awsRequestId,
+        correlationIds: {
+            awsRequestId: context.awsRequestId,
+        },
+    });
+    
+    logger.info('Music History API Lambda invoked', { event });
+    metrics.addMetric('InvocationCount', MetricUnit.Count, 1);
+
+    try {
+        // Get environment variables
+        const tableName = process.env.DYNAMODB_TABLE_NAME;
+        if (!tableName) {
+            throw new Error('Missing required environment variable: DYNAMODB_TABLE_NAME');
+        }
+
+        // Get query parameters
+        const queryParams = event.queryStringParameters || {};
+
+        // Parse limit with fallback to default
+        const limit = queryParams.limit
+            ? parseInt(queryParams.limit, 10)
+            : DEFAULT_LIMIT;
+
+        // Get artist filter if provided
+        const artistName = queryParams.artist;
+
+        // Get starting key for pagination if provided
+        const startKey = queryParams.startKey
+            ? decodeURIComponent(queryParams.startKey)
+            : undefined;
+
+        // Fetch tracks from DynamoDB
+        let result;
+        if (artistName) {
+            logger.info('Fetching tracks by artist', { artistName, limit });
+            result = await getTracksByArtist(tableName, artistName, limit, startKey);
+            metrics.addMetric('ArtistFilteredQuery', MetricUnit.Count, 1);
+        } else {
+            logger.info('Fetching all tracks', { limit });
+            result = await getAllTracks(tableName, limit, startKey);
+            metrics.addMetric('AllTracksQuery', MetricUnit.Count, 1);
+        }
+
+        // Track the number of results returned
+        metrics.addMetric('ResultCount', MetricUnit.Count, result.items.length);
+
+        // Prepare pagination info
+        const response: PaginatedResponse = {
+            items: result.items,
+            pagination: {
+                count: result.items.length,
+                hasMore: !!result.lastEvaluatedKey
+            }
+        };
+
+        // Add next page token if there are more results
+        if (result.lastEvaluatedKey) {
+            response.pagination.nextToken = encodeURIComponent(result.lastEvaluatedKey);
+        }
+
+        logger.info('Successfully returned track history', {
+            count: result.items.length,
+            hasMore: !!result.lastEvaluatedKey
+        });
+
+        // Return tracks as JSON response
+        return {
+            statusCode: 200,
+            headers: getCorsHeaders(event.headers?.origin, 'GET,OPTIONS'),
+            body: JSON.stringify(response)
+        };
+    } catch (error) {
+        logger.error('Error fetching music history', { error });
+        metrics.addMetric('ErrorCount', MetricUnit.Count, 1);
+
+        return {
+            statusCode: 500,
+            headers: getCorsHeaders(event.headers?.origin, 'GET,OPTIONS'),
+            body: JSON.stringify({
+                message: 'Failed to fetch music history',
+                error: error instanceof Error ? error.message : 'Unknown error'
+            })
+        };
+    }
+};
