@@ -126,7 +126,8 @@ public class AppleMusicHistoryStack : Stack
                 ["LAST_PROCESSED_TRACK_PARAMETER"] = lastProcessedTrackIdParameter.ParameterName,
                 ["MUSIC_USER_TOKEN_PARAMETER"] = "/Music/AdminPanel/MUT",
                 ["TRACK_LIMIT_PARAMETER"] = trackLimitParameter.ParameterName
-            }
+            },
+            Tracing = Tracing.ACTIVE
         });
 
         #endregion
@@ -151,7 +152,8 @@ public class AppleMusicHistoryStack : Stack
             Environment = new Dictionary<string, string>
             {
                 ["RULE_NAME"] = rule.RuleName
-            }
+            },
+            Tracing = Tracing.ACTIVE
         });
 
         // Grant permissions to the Lambda to modify the rule and read SSM parameter

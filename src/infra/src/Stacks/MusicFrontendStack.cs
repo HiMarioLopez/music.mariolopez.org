@@ -153,7 +153,8 @@ public class MusicFrontendStack : Stack
             CurrentVersionOptions = new VersionOptions
             {
                 RemovalPolicy = RemovalPolicy.DESTROY,
-            }
+            },
+            Tracing = Tracing.ACTIVE
         });
 
         #endregion

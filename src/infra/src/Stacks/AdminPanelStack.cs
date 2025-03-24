@@ -117,6 +117,7 @@ public class AdminPanelStack : Stack
             MemorySize = 128,
             EphemeralStorageSize = Size.Mebibytes(512),
             Timeout = Duration.Seconds(29),
+            Tracing = Tracing.ACTIVE
         });
 
         // Grant Lambda permission to write to Parameter Store
@@ -138,6 +139,7 @@ public class AdminPanelStack : Stack
             MemorySize = 128,
             EphemeralStorageSize = Size.Mebibytes(512),
             Timeout = Duration.Seconds(29),
+            Tracing = Tracing.ACTIVE
         });
 
         // Grant Lambda permission to read from Parameter Store
@@ -158,6 +160,7 @@ public class AdminPanelStack : Stack
             Architecture = Architecture.ARM_64,
             MemorySize = 128,
             Timeout = Duration.Seconds(29),
+            Tracing = Tracing.ACTIVE
         });
 
         // Grant Lambda permission to write to Parameter Store
@@ -183,6 +186,7 @@ public class AdminPanelStack : Stack
             Architecture = Architecture.ARM_64,
             MemorySize = 128,
             Timeout = Duration.Seconds(29),
+            Tracing = Tracing.ACTIVE
         });
 
         // Grant Lambda permission to read from Parameter Store
@@ -208,6 +212,7 @@ public class AdminPanelStack : Stack
             Architecture = Architecture.ARM_64,
             MemorySize = 128,
             Timeout = Duration.Seconds(29),
+            Tracing = Tracing.ACTIVE
         });
 
         // Create Lambda function to get track limit
@@ -225,6 +230,7 @@ public class AdminPanelStack : Stack
             Architecture = Architecture.ARM_64,
             MemorySize = 128,
             Timeout = Duration.Seconds(29),
+            Tracing = Tracing.ACTIVE
         });
 
         // Grant Lambda permissions

@@ -16,6 +16,7 @@ using Microsoft.Extensions.Configuration;
 using Music.Infra.Models.Settings;
 using Amazon.CDK.AWS.Events;
 using Amazon.CDK.AWS.Events.Targets;
+using Amazon.CDK.AWS.SES.Actions;
 
 namespace Music.Infra.Stacks;
 
@@ -178,6 +179,7 @@ public class IntegrationApiStack : Stack
             MemorySize = 128,
             EphemeralStorageSize = Size.Mebibytes(512),
             Timeout = Duration.Seconds(29),
+            Tracing = Tracing.ACTIVE
         });
 
         // Apple Music API Data Fetching Lambda
@@ -197,7 +199,8 @@ public class IntegrationApiStack : Stack
                 ["UPSTASH_REDIS_URL"] = configuration["AppleMusicApi:UpstashRedis:Url"],
                 ["UPSTASH_REDIS_TOKEN"] = configuration["AppleMusicApi:UpstashRedis:Token"],
                 ["MUSIC_USER_TOKEN_PARAMETER"] = "/Music/AdminPanel/MUT"
-            }
+            },
+            Tracing = Tracing.ACTIVE
         });
 
         // Token Refresh Notification Lambda
@@ -215,7 +218,8 @@ public class IntegrationApiStack : Stack
                 ["AWS_NODEJS_CONNECTION_REUSE_ENABLED"] = "1",
                 ["ADMIN_EMAIL"] = configuration["AppleMusicApi:Email:AdminEmail"],
                 ["SOURCE_EMAIL"] = configuration["AppleMusicApi:Email:SourceEmail"]
-            }
+            },
+            Tracing = Tracing.ACTIVE
         });
 
         // MusicBrainz API Data Fetching Lambda
@@ -251,7 +255,8 @@ public class IntegrationApiStack : Stack
                 ["AWS_NODEJS_CONNECTION_REUSE_ENABLED"] = "1",
                 ["UPSTASH_REDIS_URL"] = configuration["AppleMusicApi:UpstashRedis:Url"],
                 ["UPSTASH_REDIS_TOKEN"] = configuration["AppleMusicApi:UpstashRedis:Token"]
-            }
+            },
+            Tracing = Tracing.ACTIVE
         });
 
         #endregion
