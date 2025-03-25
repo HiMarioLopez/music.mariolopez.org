@@ -1,82 +1,96 @@
-import React, { useEffect, useRef } from 'react';
+import React from 'react';
+import Slider from 'react-slick';
 import placeholderAlbumArt from '../../assets/50.png';
+import { useMusicContext } from '../../context/MusicContext';
 import './index.css';
-
-// Mock data for the recently played songs
-const recentlyPlayed = [
-    {
-        songTitle: 'Song One',
-        artistName: 'Artist One',
-        albumName: 'Album One',
-        albumCoverUrl: placeholderAlbumArt
-    },
-    {
-        songTitle: 'Song Two',
-        artistName: 'Artist Two',
-        albumName: 'Album Two',
-        albumCoverUrl: placeholderAlbumArt
-    },
-    {
-        songTitle: 'Song Three',
-        artistName: 'Artist Three',
-        albumName: 'Album Three',
-        albumCoverUrl: placeholderAlbumArt
-    },
-    {
-        songTitle: 'Song Four',
-        artistName: 'Artist Four',
-        albumName: 'Album Four',
-        albumCoverUrl: placeholderAlbumArt
-    },
-    {
-        songTitle: 'Song Five',
-        artistName: 'Artist Five',
-        albumName: 'Album Five',
-        albumCoverUrl: placeholderAlbumArt
-    }
-]
+// Import React Slick CSS
+import 'slick-carousel/slick/slick.css';
+import 'slick-carousel/slick/slick-theme.css';
 
 const RecentlyPlayedList: React.FC = () => {
-    const scrollRef = useRef<HTMLDivElement>(null);
+    const { recentlyPlayed, loading, error } = useMusicContext();
+    
+    // Replace {w}x{h} in the artworkUrl with actual dimensions for thumbnails
+    const getProcessedArtworkUrl = (url: string | undefined) => {
+        if (!url) return placeholderAlbumArt;
+        return url.replace('{w}x{h}', '50x50');
+    };
 
-    useEffect(() => {
-        const scroll = scrollRef.current;
-
-        if (scroll) {
-            let startLeft = 0;
-            const step = () => {
-                if (scroll.offsetWidth + startLeft >= scroll.scrollWidth) {
-                    startLeft = 0; // Reset to start if end reached
-                    scroll.scrollLeft = startLeft;
-                } else {
-                    startLeft += 0.25; // Increment the scroll position
-                    scroll.scrollLeft = startLeft;
+    // React Slick carousel settings
+    const sliderSettings = {
+        dots: false,
+        arrows: false,
+        infinite: true,
+        speed: 6000,
+        autoplay: true,
+        autoplaySpeed: 0,
+        cssEase: "linear",
+        pauseOnHover: true,
+        variableWidth: true,
+        adaptiveHeight: true,
+        swipeToSlide: true,
+        responsive: [
+            {
+                breakpoint: 680,
+                settings: {
+                    slidesToShow: 2
                 }
-                requestAnimationFrame(step);
-            };
+            }
+        ]
+    };
 
-            step();
-        }
+    // Show loading state
+    if (loading && recentlyPlayed.length === 0) {
+        return (
+            <div className="recently-played-list-component styled-container">
+                <h1>Recently Played</h1>
+                <div className="recently-played-list-component-list-container">
+                    <p>Loading recently played tracks...</p>
+                </div>
+            </div>
+        );
+    }
 
-        // Cleanup function to potentially stop the animation
-        return () => {
-            // Reset or stop animation logic if needed
-        };
-    }, []); // Empty dependency array means this effect runs once on mount
+    // Show error state
+    if (error && recentlyPlayed.length === 0) {
+        return (
+            <div className="recently-played-list-component styled-container">
+                <h1>Recently Played</h1>
+                <div className="recently-played-list-component-list-container">
+                    <p>Error loading tracks: {error}</p>
+                </div>
+            </div>
+        );
+    }
+
+    // Prepare tracks data with conditional duplication
+    const tracksToDisplay = recentlyPlayed.length === 1 
+        ? [...recentlyPlayed, ...recentlyPlayed, ...recentlyPlayed]
+        : recentlyPlayed.length === 2 
+            ? [...recentlyPlayed, ...recentlyPlayed]
+            : recentlyPlayed;
 
     return (
         <div className="recently-played-list-component styled-container">
             <h1>Recently Played</h1>
-            <div className="recently-played-list-component-list-container" ref={scrollRef}>
-                {recentlyPlayed.map((play, index) => (
-                    <div key={index} className="recently-played-list-component-track">
-                        <img src={play.albumCoverUrl} alt="Album Cover" />
-                        <div className="recently-played-list-component-track-text-container">
-                            <h3>{play.songTitle}</h3>
-                            <p>{play.artistName} - {play.albumName}</p>
-                        </div>
-                    </div>
-                ))}
+            <div className="recently-played-list-component-list-container">
+                {recentlyPlayed.length > 0 ? (
+                    <Slider {...sliderSettings}>
+                        {tracksToDisplay.map((track, index) => (
+                            <div key={`${track.id}-${index}`}>
+                                <div className="recently-played-list-component-track">
+                                    <img src={getProcessedArtworkUrl(track.artworkUrl)} alt="Album Cover" />
+                                    <div className="recently-played-list-component-track-text-container">
+                                        <h3>{track.name}</h3>
+                                        <p>{track.artistName} - {track.albumName}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </Slider>
+                ) : (
+                    <p>No recently played tracks available</p>
+                )}
             </div>
         </div>
     );

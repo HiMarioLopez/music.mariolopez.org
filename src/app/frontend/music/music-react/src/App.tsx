@@ -1,14 +1,15 @@
-import React from 'react';
-import './App.css';
-import NowPlaying from './components/NowPlaying/index';
-import RecentlyPlayedList from './components/RecentlyPlayedList/index';
-import RecommendationForm from './components/RecommendationForm/RecommendationForm';
-import Navbar from './components/Navbar';
-import Footer from './components/Footer';
-import CombinedRecommendationList from './components/CombinedRecommendationList';
+import React from "react";
+import "./App.css";
+import NowPlaying from "./components/NowPlaying/index";
+import RecentlyPlayedList from "./components/RecentlyPlayedList/index";
+import RecommendationForm from "./components/RecommendationForm/RecommendationForm";
+import Navbar from "./components/Navbar";
+import Footer from "./components/Footer";
+import CombinedRecommendationList from "./components/CombinedRecommendationList";
 // import RealtimeUpdatesCard from './components/RealtimeUpdatesCard/RealtimeUpdatesCard';
-import QueuedSongsList from './components/QueuedSongsList';
-import { RecommendationsProvider } from './context/RecommendationsContext';
+import QueuedSongsList from "./components/QueuedSongsList";
+import { RecommendationsProvider } from "./context/RecommendationsContext";
+import { MusicProvider } from "./context/MusicContext";
 
 const App: React.FC = () => {
   return (
@@ -24,15 +25,17 @@ const App: React.FC = () => {
               </div>
             </div>
             <div className="middle-column">
-              <div className="now-playing-container">
-                <NowPlaying />
-              </div>
-              <div className="recently-played-container">
-                <RecentlyPlayedList />
-              </div>
+              <MusicProvider>
+                <div className="now-playing-container">
+                  <NowPlaying />
+                </div>
+                <div className="recently-played-container">
+                  <RecentlyPlayedList />
+                </div>
+              </MusicProvider>
               {/* <div className="realtime-updates-container">
-                <RealtimeUpdatesCard />
-              </div> */}
+                  <RealtimeUpdatesCard />
+                </div> */}
             </div>
             <div className="right-column">
               <div className="recommendation-form-container">
@@ -48,6 +51,6 @@ const App: React.FC = () => {
       </div>
     </>
   );
-}
+};
 
 export default App;

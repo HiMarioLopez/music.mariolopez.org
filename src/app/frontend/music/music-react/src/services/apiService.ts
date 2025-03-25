@@ -1,5 +1,6 @@
 // API Service for music-related requests
 import { Result, Hint } from '../components/RecommendationForm/RecommendationForm.types';
+import { MusicHistoryResponse } from '../context/MusicContext';
 
 const API_BASE_URL = '/api/nodejs';
 
@@ -251,9 +252,14 @@ export const apiService = {
                 }) || [];
 
             return { termSuggestions, contentResults };
+        },
+        async getMusicHistory(limit: number = 5): Promise<MusicHistoryResponse> {
+            return fetchWithErrorHandling<MusicHistoryResponse>(
+                `${API_BASE_URL}/history/music?limit=${limit}`
+            );
         }
     }
 };
 
 // For backward compatibility
-export const musicApiService = apiService.music; 
+export const musicApiService = apiService.music;

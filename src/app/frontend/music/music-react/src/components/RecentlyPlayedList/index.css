@@ -12,16 +12,19 @@
 }
 
 .recently-played-list-component-list-container {
-    display: flex;
-    align-items: center;
-    overflow-x: auto;
-    white-space: nowrap;
-    scrollbar-width: none;
-    -ms-overflow-style: none;
+    position: relative;
+    width: 100%;
+    overflow: hidden; /* Hide overflow without relying on scrolling */
+    padding-bottom: 5px; /* Add a bit of padding to prevent cutoff */
 }
 
-.recently-played-list-component-list-container::-webkit-scrollbar {
-    display: none;
+/* Container for tracks that will be animated */
+.recently-played-list-component-track-container {
+    display: flex;
+    align-items: center;
+    white-space: nowrap;
+    will-change: transform; /* Optimize for animations */
+    transform: translateX(0); /* Initial position */
 }
 
 .recently-played-list-component-track {
@@ -32,37 +35,82 @@
     border-radius: var(--border-radius-medium);
     background: var(--track-bg-color);
     height: 60px;
+    transition: transform 0.2s ease-in-out, background 0.2s ease;
+    flex: 0 0 auto; /* Prevent items from stretching */
+    max-width: 320px; /* Limit the width of track items */
 }
 
 .recently-played-list-component-track:hover {
     background: var(--track-bg-color-hover);
+    transform: translateY(-2px); /* Slight lift effect on hover */
 }
 
 .recently-played-list-component-track:last-child {
     margin-right: 0;
 }
 
+/* Style for the images to ensure consistent sizing */
 .recently-played-list-component-track img {
-    width: var(--album-art-size-small);
-    height: var(--album-art-size-small);
-    margin-right: var(--margin-medium);
-    border-radius: var(--border-radius-small);
+    width: 50px;
+    height: 50px;
+    border-radius: 5px;
+    object-fit: cover;
+    margin-right: var(--margin-small);
+    flex-shrink: 0; /* Prevent image from shrinking */
 }
 
+/* Text container styling */
 .recently-played-list-component-track-text-container {
     display: flex;
     flex-direction: column;
-    margin-right: var(--margin-small);
+    justify-content: center;
+    overflow: hidden;
+    max-width: calc(100% - 60px); /* Account for image width and margin */
+    width: 100%; /* Take up available space */
 }
 
 .recently-played-list-component-track-text-container h3,
 .recently-played-list-component-track-text-container p {
     margin: 0;
-    color: var(--font-color);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    width: 100%; /* Ensure text takes full width of container */
+}
+
+/* Apply specific max-width for the artist-album line which tends to be longer */
+.recently-played-list-component-track-text-container p {
+    max-width: 100%;
+    font-size: 0.9em; /* Slightly smaller text for artist/album */
+}
+
+/* React Slick custom styling to integrate with our existing component */
+.recently-played-list-component .slick-track {
+    display: flex;
+    align-items: center;
+}
+
+.recently-played-list-component .slick-slide {
+    height: auto;
+    margin: 0 var(--margin-small);
+}
+
+.recently-played-list-component .slick-list {
+    margin: 0 -var(--margin-small);
+    overflow: visible;
+}
+
+/* Ensure our track styling works with the slick container */
+.recently-played-list-component .slick-slide > div {
+    height: 100%;
 }
 
 @media (max-width: 680px) {
     .recently-played-list-component {
         width: var(--width-mobile);
+    }
+    
+    .recently-played-list-component-track {
+        max-width: 260px; /* Smaller on mobile */
     }
 }
