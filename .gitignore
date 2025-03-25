@@ -28,6 +28,9 @@ dist-ssr
 
 auth
 
+# TypeScript build info
+*.tsbuildinfo
+
 # Environment variables
 .env*
 !.env.example
