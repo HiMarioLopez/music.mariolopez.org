@@ -136,3 +136,79 @@
     color: var(--text-primary);
     border: 1px solid var(--border-color);
 }
+
+/* Button loading state styles */
+.primary-button {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+}
+
+.primary-button.loading {
+    background-color: var(--primary-color-muted, #5a6acb);
+    cursor: not-allowed;
+}
+
+.spinner {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top-color: #fff;
+    animation: spin 1s ease-in-out infinite;
+    margin-right: 8px;
+}
+
+/* Button container with status message */
+.button-container {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.button-container .primary-button {
+    flex: 0 0 auto;
+}
+
+/* Updated status message styling */
+.status-message {
+    flex: 1;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    margin: 0;
+    opacity: 1;
+    transition: opacity 0.5s ease-out;
+    max-width: 60%;
+}
+
+.status-message.fade-out {
+    opacity: 0;
+}
+
+.status-message.error {
+    background-color: var(--error-color);
+    color: white;
+}
+
+.status-message.success {
+    background-color: var(--success-color);
+    color: white;
+}
+
+@media (max-width: 640px) {
+    .button-container {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .status-message {
+        max-width: 100%;
+        margin-top: 1rem;
+    }
+}

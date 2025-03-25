@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { RateUnit, useScheduleRate } from '../hooks/useScheduleRate';
 import './ScheduleRateCard.css';
 
@@ -13,6 +13,37 @@ export const ScheduleRateCard: React.FC = () => {
         { rateType, value, unit, cronExpression, status, isLoading },
         { setRateType, setValue, setUnit, setCronExpression, handleUpdate, refresh }
     ] = useScheduleRate();
+    
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [shouldFadeOut, setShouldFadeOut] = useState(false);
+    const statusTimeoutRef = useRef<number | null>(null);
+    
+    // Clear any existing timeouts when component unmounts
+    useEffect(() => {
+        return () => {
+            if (statusTimeoutRef.current) {
+                clearTimeout(statusTimeoutRef.current);
+            }
+        };
+    }, []);
+    
+    // Set up fade-out effect when status changes
+    useEffect(() => {
+        if (status) {
+            // Reset fade state
+            setShouldFadeOut(false);
+            
+            // Clear any existing timeout
+            if (statusTimeoutRef.current) {
+                clearTimeout(statusTimeoutRef.current);
+            }
+            
+            // Set timeout to fade out after 5 seconds
+            statusTimeoutRef.current = window.setTimeout(() => {
+                setShouldFadeOut(true);
+            }, 3000);
+        }
+    }, [status]);
 
     // Helper to determine if we should use singular or plural form
     const getUnitOptions = () => {
@@ -35,6 +66,17 @@ export const ScheduleRateCard: React.FC = () => {
         if (currentBase) {
             const numValue = parseInt(newValue, 10);
             setUnit(numValue === 1 ? currentBase.value : currentBase.plural as RateUnit);
+        }
+    };
+    
+    const handleSubmit = async () => {
+        setIsSubmitting(true);
+        // Reset fade state if there was a previous status
+        setShouldFadeOut(false);
+        try {
+            await handleUpdate();
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
@@ -127,16 +169,27 @@ export const ScheduleRateCard: React.FC = () => {
             )}
 
             <div className="button-container">
-                <button onClick={handleUpdate} className="primary-button">
-                    Update Schedule
+                <button 
+                    onClick={handleSubmit} 
+                    className={`primary-button ${isSubmitting ? 'loading' : ''}`}
+                    disabled={isSubmitting}
+                >
+                    {isSubmitting ? (
+                        <>
+                            <span className="spinner"></span>
+                            Updating...
+                        </>
+                    ) : (
+                        'Update Schedule'
+                    )}
                 </button>
+                
+                {status && (
+                    <div className={`status-message ${status.includes('Error') ? 'error' : 'success'} ${shouldFadeOut ? 'fade-out' : ''}`}>
+                        {status}
+                    </div>
+                )}
             </div>
-
-            {status && (
-                <div className={`status-message ${status.includes('Error') ? 'error' : 'success'}`}>
-                    {status}
-                </div>
-            )}
         </div>
     );
-}; 
+};
