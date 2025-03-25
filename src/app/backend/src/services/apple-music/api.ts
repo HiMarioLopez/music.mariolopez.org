@@ -217,14 +217,14 @@ export const fetchRecentTracks = async (
         );
 
         // Update validation to handle the actual response structure
-        if (!responseData?.data?.data || !Array.isArray(responseData.data.data)) {
+        if (!responseData?.data || !Array.isArray(responseData.data)) {
             logger.error('Invalid response structure from Apple Music API', {
                 response: JSON.stringify(responseData)
             });
             return [];
         }
 
-        const tracks = responseData.data.data
+        const tracks = responseData.data
             .map((track: any) => {
                 try {
                     const { attributes, id } = track;

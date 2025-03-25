@@ -1,4 +1,9 @@
-import { ScheduledHandler, Context, APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
+import {
+  ScheduledHandler,
+  Context,
+  APIGatewayProxyEvent,
+  APIGatewayProxyResult,
+} from 'aws-lambda';
 import { Logger } from '@aws-lambda-powertools/logger';
 import { Tracer } from '@aws-lambda-powertools/tracer';
 import { Metrics, MetricUnit } from '@aws-lambda-powertools/metrics';
@@ -21,7 +26,10 @@ interface Environment {
 /**
  * Lambda handler for updating track history
  */
-export const handler = async (event: APIGatewayProxyEvent, context: Context): Promise<APIGatewayProxyResult> => {
+export const handler = async (
+  event: APIGatewayProxyEvent,
+  context: Context
+): Promise<APIGatewayProxyResult> => {
   logger.appendKeys({
     requestId: context.awsRequestId,
     correlationIds: {
@@ -36,9 +44,10 @@ export const handler = async (event: APIGatewayProxyEvent, context: Context): Pr
     // Get environment variables
     const env: Environment = {
       DYNAMODB_TABLE_NAME: process.env.DYNAMODB_TABLE_NAME!,
-      LAST_PROCESSED_TRACK_PARAMETER: process.env.LAST_PROCESSED_TRACK_PARAMETER!,
+      LAST_PROCESSED_TRACK_PARAMETER:
+        process.env.LAST_PROCESSED_TRACK_PARAMETER!,
       MUSIC_USER_TOKEN_PARAMETER: process.env.MUSIC_USER_TOKEN_PARAMETER!,
-      TRACK_LIMIT_PARAMETER: process.env.TRACK_LIMIT_PARAMETER!
+      TRACK_LIMIT_PARAMETER: process.env.TRACK_LIMIT_PARAMETER!,
     };
 
     // Validate environment variables
@@ -59,31 +68,71 @@ export const handler = async (event: APIGatewayProxyEvent, context: Context): Pr
     }
 
     // Get last processed track ID
-    const lastProcessedTrackId = await getParameter(env.LAST_PROCESSED_TRACK_PARAMETER);
+    const lastProcessedTrackId = await getParameter(
+      env.LAST_PROCESSED_TRACK_PARAMETER
+    );
     logger.info('Last processed track status', {
-      lastProcessedTrackId: lastProcessedTrackId || 'No previously processed tracks'
+      lastProcessedTrackId:
+        lastProcessedTrackId || 'No previously processed tracks',
     });
 
     // Fetch recent tracks
-    const recentTracks = await fetchRecentTracks(musicUserToken, env.TRACK_LIMIT_PARAMETER);
-    logger.info('Recent tracks fetched', { count: recentTracks.length });
+    const recentTracks = await fetchRecentTracks(
+      musicUserToken,
+      env.TRACK_LIMIT_PARAMETER
+    );
+    logger.info('Recent tracks fetched', {
+      count: recentTracks.length,
+      trackIds: recentTracks.map((t) => t.id).join(','),
+    });
     metrics.addMetric('TracksProcessed', MetricUnit.Count, recentTracks.length);
 
     // Process tracks and filter out already processed ones
-    const newTracks = await processTracks(recentTracks, lastProcessedTrackId || '');
-    logger.info('New tracks identified', { count: newTracks.length });
-    metrics.addMetric('NewTracksIdentified', MetricUnit.Count, newTracks.length);
+    const newTracks = await processTracks(
+      recentTracks,
+      lastProcessedTrackId || ''
+    );
+    logger.info('New tracks identified', {
+      count: newTracks.length,
+      trackIds: newTracks.map((t) => t.id).join(','),
+      firstTrackId: newTracks.length > 0 ? newTracks[0].id : 'none',
+      lastTrackId:
+        newTracks.length > 0 ? newTracks[newTracks.length - 1].id : 'none',
+    });
+    metrics.addMetric(
+      'NewTracksIdentified',
+      MetricUnit.Count,
+      newTracks.length
+    );
 
     // Store new tracks in DynamoDB
     if (newTracks.length > 0) {
-      const { successCount, errorCount } = await storeTracksInDynamoDB(newTracks, env.DYNAMODB_TABLE_NAME);
+      logger.info('About to store tracks in DynamoDB', {
+        tableName: env.DYNAMODB_TABLE_NAME,
+        trackCount: newTracks.length,
+      });
+
+      const { successCount, errorCount } = await storeTracksInDynamoDB(
+        newTracks,
+        env.DYNAMODB_TABLE_NAME
+      );
+
+      logger.info('Tracks storage completed', {
+        successCount,
+        errorCount,
+        totalExpected: newTracks.length,
+      });
+
       metrics.addMetric('TracksStoredSuccess', MetricUnit.Count, successCount);
       metrics.addMetric('TracksStoredError', MetricUnit.Count, errorCount);
 
       // Update the last processed track ID
       if (successCount > 0) {
         const mostRecentTrackId = newTracks[0].id;
-        await updateParameter(env.LAST_PROCESSED_TRACK_PARAMETER, mostRecentTrackId);
+        await updateParameter(
+          env.LAST_PROCESSED_TRACK_PARAMETER,
+          mostRecentTrackId
+        );
         logger.info('Last processed track ID updated', { mostRecentTrackId });
       }
     } else {
@@ -93,12 +142,12 @@ export const handler = async (event: APIGatewayProxyEvent, context: Context): Pr
     // Put CloudWatch metrics
     await putCloudWatchMetrics('AppleMusicHistory', [
       { name: 'TracksProcessed', value: recentTracks.length, unit: 'Count' },
-      { name: 'NewTracksStored', value: newTracks.length, unit: 'Count' }
+      { name: 'NewTracksStored', value: newTracks.length, unit: 'Count' },
     ]);
 
     logger.info('Apple Music history processing complete', {
       tracksProcessed: recentTracks.length,
-      newTracksStored: newTracks.length
+      newTracksStored: newTracks.length,
     });
 
     return {
@@ -106,8 +155,8 @@ export const handler = async (event: APIGatewayProxyEvent, context: Context): Pr
       body: JSON.stringify({
         message: 'Successfully processed Apple Music history',
         tracksProcessed: recentTracks.length,
-        newTracksStored: newTracks.length
-      })
+        newTracksStored: newTracks.length,
+      }),
     };
   } catch (error) {
     logger.error('Error processing Apple Music history', { error });
