@@ -32,7 +32,8 @@ public class AppleMusicHistoryStack : Stack
         var historyTable = new Table(this, "AppleMusicHistory", new TableProps
         {
             TableName = "AppleMusicHistory",
-            PartitionKey = new Attribute { Name = "id", Type = AttributeType.STRING },
+            PartitionKey = new Attribute { Name = "entityType", Type = AttributeType.STRING },
+            SortKey = new Attribute { Name = "processedTimestamp", Type = AttributeType.STRING },
             BillingMode = BillingMode.PAY_PER_REQUEST,
         });
 
@@ -153,7 +154,7 @@ public class AppleMusicHistoryStack : Stack
         {
             Runtime = Runtime.NODEJS_22_X,
             Handler = "update-schedule.handler",
-            Code = Code.FromAsset("../app/backend/dist/handlers/api/admin"),
+            Code = Code.FromAsset("../app/backend/dist/handlers/event-handlers"),
             MemorySize = 128,
             Timeout = Duration.Seconds(30),
             Description = "Updates EventBridge rule schedule when SSM parameter changes",
