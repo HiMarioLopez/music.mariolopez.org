@@ -39,13 +39,26 @@ const RecentlyPlayedList: React.FC = () => {
         ]
     };
 
-    // Show loading state
+    // Show skeleton loader during loading
     if (loading && recentlyPlayed.length === 0) {
+        // Create an array of 4 placeholder items for the skeleton loader
+        const skeletonItems = Array(4).fill(null);
+        
         return (
             <div className="recently-played-list-component styled-container">
                 <h1>Recently Played</h1>
                 <div className="recently-played-list-component-list-container">
-                    <p>Loading recently played tracks...</p>
+                    <div className="recently-played-skeleton-container">
+                        {skeletonItems.map((_, index) => (
+                            <div key={`skeleton-${index}`} className="recently-played-skeleton-track">
+                                <div className="recently-played-skeleton-img skeleton-loader"></div>
+                                <div className="recently-played-skeleton-text">
+                                    <div className="recently-played-skeleton-title skeleton-loader"></div>
+                                    <div className="recently-played-skeleton-subtitle skeleton-loader"></div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
                 </div>
             </div>
         );

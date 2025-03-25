@@ -12,15 +12,17 @@ const NowPlaying: React.FC = () => {
         return url.replace('{w}x{h}', '300x300');
     };
 
-    // Show loading state
+    // Show skeleton loader during loading
     if (loading && !nowPlaying) {
         return (
             <div className="now-playing-component styled-container">
-                <img src={placeholderAlbumArt} alt="Loading Album Art" />
+                <div className="now-playing-skeleton-img skeleton-loader"></div>
                 <div className="now-playing-component-text-container">
                     <h1>Mario's Now Playing</h1>
                     <div className="now-playing-component-text">
-                        <h2>Loading...</h2>
+                        <div className="now-playing-skeleton-title skeleton-loader"></div>
+                        <div className="now-playing-skeleton-artist skeleton-loader"></div>
+                        <div className="now-playing-skeleton-album skeleton-loader"></div>
                     </div>
                 </div>
             </div>

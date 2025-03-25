@@ -63,6 +63,61 @@
     white-space: nowrap;
 }
 
+/* Skeleton loader styles for NowPlaying */
+.skeleton-loader {
+    background: var(--track-bg-color);
+    position: relative;
+    overflow: hidden;
+    border-radius: var(--border-radius-small);
+}
+
+.skeleton-loader::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    transform: translateX(-100%);
+    background: linear-gradient(
+        90deg,
+        rgba(255, 255, 255, 0) 0%,
+        rgba(255, 255, 255, 0.1) 50%,
+        rgba(255, 255, 255, 0) 100%
+    );
+    animation: shimmer 1.5s infinite;
+}
+
+.now-playing-skeleton-img {
+    width: var(--album-art-size-large);
+    height: var(--album-art-size-large);
+    border-radius: 10px;
+    margin-right: var(--margin-large);
+}
+
+.now-playing-skeleton-title {
+    height: 2rem;
+    margin-bottom: 0.75rem;
+    width: 70%;
+}
+
+.now-playing-skeleton-artist {
+    height: 1.2rem;
+    margin-bottom: 0.5rem;
+    width: 50%;
+}
+
+.now-playing-skeleton-album {
+    height: 1.2rem;
+    width: 60%;
+}
+
+@keyframes shimmer {
+    100% {
+        transform: translateX(100%);
+    }
+}
+
 @media (max-width: 680px) {
 
     .now-playing-component,
@@ -93,5 +148,12 @@
     
     .now-playing-component-text h2 {
         font-size: 1.3rem;
+    }
+
+    .now-playing-skeleton-img {
+        width: var(--width-mobile);
+        height: auto;
+        aspect-ratio: 1 / 1;
+        margin: var(--margin-medium) 0;
     }
 }
