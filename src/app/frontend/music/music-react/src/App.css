@@ -1,11 +1,11 @@
 .app {
-    position: absolute;
+    position: relative;
     width: 100%;
-    height: 100%;
+    min-height: 100vh;
     display: flex;
+    flex-direction: column;
+    overflow-y: auto;
     align-items: center;
-    justify-content: center;
-    overflow-y: scroll;
 }
 
 @keyframes gradient {
@@ -35,60 +35,76 @@
     z-index: -1;
 }
 
+.main-content {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    padding-top: 10rem;
+    width: 100%;
+}
+
 /* Three-column layout for larger screens */
 @media (min-width: 1500px) {
     .main-content {
-        max-width: 1400px;
+        max-width: 1500px;
         display: flex;
     }
 
-    .queue-column {
-        width: 25%;
+    .left-column {
+        width: 35%;
         margin-right: var(--margin-large);
-    }
-
-    .middle-column,
-    .right-column {
-        width: 37.5%;
     }
 
     .middle-column {
+        width: 45%;
         margin-right: var(--margin-large);
+    }
+
+    .right-column {
+        width: 20%;
+    }
+
+    .recommendations-list-container {
+        flex: 1;
+        min-height: 0;
+        overflow-y: auto;
+        margin-bottom: var(--margin-large);
     }
 
     .now-playing-container,
     .recommendation-form-container,
-    .recommendations-list-container,
     .recently-played-container,
     .queued-songs-container {
         margin-bottom: var(--margin-large);
-    }
-
-    .recommendations-list-container:last-child,
-    .queued-songs-container:last-child {
-        margin-bottom: 0;
     }
 }
 
 /* Medium desktop - still 3 columns but narrower */
 @media (min-width: 1200px) and (max-width: 1499px) {
     .main-content {
-        max-width: 1100px;
+        max-width: 1200px;
         display: flex;
     }
 
-    .queue-column {
-        width: 25%;
+    .left-column {
+        width: 30%;
         margin-right: var(--margin-medium);
-    }
-
-    .middle-column,
-    .right-column {
-        width: 37.5%;
     }
 
     .middle-column {
+        width: 40%;
         margin-right: var(--margin-medium);
+    }
+
+    .right-column {
+        width: 30%;
+    }
+
+    .recommendations-list-container {
+        flex: 1;
+        min-height: 0;
+        overflow-y: auto;
+        margin-bottom: var(--margin-medium);
     }
 
     .now-playing-container,
@@ -120,8 +136,15 @@
     }
 
     /* Reordering elements for the single column layout */
-    .queue-column {
+    .left-column {
         order: 2;
+    }
+
+    .left-column {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        width: 100%;
     }
 
     .middle-column {
@@ -132,14 +155,20 @@
         order: 3;
     }
 
-    .queue-column,
+    .left-column,
     .middle-column,
     .right-column {
         width: 100%;
     }
 
+    .recommendations-list-container {
+        flex: 1;
+        min-height: 0;
+        overflow-y: auto;
+        margin-bottom: var(--margin-large) 0;
+    }
+
     .now-playing-container,
-    .recommendations-list-container,
     .recently-played-container,
     .realtime-updates-container {
         width: 100%;
@@ -147,6 +176,7 @@
     }
 
     .queued-songs-container,
+    .recommendations-list-container,
     .recommendation-form-container {
         width: 100%;
         margin: 0 0 var(--margin-large) 0;

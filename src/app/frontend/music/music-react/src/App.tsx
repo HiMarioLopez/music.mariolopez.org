@@ -1,15 +1,14 @@
 import React from "react";
 import "./App.css";
-import NowPlaying from "./components/NowPlaying/index";
-import RecentlyPlayedList from "./components/RecentlyPlayedList/index";
-import RecommendationForm from "./components/RecommendationForm/RecommendationForm";
-import Navbar from "./components/Navbar";
-import Footer from "./components/Footer";
 import CombinedRecommendationList from "./components/CombinedRecommendationList";
-// import RealtimeUpdatesCard from './components/RealtimeUpdatesCard/RealtimeUpdatesCard';
+import Footer from "./components/Footer";
+import Navbar from "./components/Navbar";
+import NowPlaying from "./components/NowPlaying/NowPlaying";
 import QueuedSongsList from "./components/QueuedSongsList";
-import { RecommendationsProvider } from "./context/RecommendationsContext";
+import RecentlyPlayedList from "./components/RecentlyPlayedList/RecentlyPlayedList";
+import RecommendationForm from "./components/RecommendationForm/RecommendationForm";
 import { MusicProvider } from "./context/MusicContext";
+import { RecommendationsProvider } from "./context/RecommendationsContext";
 
 const App: React.FC = () => {
   return (
@@ -18,34 +17,31 @@ const App: React.FC = () => {
       <div className="app">
         <Navbar />
         <div className="main-content">
-          <RecommendationsProvider>
-            <div className="queue-column">
-              <div className="queued-songs-container">
-                <QueuedSongsList />
+          <MusicProvider>
+            <RecommendationsProvider>
+              <div className="left-column">
+                <div className="recommendation-form-container">
+                  <RecommendationForm />
+                </div>
+                <div className="recommendations-list-container">
+                  <CombinedRecommendationList />
+                </div>
               </div>
-            </div>
-            <div className="middle-column">
-              <MusicProvider>
+              <div className="middle-column">
                 <div className="now-playing-container">
                   <NowPlaying />
                 </div>
                 <div className="recently-played-container">
                   <RecentlyPlayedList />
                 </div>
-              </MusicProvider>
-              {/* <div className="realtime-updates-container">
-                  <RealtimeUpdatesCard />
-                </div> */}
-            </div>
-            <div className="right-column">
-              <div className="recommendation-form-container">
-                <RecommendationForm />
               </div>
-              <div className="recommendations-list-container">
-                <CombinedRecommendationList />
+              <div className="right-column">
+                <div className="queued-songs-container">
+                  <QueuedSongsList />
+                </div>
               </div>
-            </div>
-          </RecommendationsProvider>
+            </RecommendationsProvider>
+          </MusicProvider>
         </div>
         <Footer />
       </div>
