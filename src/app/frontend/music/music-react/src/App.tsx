@@ -17,31 +17,31 @@ const App: React.FC = () => {
       <div className="app">
         <Navbar />
         <div className="main-content">
-          <MusicProvider>
+          <div className="left-column">
             <RecommendationsProvider>
-              <div className="left-column">
-                <div className="recommendation-form-container">
-                  <RecommendationForm />
-                </div>
-                <div className="recommendations-list-container">
-                  <CombinedRecommendationList />
-                </div>
+              <div className="recommendation-form-container">
+                <RecommendationForm />
               </div>
-              <div className="middle-column">
-                <div className="now-playing-container">
-                  <NowPlaying />
-                </div>
-                <div className="recently-played-container">
-                  <RecentlyPlayedList />
-                </div>
-              </div>
-              <div className="right-column">
-                <div className="queued-songs-container">
-                  <QueuedSongsList />
-                </div>
+              <div className="recommendations-list-container">
+                <CombinedRecommendationList />
               </div>
             </RecommendationsProvider>
-          </MusicProvider>
+          </div>
+          <div className="middle-column">
+            <MusicProvider>
+              <div className="now-playing-container">
+                <NowPlaying />
+              </div>
+              <div className="recently-played-container">
+                <RecentlyPlayedList />
+              </div>
+            </MusicProvider>
+          </div>
+          <div className="right-column">
+            <div className="queued-songs-container">
+              <QueuedSongsList />
+            </div>
+          </div>
         </div>
         <Footer />
       </div>
