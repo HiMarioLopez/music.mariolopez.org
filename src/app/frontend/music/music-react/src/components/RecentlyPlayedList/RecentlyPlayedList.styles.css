@@ -1,7 +1,7 @@
 .recently-played-list-component {
     align-items: normal;
     flex-direction: column;
-    overflow: hidden;
+    overflow-x: hidden;
     position: relative;
 }
 
@@ -14,39 +14,36 @@
 .recently-played-list-component-list-container {
     position: relative;
     width: 100%;
-    overflow: hidden; /* Hide overflow without relying on scrolling */
-    padding-bottom: 5px; /* Add a bit of padding to prevent cutoff */
+    padding: 5px 5px 10px 5px;
 }
 
-/* Container for tracks that will be animated */
-.recently-played-list-component-track-container {
-    display: flex;
-    align-items: center;
-    white-space: nowrap;
-    will-change: transform; /* Optimize for animations */
-    transform: translateX(0); /* Initial position */
+/* Row container for each slider */
+.recently-played-list-row {
+    margin-bottom: 12px; /* Space between the two rows */
+    height: auto; /* Allow natural height */
+    width: 100%;
+}
+
+/* Remove margin from the last row */
+.recently-played-list-row:last-child {
+    margin-bottom: 0;
 }
 
 .recently-played-list-component-track {
-    display: inline-flex;
+    display: flex;
     align-items: center;
     padding: var(--padding-medium);
-    margin-right: var(--margin-medium);
     border-radius: var(--border-radius-medium);
     background: var(--track-bg-color);
-    height: 60px;
+    height: auto; /* Allow natural height */
     transition: transform 0.2s ease-in-out, background 0.2s ease;
-    flex: 0 0 auto; /* Prevent items from stretching */
-    max-width: 320px; /* Limit the width of track items */
+    margin: 0 8px; /* Reduced horizontal margin for less space between track pairs */
+    width: 280px !important; /* Fixed width for consistent sizing */
 }
 
 .recently-played-list-component-track:hover {
     background: var(--track-bg-color-hover);
     transform: translateY(-2px); /* Slight lift effect on hover */
-}
-
-.recently-played-list-component-track:last-child {
-    margin-right: 0;
 }
 
 /* Style for the images to ensure consistent sizing */
@@ -92,20 +89,25 @@
 
 .recently-played-list-component .slick-slide {
     height: auto;
-    margin: 0 var(--margin-small);
 }
 
 .recently-played-list-component .slick-list {
-    margin: 0 -var(--margin-small);
     overflow: visible;
+    height: auto; /* Allow natural height instead of fixed height */
 }
 
 /* Ensure our track styling works with the slick container */
 .recently-played-list-component .slick-slide > div {
-    height: 100%;
+    height: auto; /* Allow natural height */
 }
 
-/* Skeleton loader styles for RecentlyPlayedList */
+/* Remove default styling for slick rows */
+.recently-played-list-component .slick-slider .slick-track,
+.recently-played-list-component .slick-slider .slick-list {
+    transform: translate3d(0, 0, 0);
+}
+
+/* Skeleton loader styles */
 .skeleton-loader {
     background: var(--track-bg-color);
     position: relative;
@@ -130,10 +132,18 @@
     animation: shimmer 1.5s infinite;
 }
 
+/* Update skeleton container to match new layout */
 .recently-played-skeleton-container {
     display: flex;
-    overflow: hidden;
+    flex-direction: column;
+    gap: 12px;
+    width: 100%;
+}
+
+.recently-played-skeleton-row {
+    display: flex;
     gap: var(--margin-medium);
+    width: 100%;
 }
 
 .recently-played-skeleton-track {
@@ -141,9 +151,9 @@
     align-items: center;
     padding: var(--padding-medium);
     background: var(--track-bg-color);
-    height: 60px;
+    height: auto; /* Allow natural height */
     border-radius: var(--border-radius-medium);
-    width: 280px;
+    min-width: 280px;
     flex-shrink: 0;
 }
 
@@ -185,10 +195,6 @@
     }
     
     .recently-played-list-component-track {
-        max-width: 260px; /* Smaller on mobile */
-    }
-    
-    .recently-played-skeleton-track {
-        width: 220px;
+        width: 220px !important; /* Smaller width on mobile */
     }
 }

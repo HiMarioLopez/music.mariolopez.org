@@ -1,7 +1,32 @@
 import React from 'react';
 import placeholderAlbumArt from '../../assets/300.png';
-import './index.css';
+import './NowPlaying.styles.css';
 import { useMusicContext } from '../../context/MusicContext';
+
+// Helper function to format the relative time
+const formatRelativeTime = (timestamp: string): string => {
+    if (!timestamp) return '';
+    
+    const now = new Date();
+    const playedTime = new Date(timestamp);
+    const timeDiffMs = now.getTime() - playedTime.getTime();
+    
+    // Convert to seconds
+    const seconds = Math.floor(timeDiffMs / 1000);
+    
+    if (seconds < 60) {
+        return 'just now';
+    } else if (seconds < 3600) {
+        const minutes = Math.floor(seconds / 60);
+        return `${minutes} ${minutes === 1 ? 'min' : 'mins'} ago`;
+    } else if (seconds < 86400) {
+        const hours = Math.floor(seconds / 3600);
+        return `${hours} ${hours === 1 ? 'hour' : 'hours'} ago`;
+    } else {
+        const days = Math.floor(seconds / 86400);
+        return `${days} ${days === 1 ? 'day' : 'days'} ago`;
+    }
+};
 
 const NowPlaying: React.FC = () => {
     const { nowPlaying, loading, error } = useMusicContext();
@@ -45,6 +70,11 @@ const NowPlaying: React.FC = () => {
         );
     }
 
+    // Format the timestamp if available
+    const relativeTime = nowPlaying?.processedTimestamp 
+        ? formatRelativeTime(nowPlaying.processedTimestamp) 
+        : '';
+
     return (
         <div className="now-playing-component styled-container">
             <img 
@@ -52,7 +82,9 @@ const NowPlaying: React.FC = () => {
                 alt={`${nowPlaying?.albumName || 'Album'} Art`} 
             />
             <div className="now-playing-component-text-container">
-                <h1>Mario's Now Playing</h1>
+                <div className="now-playing-header">
+                    <h1>Mario's Now Playing</h1>
+                </div>
                 <div className="now-playing-component-text">
                     <h2 title={nowPlaying?.name || 'No song playing'}>
                         {nowPlaying?.name || 'No song playing'}
@@ -63,6 +95,11 @@ const NowPlaying: React.FC = () => {
                     <p title={nowPlaying?.albumName || 'Unknown Album'}>
                         {nowPlaying?.albumName || 'Unknown Album'}
                     </p>
+                    {relativeTime && (
+                        <span className="now-playing-timestamp" title={`Played: ${new Date(nowPlaying?.processedTimestamp || '').toLocaleString()}`}>
+                            {relativeTime}
+                        </span>
+                    )}
                 </div>
             </div>
         </div>
