@@ -6,6 +6,8 @@ export type RecommendedSong = {
     albumCoverUrl: string;
     votes?: number;
     userVoted?: 'up' | 'down';
+    from?: string;
+    note?: string;
 };
 
 export type RecommendedAlbum = {
@@ -17,6 +19,8 @@ export type RecommendedAlbum = {
     releaseDate?: string;
     votes?: number;
     userVoted?: 'up' | 'down';
+    from?: string;
+    note?: string;
 };
 
 export type RecommendedArtist = {
@@ -26,4 +30,6 @@ export type RecommendedArtist = {
     genres?: string[];
     votes?: number;
     userVoted?: 'up' | 'down';
+    from?: string;
+    note?: string;
 }; 

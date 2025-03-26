@@ -12,6 +12,13 @@ export type Result = {
     genres?: string[];
 }
 
+// New type for the recommendation form data
+export type RecommendationFormData = {
+    from: string;
+    note: string;
+    selectedItem: Result | null;
+}
+
 export type TopResult = {
     id: string;
     type: 'songs' | 'albums' | 'artists';

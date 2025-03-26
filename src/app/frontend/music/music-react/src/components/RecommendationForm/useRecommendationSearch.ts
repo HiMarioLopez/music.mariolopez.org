@@ -87,7 +87,8 @@ export const useRecommendationSearch = () => {
         setResults(contentResults);
       }
 
-      // Show results after successful search
+      // Show results after successful search - make sure this is set to true
+      // even if one of the arrays is empty
       setIsResultsVisible(true);
     } catch (error) {
       // Handle API errors
