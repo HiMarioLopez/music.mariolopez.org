@@ -1,7 +1,7 @@
 import {
   Hint,
   Result,
-} from "../components/RecommendationForm/hooks/RecommendationForm.types";
+} from "../components/RecommendationForm/types/RecommendationForm.types";
 import { MusicHistoryResponse } from "../context/MusicContext";
 
 const API_BASE_URL = "/api/nodejs";

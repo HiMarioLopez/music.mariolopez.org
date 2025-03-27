@@ -855,3 +855,93 @@ li:hover .type-indicator.artists {
         width: 100%;
     }
 }
+
+/* Selected item container that replaces the search input */
+.selected-item-container {
+    width: 100%;
+}
+
+.selected-item {
+    display: flex;
+    align-items: center;
+    padding: var(--padding-medium) 15px;
+    border: var(--input-border);
+    border-radius: var(--border-radius-medium);
+    background-color: var(--input-bg-color);
+    width: calc(100% - 32px);
+    position: relative;
+}
+
+.selected-item .result-artwork {
+    width: 40px;
+    height: 40px;
+    margin-right: 15px;
+    border-radius: var(--border-radius-small);
+    object-fit: cover;
+}
+
+.selected-item .result-info {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.selected-item .result-info-text {
+    overflow: hidden;
+}
+
+.selected-item .result-info-text strong {
+    display: block;
+    color: var(--font-color);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+}
+
+.selected-item .result-info-text span {
+    color: var(--text-secondary);
+    font-size: 0.9em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: inline-block;
+    max-width: 100%;
+}
+
+.selected-item .type-indicator {
+    font-size: 0.7em;
+    padding: 2px 6px;
+    border-radius: 10px;
+    background-color: rgba(252, 60, 68, 0.1);
+    color: var(--theme-color);
+    margin-left: 8px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+}
+
+.clear-selection-button {
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 20px;
+    cursor: pointer;
+    padding: 0 0 0 10px;
+    transition: color var(--transition-speed);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 30px;
+    width: 30px;
+    margin-left: 8px;
+}
+
+.clear-selection-button:hover,
+.clear-selection-button:focus {
+    color: var(--theme-color);
+    background: transparent;
+    box-shadow: none;
+}

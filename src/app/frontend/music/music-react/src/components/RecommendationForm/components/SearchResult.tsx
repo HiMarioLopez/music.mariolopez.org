@@ -1,5 +1,5 @@
 import React, { memo } from "react";
-import { Result } from "../hooks/RecommendationForm.types";
+import { Result } from "../types/RecommendationForm.types";
 
 type SearchResultProps = {
   result: Result;
