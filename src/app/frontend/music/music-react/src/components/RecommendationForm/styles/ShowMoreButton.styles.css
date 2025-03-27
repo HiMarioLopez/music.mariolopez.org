@@ -4,7 +4,6 @@
 }
 
 .show-more {
-    cursor: pointer;
     color: var(--text-secondary);
     font-style: italic;
     opacity: 0.8;

@@ -2,7 +2,6 @@
     background: none;
     border: 1px solid var(--border-color);
     color: var(--text-secondary);
-    cursor: pointer;
     padding: 0 15px;
     border-radius: var(--border-radius-medium);
     display: flex;

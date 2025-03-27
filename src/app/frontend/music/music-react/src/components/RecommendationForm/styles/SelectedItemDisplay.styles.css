@@ -1,0 +1,135 @@
+.selected-item {
+    display: flex;
+    align-items: center;
+    padding: var(--padding-medium) 15px;
+    border: var(--input-border);
+    border-radius: var(--border-radius-medium);
+    background-color: var(--input-bg-color);
+    width: 100%;
+    box-sizing: border-box;
+    gap: 8px;
+}
+
+.selected-item .result-artwork {
+    width: 40px;
+    height: 40px;
+    margin-right: 15px;
+    border-radius: var(--border-radius-small);
+    object-fit: cover;
+    flex-shrink: 0;
+}
+
+.result-info {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.result-info-text {
+    flex: 1;
+}
+
+.selected-item .result-info {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-width: 0; /* Enable proper flexbox text truncation */
+    gap: 8px;
+}
+
+.selected-item .result-info-text {
+    flex: 1;
+    min-width: 0; /* Enable text truncation */
+    overflow: hidden;
+}
+
+.selected-item .result-info-text strong {
+    display: block;
+    color: var(--font-color);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.selected-item .result-info-text span {
+    color: var(--text-secondary);
+    font-size: 0.9em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: inline-block;
+    max-width: 100%;
+}
+
+.selected-item .type-indicator {
+    font-size: 0.7em;
+    padding: 2px 6px;
+    border-radius: 10px;
+    background-color: rgba(252, 60, 68, 0.1);
+    color: var(--theme-color);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+@media (max-width: 680px) {
+    /* Make type indicator pills SMALLER on mobile */
+    .type-indicator {
+        font-size: 0.55em;
+        padding: 1px 5px;
+        border-radius: 8px;
+        margin-top: 3px;
+        letter-spacing: 0.3px;
+        font-weight: 600;
+    }
+
+    /* Add word-breaking for extremely long words if needed */
+    .result-info-text strong {
+        overflow-wrap: break-word;
+        word-wrap: break-word;
+        hyphens: auto;
+        max-width: 100%;
+    }
+
+    /* Ensure layout direction for mobile is right */
+    .result-info {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}
+
+/* Type-specific colors */
+.type-indicator.songs {
+    background-color: rgba(255, 214, 10, 0.2);
+    color: #ffd60a;
+    border: 1px solid rgba(255, 214, 10, 0.3);
+}
+
+.type-indicator.albums {
+    background-color: rgba(99, 178, 255, 0.2);
+    color: #63b2ff;
+    border: 1px solid rgba(99, 178, 255, 0.3);
+}
+
+.type-indicator.artists {
+    background-color: rgba(30, 215, 96, 0.2);
+    color: #1ed760;
+    border: 1px solid rgba(30, 215, 96, 0.3);
+}
+
+/* Hover effects */
+li:hover .type-indicator.songs {
+    background-color: rgba(255, 214, 10, 0.3);
+}
+
+li:hover .type-indicator.albums {
+    background-color: rgba(99, 178, 255, 0.3);
+}
+
+li:hover .type-indicator.artists {
+    background-color: rgba(30, 215, 96, 0.3);
+}
