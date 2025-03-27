@@ -49,6 +49,8 @@
     "build:music-angular": "cd src/app/frontend/music/music-angular && pnpm build",
     "build:music-leptos": "cd src/app/frontend/music/music-leptos && trunk build --release",
     "build:music-blazor": "cd src/app/frontend/music/music-blazor && dotnet publish -c Release",
+    "------------Frontend (Music Start Scripts)------------": "--------------------------------",
+    "dev:music-react": "cd src/app/frontend/music/music-react && pnpm dev",
     "------------Frontend (Admin Panel)------------": "--------------------------------",
     "update-build-deploy:admin": "pnpm run-s update-and-build:admin deploy:admin",
     "update-and-build:admin": "pnpm run-s update:admin build:admin",
