@@ -12,7 +12,7 @@ import {
   authService,
   musicApiService,
 } from "../../../services/apiService";
-import { Result } from "../RecommendationForm.types";
+import { Result } from "./RecommendationForm.types";
 
 export const useRecommendationSearch = () => {
   const [searchTerm, setSearchTerm] = useState("");

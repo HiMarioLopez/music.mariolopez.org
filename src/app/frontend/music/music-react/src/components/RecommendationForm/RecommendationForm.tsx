@@ -15,16 +15,14 @@ import {
   RecommendedArtist,
   RecommendedSong,
 } from "../../types/Recommendations";
-import "./RecommendationForm.styles.css";
-import { Result } from "./RecommendationForm.types";
-import {
-  ResultSectionHeader,
-  SearchButton,
-  SearchHint,
-  SearchResult,
-  ShowMoreButton,
-} from "./components";
+import "./styles/RecommendationForm.styles.css";
+import { Result } from "./hooks/RecommendationForm.types";
 import { useRecommendationSearch } from "./hooks/useRecommendationSearch";
+import ResultSectionHeader from "./components/ResultSectionHeader";
+import SearchButton from "./components/SearchButton";
+import SearchHint from "./components/SearchHint";
+import SearchResult from "./components/SearchResult";
+import ShowMoreButton from "./components/ShowMoreButton";
 
 // Create a stable ID to reduce unnecessary re-renders
 // See: https://stackoverflow.com/a/49688084
