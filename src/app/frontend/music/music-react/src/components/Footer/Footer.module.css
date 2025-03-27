@@ -27,11 +27,11 @@ footer {
         font-size: small;
     }
 
-    footer .footer-component-link-container {
+    footer .footerComponentLinkContainer {
         margin: var(--margin-small) 0;
     }
 
-    footer .footer-component-copyright-container {
+    footer .footerComponentCopyrightContainer {
         margin: var(--margin-small) 0;
     }
 }
@@ -46,6 +46,6 @@ footer a:hover {
     text-decoration: underline;
 }
 
-footer .footer-component-copyright-container {
+footer .footerComponentCopyrightContainer {
     margin: 0 var(--margin-medium);
 }

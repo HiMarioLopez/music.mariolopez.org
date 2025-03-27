@@ -1,15 +1,15 @@
-.now-playing-component {
+.nowPlayingComponent {
     display: flex;
     align-items: center;
     justify-content: flex-start;
 }
 
-.now-playing-component img {
+.nowPlayingComponent img {
     border-radius: 10px;
     margin-right: var(--margin-large);
 }
 
-.now-playing-component-text-container {
+.nowPlayingComponentTextContainer {
     flex-grow: 1;
     display: flex;
     flex-direction: column;
@@ -18,12 +18,12 @@
 }
 
 @media (min-width: 1500px) {
-    .now-playing-component img {
+    .nowPlayingComponent img {
         width: var(--album-art-size-large);
         height: var(--album-art-size-large);
     }
 
-    .now-playing-component-text-container {
+    .nowPlayingComponentTextContainer {
         height: var(--album-art-size-large);
         /* Matching the size of the album art */
         max-width: calc(100% - var(--album-art-size-large) - var(--margin-large));
@@ -31,12 +31,12 @@
 }
 
 @media (min-width: 1200px) and (max-width: 1499px) {
-    .now-playing-component img {
+    .nowPlayingComponent img {
         width: var(--album-art-size-medium);
         height: var(--album-art-size-medium);
     }
 
-    .now-playing-component-text-container {
+    .nowPlayingComponentTextContainer {
         height: var(--album-art-size-medium);
         /* Matching the size of the album art */
         max-width: calc(100% - var(--album-art-size-medium) - var(--margin-large));
@@ -44,25 +44,25 @@
 }
 
 @media (min-width: 680px) and (max-width: 1199px) {
-    .now-playing-component img {
+    .nowPlayingComponent img {
         width: var(--album-art-size-medium);
         height: var(--album-art-size-medium);
     }
 
-    .now-playing-component-text-container {
+    .nowPlayingComponentTextContainer {
         height: var(--album-art-size-medium);
         /* Matching the size of the album art */
         max-width: calc(100% - var(--album-art-size-medium) - var(--margin-large));
     }
 }
 
-.now-playing-header {
+.nowPlayingHeader {
     display: flex;
     align-items: baseline;
     margin-bottom: 0.25rem;
 }
 
-.now-playing-component h1 {
+.nowPlayingComponent h1 {
     margin: 0;
     display: -webkit-box;
     -webkit-line-clamp: 2;
@@ -74,7 +74,7 @@
     max-height: 4.8rem; /* Fallback for browsers that don't support line-clamp */
 }
 
-.now-playing-timestamp {
+.nowPlayingTimestamp {
     font-size: 0.7em;
     text-transform: uppercase;
     padding: 3px 8px;
@@ -90,25 +90,25 @@
     transition: all 0.2s ease;
 }
 
-.now-playing-timestamp:hover {
+.nowPlayingTimestamp:hover {
     background-color: rgba(252, 60, 68, 0.5);
 }
 
-.now-playing-component-text {
+.nowPlayingComponentText {
     text-align: left;
     display: flex;
     flex-direction: column;
     justify-content: flex-end;
 }
 
-.now-playing-component-text h2,
-.now-playing-component-text p {
+.nowPlayingComponentText h2,
+.nowPlayingComponentText p {
     margin: 0;
     overflow: hidden;
     text-overflow: ellipsis;
 }
 
-.now-playing-component-text h2 {
+.nowPlayingComponentText h2 {
     font-size: 1.5rem;
     margin-bottom: 0.25rem;
     display: -webkit-box;
@@ -119,19 +119,19 @@
     max-height: 3.6rem; /* Fallback for browsers that don't support line-clamp */
 }
 
-.now-playing-component-text p {
+.nowPlayingComponentText p {
     white-space: nowrap;
 }
 
 /* Skeleton loader styles for NowPlaying */
-.skeleton-loader {
+.skeletonLoader {
     background: var(--track-bg-color);
     position: relative;
     overflow: hidden;
     border-radius: var(--border-radius-small);
 }
 
-.skeleton-loader::after {
+.skeletonLoader::after {
     content: '';
     position: absolute;
     top: 0;
@@ -148,26 +148,26 @@
     animation: shimmer 1.5s infinite;
 }
 
-.now-playing-skeleton-img {
+.nowPlayingSkeletonImg {
     width: var(--album-art-size-large);
     height: var(--album-art-size-large);
     border-radius: 10px;
     margin-right: var(--margin-large);
 }
 
-.now-playing-skeleton-title {
+.nowPlayingSkeletonTitle {
     height: 2rem;
     margin-bottom: 0.75rem;
     width: 70%;
 }
 
-.now-playing-skeleton-artist {
+.nowPlayingSkeletonArtist {
     height: 1.2rem;
     margin-bottom: 0.5rem;
     width: 50%;
 }
 
-.now-playing-skeleton-album {
+.nowPlayingSkeletonAlbum {
     height: 1.2rem;
     width: 60%;
 }
@@ -180,41 +180,41 @@
 
 @media (max-width: 680px) {
 
-    .now-playing-component,
-    .now-playing-component h1,
-    .now-playing-component img,
-    .now-playing-component-text {
+    .nowPlayingComponent,
+    .nowPlayingComponent h1,
+    .nowPlayingComponent img,
+    .nowPlayingComponentText {
         width: var(--width-mobile);
     }
 
-    .now-playing-component {
+    .nowPlayingComponent {
         flex-direction: column-reverse;
         max-width: none;
     }
 
-    .now-playing-component img {
+    .nowPlayingComponent img {
         height: auto;
         margin: var(--margin-medium) 0;
     }
 
-    .now-playing-header {
+    .nowPlayingHeader {
         margin-bottom: 0.25rem;
     }
 
-    .now-playing-component h1 {
+    .nowPlayingComponent h1 {
         margin-bottom: 0.5rem;
     }
 
-    .now-playing-component-text-container {
+    .nowPlayingComponentTextContainer {
         height: auto;
         max-width: 100%;
     }
     
-    .now-playing-component-text h2 {
+    .nowPlayingComponentText h2 {
         font-size: 1.3rem;
     }
 
-    .now-playing-skeleton-img {
+    .nowPlayingSkeletonImg {
         width: var(--width-mobile);
         height: auto;
         aspect-ratio: 1 / 1;
