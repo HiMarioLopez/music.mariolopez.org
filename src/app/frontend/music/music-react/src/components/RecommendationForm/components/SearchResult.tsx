@@ -1,5 +1,6 @@
 import React, { memo } from "react";
 import { Result } from "../types/RecommendationForm.types";
+import "../styles/SearchResult.styles.css";
 
 type SearchResultProps = {
   result: Result;

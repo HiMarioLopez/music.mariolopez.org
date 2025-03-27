@@ -290,7 +290,7 @@ const RecommendationForm: React.FC = () => {
     if (!selectedItem) return null;
 
     return (
-      <div className="selected-item-container">
+      <>
         <div className="selected-item">
           {selectedItem.artworkUrl && (
             <img
@@ -333,16 +333,8 @@ const RecommendationForm: React.FC = () => {
                   : "Artist"}
             </span>
           </div>
-          <button
-            type="button"
-            className="clear-selection-button"
-            onClick={handleClearSelection}
-            aria-label="Clear selection"
-          >
-            ×
-          </button>
         </div>
-      </div>
+      </>
     );
   };
 
@@ -387,7 +379,20 @@ const RecommendationForm: React.FC = () => {
       <h1>Make a Recommendation</h1>
       <form onSubmit={handleSubmit}>
         <div className="search-container" ref={searchContainerRef}>
-          {selectedItem ? renderSelectedItem() : renderSearchInput()}
+          {selectedItem ? (
+            <div className="selected-item-wrapper">
+              {renderSelectedItem()}
+              <SearchButton
+                isLoading={false}
+                isAuthenticating={false}
+                searchTerm="x" // Any non-empty string to trigger clear mode
+                onClear={handleClearSelection}
+                disabled={false}
+              />
+            </div>
+          ) : (
+            renderSearchInput()
+          )}
           {formErrors.selectedItem && !selectedItem && (
             <div className="error-text">{formErrors.selectedItem}</div>
           )}
@@ -446,7 +451,7 @@ const RecommendationForm: React.FC = () => {
                     />
                   ))}
                   {!showAllResults &&
-                    results.length > DEFAULT_VISIBLE_ITEMS_COUNT && (
+                    results.length === DEFAULT_VISIBLE_ITEMS_COUNT && (
                       <ShowMoreButton
                         onClick={handleLoadMore}
                         text="Show more results..."

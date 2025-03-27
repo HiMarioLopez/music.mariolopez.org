@@ -61,7 +61,7 @@
 /* Updated styles for combined search results display */
 .search-results {
     position: absolute;
-    top: calc(30% + var(--margin-small));
+    top: calc(100% + var(--margin-small));
     left: 0;
     width: 100%;
     max-height: 400px;
@@ -76,23 +76,6 @@
     list-style: none;
 }
 
-/* Section headers for different result types */
-.result-section-header {
-    padding: 8px 15px;
-    background-color: rgba(40, 40, 40, 0.8);
-    color: rgba(255, 255, 255, 0.7);
-    font-size: 0.85em;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    border-bottom: 1px solid rgba(252, 60, 68, 0.2);
-}
-
-/* Add this to ensure proper spacing between sections */
-.result-section-header:not(:first-child) {
-    border-top: 1px solid rgba(252, 60, 68, 0.2);
-}
-
 .search-results li {
     padding: 10px 15px;
     cursor: pointer;
@@ -100,12 +83,6 @@
     border-bottom: 1px solid rgba(252, 60, 68, 0.2);
     display: flex;
     align-items: center;
-}
-
-/* Active/selected item styling for keyboard navigation */
-.search-results li.active {
-    background-color: rgba(252, 60, 68, 0.15);
-    outline: 2px solid rgba(252, 60, 68, 0.6);
 }
 
 .search-results li:last-child {
@@ -147,51 +124,6 @@
     color: rgba(240, 248, 255, 0.8);
 }
 
-.result-artwork {
-    width: 40px;
-    height: 40px;
-    border-radius: var(--border-radius-small);
-    margin-right: 15px;
-    object-fit: cover;
-}
-
-.result-info {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    gap: 4px;
-}
-
-.result-info-text {
-    flex: 1;
-}
-
-.hint-result {
-    padding-left: 15px;
-    background-color: rgba(40, 40, 40, 0.4);
-}
-
-.song-result {
-    padding: var(--padding-medium) 15px;
-}
-
-.albums-result,
-.artists-result {
-    padding: var(--padding-medium) 15px;
-}
-
-.artists-result .result-artwork {
-    border-radius: 50%;
-    /* Make artist images circular */
-}
-
-/* Adjust the result info for different types */
-.albums-result .result-info span,
-.artists-result .result-info span {
-    opacity: 0.8;
-    font-size: 0.9em;
-}
-
 /* Loading indicator */
 .input-wrapper {
     display: flex;
@@ -210,62 +142,6 @@
     transition: border-color var(--transition-speed), box-shadow var(--transition-speed);
     font-size: 16px;
     /* This is the minimum font size that prevents zoom on iOS */
-}
-
-.search-button {
-    background: none;
-    border: 1px solid var(--border-color);
-    color: var(--text-secondary);
-    cursor: pointer;
-    padding: 0 15px;
-    border-radius: var(--border-radius-medium);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all var(--transition-speed);
-    min-width: 42px;
-}
-
-.search-button:hover {
-    border-color: var(--focus-border-color);
-    color: var(--text-primary);
-    background-color: rgba(252, 60, 68, 0.1);
-}
-
-.search-button svg {
-    width: 30px;
-    height: 30px;
-    transition: transform var(--transition-speed);
-}
-
-/* Fix the spinning animation */
-.search-button.spinning svg {
-    animation: spin 1s linear infinite;
-}
-
-/* Ensure the spinning happens from the center */
-@keyframes spin {
-    from {
-        transform: rotate(0deg);
-    }
-
-    to {
-        transform: rotate(360deg);
-    }
-}
-
-/* Non-spinning hover effect */
-.search-button:not(.spinning):hover svg {
-    transform: scale(1.1);
-}
-
-/* Disable hover effects when spinning */
-.search-button.spinning:hover {
-    cursor: not-allowed;
-}
-
-.search-button.spinning:hover svg {
-    transform: none;
 }
 
 @media (max-width: 680px) {
@@ -289,173 +165,12 @@
         font-size: 16px;
     }
 
-    .search-button {
-        width: 40px;
-        height: 40px;
-    }
-
-    /* Make artwork LARGER for mobile */
-    .result-artwork {
-        width: 60px;
-        height: 60px;
-        margin-right: 12px;
-    }
-
-    /* Make type indicator pills SMALLER on mobile */
-    .type-indicator {
-        font-size: 0.55em;
-        padding: 1px 5px;
-        border-radius: 8px;
-        margin-top: 3px;
-        letter-spacing: 0.3px;
-        font-weight: 600;
-    }
-
     /* Make result container handle overflow better */
     .search-results li {
         box-sizing: border-box;
         max-width: 100%;
         overflow: hidden;
     }
-
-    /* Add word-breaking for extremely long words if needed */
-    .result-info-text strong {
-        overflow-wrap: break-word;
-        word-wrap: break-word;
-        hyphens: auto;
-        max-width: 100%;
-    }
-
-    /* Make artwork slightly smaller for extremely long text */
-    .result-artwork {
-        min-width: 55px;
-        /* Make sure it doesn't shrink too much */
-    }
-
-    /* Ensure layout direction for mobile is right */
-    .result-info {
-        flex-direction: column;
-        align-items: flex-start;
-    }
-}
-
-/* Fix text truncation with ellipsis for all screen sizes */
-.result-info-text strong {
-    display: block;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    max-width: 100%;
-}
-
-.result-info-text span {
-    display: inline-block;
-    max-width: 100%;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-/* Ensure the container has proper overflow handling */
-.result-info {
-    flex: 1;
-    display: flex;
-    gap: 4px;
-    min-width: 0;
-    /* Critical for flex child text truncation */
-    overflow: hidden;
-}
-
-.result-info-text {
-    flex: 1;
-    min-width: 0;
-    /* Critical for text truncation in flex layouts */
-    max-width: 100%;
-}
-
-.type-indicator {
-    font-size: 0.7em;
-    text-transform: uppercase;
-    padding: 3px 8px;
-    border-radius: 12px;
-    letter-spacing: 0.5px;
-    font-weight: 600;
-    transition: all var(--transition-speed);
-}
-
-/* Type-specific colors */
-.type-indicator.songs {
-    background-color: rgba(255, 214, 10, 0.2);
-    color: #ffd60a;
-    border: 1px solid rgba(255, 214, 10, 0.3);
-}
-
-.type-indicator.albums {
-    background-color: rgba(99, 178, 255, 0.2);
-    color: #63b2ff;
-    border: 1px solid rgba(99, 178, 255, 0.3);
-}
-
-.type-indicator.artists {
-    background-color: rgba(30, 215, 96, 0.2);
-    color: #1ed760;
-    border: 1px solid rgba(30, 215, 96, 0.3);
-}
-
-/* Hover effects */
-li:hover .type-indicator.songs {
-    background-color: rgba(255, 214, 10, 0.3);
-}
-
-li:hover .type-indicator.albums {
-    background-color: rgba(99, 178, 255, 0.3);
-}
-
-li:hover .type-indicator.artists {
-    background-color: rgba(30, 215, 96, 0.3);
-}
-
-.show-more {
-    cursor: pointer;
-    color: var(--text-secondary);
-    font-style: italic;
-    opacity: 0.8;
-    transition: all var(--transition-speed);
-    text-align: center;
-    padding: 12px 15px !important;
-}
-
-.show-more:hover {
-    opacity: 1;
-    background-color: rgba(40, 40, 40, 0.6) !important;
-}
-
-.show-more .show-more-text {
-    color: var(--text-secondary);
-    font-size: 0.9em;
-}
-
-/* Add a subtle divider before the show more option */
-.show-more {
-    border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
-}
-
-.inline-loader {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    justify-content: center;
-}
-
-.inline-loader svg {
-    width: 24px;
-    height: 24px;
-    animation: spin 1s linear infinite;
-}
-
-.show-more.loading {
-    pointer-events: none;
-    opacity: 0.7;
 }
 
 /* Refine the tablet/medium screen media query */
@@ -763,28 +478,22 @@ li:hover .type-indicator.artists {
 }
 
 .clear-selection-button {
-    position: absolute;
-    top: 0.75rem;
-    right: 0.75rem;
     background: none;
-    border: none;
-    color: rgba(255, 255, 255, 0.6);
-    font-size: 1.2rem;
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
     cursor: pointer;
-    padding: 0.25rem;
-    line-height: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 28px;
-    height: 28px;
-    border-radius: 50%;
-    transition: all 0.2s ease;
+    padding: 0;
+    border-radius: var(--border-radius-medium);
+    transition: all var(--transition-speed);
+    font-size: 18px;
 }
 
-.clear-selection-button:hover {
-    background-color: rgba(255, 255, 255, 0.1);
-    color: rgba(255, 255, 255, 0.9);
+.clear-selection-button:hover,
+.clear-selection-button:focus {
+    border-color: var(--focus-border-color);
+    color: var(--text-primary);
+    background-color: rgba(252, 60, 68, 0.1);
+    outline: none;
 }
 
 /* Form actions */
@@ -842,11 +551,6 @@ li:hover .type-indicator.artists {
         text-align: center;
     }
     
-    .clear-selection-button {
-        top: 0.5rem;
-        right: 0.5rem;
-    }
-    
     .form-actions {
         justify-content: center;
     }
@@ -856,11 +560,6 @@ li:hover .type-indicator.artists {
     }
 }
 
-/* Selected item container that replaces the search input */
-.selected-item-container {
-    width: 100%;
-}
-
 .selected-item {
     display: flex;
     align-items: center;
@@ -868,8 +567,8 @@ li:hover .type-indicator.artists {
     border: var(--input-border);
     border-radius: var(--border-radius-medium);
     background-color: var(--input-bg-color);
-    width: calc(100% - 32px);
-    position: relative;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .selected-item .result-artwork {
@@ -878,6 +577,7 @@ li:hover .type-indicator.artists {
     margin-right: 15px;
     border-radius: var(--border-radius-small);
     object-fit: cover;
+    flex-shrink: 0;
 }
 
 .selected-item .result-info {
@@ -885,9 +585,13 @@ li:hover .type-indicator.artists {
     display: flex;
     align-items: center;
     justify-content: space-between;
+    min-width: 0; /* Enable proper flexbox text truncation */
+    gap: 8px;
 }
 
 .selected-item .result-info-text {
+    flex: 1;
+    min-width: 0; /* Enable text truncation */
     overflow: hidden;
 }
 
@@ -897,7 +601,6 @@ li:hover .type-indicator.artists {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    max-width: 100%;
 }
 
 .selected-item .result-info-text span {
@@ -916,32 +619,16 @@ li:hover .type-indicator.artists {
     border-radius: 10px;
     background-color: rgba(252, 60, 68, 0.1);
     color: var(--theme-color);
-    margin-left: 8px;
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.5px;
     white-space: nowrap;
+    flex-shrink: 0;
 }
 
-.clear-selection-button {
-    background: transparent;
-    border: none;
-    color: var(--text-secondary);
-    font-size: 20px;
-    cursor: pointer;
-    padding: 0 0 0 10px;
-    transition: color var(--transition-speed);
+.selected-item-wrapper {
     display: flex;
     align-items: center;
-    justify-content: center;
-    height: 30px;
-    width: 30px;
-    margin-left: 8px;
-}
-
-.clear-selection-button:hover,
-.clear-selection-button:focus {
-    color: var(--theme-color);
-    background: transparent;
-    box-shadow: none;
+    width: 100%;
+    gap: 8px;
 }

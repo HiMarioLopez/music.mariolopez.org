@@ -1,5 +1,6 @@
 import React, { memo } from "react";
 import { Result } from "../types/RecommendationForm.types";
+import "../styles/SearchHint.styles.css";
 
 type SearchHintProps = {
   hint: Result;

@@ -1,5 +1,6 @@
 import React, { memo } from "react";
 import { LoadingIcon } from "../../Icons/Icons";
+import "../styles/ShowMoreButton.styles.css";
 
 type ShowMoreButtonProps = {
   index: number;

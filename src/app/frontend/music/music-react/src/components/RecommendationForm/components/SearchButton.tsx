@@ -1,5 +1,6 @@
 import React, { memo } from "react";
 import { LoadingIcon, ClearIcon, SearchIcon } from "../../Icons/Icons";
+import "../styles/SearchButton.styles.css";
 
 type SearchButtonProps = {
   isLoading: boolean;

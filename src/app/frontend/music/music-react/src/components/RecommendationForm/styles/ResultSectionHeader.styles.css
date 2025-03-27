@@ -1,0 +1,16 @@
+/* Section headers for different result types */
+.result-section-header {
+    padding: 8px 15px;
+    background-color: rgba(40, 40, 40, 0.8);
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.85em;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border-bottom: 1px solid rgba(252, 60, 68, 0.2);
+}
+
+/* Add this to ensure proper spacing between sections */
+.result-section-header:not(:first-child) {
+    border-top: 1px solid rgba(252, 60, 68, 0.2);
+}
