@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
-import { UpArrowIcon, DownArrowIcon } from '../../Icons';
-import '../CombinedRecommendationList.styles.css';
-import RecommendationHighlight from './RecommendationHighlight';
+import React, { useState } from "react";
+import { DownArrowIcon, UpArrowIcon } from "../../Icons";
+import "../styles/index.css";
+import RecommendationHighlight from "./RecommendationHighlight";
 
 // Helper function to format numbers with commas
 const formatNumber = (num: number): string => {
@@ -22,21 +22,21 @@ type BaseRecommendationListProps<T> = {
 
 // Helper function to get appropriate label for screen readers
 function getItemLabel<T extends Record<string, any>>(item: T): string {
-  if (typeof item === 'object' && item !== null) {
-    if ('songTitle' in item) {
+  if (typeof item === "object" && item !== null) {
+    if ("songTitle" in item) {
       return item.songTitle;
-    } else if ('albumTitle' in item) {
+    } else if ("albumTitle" in item) {
       return item.albumTitle;
-    } else if ('artistName' in item) {
+    } else if ("artistName" in item) {
       return item.artistName;
     }
   }
-  return 'item';
+  return "item";
 }
 
 // Helper function to get an item's ID or generate a fallback
 function getItemId<T>(item: T, index: number): string {
-  if (typeof item === 'object' && item !== null && 'id' in item) {
+  if (typeof item === "object" && item !== null && "id" in item) {
     return (item as any).id;
   }
   return `index_${index}`;
@@ -51,10 +51,14 @@ function BaseRecommendationList<T>({
   renderItem,
   getImageUrl,
   getImageAlt,
-  getVotes
+  getVotes,
 }: BaseRecommendationListProps<T>) {
-  const [animatingItems, setAnimatingItems] = useState<Record<string, boolean>>({});
-  const [animatingDownvoteItems, setAnimatingDownvoteItems] = useState<Record<string, boolean>>({});
+  const [animatingItems, setAnimatingItems] = useState<Record<string, boolean>>(
+    {},
+  );
+  const [animatingDownvoteItems, setAnimatingDownvoteItems] = useState<
+    Record<string, boolean>
+  >({});
 
   if (recommendations.length === 0) {
     return (
@@ -73,16 +77,16 @@ function BaseRecommendationList<T>({
     const itemId = getItemId(recommendations[index], index);
 
     // Set animation state
-    setAnimatingItems(prev => ({
+    setAnimatingItems((prev) => ({
       ...prev,
-      [itemId]: true
+      [itemId]: true,
     }));
 
     // Remove animation class after animation completes
     setTimeout(() => {
-      setAnimatingItems(prev => ({
+      setAnimatingItems((prev) => ({
         ...prev,
-        [itemId]: false
+        [itemId]: false,
       }));
     }, 50);
   };
@@ -96,32 +100,32 @@ function BaseRecommendationList<T>({
     const itemId = getItemId(recommendations[index], index);
 
     // Set animation state
-    setAnimatingDownvoteItems(prev => ({
+    setAnimatingDownvoteItems((prev) => ({
       ...prev,
-      [itemId]: true
+      [itemId]: true,
     }));
 
     // Remove animation class after animation completes
     setTimeout(() => {
-      setAnimatingDownvoteItems(prev => ({
+      setAnimatingDownvoteItems((prev) => ({
         ...prev,
-        [itemId]: false
+        [itemId]: false,
       }));
     }, 50);
   };
 
   // Determine the appropriate class name based on the recommendation type
   const getItemClassName = (item: T): string => {
-    if (typeof item === 'object' && item !== null) {
-      if ('songTitle' in item) {
-        return 'song-item';
-      } else if ('albumTitle' in item) {
-        return 'album-item';
-      } else if ('artistName' in item) {
-        return 'artist-item';
+    if (typeof item === "object" && item !== null) {
+      if ("songTitle" in item) {
+        return "song-item";
+      } else if ("albumTitle" in item) {
+        return "album-item";
+      } else if ("artistName" in item) {
+        return "artist-item";
       }
     }
-    return 'recommendation-item';
+    return "recommendation-item";
   };
 
   return (
@@ -140,20 +144,38 @@ function BaseRecommendationList<T>({
             <li>
               <div className="recommendation-item-actions">
                 <button
-                  className={`upvote-button ${animatingItems[itemId] ? 'voted' : ''} ${votedItems[itemId] ? 'voted-permanent' : ''}`}
+                  className={`upvote-button ${
+                    animatingItems[itemId] ? "voted" : ""
+                  } ${votedItems[itemId] ? "voted-permanent" : ""}`}
                   onClick={() => handleUpvote(index)}
-                  aria-label={`Upvote ${getItemLabel(recommendation as Record<string, any>)}`}
+                  aria-label={`Upvote ${getItemLabel(
+                    recommendation as Record<string, any>,
+                  )}`}
                   aria-pressed={votedItems[itemId]}
                 >
                   <UpArrowIcon />
                 </button>
-                <span className={`vote-count ${animatingItems[itemId] ? 'vote-count-highlight' : ''} ${animatingDownvoteItems[itemId] ? 'vote-count-highlight-down' : ''} ${votedItems[itemId] ? 'vote-count-permanent' : ''} ${downvotedItems[itemId] ? 'vote-count-permanent-down' : ''}`}>
+                <span
+                  className={`vote-count ${
+                    animatingItems[itemId] ? "vote-count-highlight" : ""
+                  } ${
+                    animatingDownvoteItems[itemId]
+                      ? "vote-count-highlight-down"
+                      : ""
+                  } ${votedItems[itemId] ? "vote-count-permanent" : ""} ${
+                    downvotedItems[itemId] ? "vote-count-permanent-down" : ""
+                  }`}
+                >
                   {formatNumber(votes)}
                 </span>
                 <button
-                  className={`downvote-button ${animatingDownvoteItems[itemId] ? 'downvoted' : ''} ${downvotedItems[itemId] ? 'downvoted-permanent' : ''}`}
+                  className={`downvote-button ${
+                    animatingDownvoteItems[itemId] ? "downvoted" : ""
+                  } ${downvotedItems[itemId] ? "downvoted-permanent" : ""}`}
                   onClick={() => handleDownvote(index)}
-                  aria-label={`Downvote ${getItemLabel(recommendation as Record<string, any>)}`}
+                  aria-label={`Downvote ${getItemLabel(
+                    recommendation as Record<string, any>,
+                  )}`}
                   aria-pressed={downvotedItems[itemId]}
                 >
                   <DownArrowIcon />
@@ -175,4 +197,4 @@ function BaseRecommendationList<T>({
   );
 }
 
-export default BaseRecommendationList; 
+export default BaseRecommendationList;

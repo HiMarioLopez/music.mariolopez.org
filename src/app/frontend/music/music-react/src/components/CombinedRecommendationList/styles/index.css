@@ -1,0 +1,8 @@
+/* Main CSS file that imports all modular CSS components */
+@import './variables.css';
+@import './container.css';
+@import './header.css';
+@import './content.css';
+@import './voting.css';
+@import './skeleton.css';
+@import './highlight.css';
