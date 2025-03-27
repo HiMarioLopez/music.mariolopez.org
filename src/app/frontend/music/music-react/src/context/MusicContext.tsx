@@ -70,7 +70,7 @@ export const MusicProvider: React.FC<MusicProviderProps> = ({ children }) => {
       setLoading(true);
       setError(null);
 
-      const response = await apiService.music.getMusicHistory(31); // (10 x 3) carousels + 1 for now playing
+      const response = await apiService.music.getMusicHistory(16); // (5 x 3) carousels + 1 for now playing
 
       if (response.items.length > 0) {
         // Set the first item as now playing
