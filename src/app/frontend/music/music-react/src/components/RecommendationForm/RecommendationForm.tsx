@@ -9,6 +9,7 @@ import React, {
   useState,
 } from "react";
 import placeholderAlbumArt from "../../assets/50.png";
+import { useRecommendations } from "../../context/RecommendationsContext";
 import {
   RecommendedAlbum,
   RecommendedArtist,
@@ -23,8 +24,7 @@ import {
   SearchResult,
   ShowMoreButton,
 } from "./components";
-import { useRecommendationSearch } from "./useRecommendationSearch";
-import { useRecommendations } from "../../context/RecommendationsContext";
+import { useRecommendationSearch } from "./hooks/useRecommendationSearch";
 
 // Create a stable ID to reduce unnecessary re-renders
 // See: https://stackoverflow.com/a/49688084
@@ -76,7 +76,7 @@ const RecommendationForm: React.FC = () => {
       setSearchTerm("");
       handleResultsVisibility(false);
     },
-    [setSearchTerm, handleResultsVisibility]
+    [setSearchTerm, handleResultsVisibility],
   );
 
   // Handle form submission
@@ -161,7 +161,7 @@ const RecommendationForm: React.FC = () => {
       setSearchTerm("");
       setIsFormExpanded(false);
     },
-    [addRecommendation, from, note, selectedItem, setSearchTerm]
+    [addRecommendation, from, note, selectedItem, setSearchTerm],
   );
 
   // Clear selection handler
@@ -225,14 +225,14 @@ const RecommendationForm: React.FC = () => {
         e.preventDefault();
         setActiveResultIndex(
           (prevIndex) =>
-            prevIndex < allVisibleResults.length - 1 ? prevIndex + 1 : 0 // Cycle to top when at bottom
+            prevIndex < allVisibleResults.length - 1 ? prevIndex + 1 : 0, // Cycle to top when at bottom
         );
         break;
       case "ArrowUp":
         e.preventDefault();
         setActiveResultIndex(
           (prevIndex) =>
-            prevIndex > 0 ? prevIndex - 1 : allVisibleResults.length - 1 // Cycle to bottom when at top
+            prevIndex > 0 ? prevIndex - 1 : allVisibleResults.length - 1, // Cycle to bottom when at top
         );
         break;
       case "Home":
@@ -279,7 +279,7 @@ const RecommendationForm: React.FC = () => {
   useEffect(() => {
     if (activeResultIndex >= 0 && resultsRef.current) {
       const activeItem = resultsRef.current.querySelector(
-        `li[data-index="${activeResultIndex}"]`
+        `li[data-index="${activeResultIndex}"]`,
       );
       if (activeItem) {
         activeItem.scrollIntoView({ block: "nearest" });
@@ -444,10 +444,7 @@ const RecommendationForm: React.FC = () => {
   }, [selectedItem, handleClearSelection]);
 
   return (
-    <div
-      className="recommendation-form-component styled-container"
-      key="rec-form-container"
-    >
+    <div className="recommendation-form-component" key="rec-form-container">
       <h1 id="form-title">Make a Recommendation</h1>
       <div
         className="search-container"

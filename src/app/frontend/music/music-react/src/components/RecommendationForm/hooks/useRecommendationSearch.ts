@@ -1,10 +1,21 @@
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
-import { useDebouncedCallback } from 'use-debounce';
-import { ApiError, authService, musicApiService } from '../../services/apiService';
-import { Result } from './RecommendationForm.types';
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import { useDebouncedCallback } from "use-debounce";
+import {
+  ApiError,
+  authService,
+  musicApiService,
+} from "../../../services/apiService";
+import { Result } from "../RecommendationForm.types";
 
 export const useRecommendationSearch = () => {
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
   const [searchHints, setSearchHints] = useState<Result[]>([]);
   const [results, setResults] = useState<Result[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -39,14 +50,15 @@ export const useRecommendationSearch = () => {
       return true;
     } catch (error) {
       // Improved error logging
-      console.error('Authentication error details:', error);
+      console.error("Authentication error details:", error);
 
-      const message = error instanceof ApiError
-        ? `${error.message} (Status: ${error.status})`
-        : 'Failed to connect to authentication service';
+      const message =
+        error instanceof ApiError
+          ? `${error.message} (Status: ${error.status})`
+          : "Failed to connect to authentication service";
 
       setTokenError(message);
-      console.error('Auth error:', error);
+      console.error("Auth error:", error);
       return false;
     } finally {
       setIsAuthenticating(false);
@@ -54,66 +66,68 @@ export const useRecommendationSearch = () => {
   };
 
   // Debounced search function to prevent too many API calls
-  const debouncedSearch = useDebouncedCallback(async (term: string, limit: number = 3) => {
-    try {
-      // Track focus before search
-      trackFocus();
+  const debouncedSearch = useDebouncedCallback(
+    async (term: string, limit: number = 3) => {
+      try {
+        // Track focus before search
+        trackFocus();
 
-      // Set loading state based on whether this is loading more or a new search
-      if (limit > 3) {
-        setIsLoadingMore(true);
-      } else {
-        setIsLoading(true);
+        // Set loading state based on whether this is loading more or a new search
+        if (limit > 3) {
+          setIsLoadingMore(true);
+        } else {
+          setIsLoading(true);
+        }
+
+        // Authenticate before searching if needed
+        if (!authService.token) {
+          const authSuccess = await authenticate();
+          if (!authSuccess) return; // Don't proceed with search if auth failed
+        }
+
+        const { termSuggestions, contentResults } =
+          await musicApiService.searchSuggestions(term, limit);
+
+        // If we're loading more, append to existing results
+        // If it's a new search, replace results
+        if (limit > 3) {
+          setResults((prev) => [...prev, ...contentResults.slice(3)]);
+          setShowAllResults(true);
+        } else {
+          setSearchHints(termSuggestions);
+          setResults(contentResults);
+        }
+
+        // Show results after successful search - make sure this is set to true
+        // even if one of the arrays is empty
+        setIsResultsVisible(true);
+      } catch (error) {
+        // Handle API errors
+        if (error instanceof ApiError && error.status === 401) {
+          // Token expired, clear it and try again
+          authService.clearToken();
+          setTokenError("Authentication expired. Please try again.");
+        } else {
+          console.error("Search error:", error);
+        }
+      } finally {
+        // Reset loading states
+        setIsLoading(false);
+        setIsLoadingMore(false);
       }
-
-      // Authenticate before searching if needed
-      if (!authService.token) {
-        const authSuccess = await authenticate();
-        if (!authSuccess) return; // Don't proceed with search if auth failed
-      }
-
-      const { termSuggestions, contentResults } = await musicApiService.searchSuggestions(
-        term,
-        limit
-      );
-
-      // If we're loading more, append to existing results
-      // If it's a new search, replace results
-      if (limit > 3) {
-        setResults(prev => [...prev, ...contentResults.slice(3)]);
-        setShowAllResults(true);
-      } else {
-        setSearchHints(termSuggestions);
-        setResults(contentResults);
-      }
-
-      // Show results after successful search - make sure this is set to true
-      // even if one of the arrays is empty
-      setIsResultsVisible(true);
-    } catch (error) {
-      // Handle API errors
-      if (error instanceof ApiError && error.status === 401) {
-        // Token expired, clear it and try again
-        authService.clearToken();
-        setTokenError('Authentication expired. Please try again.');
-      } else {
-        console.error('Search error:', error);
-      }
-    } finally {
-      // Reset loading states
-      setIsLoading(false);
-      setIsLoadingMore(false);
-    }
-  }, 300); // 300ms debounce delay
+    },
+    300,
+  ); // 300ms debounce delay
 
   // More aggressive focus restoration on state changes
   useLayoutEffect(() => {
     // Only restore focus if we need to and operations are complete
-    if (needsFocusRestore.current &&
+    if (
+      needsFocusRestore.current &&
       !isLoading &&
       !isAuthenticating &&
-      inputRef.current) {
-
+      inputRef.current
+    ) {
       // Try multiple focus attempts to ensure it works
       // First attempt - immediate
       inputRef.current.focus();
@@ -156,11 +170,14 @@ export const useRecommendationSearch = () => {
   }, [searchTerm, isAuthenticating, tokenError, debouncedSearch]);
 
   // Memoized callbacks to prevent unnecessary rerenders
-  const handleHintSelect = useCallback((hint: string) => {
-    // Track focus before changing search term
-    trackFocus();
-    setSearchTerm(hint);
-  }, [trackFocus]);
+  const handleHintSelect = useCallback(
+    (hint: string) => {
+      // Track focus before changing search term
+      trackFocus();
+      setSearchTerm(hint);
+    },
+    [trackFocus],
+  );
 
   const handleLoadMore = useCallback(async () => {
     if (isLoadingMore || isLoading) return;
@@ -172,7 +189,7 @@ export const useRecommendationSearch = () => {
   const handleClearSearch = useCallback(() => {
     // Track focus before clearing
     trackFocus();
-    setSearchTerm('');
+    setSearchTerm("");
     setSearchHints([]);
     setResults([]);
     setIsResultsVisible(false);
@@ -211,4 +228,4 @@ export const useRecommendationSearch = () => {
     setResults,
     setIsResultsVisible,
   };
-}; 
+};
