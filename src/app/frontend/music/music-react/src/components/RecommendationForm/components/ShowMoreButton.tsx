@@ -1,5 +1,5 @@
 import React, { memo } from "react";
-import { LoadingIcon } from "../../Icons";
+import { LoadingIcon } from "../../Icons/Icons";
 
 type ShowMoreButtonProps = {
   index: number;
@@ -14,12 +14,12 @@ const ShowMoreButton: React.FC<ShowMoreButtonProps> = ({
   isActive,
   onClick,
   text,
-  isLoading
+  isLoading,
 }) => (
   <li
     id={`result-${index}`}
     data-index={index}
-    className={`hint-result show-more ${isActive ? 'active' : ''} ${isLoading ? 'loading' : ''}`}
+    className={`hint-result show-more ${isActive ? "active" : ""} ${isLoading ? "loading" : ""}`}
     onClick={onClick}
     role="option"
     aria-selected={isActive}

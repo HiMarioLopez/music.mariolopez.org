@@ -1,5 +1,5 @@
 import React, { memo } from "react";
-import { LoadingIcon, ClearIcon, SearchIcon } from "../../Icons";
+import { LoadingIcon, ClearIcon, SearchIcon } from "../../Icons/Icons";
 
 type SearchButtonProps = {
   isLoading: boolean;
@@ -14,7 +14,7 @@ const SearchButton: React.FC<SearchButtonProps> = ({
   isAuthenticating,
   searchTerm,
   onClear,
-  disabled
+  disabled,
 }: {
   isLoading: boolean;
   isAuthenticating: boolean;
@@ -23,7 +23,7 @@ const SearchButton: React.FC<SearchButtonProps> = ({
   disabled: boolean;
 }) => (
   <button
-    className={`search-button ${(isLoading || isAuthenticating) ? 'spinning' : ''}`}
+    className={`search-button ${isLoading || isAuthenticating ? "spinning" : ""}`}
     disabled={disabled}
     onClick={() => {
       if (searchTerm && !isLoading && !isAuthenticating) {
@@ -31,13 +31,18 @@ const SearchButton: React.FC<SearchButtonProps> = ({
       }
     }}
     type="button"
-    title={isLoading ? "Searching..." :
-      searchTerm ? "Clear search" : "Search"}
-    aria-label={isLoading ? "Searching..." :
-      searchTerm ? "Clear search" : "Search"}
+    title={isLoading ? "Searching..." : searchTerm ? "Clear search" : "Search"}
+    aria-label={
+      isLoading ? "Searching..." : searchTerm ? "Clear search" : "Search"
+    }
   >
-    {(isLoading || isAuthenticating) ? <LoadingIcon /> :
-      searchTerm ? <ClearIcon /> : <SearchIcon />}
+    {isLoading || isAuthenticating ? (
+      <LoadingIcon />
+    ) : searchTerm ? (
+      <ClearIcon />
+    ) : (
+      <SearchIcon />
+    )}
   </button>
 );
 

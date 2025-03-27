@@ -14,7 +14,7 @@
   flex-direction: column;
   gap: var(--margin-medium);
   overflow-y: auto;
-  max-height: 600px;
+  max-height: 550px;
 }
 
 .queued-song-item {
