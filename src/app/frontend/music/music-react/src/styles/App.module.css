@@ -22,7 +22,7 @@
     }
 }
 
-.app-bg {
+.appBg {
     position: fixed;
     animation: gradient 5s ease infinite;
     background: linear-gradient(-45deg, #FA573C, #61DAFB, #60A4F4, #FA573C, #1f2378);
@@ -35,7 +35,7 @@
     z-index: -1;
 }
 
-.main-content {
+.mainContent {
     flex: 1;
     display: flex;
     justify-content: center;
@@ -45,73 +45,73 @@
 
 /* Three-column layout for larger screens */
 @media (min-width: 1500px) {
-    .main-content {
+    .mainContent {
         max-width: 1500px;
         display: flex;
     }
 
-    .left-column {
+    .leftColumn {
         width: 35%;
         margin-right: var(--margin-large);
     }
 
-    .middle-column {
+    .middleColumn {
         width: 45%;
         margin-right: var(--margin-large);
     }
 
-    .right-column {
+    .rightColumn {
         width: 20%;
     }
 
-    .recommendations-list-container {
+    .recommendationsListContainer {
         flex: 1;
         min-height: 0;
         overflow-y: auto;
         margin-bottom: var(--margin-large);
     }
 
-    .now-playing-container,
-    .recommendation-form-container,
-    .recently-played-container,
-    .queued-songs-container {
+    .nowPlayingContainer,
+    .recommendationFormContainer,
+    .recentlyPlayedContainer,
+    .queuedSongsContainer {
         margin-bottom: var(--margin-large);
     }
 }
 
 /* Medium desktop - still 3 columns but narrower */
 @media (min-width: 1200px) and (max-width: 1499px) {
-    .main-content {
+    .mainContent {
         max-width: 1200px;
         display: flex;
     }
 
-    .left-column {
+    .leftColumn {
         width: 30%;
         margin-right: var(--margin-medium);
     }
 
-    .middle-column {
+    .middleColumn {
         width: 40%;
         margin-right: var(--margin-medium);
     }
 
-    .right-column {
+    .rightColumn {
         width: 30%;
     }
 
-    .recommendations-list-container {
+    .recommendationsListContainer {
         flex: 1;
         min-height: 0;
         overflow-y: auto;
         margin-bottom: var(--margin-medium);
     }
 
-    .now-playing-container,
-    .recommendation-form-container,
-    .recommendations-list-container,
-    .recently-played-container,
-    .queued-songs-container {
+    .nowPlayingContainer,
+    .recommendationFormContainer,
+    .recommendationsListContainer,
+    .recentlyPlayedContainer,
+    .queuedSongsContainer {
         margin-bottom: var(--margin-medium);
     }
 }
@@ -122,7 +122,7 @@
         flex-direction: column;
     }
 
-    .main-content {
+    .mainContent {
         padding-top: calc(var(--navbar-height-desktop) + var(--padding-large));
         padding-bottom: 0;
         width: 600px;
@@ -136,48 +136,48 @@
     }
 
     /* Reordering elements for the single column layout */
-    .left-column {
+    .leftColumn {
         order: 2;
     }
 
-    .left-column {
+    .leftColumn {
         display: flex;
         flex-direction: column;
         height: 100%;
         width: 100%;
     }
 
-    .middle-column {
+    .middleColumn {
         order: 1;
     }
 
-    .right-column {
+    .rightColumn {
         order: 3;
     }
 
-    .left-column,
-    .middle-column,
-    .right-column {
+    .leftColumn,
+    .middleColumn,
+    .rightColumn {
         width: 100%;
     }
 
-    .recommendations-list-container {
+    .recommendationsListContainer {
         flex: 1;
         min-height: 0;
         overflow-y: auto;
         margin-bottom: var(--margin-large) 0;
     }
 
-    .now-playing-container,
-    .recently-played-container,
-    .realtime-updates-container {
+    .nowPlayingContainer,
+    .recentlyPlayedContainer,
+    .realtimeUpdatesContainer {
         width: 100%;
         margin: var(--margin-large) 0;
     }
 
-    .queued-songs-container,
-    .recommendations-list-container,
-    .recommendation-form-container {
+    .queuedSongsContainer,
+    .recommendationsListContainer,
+    .recommendationFormContainer {
         width: 100%;
         margin: 0 0 var(--margin-large) 0;
     }
@@ -192,35 +192,37 @@
 }
 
 @media (min-width: 700px) and (max-height: 1000px) {
-    .main-content {
+    .mainContent {
         padding-top: calc(var(--navbar-height-desktop) + 40px);
         padding-bottom: 0;
     }
 }
 
 /* Smaller mobile adjustments */
-@media (max-width: 680px) {
-    .app {
-        flex-direction: column;
-        align-items: center;
-        justify-content: flex-start;
-    }
-
-    .main-content {
+@media (max-width: 699px) {
+    .mainContent {
         padding-top: calc(var(--navbar-height-mobile) + var(--padding-large));
-        padding-bottom: 0;
+        max-width: var(--width-mobile);
     }
+}
 
-    .realtime-updates-container {
-        width: 100%;
+/* Shared component styles */
+.styledContainer {
+    background: var(--component-bg-color);
+    color: var(--font-color);
+    padding: var(--padding-large);
+    border-radius: var(--border-radius-large);
+    box-shadow: inset 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+@media (min-width: 1300px) {
+    .styledContainer {
+        max-width: var(--max-width-large);
     }
+}
 
-    .realtime-updates-container p {
-        white-space: normal;
-        overflow-wrap: break-word;
-        word-wrap: break-word;
-        hyphens: auto;
-        max-width: 100%;
-        line-height: 1.5;
+@media (max-width: 1299px) {
+    .styledContainer {
+        max-width: var(--max-width-medium);
     }
 }

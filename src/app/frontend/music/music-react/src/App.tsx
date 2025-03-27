@@ -1,5 +1,5 @@
+import cx from "classix";
 import React from "react";
-import "./App.css";
 import CombinedRecommendationList from "./components/CombinedRecommendationList";
 import Footer from "./components/Footer";
 import Navbar from "./components/Navbar";
@@ -9,36 +9,62 @@ import RecentlyPlayedList from "./components/RecentlyPlayedList/RecentlyPlayedLi
 import RecommendationForm from "./components/RecommendationForm/RecommendationForm";
 import { MusicProvider } from "./context/MusicContext";
 import { RecommendationsProvider } from "./context/RecommendationsContext";
+import styles from "./styles/App.module.css";
 
 const App: React.FC = () => {
   return (
     <>
-      <div className="app-bg" />
-      <div className="app">
+      <div className={styles.appBg} />
+      <div className={styles.app}>
         <Navbar />
-        <div className="main-content">
-          <div className="left-column">
+        <div className={styles.mainContent}>
+          <div className={styles.leftColumn}>
             <RecommendationsProvider>
-              <div className="recommendation-form-container">
+              <div
+                className={cx(
+                  styles.recommendationFormContainer,
+                  styles.styledContainer,
+                )}
+              >
                 <RecommendationForm />
               </div>
-              <div className="recommendations-list-container">
+              <div
+                className={cx(
+                  styles.recommendationsListContainer,
+                  styles.styledContainer,
+                )}
+              >
                 <CombinedRecommendationList />
               </div>
             </RecommendationsProvider>
           </div>
-          <div className="middle-column">
+          <div className={styles.middleColumn}>
             <MusicProvider>
-              <div className="now-playing-container">
+              <div
+                className={cx(
+                  styles.nowPlayingContainer,
+                  styles.styledContainer,
+                )}
+              >
                 <NowPlaying />
               </div>
-              <div className="recently-played-container">
+              <div
+                className={cx(
+                  styles.recentlyPlayedContainer,
+                  styles.styledContainer,
+                )}
+              >
                 <RecentlyPlayedList />
               </div>
             </MusicProvider>
           </div>
-          <div className="right-column">
-            <div className="queued-songs-container">
+          <div className={styles.rightColumn}>
+            <div
+              className={cx(
+                styles.queuedSongsContainer,
+                styles.styledContainer,
+              )}
+            >
               <QueuedSongsList />
             </div>
           </div>
