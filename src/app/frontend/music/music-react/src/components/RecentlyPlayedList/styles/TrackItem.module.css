@@ -1,0 +1,58 @@
+/* Individual track styles */
+.track {
+  display: flex;
+  align-items: center;
+  padding: var(--padding-medium);
+  border-radius: var(--border-radius-medium);
+  background: var(--track-bg-color);
+  height: auto; /* Allow natural height */
+  transition: transform 0.2s ease-in-out, background 0.2s ease;
+  margin: 0 8px; /* Reduced horizontal margin for less space between track pairs */
+  width: 280px !important; /* Fixed width for consistent sizing */
+}
+
+.track:hover {
+  background: var(--track-bg-color-hover);
+  transform: translateY(-2px); /* Slight lift effect on hover */
+}
+
+/* Style for the images to ensure consistent sizing */
+.track img {
+  width: 50px;
+  height: 50px;
+  border-radius: 5px;
+  object-fit: cover;
+  margin-right: var(--margin-small);
+  flex-shrink: 0; /* Prevent image from shrinking */
+}
+
+/* Text container styling */
+.trackTextContainer {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  overflow: hidden;
+  max-width: calc(100% - 60px); /* Account for image width and margin */
+  width: 100%; /* Take up available space */
+}
+
+.trackTextContainer h3,
+.trackTextContainer p {
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  width: 100%; /* Ensure text takes full width of container */
+}
+
+/* Apply specific max-width for the artist-album line which tends to be longer */
+.trackTextContainer p {
+  max-width: 100%;
+  font-size: 0.9em; /* Slightly smaller text for artist/album */
+}
+
+@media (max-width: 680px) {
+  .track {
+      width: 220px !important; /* Smaller width on mobile */
+  }
+}
