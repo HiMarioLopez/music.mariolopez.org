@@ -1,12 +1,10 @@
 import React, { useState } from "react";
-import { DownArrowIcon, UpArrowIcon } from "../../Icons";
+import { DownArrowIcon, UpArrowIcon } from "../../Icons/Icons";
 import "../styles/index.css";
 import RecommendationHighlight from "./RecommendationHighlight";
-
-// Helper function to format numbers with commas
-const formatNumber = (num: number): string => {
-  return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-};
+import { formatNumber } from "../../../utils/formatters";
+import { getItemId, getItemLabel } from "../../../utils/accessibility";
+import { getItemClassName } from "../../../utils/styles";
 
 type BaseRecommendationListProps<T> = {
   recommendations: T[];
@@ -19,28 +17,6 @@ type BaseRecommendationListProps<T> = {
   getImageAlt: (item: T) => string;
   getVotes: (item: T) => number;
 };
-
-// Helper function to get appropriate label for screen readers
-function getItemLabel<T extends Record<string, any>>(item: T): string {
-  if (typeof item === "object" && item !== null) {
-    if ("songTitle" in item) {
-      return item.songTitle;
-    } else if ("albumTitle" in item) {
-      return item.albumTitle;
-    } else if ("artistName" in item) {
-      return item.artistName;
-    }
-  }
-  return "item";
-}
-
-// Helper function to get an item's ID or generate a fallback
-function getItemId<T>(item: T, index: number): string {
-  if (typeof item === "object" && item !== null && "id" in item) {
-    return (item as any).id;
-  }
-  return `index_${index}`;
-}
 
 function BaseRecommendationList<T>({
   recommendations,
@@ -112,20 +88,6 @@ function BaseRecommendationList<T>({
         [itemId]: false,
       }));
     }, 50);
-  };
-
-  // Determine the appropriate class name based on the recommendation type
-  const getItemClassName = (item: T): string => {
-    if (typeof item === "object" && item !== null) {
-      if ("songTitle" in item) {
-        return "song-item";
-      } else if ("albumTitle" in item) {
-        return "album-item";
-      } else if ("artistName" in item) {
-        return "artist-item";
-      }
-    }
-    return "recommendation-item";
   };
 
   return (

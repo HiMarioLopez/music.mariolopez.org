@@ -2,7 +2,7 @@ import {
   RecommendedAlbum,
   RecommendedArtist,
   RecommendedSong,
-} from "../../types/Recommendations";
+} from "../../../types/Recommendations";
 
 export type RecommendationType = "songs" | "albums" | "artists";
 

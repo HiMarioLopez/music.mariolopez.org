@@ -1,20 +1,18 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import "./styles/index.css";
+import { useRecommendations } from "../../context/RecommendationsContext";
 import {
   RecommendationStateMap,
   RecommendationType,
-} from "./CombinedRecommendationList.types";
+} from "./types/CombinedRecommendationList.types";
+import AlbumRecommendationList from "./components/AlbumRecommendationList";
+import ArtistRecommendationList from "./components/ArtistRecommendationList";
+import SkeletonLoader from "./components/SkeletonLoader";
+import SongRecommendationList from "./components/SongRecommendationList";
+import "./styles/index.css";
 import {
-  AlbumRecommendationList,
-  ArtistRecommendationList,
-  SkeletonLoader,
-  SongRecommendationList,
-} from "./components";
-import {
-  useRecommendationSelector,
   simulateNetworkDelay,
-} from "./useRecommendationSelector";
-import { useRecommendations } from "../../context/RecommendationsContext";
+  useRecommendationSelector,
+} from "./hooks/useRecommendationSelector";
 
 const CombinedRecommendationList: React.FC = () => {
   const {

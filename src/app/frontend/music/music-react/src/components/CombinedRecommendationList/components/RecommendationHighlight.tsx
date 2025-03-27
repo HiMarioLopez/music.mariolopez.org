@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 
 interface RecommendationHighlightProps {
   children: React.ReactNode;
@@ -13,7 +13,7 @@ interface RecommendationHighlightProps {
 const RecommendationHighlight: React.FC<RecommendationHighlightProps> = ({
   children,
   votes,
-  className = ''
+  className = "",
 }) => {
   const [prevVotes, setPrevVotes] = useState<number>(votes);
   const [isUpdating, setIsUpdating] = useState<boolean>(false);
@@ -34,13 +34,9 @@ const RecommendationHighlight: React.FC<RecommendationHighlightProps> = ({
     setPrevVotes(votes);
   }, [votes, prevVotes]);
 
-  const highlightClass = isUpdating ? `${className}-updating` : '';
+  const highlightClass = isUpdating ? `${className}-updating` : "";
 
-  return (
-    <div className={`${className} ${highlightClass}`}>
-      {children}
-    </div>
-  );
+  return <div className={`${className} ${highlightClass}`}>{children}</div>;
 };
 
-export default RecommendationHighlight; 
+export default RecommendationHighlight;
