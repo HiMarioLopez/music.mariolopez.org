@@ -1,5 +1,11 @@
-import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
-import { apiService } from '../services/apiService';
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  ReactNode,
+} from "react";
+import { apiService } from "../services/apiService";
 
 // Define types for our music data based on the API response
 export interface MusicItem {
@@ -63,13 +69,13 @@ export const MusicProvider: React.FC<MusicProviderProps> = ({ children }) => {
     try {
       setLoading(true);
       setError(null);
-      
-      const response = await apiService.music.getMusicHistory(20);
-      
+
+      const response = await apiService.music.getMusicHistory(31); // (10 x 3) carousels + 1 for now playing
+
       if (response.items.length > 0) {
         // Set the first item as now playing
         setNowPlaying(response.items[0]);
-        
+
         // Set the rest as recently played
         setRecentlyPlayed(response.items.slice(1));
       } else {
@@ -77,8 +83,10 @@ export const MusicProvider: React.FC<MusicProviderProps> = ({ children }) => {
         setRecentlyPlayed([]);
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to fetch music history');
-      console.error('Error fetching music history:', err);
+      setError(
+        err instanceof Error ? err.message : "Failed to fetch music history",
+      );
+      console.error("Error fetching music history:", err);
     } finally {
       setLoading(false);
     }
@@ -87,12 +95,12 @@ export const MusicProvider: React.FC<MusicProviderProps> = ({ children }) => {
   // Fetch music history when the component mounts
   useEffect(() => {
     fetchMusicHistory();
-    
+
     // Optional: Set up a refresh interval
     const intervalId = setInterval(() => {
       fetchMusicHistory();
     }, 60000); // Refresh every minute
-    
+
     return () => clearInterval(intervalId);
   }, []);
 
@@ -105,17 +113,19 @@ export const MusicProvider: React.FC<MusicProviderProps> = ({ children }) => {
     recentlyPlayed,
     loading,
     error,
-    refreshMusicHistory
+    refreshMusicHistory,
   };
 
-  return <MusicContext.Provider value={value}>{children}</MusicContext.Provider>;
+  return (
+    <MusicContext.Provider value={value}>{children}</MusicContext.Provider>
+  );
 };
 
 // Custom hook to use the music context
 export const useMusicContext = () => {
   const context = useContext(MusicContext);
   if (context === undefined) {
-    throw new Error('useMusicContext must be used within a MusicProvider');
+    throw new Error("useMusicContext must be used within a MusicProvider");
   }
   return context;
 };
