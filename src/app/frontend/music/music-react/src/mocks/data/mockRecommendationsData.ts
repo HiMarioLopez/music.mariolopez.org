@@ -1,5 +1,9 @@
-import { RecommendedSong, RecommendedAlbum, RecommendedArtist } from '../types/Recommendations';
-import placeholderAlbumArt from '../assets/50.png';
+import {
+  RecommendedSong,
+  RecommendedAlbum,
+  RecommendedArtist,
+} from '../../types/Recommendations';
+import placeholderAlbumArt from '../../assets/50.png';
 
 // Mock song recommendations data
 export const mockSongs: RecommendedSong[] = [
@@ -9,7 +13,7 @@ export const mockSongs: RecommendedSong[] = [
     artistName: 'Queen',
     albumName: 'A Night at the Opera',
     albumCoverUrl: placeholderAlbumArt,
-    votes: 19
+    votes: 19,
   },
   {
     id: 'song_2',
@@ -17,7 +21,7 @@ export const mockSongs: RecommendedSong[] = [
     artistName: 'Queen',
     albumName: 'A Night at the Opera',
     albumCoverUrl: placeholderAlbumArt,
-    votes: 15
+    votes: 15,
   },
   {
     id: 'song_3',
@@ -25,7 +29,7 @@ export const mockSongs: RecommendedSong[] = [
     artistName: 'Eagles',
     albumName: 'Hotel California',
     albumCoverUrl: placeholderAlbumArt,
-    votes: 13
+    votes: 13,
   },
   {
     id: 'song_4',
@@ -33,7 +37,7 @@ export const mockSongs: RecommendedSong[] = [
     artistName: 'Eagles',
     albumName: 'Hotel California',
     albumCoverUrl: placeholderAlbumArt,
-    votes: 12
+    votes: 12,
   },
   {
     id: 'song_5',
@@ -41,7 +45,7 @@ export const mockSongs: RecommendedSong[] = [
     artistName: 'Led Zeppelin',
     albumName: 'Led Zeppelin IV',
     albumCoverUrl: placeholderAlbumArt,
-    votes: 10
+    votes: 10,
   },
   {
     id: 'song_6',
@@ -49,7 +53,7 @@ export const mockSongs: RecommendedSong[] = [
     artistName: 'Led Zeppelin',
     albumName: 'Led Zeppelin IV',
     albumCoverUrl: placeholderAlbumArt,
-    votes: 10
+    votes: 10,
   },
 ];
 
@@ -61,7 +65,7 @@ export const mockAlbums: RecommendedAlbum[] = [
     artistName: 'Pink Floyd',
     albumCoverUrl: placeholderAlbumArt,
     trackCount: 10,
-    votes: 18
+    votes: 18,
   },
   {
     id: 'album_2',
@@ -69,7 +73,7 @@ export const mockAlbums: RecommendedAlbum[] = [
     artistName: 'Michael Jackson',
     albumCoverUrl: placeholderAlbumArt,
     trackCount: 9,
-    votes: 14
+    votes: 14,
   },
   {
     id: 'album_3',
@@ -77,7 +81,7 @@ export const mockAlbums: RecommendedAlbum[] = [
     artistName: 'The Beatles',
     albumCoverUrl: placeholderAlbumArt,
     trackCount: 17,
-    votes: 11
+    votes: 11,
   },
   {
     id: 'album_4',
@@ -85,7 +89,7 @@ export const mockAlbums: RecommendedAlbum[] = [
     artistName: 'Pink Floyd',
     albumCoverUrl: placeholderAlbumArt,
     trackCount: 10,
-    votes: 11
+    votes: 11,
   },
   {
     id: 'album_5',
@@ -93,7 +97,7 @@ export const mockAlbums: RecommendedAlbum[] = [
     artistName: 'Pink Floyd',
     albumCoverUrl: placeholderAlbumArt,
     trackCount: 10,
-    votes: 11
+    votes: 11,
   },
   {
     id: 'album_6',
@@ -101,7 +105,7 @@ export const mockAlbums: RecommendedAlbum[] = [
     artistName: 'Pink Floyd',
     albumCoverUrl: placeholderAlbumArt,
     trackCount: 10,
-    votes: 9
+    votes: 9,
   },
 ];
 
@@ -143,4 +147,4 @@ export const mockArtists: RecommendedArtist[] = [
   //   genres: ['Rock', 'Pop Rock'],
   //   votes: 13
   // },
-]; 
+];
