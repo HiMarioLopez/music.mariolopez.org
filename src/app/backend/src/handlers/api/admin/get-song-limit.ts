@@ -1,16 +1,20 @@
-import { APIGatewayProxyEvent, APIGatewayProxyResult, Context } from 'aws-lambda';
+import {
+  APIGatewayProxyEvent,
+  APIGatewayProxyResult,
+  Context,
+} from 'aws-lambda';
 import { Logger } from '@aws-lambda-powertools/logger';
 import { Tracer } from '@aws-lambda-powertools/tracer';
 import { Metrics, MetricUnit } from '@aws-lambda-powertools/metrics';
 import { getCorsHeaders } from '../../../utils/cors';
 import { getParameter } from '../../../services/parameter';
 
-const logger = new Logger({ serviceName: 'get-track-limit' });
-const tracer = new Tracer({ serviceName: 'get-track-limit' });
-const metrics = new Metrics({ namespace: 'get-track-limit' });
+const logger = new Logger({ serviceName: 'get-song-limit' });
+const tracer = new Tracer({ serviceName: 'get-song-limit' });
+const metrics = new Metrics({ namespace: 'get-song-limit' });
 
 /**
- * Lambda handler for retrieving the track limit from Parameter Store
+ * Lambda handler for retrieving the song limit from Parameter Store
  */
 export const handler = async (
   event: APIGatewayProxyEvent,
@@ -23,7 +27,7 @@ export const handler = async (
     },
   });
 
-  logger.info('Get Track Limit Lambda invoked', { event });
+  logger.info('Get Song Limit Lambda invoked', { event });
   metrics.addMetric('RequestCount', MetricUnit.Count, 1);
 
   try {
@@ -33,35 +37,35 @@ export const handler = async (
       throw new Error('Missing required environment variable: PARAMETER_NAME');
     }
 
-    // Get track limit from Parameter Store
-    const trackLimitValue = await getParameter(parameterName);
-    if (!trackLimitValue) {
-      logger.error('Track limit parameter not found', { parameterName });
+    // Get song limit from Parameter Store
+    const songLimitValue = await getParameter(parameterName);
+    if (!songLimitValue) {
+      logger.error('Song limit parameter not found', { parameterName });
       metrics.addMetric('ParameterNotFound', MetricUnit.Count, 1);
-      throw new Error('Track limit parameter not found');
+      throw new Error('Song limit parameter not found');
     }
 
-    // Parse the track limit value
-    const trackLimit = parseInt(trackLimitValue, 10);
-    logger.info('Successfully retrieved track limit', { trackLimit });
+    // Parse the song limit value
+    const songLimit = parseInt(songLimitValue, 10);
+    logger.info('Successfully retrieved song limit', { songLimit });
     metrics.addMetric('RetrievalSuccess', MetricUnit.Count, 1);
 
     return {
       statusCode: 200,
       headers: getCorsHeaders(event.headers.origin, 'GET'),
-      body: JSON.stringify({ trackLimit })
+      body: JSON.stringify({ songLimit }),
     };
   } catch (error) {
-    logger.error('Error retrieving track limit', { error });
+    logger.error('Error retrieving song limit', { error });
     metrics.addMetric('ErrorCount', MetricUnit.Count, 1);
 
     return {
       statusCode: 500,
       headers: getCorsHeaders(event.headers.origin, 'GET'),
       body: JSON.stringify({
-        message: 'Error retrieving track limit',
-        error: error instanceof Error ? error.message : 'Unknown error'
-      })
+        message: 'Error retrieving song limit',
+        error: error instanceof Error ? error.message : 'Unknown error',
+      }),
     };
   }
 };

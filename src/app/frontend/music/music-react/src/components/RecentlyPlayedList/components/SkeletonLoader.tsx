@@ -20,7 +20,7 @@ const SkeletonLoader: React.FC = () => {
           {skeletonItems.map((_, index) => (
             <div
               key={`skeleton-${rowNum}-${index}`}
-              className={styles.recentlyPlayedSkeletonTrack}
+              className={styles.recentlyPlayedSkeletonSong}
             >
               <div
                 className={`${styles.recentlyPlayedSkeletonImg} ${styles.skeletonLoader}`}

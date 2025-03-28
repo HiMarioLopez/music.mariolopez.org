@@ -2,30 +2,30 @@ import React, { memo } from "react";
 import Slider from "react-slick";
 import { MusicItem } from "../../../context/MusicContext";
 import styles from "../styles/CarouselRow.module.css";
-import TrackItem from "./TrackItem";
+import SongItem from "./SongItem";
 
 interface CarouselRowProps {
-  tracks: MusicItem[];
+  songs: MusicItem[];
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   settings: any; // React-slick settings
   rowName: string;
 }
 
 /**
- * Carousel row component for displaying a horizontal scrolling list of tracks
+ * Carousel row component for displaying a horizontal scrolling list of songs
  */
 const CarouselRow: React.FC<CarouselRowProps> = ({
-  tracks,
+  songs,
   settings,
   rowName,
 }) => {
   return (
     <div className={styles.recentlyPlayedListRow}>
       <Slider {...settings}>
-        {tracks.map((track, index) => (
-          <TrackItem
-            key={`${rowName}-${track.id}-${index}`}
-            track={track}
+        {songs.map((song, index) => (
+          <SongItem
+            key={`${rowName}-${song.id}-${index}`}
+            song={song}
             index={index}
             rowName={rowName}
           />

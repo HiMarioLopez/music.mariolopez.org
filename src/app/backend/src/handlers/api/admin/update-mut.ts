@@ -1,4 +1,8 @@
-import { APIGatewayProxyEvent, APIGatewayProxyResult, Context } from 'aws-lambda';
+import {
+  APIGatewayProxyEvent,
+  APIGatewayProxyResult,
+  Context,
+} from 'aws-lambda';
 import { Logger } from '@aws-lambda-powertools/logger';
 import { Tracer } from '@aws-lambda-powertools/tracer';
 import { Metrics, MetricUnit } from '@aws-lambda-powertools/metrics';
@@ -40,7 +44,7 @@ export const handler = async (
       return {
         statusCode: 400,
         headers: getCorsHeaders(event.headers.origin, 'POST'),
-        body: JSON.stringify({ message: 'Missing request body' })
+        body: JSON.stringify({ message: 'Missing request body' }),
       };
     }
 
@@ -52,7 +56,9 @@ export const handler = async (
       return {
         statusCode: 400,
         headers: getCorsHeaders(event.headers.origin, 'POST'),
-        body: JSON.stringify({ message: 'Missing musicUserToken in request body' })
+        body: JSON.stringify({
+          message: 'Missing musicUserToken in request body',
+        }),
       };
     }
 
@@ -64,7 +70,7 @@ export const handler = async (
     return {
       statusCode: 200,
       headers: getCorsHeaders(event.headers.origin, 'POST'),
-      body: JSON.stringify({ message: 'MUT stored successfully' })
+      body: JSON.stringify({ message: 'MUT stored successfully' }),
     };
   } catch (error) {
     logger.error('Error storing MUT', { error });
@@ -75,8 +81,8 @@ export const handler = async (
       headers: getCorsHeaders(event.headers.origin, 'POST'),
       body: JSON.stringify({
         error: 'Error processing your request',
-        message: error instanceof Error ? error.message : 'Unknown error'
-      })
+        message: error instanceof Error ? error.message : 'Unknown error',
+      }),
     };
   }
 };

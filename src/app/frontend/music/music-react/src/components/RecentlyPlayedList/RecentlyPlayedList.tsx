@@ -3,7 +3,7 @@ import { useMusicContext } from "../../context/MusicContext";
 import CarouselRow from "./components/CarouselRow";
 import SkeletonLoader from "./components/SkeletonLoader";
 import { useCarouselSettings } from "./hooks/useCarouselSettings";
-import { useTrackDistribution } from "./hooks/useTrackDistribution";
+import { useSongDistribution } from "./hooks/useSongDistribution";
 import styles from "./styles/RecentlyPlayedList.module.css";
 
 // Import React Slick CSS
@@ -12,14 +12,14 @@ import "slick-carousel/slick/slick.css";
 
 /**
  * RecentlyPlayedList component displays three horizontal carousels
- * of the user's recently played tracks
+ * of the user's recently played songs
  */
 const RecentlyPlayedList: React.FC = () => {
   const { recentlyPlayed, loading, error } = useMusicContext();
   const { topSliderSettings, middleSliderSettings, bottomSliderSettings } =
     useCarouselSettings();
-  const { topRowTracks, middleRowTracks, bottomRowTracks } =
-    useTrackDistribution(recentlyPlayed);
+  const { topRowSongs, middleRowSongs, bottomRowSongs } =
+    useSongDistribution(recentlyPlayed);
 
   // Show skeleton loader during loading
   if (loading && recentlyPlayed.length === 0) {
@@ -36,7 +36,7 @@ const RecentlyPlayedList: React.FC = () => {
     return (
       <div className={styles.recentlyPlayedListComponent}>
         <h1>Recently Played</h1>
-        <p>Error loading tracks: {error}</p>
+        <p>Error loading songs: {error}</p>
       </div>
     );
   }
@@ -48,25 +48,25 @@ const RecentlyPlayedList: React.FC = () => {
         <>
           {/* Top row slider - moves left to right */}
           <CarouselRow
-            tracks={topRowTracks}
+            songs={topRowSongs}
             settings={topSliderSettings}
             rowName="top"
           />
           {/* Middle row slider - moves right to left */}
           <CarouselRow
-            tracks={middleRowTracks}
+            songs={middleRowSongs}
             settings={middleSliderSettings}
             rowName="middle"
           />
           {/* Bottom row slider - moves left to right slower */}
           <CarouselRow
-            tracks={bottomRowTracks}
+            songs={bottomRowSongs}
             settings={bottomSliderSettings}
             rowName="bottom"
           />
         </>
       ) : (
-        <p>No recently played tracks available</p>
+        <p>No recently played songs available</p>
       )}
     </div>
   );

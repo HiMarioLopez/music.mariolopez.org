@@ -7,15 +7,15 @@ import {
   Context,
 } from 'aws-lambda';
 import {
-  getAllTracks,
-  getTracksByArtist,
-} from '../../../services/dynamodb/track-history';
+  getAllSongs,
+  getSongsByArtist,
+} from '../../../services/dynamodb/song-history';
 import { getParameter } from '../../../services/parameter';
 import { getCorsHeaders } from '../../../utils/cors';
 
-const logger = new Logger({ serviceName: 'get-track-history' });
-const tracer = new Tracer({ serviceName: 'get-track-history' });
-const metrics = new Metrics({ namespace: 'get-track-history' });
+const logger = new Logger({ serviceName: 'get-song-history' });
+const tracer = new Tracer({ serviceName: 'get-song-history' });
+const metrics = new Metrics({ namespace: 'get-song-history' });
 
 // Default limit for queries
 const DEFAULT_LIMIT = 50;
@@ -81,19 +81,19 @@ export const handler = async (
       ? decodeURIComponent(queryParams.startKey)
       : undefined;
 
-    // Fetch tracks from DynamoDB
+    // Fetch songs from DynamoDB
     let result;
     if (artistName) {
-      logger.info('Fetching tracks by artist', { artistName, limit });
-      result = await getTracksByArtist(tableName, artistName, limit, startKey);
+      logger.info('Fetching songs by artist', { artistName, limit });
+      result = await getSongsByArtist(tableName, artistName, limit, startKey);
       metrics.addMetric('ArtistFilteredQuery', MetricUnit.Count, 1);
     } else {
-      logger.info('Fetching all tracks', { limit });
-      result = await getAllTracks(tableName, limit, startKey);
-      metrics.addMetric('AllTracksQuery', MetricUnit.Count, 1);
+      logger.info('Fetching all songs', { limit });
+      result = await getAllSongs(tableName, limit, startKey);
+      metrics.addMetric('AllSongsQuery', MetricUnit.Count, 1);
     }
 
-    // Track the number of results returned
+    // Record the number of results returned
     metrics.addMetric('ResultCount', MetricUnit.Count, result.items.length);
 
     // Prepare pagination info
@@ -112,12 +112,12 @@ export const handler = async (
       );
     }
 
-    logger.info('Successfully returned track history', {
+    logger.info('Successfully returned song history', {
       count: result.items.length,
       hasMore: !!result.lastEvaluatedKey,
     });
 
-    // Return tracks as JSON response
+    // Return songs as JSON response
     return {
       statusCode: 200,
       headers: getCorsHeaders(event.headers?.origin, 'GET,OPTIONS'),

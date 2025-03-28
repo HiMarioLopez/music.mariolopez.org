@@ -13,14 +13,14 @@ using Microsoft.Extensions.Configuration;
 namespace Music.Infra.Stacks;
 
 /// <summary>
-/// Defines the stack for the Apple Music History Tracker.
+/// Defines the stack for the Apple Music History Stack.
 /// </summary>
 /// <remarks>
-/// This stack contains resources for tracking Apple Music listening history:
-/// - Lambda function for fetching and storing track history
+/// This stack contains resources for recording Apple Music listening history:
+/// - Lambda function for fetching and storing song history
 /// - DynamoDB table for persistent storage
 /// - CloudWatch Event Rule for scheduled execution
-/// - SSM Parameter for storing the last processed track ID
+/// - SSM Parameter for storing the last processed song ID
 /// </remarks>
 public class AppleMusicHistoryStack : Stack
 {
@@ -44,7 +44,7 @@ public class AppleMusicHistoryStack : Stack
         var updateHistoryJobLambdaRole = new Role(this, "UpdateAppleMusicHistoryJobLambdaRole", new RoleProps
         {
             AssumedBy = new ServicePrincipal("lambda.amazonaws.com"),
-            Description = "Role for Apple Music History tracking Lambda function",
+            Description = "Role for Apple Music History Lambda function",
             ManagedPolicies =
             [
                 ManagedPolicy.FromAwsManagedPolicyName("service-role/AWSLambdaBasicExecutionRole")
@@ -67,9 +67,9 @@ public class AppleMusicHistoryStack : Stack
             Resources =
             [
                 historyTable.TableArn,
-                $"arn:aws:ssm:{Region}:{Account}:parameter/Music/AppleMusicHistory/LastProcessedTrackId",
+                $"arn:aws:ssm:{Region}:{Account}:parameter/Music/AppleMusicHistory/LastProcessedSongId",
                 $"arn:aws:ssm:{Region}:{Account}:parameter/Music/AdminPanel/MUT",
-                $"arn:aws:ssm:{Region}:{Account}:parameter/Music/AppleMusicHistory/TrackLimit"
+                $"arn:aws:ssm:{Region}:{Account}:parameter/Music/AppleMusicHistory/SongLimit"
             ]
         }));
 
@@ -85,25 +85,25 @@ public class AppleMusicHistoryStack : Stack
 
         #region SSM Parameters
 
-        var lastProcessedTrackIdParameter = new StringParameter(this, "LastProcessedTrackId", new StringParameterProps
+        var lastProcessedSongIdParameter = new StringParameter(this, "LastProcessedSongId", new StringParameterProps
         {
-            ParameterName = "/Music/AppleMusicHistory/LastProcessedTrackId",
+            ParameterName = "/Music/AppleMusicHistory/LastProcessedSongId",
             StringValue = "placeholder", // Initial placeholder value
-            Description = "Stores the ID of the last processed track to enable deduplication",
+            Description = "Stores the ID of the last processed song to enable deduplication",
         });
 
         var scheduleRateParameter = new StringParameter(this, "HistoryScheduleRate", new StringParameterProps
         {
             ParameterName = "/Music/AppleMusicHistory/ScheduleRate",
             StringValue = "rate(5 minutes)", // Default value
-            Description = "Schedule rate for Apple Music history tracking (using Schedule expression syntax)",
+            Description = "Schedule rate for Apple Music History Lambda (using Schedule expression syntax)",
         });
 
-        var trackLimitParameter = new StringParameter(this, "TrackLimit", new StringParameterProps
+        var songLimitParameter = new StringParameter(this, "SongLimit", new StringParameterProps
         {
-            ParameterName = "/Music/AppleMusicHistory/TrackLimit",
+            ParameterName = "/Music/AppleMusicHistory/SongLimit",
             StringValue = "25", // Default value
-            Description = "Number of tracks to fetch from Apple Music API",
+            Description = "Number of songs to fetch from Apple Music API",
         });
 
         // Store the table name in SSM Parameter Store instead of using CloudFormation exports
@@ -122,7 +122,7 @@ public class AppleMusicHistoryStack : Stack
         var updateHistoryJobLambda = new Function(this, "UpdateAppleMusicHistoryJobLambda", new FunctionProps
         {
             Runtime = Runtime.NODEJS_22_X,
-            Handler = "update-track-history.handler",
+            Handler = "update-song-history.handler",
             Code = Code.FromAsset("../app/backend/dist/handlers/jobs"),
             Role = updateHistoryJobLambdaRole,
             MemorySize = 256,
@@ -132,9 +132,9 @@ public class AppleMusicHistoryStack : Stack
             {
                 ["AWS_NODEJS_CONNECTION_REUSE_ENABLED"] = "1",
                 ["DYNAMODB_TABLE_NAME"] = historyTable.TableName,
-                ["LAST_PROCESSED_TRACK_PARAMETER"] = lastProcessedTrackIdParameter.ParameterName,
+                ["LAST_PROCESSED_SONG_PARAMETER"] = lastProcessedSongIdParameter.ParameterName,
                 ["MUSIC_USER_TOKEN_PARAMETER"] = "/Music/AdminPanel/MUT",
-                ["TRACK_LIMIT_PARAMETER"] = trackLimitParameter.ParameterName
+                ["SONG_LIMIT_PARAMETER"] = songLimitParameter.ParameterName
             },
             Tracing = Tracing.ACTIVE
         });
@@ -287,7 +287,7 @@ public class AppleMusicHistoryStack : Stack
             }),
             new GraphWidget(new GraphWidgetProps
             {
-                Title = "Tracks Processed",
+                Title = "Songs Processed",
                 Width = 24,
                 Height = 8,
                 Left =
@@ -295,14 +295,14 @@ public class AppleMusicHistoryStack : Stack
                     new Metric(new MetricProps
                     {
                         Namespace = "AppleMusicHistory",
-                        MetricName = "TracksProcessed",
+                        MetricName = "SongsProcessed",
                         Statistic = "Sum",
                         Period = Duration.Minutes(5)
                     }),
                     new Metric(new MetricProps
                     {
                         Namespace = "AppleMusicHistory",
-                        MetricName = "NewTracksStored",
+                        MetricName = "NewSongsStored",
                         Statistic = "Sum",
                         Period = Duration.Minutes(5)
                     })

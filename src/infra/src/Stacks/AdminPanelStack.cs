@@ -156,7 +156,7 @@ public class AdminPanelStack : Stack
                 ["AWS_NODEJS_CONNECTION_REUSE_ENABLED"] = "1",
                 ["PARAMETER_NAME"] = "/Music/AppleMusicHistory/ScheduleRate"
             },
-            Description = "Lambda function to update the Apple Music history tracking schedule rate",
+            Description = "Lambda function to update the Apple Music history job schedule rate",
             Architecture = Architecture.ARM_64,
             MemorySize = 128,
             Timeout = Duration.Seconds(29),
@@ -182,7 +182,7 @@ public class AdminPanelStack : Stack
                 ["AWS_NODEJS_CONNECTION_REUSE_ENABLED"] = "1",
                 ["PARAMETER_NAME"] = "/Music/AppleMusicHistory/ScheduleRate"
             },
-            Description = "Lambda function to get the Apple Music history tracking schedule rate",
+            Description = "Lambda function to get the Apple Music history job schedule rate",
             Architecture = Architecture.ARM_64,
             MemorySize = 128,
             Timeout = Duration.Seconds(29),
@@ -197,36 +197,36 @@ public class AdminPanelStack : Stack
             Resources = [$"arn:aws:ssm:{Region}:{Account}:parameter/Music/AppleMusicHistory/ScheduleRate"]
         }));
 
-        // Create Lambda function to update track limit
-        var updateTrackLimitFunction = new Function(this, "Music-UpdateTrackLimitFunction", new FunctionProps
+        // Create Lambda function to update song limit
+        var updateSongLimitFunction = new Function(this, "Music-UpdateSongLimitFunction", new FunctionProps
         {
             Runtime = Runtime.NODEJS_22_X,
-            Handler = "update-track-limit.handler",
+            Handler = "update-song-limit.handler",
             Code = Code.FromAsset("../app/backend/dist/handlers/api/admin"),
             Environment = new Dictionary<string, string>
             {
                 ["AWS_NODEJS_CONNECTION_REUSE_ENABLED"] = "1",
-                ["PARAMETER_NAME"] = "/Music/AppleMusicHistory/TrackLimit"
+                ["PARAMETER_NAME"] = "/Music/AppleMusicHistory/SongLimit"
             },
-            Description = "Lambda function to update the Apple Music history tracking track limit",
+            Description = "Lambda function to update the Apple Music history song limit",
             Architecture = Architecture.ARM_64,
             MemorySize = 128,
             Timeout = Duration.Seconds(29),
             Tracing = Tracing.ACTIVE
         });
 
-        // Create Lambda function to get track limit
-        var getTrackLimitFunction = new Function(this, "Music-GetTrackLimitFunction", new FunctionProps
+        // Create Lambda function to get song limit
+        var getSongLimitFunction = new Function(this, "Music-GetSongLimitFunction", new FunctionProps
         {
             Runtime = Runtime.NODEJS_22_X,
-            Handler = "get-track-limit.handler",
+            Handler = "get-song-limit.handler",
             Code = Code.FromAsset("../app/backend/dist/handlers/api/admin"),
             Environment = new Dictionary<string, string>
             {
                 ["AWS_NODEJS_CONNECTION_REUSE_ENABLED"] = "1",
-                ["PARAMETER_NAME"] = "/Music/AppleMusicHistory/TrackLimit"
+                ["PARAMETER_NAME"] = "/Music/AppleMusicHistory/SongLimit"
             },
-            Description = "Lambda function to get the Apple Music history tracking track limit",
+            Description = "Lambda function to get the Apple Music history song limit",
             Architecture = Architecture.ARM_64,
             MemorySize = 128,
             Timeout = Duration.Seconds(29),
@@ -234,18 +234,18 @@ public class AdminPanelStack : Stack
         });
 
         // Grant Lambda permissions
-        updateTrackLimitFunction.AddToRolePolicy(new PolicyStatement(new PolicyStatementProps
+        updateSongLimitFunction.AddToRolePolicy(new PolicyStatement(new PolicyStatementProps
         {
             Effect = Effect.ALLOW,
             Actions = ["ssm:PutParameter"],
-            Resources = [$"arn:aws:ssm:{Region}:{Account}:parameter/Music/AppleMusicHistory/TrackLimit"]
+            Resources = [$"arn:aws:ssm:{Region}:{Account}:parameter/Music/AppleMusicHistory/SongLimit"]
         }));
 
-        getTrackLimitFunction.AddToRolePolicy(new PolicyStatement(new PolicyStatementProps
+        getSongLimitFunction.AddToRolePolicy(new PolicyStatement(new PolicyStatementProps
         {
             Effect = Effect.ALLOW,
             Actions = ["ssm:GetParameter"],
-            Resources = [$"arn:aws:ssm:{Region}:{Account}:parameter/Music/AppleMusicHistory/TrackLimit"]
+            Resources = [$"arn:aws:ssm:{Region}:{Account}:parameter/Music/AppleMusicHistory/SongLimit"]
         }));
 
         #endregion
@@ -401,20 +401,20 @@ public class AdminPanelStack : Stack
             })
         );
 
-        // Add track limit endpoints
-        var trackLimitResource = nodejsResource.AddResource("track-limit");
-        trackLimitResource.AddResource("update").AddMethod(
+        // Add song limit endpoints
+        var songLimitResource = nodejsResource.AddResource("song-limit");
+        songLimitResource.AddResource("update").AddMethod(
             "POST",
-            new LambdaIntegration(updateTrackLimitFunction, new LambdaIntegrationOptions
+            new LambdaIntegration(updateSongLimitFunction, new LambdaIntegrationOptions
             {
                 Timeout = Duration.Seconds(29),
                 AllowTestInvoke = true
             })
         );
 
-        trackLimitResource.AddResource("get").AddMethod(
+        songLimitResource.AddResource("get").AddMethod(
             "GET",
-            new LambdaIntegration(getTrackLimitFunction, new LambdaIntegrationOptions
+            new LambdaIntegration(getSongLimitFunction, new LambdaIntegrationOptions
             {
                 Timeout = Duration.Seconds(29),
                 AllowTestInvoke = true

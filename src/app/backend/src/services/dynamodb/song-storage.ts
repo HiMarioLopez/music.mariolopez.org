@@ -3,10 +3,10 @@ import { Tracer } from '@aws-lambda-powertools/tracer';
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import { DynamoDBDocumentClient, PutCommand } from '@aws-sdk/lib-dynamodb';
 import { createHash } from 'crypto';
-import { Track } from '../../models/track';
+import { Song } from '../../models/song';
 
-const logger = new Logger({ serviceName: 'dynamodb-track-service' });
-const tracer = new Tracer({ serviceName: 'dynamodb-track-service' });
+const logger = new Logger({ serviceName: 'dynamodb-song-service' });
+const tracer = new Tracer({ serviceName: 'dynamodb-song-service' });
 
 const dynamodbClient = new DynamoDBClient();
 const docClient = DynamoDBDocumentClient.from(dynamodbClient);
@@ -16,73 +16,73 @@ tracer.captureAWSv3Client(dynamodbClient);
 tracer.captureAWSv3Client(docClient);
 
 /**
- * Store tracks in DynamoDB
+ * Store songs in DynamoDB
  *
- * @param tracks - Array of Track objects to store
+ * @param songs - Array of Song objects to store
  * @param tableName - DynamoDB table name
  * @returns Promise resolving with storage stats
  */
-export const storeTracksInDynamoDB = async (
-  tracks: Track[],
+export const storeSongsInDynamoDB = async (
+  songs: Song[],
   tableName: string
 ): Promise<{ successCount: number; errorCount: number }> => {
   let successCount = 0;
   let errorCount = 0;
 
-  logger.info(`Starting to store ${tracks.length} tracks in DynamoDB`, {
+  logger.info(`Starting to store ${songs.length} songs in DynamoDB`, {
     tableName,
   });
 
-  for (let i = 0; i < tracks.length; i++) {
-    const track = tracks[i];
+  for (let i = 0; i < songs.length; i++) {
+    const song = songs[i];
     try {
-      // Create a hash ID to deduplicate tracks
+      // Create a hash ID to deduplicate songs
       const hashId = createHash('sha256')
-        .update(`${track.artistName}-${track.name}-${track.albumName}`)
+        .update(`${song.artistName}-${song.name}-${song.albumName}`)
         .digest('hex');
 
-      logger.debug(`Processing track ${i + 1}/${tracks.length}`, {
-        trackId: track.id,
+      logger.debug(`Processing song ${i + 1}/${songs.length}`, {
+        songId: song.id,
         hashId: hashId.substring(0, 8) + '...',
-        artistName: track.artistName,
-        trackName: track.name,
+        artistName: song.artistName,
+        songName: song.name,
       });
 
       // Create a new object without the id property to avoid duplication
-      const { id, ...trackWithoutId } = track;
+      const { id, ...songWithoutId } = song;
 
       // Ensure we have a processedTimestamp
-      if (!trackWithoutId.processedTimestamp) {
-        trackWithoutId.processedTimestamp = new Date().toISOString();
+      if (!songWithoutId.processedTimestamp) {
+        songWithoutId.processedTimestamp = new Date().toISOString();
       }
 
-      logger.debug(`Storing track in DynamoDB`, {
-        trackIndex: i,
-        entityType: 'TRACK',
-        processedTimestamp: trackWithoutId.processedTimestamp,
-        trackId: id,
+      logger.debug(`Storing song in DynamoDB`, {
+        songIndex: i,
+        entityType: 'SONG',
+        processedTimestamp: songWithoutId.processedTimestamp,
+        songId: id,
       });
 
       // Create the item to be stored
       const item = {
-        entityType: 'TRACK',
-        processedTimestamp: trackWithoutId.processedTimestamp,
+        entityType: 'SONG',
+        processedTimestamp: songWithoutId.processedTimestamp,
         id: hashId,
-        trackId: id,
-        artistName: track.artistName,
-        name: track.name,
-        albumName: track.albumName,
-        genreNames: track.genreNames,
-        trackNumber: track.trackNumber,
-        durationInMillis: track.durationInMillis,
-        releaseDate: track.releaseDate,
-        isrc: track.isrc,
-        artworkUrl: track.artworkUrl,
-        composerName: track.composerName,
-        url: track.url,
-        hasLyrics: track.hasLyrics,
-        isAppleDigitalMaster: track.isAppleDigitalMaster,
-        artworkColors: track.artworkColors,
+        songId: id,
+        artistName: song.artistName,
+        name: song.name,
+        albumName: song.albumName,
+        genreNames: song.genreNames,
+        trackNumber: song.trackNumber,
+        durationInMillis: song.durationInMillis,
+        releaseDate: song.releaseDate,
+        isrc: song.isrc,
+        artworkUrl: song.artworkUrl,
+        composerName: song.composerName,
+        url: song.url,
+        hasLyrics: song.hasLyrics,
+        isAppleDigitalMaster: song.isAppleDigitalMaster,
+        artworkColors: song.artworkColors,
       };
 
       // Make sure we're using a unique processedTimestamp for each record
@@ -93,7 +93,7 @@ export const storeTracksInDynamoDB = async (
         timestamp.setMilliseconds(timestamp.getMilliseconds() + i);
         item.processedTimestamp = timestamp.toISOString();
         logger.debug('Adjusted timestamp for uniqueness', {
-          trackIndex: i,
+          songIndex: i,
           newTimestamp: item.processedTimestamp,
         });
       }
@@ -106,16 +106,16 @@ export const storeTracksInDynamoDB = async (
       );
 
       successCount++;
-      logger.info(`Successfully stored track ${i + 1}/${tracks.length}`, {
-        trackId: id,
-        trackName: track.name,
-        artistName: track.artistName,
+      logger.info(`Successfully stored song ${i + 1}/${songs.length}`, {
+        songId: id,
+        songName: song.name,
+        artistName: song.artistName,
         successCount,
       });
     } catch (error) {
       errorCount++;
-      logger.error(`Error storing track ${i + 1}/${tracks.length}`, {
-        trackId: track?.id || 'unknown',
+      logger.error(`Error storing song ${i + 1}/${songs.length}`, {
+        songId: song?.id || 'unknown',
         error: error instanceof Error ? error.message : String(error),
         errorStack: error instanceof Error ? error.stack : 'No stack trace',
         errorCount,
@@ -123,8 +123,8 @@ export const storeTracksInDynamoDB = async (
     }
   }
 
-  logger.info('Track storage completed', {
-    totalTracks: tracks.length,
+  logger.info('Song storage completed', {
+    totalSongs: songs.length,
     successCount,
     errorCount,
   });
@@ -132,7 +132,7 @@ export const storeTracksInDynamoDB = async (
   // If all operations failed, throw an error
   if (errorCount > 0 && successCount === 0) {
     throw new Error(
-      `Failed to store any tracks in DynamoDB. All ${errorCount} operations failed.`
+      `Failed to store any songs in DynamoDB. All ${errorCount} operations failed.`
     );
   }
 

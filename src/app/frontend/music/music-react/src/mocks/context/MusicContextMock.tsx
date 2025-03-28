@@ -1,32 +1,32 @@
-import { ReactNode } from 'react';
-import { vi } from 'vitest';
-import { MusicItem } from '../../context/MusicContext';
+import { ReactNode } from "react";
+import { vi } from "vitest";
+import { MusicItem } from "../../context/MusicContext";
 
 // Mock for the MusicContext with proper types
 export const createMockMusicItem = (overrides = {}): MusicItem => ({
   processedTimestamp: new Date().toISOString(),
-  isrc: 'mock-isrc',
+  isrc: "mock-isrc",
   durationInMillis: 180000,
-  composerName: 'Mock Composer',
-  trackId: 'mock-track-id',
-  url: 'https://example.com/track',
-  genreNames: ['Mock Genre'],
-  name: 'Mock Track',
+  composerName: "Mock Composer",
+  songId: "mock-song-id",
+  url: "https://example.com/song",
+  genreNames: ["Mock Genre"],
+  name: "Mock Track",
   hasLyrics: false,
   trackNumber: 1,
-  releaseDate: '2023-01-01',
+  releaseDate: "2023-01-01",
   artworkColors: {
-    textColor1: '#FFFFFF',
-    backgroundColor: '#000000',
-    textColor4: '#CCCCCC',
-    textColor2: '#EEEEEE',
-    textColor3: '#DDDDDD',
+    textColor1: "#FFFFFF",
+    backgroundColor: "#000000",
+    textColor4: "#CCCCCC",
+    textColor2: "#EEEEEE",
+    textColor3: "#DDDDDD",
   },
-  albumName: 'Mock Album',
+  albumName: "Mock Album",
   isAppleDigitalMaster: false,
-  id: 'mock-id',
-  artworkUrl: 'https://example.com/artwork.jpg',
-  artistName: 'Mock Artist',
+  id: "mock-id",
+  artworkUrl: "https://example.com/artwork.jpg",
+  artistName: "Mock Artist",
   ...overrides,
 });
 
@@ -48,7 +48,7 @@ export const MockMusicProvider = ({
   contextValue?: ReturnType<typeof createMockMusicContext>;
 }) => {
   // Mock the useMusicContext hook before rendering
-  vi.mock('../../context/MusicContext', () => ({
+  vi.mock("../../context/MusicContext", () => ({
     useMusicContext: () => contextValue,
   }));
 

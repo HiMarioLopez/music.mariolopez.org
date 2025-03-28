@@ -1,5 +1,5 @@
-/* Individual track styles */
-.track {
+/* Individual song styles */
+.song {
   display: flex;
   align-items: center;
   padding: var(--padding-medium);
@@ -7,17 +7,17 @@
   background: var(--track-bg-color);
   height: auto; /* Allow natural height */
   transition: transform 0.2s ease-in-out, background 0.2s ease;
-  margin: 0 8px; /* Reduced horizontal margin for less space between track pairs */
+  margin: 0 8px; /* Reduced horizontal margin for less space between song pairs */
   width: 280px !important; /* Fixed width for consistent sizing */
 }
 
-.track:hover {
+.song:hover {
   background: var(--track-bg-color-hover);
   transform: translateY(-2px); /* Slight lift effect on hover */
 }
 
 /* Style for the images to ensure consistent sizing */
-.track img {
+.song img {
   width: 50px;
   height: 50px;
   border-radius: 5px;
@@ -27,7 +27,7 @@
 }
 
 /* Text container styling */
-.trackTextContainer {
+.songTextContainer {
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -36,8 +36,8 @@
   width: 100%; /* Take up available space */
 }
 
-.trackTextContainer h3,
-.trackTextContainer p {
+.songTextContainer h3,
+.songTextContainer p {
   margin: 0;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -46,13 +46,13 @@
 }
 
 /* Apply specific max-width for the artist-album line which tends to be longer */
-.trackTextContainer p {
+.songTextContainer p {
   max-width: 100%;
   font-size: 0.9em; /* Slightly smaller text for artist/album */
 }
 
 @media (max-width: 680px) {
-  .track {
+  .song {
       width: 220px !important; /* Smaller width on mobile */
   }
 }

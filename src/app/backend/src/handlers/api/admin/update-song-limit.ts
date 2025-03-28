@@ -1,19 +1,23 @@
-import { APIGatewayProxyEvent, APIGatewayProxyResult, Context } from 'aws-lambda';
+import {
+  APIGatewayProxyEvent,
+  APIGatewayProxyResult,
+  Context,
+} from 'aws-lambda';
 import { Logger } from '@aws-lambda-powertools/logger';
 import { Tracer } from '@aws-lambda-powertools/tracer';
 import { Metrics, MetricUnit } from '@aws-lambda-powertools/metrics';
 import { updateParameter } from '../../../services/parameter';
 import { getCorsHeaders } from '../../../utils/cors';
 
-const logger = new Logger({ serviceName: 'update-track-limit' });
-const tracer = new Tracer({ serviceName: 'update-track-limit' });
-const metrics = new Metrics({ namespace: 'update-track-limit' });
+const logger = new Logger({ serviceName: 'update-song-limit' });
+const tracer = new Tracer({ serviceName: 'update-song-limit' });
+const metrics = new Metrics({ namespace: 'update-song-limit' });
 
-const MIN_TRACK_LIMIT = 5;
-const MAX_TRACK_LIMIT = 30;
+const MIN_SONG_LIMIT = 5;
+const MAX_SONG_LIMIT = 30;
 
 /**
- * Lambda handler for updating track limit parameter
+ * Lambda handler for updating song limit parameter
  */
 export const handler = async (
   event: APIGatewayProxyEvent,
@@ -26,7 +30,7 @@ export const handler = async (
     },
   });
 
-  logger.info('Update Track Limit Lambda invoked', { event });
+  logger.info('Update Song Limit Lambda invoked', { event });
   metrics.addMetric('RequestCount', MetricUnit.Count, 1);
 
   try {
@@ -44,53 +48,55 @@ export const handler = async (
         statusCode: 400,
         headers: getCorsHeaders(event.headers.origin, 'POST'),
         body: JSON.stringify({
-          message: 'Request body is required'
-        })
+          message: 'Request body is required',
+        }),
       };
     }
 
-    // Parse and validate track limit
+    // Parse and validate song limit
     const body = JSON.parse(event.body);
-    const trackLimit = body.trackLimit;
+    const songLimit = body.songLimit;
 
-    if (typeof trackLimit !== 'number' ||
-      trackLimit < MIN_TRACK_LIMIT ||
-      trackLimit > MAX_TRACK_LIMIT) {
-      logger.warn('Invalid track limit provided', { trackLimit });
+    if (
+      typeof songLimit !== 'number' ||
+      songLimit < MIN_SONG_LIMIT ||
+      songLimit > MAX_SONG_LIMIT
+    ) {
+      logger.warn('Invalid song limit provided', { songLimit });
       metrics.addMetric('ValidationError', MetricUnit.Count, 1);
       return {
         statusCode: 400,
         headers: getCorsHeaders(event.headers.origin, 'POST'),
         body: JSON.stringify({
-          message: `Invalid track limit. Must be a number between ${MIN_TRACK_LIMIT} and ${MAX_TRACK_LIMIT}.`
-        })
+          message: `Invalid song limit. Must be a number between ${MIN_SONG_LIMIT} and ${MAX_SONG_LIMIT}.`,
+        }),
       };
     }
 
     // Update the parameter in SSM
-    await updateParameter(parameterName, trackLimit.toString());
-    logger.info('Track limit updated successfully', { trackLimit });
+    await updateParameter(parameterName, songLimit.toString());
+    logger.info('Song limit updated successfully', { songLimit });
     metrics.addMetric('UpdateSuccess', MetricUnit.Count, 1);
 
     return {
       statusCode: 200,
       headers: getCorsHeaders(event.headers.origin, 'POST'),
       body: JSON.stringify({
-        message: 'Track limit updated successfully',
-        trackLimit
-      })
+        message: 'Song limit updated successfully',
+        songLimit,
+      }),
     };
   } catch (error) {
-    logger.error('Error updating track limit', { error });
+    logger.error('Error updating song limit', { error });
     metrics.addMetric('ErrorCount', MetricUnit.Count, 1);
 
     return {
       statusCode: 500,
       headers: getCorsHeaders(event.headers.origin, 'POST'),
       body: JSON.stringify({
-        message: 'Error updating track limit',
-        error: error instanceof Error ? error.message : 'Unknown error'
-      })
+        message: 'Error updating song limit',
+        error: error instanceof Error ? error.message : 'Unknown error',
+      }),
     };
   }
 };

@@ -39,8 +39,8 @@
   width: 100%;
 }
 
-/* Track (item) style */
-.recentlyPlayedSkeletonTrack {
+/* Song (item) style */
+.recentlyPlayedSkeletonSong {
   display: flex;
   align-items: center;
   padding: var(--padding-medium);
@@ -88,7 +88,7 @@
 }
 
 @media (max-width: 680px) {
-  .recentlyPlayedSkeletonTrack {
+  .recentlyPlayedSkeletonSong {
       min-width: 220px; /* Smaller width on mobile */
   }
 }

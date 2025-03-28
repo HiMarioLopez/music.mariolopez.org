@@ -1,16 +1,16 @@
-import { vi } from 'vitest';
+import { vi } from "vitest";
 
-// Mock for the TrackItem component
+// Mock for the SongItem component
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const MockTrackItem = vi.fn(({ track, index, rowName }: any) => {
+const MockSongItem = vi.fn(({ song, index, rowName }: any) => {
   return (
-    <div data-testid={`track-item-${rowName}-${index}`}>
-      <div>{track.name}</div>
+    <div data-testid={`song-item-${rowName}-${index}`}>
+      <div>{song.name}</div>
       <div>
-        {track.artistName} - {track.albumName}
+        {song.artistName} - {song.albumName}
       </div>
     </div>
   );
 });
 
-export default MockTrackItem;
+export default MockSongItem;

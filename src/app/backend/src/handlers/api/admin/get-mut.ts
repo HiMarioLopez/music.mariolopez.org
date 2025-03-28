@@ -1,4 +1,8 @@
-import { APIGatewayProxyEvent, APIGatewayProxyResult, Context } from 'aws-lambda';
+import {
+  APIGatewayProxyEvent,
+  APIGatewayProxyResult,
+  Context,
+} from 'aws-lambda';
 import { Logger } from '@aws-lambda-powertools/logger';
 import { Tracer } from '@aws-lambda-powertools/tracer';
 import { Metrics, MetricUnit } from '@aws-lambda-powertools/metrics';
@@ -31,7 +35,7 @@ export const handler = async (
 
   try {
     const env: Environment = {
-      PARAMETER_NAME: process.env.PARAMETER_NAME ?? ''
+      PARAMETER_NAME: process.env.PARAMETER_NAME ?? '',
     };
 
     if (!env.PARAMETER_NAME) {
@@ -63,7 +67,7 @@ export const handler = async (
       headers: getCorsHeaders(event.headers.origin, 'GET'),
       body: JSON.stringify({
         error: 'Error processing your request',
-        message: error instanceof Error ? error.message : 'Unknown error'
+        message: error instanceof Error ? error.message : 'Unknown error',
       }),
     };
   }

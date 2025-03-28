@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import { describe, it, expect, vi, afterEach } from "vitest";
-import TrackItem from "../components/TrackItem";
+import SongItem from "../components/SongItem";
 import { createMockMusicItem } from "../../../mocks/context/MusicContextMock";
 
 // Mock the image processing utility
@@ -8,17 +8,17 @@ vi.mock("../../../utils/imageProcessing", () => ({
   getProcessedArtworkUrl: vi.fn((url) => `processed-${url}`),
 }));
 
-describe("TrackItem Component", () => {
-  const mockTrack = createMockMusicItem({
+describe("SongItem Component", () => {
+  const mockSong = createMockMusicItem({
     id: "123",
-    name: "Test Track Name",
+    name: "Test Song Name",
     artistName: "Test Artist",
     albumName: "Test Album",
     artworkUrl: "https://example.com/artwork.jpg",
     playedAt: new Date().toISOString(),
   });
 
-  const mockTrackWithLongNames = createMockMusicItem({
+  const mockSongWithLongNames = createMockMusicItem({
     id: "456",
     name: "The Secret Garden (Sweet Seduction Suite) [feat. Barry White, Al B. Surel, James Ingram & El DeBarge]",
     artistName: "Quincy Jones",
@@ -31,35 +31,35 @@ describe("TrackItem Component", () => {
     vi.restoreAllMocks();
   });
 
-  it("renders track information correctly", () => {
-    render(<TrackItem track={mockTrack} index={0} rowName="test-row" />);
+  it("renders song information correctly", () => {
+    render(<SongItem song={mockSong} index={0} rowName="test-row" />);
 
-    // Check that correct track info is displayed
-    expect(screen.getByText("Test Track Name")).toBeDefined();
+    // Check that correct song info is displayed
+    expect(screen.getByText("Test Song Name")).toBeDefined();
     expect(screen.getByText("Test Artist - Test Album")).toBeDefined();
 
     // Check image properties
-    const image = screen.getByAltText("Test Track Name Album Cover");
+    const image = screen.getByAltText("Test Song Name Album Cover");
     expect(image).toHaveAttribute(
       "src",
       "processed-https://example.com/artwork.jpg",
     );
-    expect(image).toHaveAttribute("title", "Test Track Name by Test Artist");
+    expect(image).toHaveAttribute("title", "Test Song Name by Test Artist");
   });
 
-  it("handles long track and artist names correctly", () => {
+  it("handles long song and artist names correctly", () => {
     render(
-      <TrackItem track={mockTrackWithLongNames} index={0} rowName="test-row" />,
+      <SongItem song={mockSongWithLongNames} index={0} rowName="test-row" />,
     );
 
     // Check that long names are displayed and properly handled with truncation in CSS
-    const trackName = screen.getByText(
+    const songName = screen.getByText(
       "The Secret Garden (Sweet Seduction Suite) [feat. Barry White, Al B. Surel, James Ingram & El DeBarge]",
     );
-    expect(trackName).toBeDefined();
+    expect(songName).toBeDefined();
 
     // Check that the element has title attribute for hover text
-    expect(trackName).toHaveAttribute(
+    expect(songName).toHaveAttribute(
       "title",
       "The Secret Garden (Sweet Seduction Suite) [feat. Barry White, Al B. Surel, James Ingram & El DeBarge]",
     );

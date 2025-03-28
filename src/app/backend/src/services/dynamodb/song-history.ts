@@ -1,14 +1,10 @@
 import { Logger } from '@aws-lambda-powertools/logger';
 import { Tracer } from '@aws-lambda-powertools/tracer';
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
-import {
-  DynamoDBDocumentClient,
-  QueryCommand,
-  ScanCommand,
-} from '@aws-sdk/lib-dynamodb';
+import { DynamoDBDocumentClient, QueryCommand } from '@aws-sdk/lib-dynamodb';
 
-const logger = new Logger({ serviceName: 'dynamodb-track-history' });
-const tracer = new Tracer({ serviceName: 'dynamodb-track-history' });
+const logger = new Logger({ serviceName: 'dynamodb-song-history' });
+const tracer = new Tracer({ serviceName: 'dynamodb-song-history' });
 
 const dynamodbClient = new DynamoDBClient();
 const docClient = DynamoDBDocumentClient.from(dynamodbClient);
@@ -27,14 +23,14 @@ interface PaginationResult {
 }
 
 /**
- * Get all tracks from DynamoDB with pagination
+ * Get all songs from DynamoDB with pagination
  *
  * @param tableName - DynamoDB table name
  * @param limit - Maximum number of items to return
  * @param startKey - Starting key for pagination
- * @returns Promise resolving to the paginated tracks
+ * @returns Promise resolving to the paginated songs
  */
-export const getAllTracks = async (
+export const getAllSongs = async (
   tableName: string,
   limit = DEFAULT_LIMIT,
   startKey?: string
@@ -47,7 +43,7 @@ export const getAllTracks = async (
       TableName: tableName,
       KeyConditionExpression: 'entityType = :entityType',
       ExpressionAttributeValues: {
-        ':entityType': 'TRACK',
+        ':entityType': 'SONG',
       },
       ScanIndexForward: false, // Descending order by sort key (timestamp)
       Limit: effectiveLimit,
@@ -63,7 +59,7 @@ export const getAllTracks = async (
       }
     }
 
-    logger.info('Querying all tracks', {
+    logger.info('Querying all songs', {
       tableName,
       limit: effectiveLimit,
       startKey: startKey || 'none',
@@ -73,10 +69,10 @@ export const getAllTracks = async (
     const result = await docClient.send(new QueryCommand(params));
 
     // Items are already sorted by timestamp (newest first) due to ScanIndexForward: false
-    const tracks = result.Items || [];
+    const songs = result.Items || [];
 
-    logger.info('Retrieved tracks', {
-      count: tracks.length,
+    logger.info('Retrieved songs', {
+      count: songs.length,
     });
 
     // Stringify the LastEvaluatedKey for pagination
@@ -86,25 +82,25 @@ export const getAllTracks = async (
     }
 
     return {
-      items: tracks,
+      items: songs,
       lastEvaluatedKey,
     };
   } catch (error) {
-    logger.error('Error fetching all tracks', { error });
+    logger.error('Error fetching all songs', { error });
     throw error;
   }
 };
 
 /**
- * Get tracks by artist name from DynamoDB with pagination
+ * Get songs by artist name from DynamoDB with pagination
  *
  * @param tableName - DynamoDB table name
  * @param artistName - Artist name to filter by
  * @param limit - Maximum number of items to return
  * @param startKey - Starting key for pagination
- * @returns Promise resolving to the paginated tracks
+ * @returns Promise resolving to the paginated songs
  */
-export const getTracksByArtist = async (
+export const getSongsByArtist = async (
   tableName: string,
   artistName: string,
   limit = DEFAULT_LIMIT,
@@ -119,7 +115,7 @@ export const getTracksByArtist = async (
       KeyConditionExpression: 'entityType = :entityType',
       FilterExpression: 'contains(artistName, :artistName)',
       ExpressionAttributeValues: {
-        ':entityType': 'TRACK',
+        ':entityType': 'SONG',
         ':artistName': artistName,
       },
       ScanIndexForward: false, // Descending order by timestamp
@@ -135,7 +131,7 @@ export const getTracksByArtist = async (
       }
     }
 
-    logger.info('Querying tracks by artist', {
+    logger.info('Querying songs by artist', {
       tableName,
       artistName,
       limit: effectiveLimit,
@@ -145,11 +141,11 @@ export const getTracksByArtist = async (
     const result = await docClient.send(new QueryCommand(params));
 
     // Results are already sorted due to ScanIndexForward: false
-    const tracks = result.Items || [];
+    const songs = result.Items || [];
 
-    logger.info('Retrieved tracks by artist', {
+    logger.info('Retrieved songs by artist', {
       artistName,
-      count: tracks.length,
+      count: songs.length,
     });
 
     // Stringify the LastEvaluatedKey for pagination
@@ -159,11 +155,11 @@ export const getTracksByArtist = async (
     }
 
     return {
-      items: tracks,
+      items: songs,
       lastEvaluatedKey,
     };
   } catch (error) {
-    logger.error('Error fetching tracks by artist', { artistName, error });
+    logger.error('Error fetching songs by artist', { artistName, error });
     throw error;
   }
 };

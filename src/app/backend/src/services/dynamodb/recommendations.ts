@@ -40,7 +40,7 @@ export interface SongRecommendation extends BaseRecommendation {
   artistName: string;
   albumName: string;
   albumCoverUrl: string;
-  type: 'SONG';
+  entityType: 'SONG';
 }
 
 export interface AlbumRecommendation extends BaseRecommendation {
@@ -49,14 +49,14 @@ export interface AlbumRecommendation extends BaseRecommendation {
   albumCoverUrl: string;
   trackCount?: number;
   releaseDate?: string;
-  type: 'ALBUM';
+  entityType: 'ALBUM';
 }
 
 export interface ArtistRecommendation extends BaseRecommendation {
   artistName: string;
   artistImageUrl: string;
   genres?: string[];
-  type: 'ARTIST';
+  entityType: 'ARTIST';
 }
 
 export type Recommendation =
@@ -80,12 +80,14 @@ export const getAllRecommendations = async (
   try {
     const effectiveLimit = Math.min(limit, MAX_LIMIT);
 
-    // Create query parameters for base table (votes sort)
+    // Create query parameters for scanning all entity types
     const params: any = {
       TableName: tableName,
-      KeyConditionExpression: 'entityType = :entityType',
+      FilterExpression: 'entityType IN (:song, :album, :artist)',
       ExpressionAttributeValues: {
-        ':entityType': 'RECOMMENDATION',
+        ':song': 'SONG',
+        ':album': 'ALBUM',
+        ':artist': 'ARTIST',
       },
       ScanIndexForward: false, // Descending order by sort key (votes)
       Limit: effectiveLimit,
@@ -137,14 +139,14 @@ export const getAllRecommendations = async (
  * Get recommendations by type from DynamoDB with pagination
  *
  * @param tableName - DynamoDB table name
- * @param type - Type to filter by (SONG, ALBUM, or ARTIST)
+ * @param entityType - Type to filter by (SONG, ALBUM, or ARTIST)
  * @param limit - Maximum number of items to return
  * @param startKey - Starting key for pagination
  * @returns Promise resolving to the paginated recommendations
  */
-export const getRecommendationsByType = async (
+export const getRecommendationsByEntityType = async (
   tableName: string,
-  type: 'SONG' | 'ALBUM' | 'ARTIST',
+  entityType: 'SONG' | 'ALBUM' | 'ARTIST',
   limit = DEFAULT_LIMIT,
   startKey?: string
 ): Promise<PaginationResult> => {
@@ -155,13 +157,8 @@ export const getRecommendationsByType = async (
     const params: any = {
       TableName: tableName,
       KeyConditionExpression: 'entityType = :entityType',
-      FilterExpression: '#type = :type',
-      ExpressionAttributeNames: {
-        '#type': 'type',
-      },
       ExpressionAttributeValues: {
-        ':entityType': 'RECOMMENDATION',
-        ':type': type,
+        ':entityType': entityType,
       },
       ScanIndexForward: false, // Descending order by votes
       Limit: effectiveLimit,
@@ -178,7 +175,7 @@ export const getRecommendationsByType = async (
 
     logger.info('Querying recommendations by type', {
       tableName,
-      type,
+      entityType,
       limit: effectiveLimit,
       startKey: startKey || 'none',
     });
@@ -189,7 +186,7 @@ export const getRecommendationsByType = async (
     const recommendations = result.Items || [];
 
     logger.info('Retrieved recommendations by type', {
-      type,
+      entityType,
       count: recommendations.length,
     });
 
@@ -204,7 +201,10 @@ export const getRecommendationsByType = async (
       lastEvaluatedKey,
     };
   } catch (error) {
-    logger.error('Error fetching recommendations by type', { error, type });
+    logger.error('Error fetching recommendations by type', {
+      error,
+      entityType,
+    });
     throw error;
   }
 };
@@ -236,7 +236,7 @@ export const getRecommendationsByFrom = async (
         '#from': 'from',
       },
       ExpressionAttributeValues: {
-        ':entityType': 'RECOMMENDATION',
+        ':entityType': 'SONG',
         ':from': fromPerson,
       },
       ScanIndexForward: false, // Descending order by votes
@@ -280,7 +280,10 @@ export const getRecommendationsByFrom = async (
       lastEvaluatedKey,
     };
   } catch (error) {
-    logger.error('Error fetching recommendations by creator', { error, fromPerson });
+    logger.error('Error fetching recommendations by creator', {
+      error,
+      fromPerson,
+    });
     throw error;
   }
 };
@@ -294,12 +297,12 @@ export const getRecommendationsByFrom = async (
  */
 export const createRecommendation = async (
   tableName: string,
-  recommendation: Omit<Recommendation, 'entityType' | 'timestamp' | 'votes'>
+  recommendation: Omit<Recommendation, 'timestamp' | 'votes'>
 ): Promise<Recommendation> => {
   try {
     // Generate current timestamp
     const timestamp = new Date().toISOString();
-    
+
     // Default votes to 0 for new recommendations
     const votes = 0;
 
@@ -307,34 +310,39 @@ export const createRecommendation = async (
     let completeRecommendation: Recommendation;
 
     // Create the appropriate recommendation type based on the 'type' property
-    if (recommendation.type === 'SONG') {
+    if (recommendation.entityType === 'SONG') {
       completeRecommendation = {
-        ...(recommendation as Omit<SongRecommendation, 'entityType' | 'timestamp' | 'votes'>),
-        entityType: 'RECOMMENDATION',
+        ...(recommendation as Omit<SongRecommendation, 'timestamp' | 'votes'>),
+        entityType: 'SONG',
         timestamp,
         votes,
       } as SongRecommendation;
-    } else if (recommendation.type === 'ALBUM') {
+    } else if (recommendation.entityType === 'ALBUM') {
       completeRecommendation = {
-        ...(recommendation as Omit<AlbumRecommendation, 'entityType' | 'timestamp' | 'votes'>),
-        entityType: 'RECOMMENDATION',
+        ...(recommendation as Omit<AlbumRecommendation, 'timestamp' | 'votes'>),
+        entityType: 'ALBUM',
         timestamp,
         votes,
       } as AlbumRecommendation;
-    } else if (recommendation.type === 'ARTIST') {
+    } else if (recommendation.entityType === 'ARTIST') {
       completeRecommendation = {
-        ...(recommendation as Omit<ArtistRecommendation, 'entityType' | 'timestamp' | 'votes'>),
-        entityType: 'RECOMMENDATION',
+        ...(recommendation as Omit<
+          ArtistRecommendation,
+          'timestamp' | 'votes'
+        >),
+        entityType: 'ARTIST',
         timestamp,
         votes,
       } as ArtistRecommendation;
     } else {
-      throw new Error(`Invalid recommendation type: ${(recommendation as any).type}`);
+      throw new Error(
+        `Invalid recommendation type: ${(recommendation as any).entityType}`
+      );
     }
 
     logger.info('Creating new recommendation', {
       tableName,
-      type: recommendation.type,
+      entityType: recommendation.entityType,
     });
 
     // Use PutCommand to add the recommendation to DynamoDB
@@ -346,7 +354,7 @@ export const createRecommendation = async (
     );
 
     logger.info('Successfully created recommendation', {
-      type: recommendation.type,
+      entityType: recommendation.entityType,
     });
 
     return completeRecommendation;
@@ -358,9 +366,9 @@ export const createRecommendation = async (
 
 /**
  * Update votes for a recommendation in DynamoDB
- * 
+ *
  * @param tableName - DynamoDB table name
- * @param entityType - Entity type (should be 'RECOMMENDATION')
+ * @param entityType - Entity type (SONG, ALBUM, or ARTIST)
  * @param votes - Current vote count
  * @param newVotes - New vote count to set
  * @returns Promise resolving to the updated recommendation
@@ -383,7 +391,9 @@ export const updateRecommendationVotes = async (
     });
 
     // This is a simplified placeholder - real implementation would need more parameters
-    throw new Error('Not implemented: This function needs additional identifiers to update votes');
+    throw new Error(
+      'Not implemented: This function needs additional identifiers to update votes'
+    );
   } catch (error) {
     logger.error('Error updating recommendation votes', { error });
     throw error;

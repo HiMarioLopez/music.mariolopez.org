@@ -1,16 +1,16 @@
-import { useAppleMusic } from '../contexts/AppleMusicContext';
-import '../styles/components.css';
-import '../styles/theme.css';
-import './AdminPanel.css';
-import { DeveloperTokenManagement } from './DeveloperTokenManagement';
-import { MusicUserTokenManagement } from './MusicUserTokenManagement';
-import { ScheduleRateCard } from './ScheduleRateCard';
-import { ThemeToggle } from './ThemeToggle';
-import { TrackLimitCard } from './TrackLimitCard';
+import { useAppleMusic } from "../contexts/AppleMusicContext";
+import "../styles/components.css";
+import "../styles/theme.css";
+import "./AdminPanel.css";
+import { DeveloperTokenManagement } from "./DeveloperTokenManagement";
+import { MusicUserTokenManagement } from "./MusicUserTokenManagement";
+import { ScheduleRateCard } from "./ScheduleRateCard";
+import { ThemeToggle } from "./ThemeToggle";
+import { SongLimitCard } from "./SongLimitCard";
 
 // Note: Amplify libs are so large! Fix this... eventually?
-import { Authenticator } from '@aws-amplify/ui-react';
-import '@aws-amplify/ui-react/styles.css';
+import { Authenticator } from "@aws-amplify/ui-react";
+import "@aws-amplify/ui-react/styles.css";
 
 export function AdminPanel() {
   const { setDeveloperToken } = useAppleMusic();
@@ -42,7 +42,7 @@ export function AdminPanel() {
                 <DeveloperTokenManagement onTokenFetched={setDeveloperToken} />
                 <MusicUserTokenManagement />
                 <ScheduleRateCard />
-                <TrackLimitCard />
+                <SongLimitCard />
               </div>
             </main>
           </div>
@@ -50,4 +50,4 @@ export function AdminPanel() {
       </Authenticator>
     </div>
   );
-} 
+}

@@ -69,29 +69,30 @@ export const handler = async (
     const requestBody = JSON.parse(event.body);
 
     // Validate request body
-    if (!requestBody.type) {
+    if (!requestBody.entityType) {
       return {
         statusCode: 400,
         headers: getCorsHeaders(event.headers?.origin, 'POST,OPTIONS'),
         body: JSON.stringify({
-          message: 'type is required in request body (SONG, ALBUM, or ARTIST)',
+          message:
+            'entityType is required in request body (SONG, ALBUM, or ARTIST)',
         }),
       };
     }
 
     // Validate the type is one of the allowed values
-    if (!['SONG', 'ALBUM', 'ARTIST'].includes(requestBody.type)) {
+    if (!['SONG', 'ALBUM', 'ARTIST'].includes(requestBody.entityType)) {
       return {
         statusCode: 400,
         headers: getCorsHeaders(event.headers?.origin, 'POST,OPTIONS'),
         body: JSON.stringify({
-          message: 'type must be one of: SONG, ALBUM, or ARTIST',
+          message: 'entityType must be one of: SONG, ALBUM, or ARTIST',
         }),
       };
     }
 
     // Validate required fields based on type
-    if (requestBody.type === 'SONG') {
+    if (requestBody.entityType === 'SONG') {
       if (
         !requestBody.songTitle ||
         !requestBody.artistName ||
@@ -106,7 +107,7 @@ export const handler = async (
           }),
         };
       }
-    } else if (requestBody.type === 'ALBUM') {
+    } else if (requestBody.entityType === 'ALBUM') {
       if (!requestBody.albumTitle || !requestBody.artistName) {
         return {
           statusCode: 400,
@@ -117,7 +118,7 @@ export const handler = async (
           }),
         };
       }
-    } else if (requestBody.type === 'ARTIST') {
+    } else if (requestBody.entityType === 'ARTIST') {
       if (!requestBody.artistName) {
         return {
           statusCode: 400,
@@ -130,13 +131,14 @@ export const handler = async (
     }
 
     // Create the recommendation in DynamoDB
-    logger.info('Creating recommendation', { type: requestBody.type });
+    logger.info('Creating recommendation', {
+      entityType: requestBody.entityType,
+    });
 
     // Map the request body to the corresponding recommendation type
-    let recommendation: Omit<Recommendation, 'entityType' | 'timestamp'>;
-    if (requestBody.type === 'SONG') {
+    let recommendation: Omit<Recommendation, 'timestamp'>;
+    if (requestBody.entityType === 'SONG') {
       recommendation = {
-        type: 'SONG',
         songTitle: requestBody.songTitle,
         artistName: requestBody.artistName,
         albumName: requestBody.albumName,
@@ -144,9 +146,8 @@ export const handler = async (
         from: requestBody.from,
         note: requestBody.note,
       } as SongRecommendation;
-    } else if (requestBody.type === 'ALBUM') {
+    } else if (requestBody.entityType === 'ALBUM') {
       recommendation = {
-        type: 'ALBUM',
         albumTitle: requestBody.albumTitle,
         artistName: requestBody.artistName,
         albumCoverUrl: requestBody.albumCoverUrl || '',
@@ -157,7 +158,6 @@ export const handler = async (
       } as AlbumRecommendation;
     } else {
       recommendation = {
-        type: 'ARTIST',
         artistName: requestBody.artistName,
         artistImageUrl: requestBody.artistImageUrl || '',
         genres: requestBody.genres,
@@ -169,15 +169,15 @@ export const handler = async (
     // Store in DynamoDB
     const result = await createRecommendation(tableName, recommendation);
 
-    // Track metrics based on recommendation type
+    // Record metrics based on recommendation type
     metrics.addMetric(
-      `${requestBody.type}RecommendationCount`,
+      `${requestBody.entityType}RecommendationCount`,
       MetricUnit.Count,
       1
     );
 
     logger.info('Successfully created recommendation', {
-      type: requestBody.type,
+      entityType: requestBody.entityType,
       timestamp: result.timestamp,
     });
 

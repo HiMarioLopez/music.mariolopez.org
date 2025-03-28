@@ -42,12 +42,12 @@ public static class Program
         adminPanelStack.AddDependency(apiStack);
         adminPanelStack.AddDependency(frontendStack);
 
-        // Add Apple Music History tracker stack
+        // Add Apple Music History stack
         var historyStack = new AppleMusicHistoryStack(app, "AppleMusicHistoryStack", new StackProps
         {
             Env = env,
             StackName = "AppleMusicHistoryStack",
-            Description = "This stack contains resources for tracking and displaying Apple Music listening history."
+            Description = "This stack contains resources for recording and displaying Apple Music listening history."
         }, configuration);
 
         // Add dependency on the API stack as we'll need the Apple Music token

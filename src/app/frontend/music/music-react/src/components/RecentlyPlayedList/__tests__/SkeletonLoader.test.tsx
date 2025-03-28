@@ -21,7 +21,7 @@ describe("SkeletonLoader Component", () => {
 
     rows.forEach((row) => {
       const placeholderItems = row.querySelectorAll(
-        ".recentlyPlayedSkeletonTrack",
+        ".recentlyPlayedSkeletonSong",
       );
       expect(placeholderItems).toHaveLength(4);
 

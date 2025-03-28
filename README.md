@@ -1,6 +1,6 @@
 # music.mariolopez.org
 
-A simple site to track what I'm currently listening to on [Apple Music](https://www.apple.com/apple-music/), and send me new song recommendations.
+A simple site to songs what I'm currently listening to on [Apple Music](https://www.apple.com/apple-music/), and send me new recommendations.
 
 ## Inspiration
 

@@ -13,7 +13,7 @@ export interface MusicItem {
   isrc: string;
   durationInMillis: number;
   composerName: string;
-  trackId: string;
+  songId: string;
   url: string;
   genreNames: string[];
   name: string;

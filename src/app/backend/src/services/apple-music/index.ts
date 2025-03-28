@@ -1,53 +1,53 @@
 import { Logger } from '@aws-lambda-powertools/logger';
-import { Track } from '../../models/track';
+import { Song } from '../../models/song';
 
 const logger = new Logger({ serviceName: 'apple-music-service' });
 
 // Re-export core API functions for backward compatibility
 export {
   fetchFromApi,
-  fetchRecentTracks,
+  fetchRecentSongs,
   getDeveloperToken,
   getMusicUserToken,
 } from './api';
 
 /**
- * Process tracks and filter out already processed ones
+ * Process songs and filter out already processed ones
  *
- * @param tracks - Array of Track objects
- * @param lastProcessedTrackId - ID of the last processed track
- * @returns Promise resolving to filtered array of Track objects
+ * @param songs - Array of Song objects
+ * @param lastProcessedSongId - ID of the last processed song
+ * @returns Promise resolving to filtered array of Song objects
  */
-export const processTracks = async (
-  tracks: Track[],
-  lastProcessedTrackId: string
-): Promise<Track[]> => {
-  // If no last processed track ID, return all tracks
-  if (!lastProcessedTrackId || lastProcessedTrackId === 'placeholder') {
-    logger.info('No last processed track ID, returning all tracks');
-    return tracks;
+export const processSongs = async (
+  songs: Song[],
+  lastProcessedSongId: string
+): Promise<Song[]> => {
+  // If no last processed song ID, return all songs
+  if (!lastProcessedSongId || lastProcessedSongId === 'placeholder') {
+    logger.info('No last processed song ID, returning all songs');
+    return songs;
   }
 
-  // Find index of the last processed track
-  const lastProcessedIndex = tracks.findIndex(
-    (track) => track.id === lastProcessedTrackId
+  // Find index of the last processed song
+  const lastProcessedIndex = songs.findIndex(
+    (song) => song.id === lastProcessedSongId
   );
 
-  // If not found, return all tracks
+  // If not found, return all songs
   if (lastProcessedIndex === -1) {
     logger.info(
-      'Last processed track not found in recent tracks, returning all tracks'
+      'Last processed song not found in recent songs, returning all songs'
     );
-    return tracks;
+    return songs;
   }
 
-  // Return only tracks newer than the last processed track
-  const newTracks = tracks.slice(0, lastProcessedIndex);
-  logger.info('Filtered tracks', {
-    total: tracks.length,
-    new: newTracks.length,
-    lastProcessedTrackId,
+  // Return only songs newer than the last processed song
+  const newSongs = songs.slice(0, lastProcessedIndex);
+  logger.info('Filtered songs', {
+    total: songs.length,
+    new: newSongs.length,
+    lastProcessedSongId,
   });
 
-  return newTracks;
+  return newSongs;
 };

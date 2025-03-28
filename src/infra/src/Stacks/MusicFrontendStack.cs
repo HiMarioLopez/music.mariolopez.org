@@ -8,8 +8,6 @@ using Amazon.CDK.AWS.S3;
 using Amazon.CDK.AWS.S3.Deployment;
 using Constructs;
 using System.Collections.Generic;
-using System.IO;
-using System.Text;
 using Microsoft.Extensions.Configuration;
 using Music.Infra.Models.Settings;
 

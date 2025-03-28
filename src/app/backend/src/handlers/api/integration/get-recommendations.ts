@@ -8,7 +8,7 @@ import {
 } from 'aws-lambda';
 import {
   getAllRecommendations,
-  getRecommendationsByType,
+  getRecommendationsByEntityType,
   getRecommendationsByFrom,
 } from '../../../services/dynamodb/recommendations';
 import { getParameter } from '../../../services/parameter';
@@ -75,7 +75,11 @@ export const handler = async (
       : DEFAULT_LIMIT;
 
     // Get filters if provided
-    const type = queryParams.type as 'SONG' | 'ALBUM' | 'ARTIST' | undefined;
+    const entityType = queryParams.entityType as
+      | 'SONG'
+      | 'ALBUM'
+      | 'ARTIST'
+      | undefined;
     const from = queryParams.from;
 
     // Get starting key for pagination if provided
@@ -87,25 +91,30 @@ export const handler = async (
     let result;
 
     // Determine which query function to use based on filters
-    if (type) {
-      // Validate type parameter
-      if (!['SONG', 'ALBUM', 'ARTIST'].includes(type)) {
+    if (entityType) {
+      // Validate entityType parameter
+      if (!['SONG', 'ALBUM', 'ARTIST'].includes(entityType)) {
         return {
           statusCode: 400,
           headers: getCorsHeaders(event.headers?.origin, 'GET,OPTIONS'),
           body: JSON.stringify({
             message:
-              'Invalid type parameter. Must be one of: SONG, ALBUM, ARTIST',
+              'Invalid entityType parameter. Must be one of: SONG, ALBUM, ARTIST',
           }),
         };
       }
 
-      logger.info('Fetching recommendations by type, sorted by votes', {
-        type,
+      logger.info('Fetching recommendations by entityType, sorted by votes', {
+        entityType,
         limit,
       });
-      result = await getRecommendationsByType(tableName, type, limit, startKey);
-      metrics.addMetric('TypeVotesFilteredQuery', MetricUnit.Count, 1);
+      result = await getRecommendationsByEntityType(
+        tableName,
+        entityType,
+        limit,
+        startKey
+      );
+      metrics.addMetric('EntityTypeVotesFilteredQuery', MetricUnit.Count, 1);
     } else if (from) {
       logger.info('Fetching recommendations by creator, sorted by votes', {
         from,
@@ -119,7 +128,7 @@ export const handler = async (
       metrics.addMetric('AllRecommendationsByVotesQuery', MetricUnit.Count, 1);
     }
 
-    // Track the number of results returned
+    // Record the number of results returned
     metrics.addMetric('ResultCount', MetricUnit.Count, result.items.length);
 
     // Prepare pagination info
