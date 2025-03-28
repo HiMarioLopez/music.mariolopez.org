@@ -41,9 +41,6 @@ body,
     --margin-small: 5px;
 
     /* Width and Height */
-    --max-width-large: 1200px;
-    --max-width-medium: 600px;
-    --width-mobile: 80vw;
     --navbar-height-desktop: 40px;
     --navbar-height-mobile: 30px;
     --footer-height-desktop: 40px;

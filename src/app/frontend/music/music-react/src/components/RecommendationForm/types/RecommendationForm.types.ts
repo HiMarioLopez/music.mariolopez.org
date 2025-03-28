@@ -1,3 +1,9 @@
+export type RecommendationFormData = {
+  from: string;
+  note: string;
+  selectedItem: Result | null;
+};
+
 export type Result = {
   id: string;
   name: string;
@@ -10,13 +16,6 @@ export type Result = {
   releaseDate?: string;
   // Artist specific fields
   genres?: string[];
-};
-
-// New type for the recommendation form data
-export type RecommendationFormData = {
-  from: string;
-  note: string;
-  selectedItem: Result | null;
 };
 
 export type TopResult = {

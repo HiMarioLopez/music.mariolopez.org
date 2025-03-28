@@ -43,8 +43,14 @@
     width: 100%;
 }
 
+/* Remove padding from recently played container for cool 'overflow' effect on lists  */
+.recentlyPlayedContainer {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+}
+
 /* Three-column layout for larger screens */
-@media (min-width: 1500px) {
+@media (min-width: 1600px) {
     .mainContent {
         max-width: 1500px;
         display: flex;
@@ -80,7 +86,7 @@
 }
 
 /* Medium desktop - still 3 columns but narrower */
-@media (min-width: 1200px) and (max-width: 1499px) {
+@media (min-width: 1300px) and (max-width: 1599px) {
     .mainContent {
         max-width: 1200px;
         display: flex;
@@ -117,7 +123,7 @@
 }
 
 /* Stack all columns for tablets and smaller screens */
-@media (max-width: 1199px) {
+@media (max-width: 1299px) {
     .app {
         flex-direction: column;
     }
@@ -125,12 +131,9 @@
     .mainContent {
         padding-top: calc(var(--navbar-height-desktop) + var(--padding-large));
         padding-bottom: 0;
-        width: 600px;
-        /* Fixed width */
-        max-width: 90%;
-        /* For smaller screens */
+        width: 560px;
+        max-width: calc(90% - var(--padding-large) * 2);
         margin: 0 auto;
-        /* Center horizontally */
         display: flex;
         flex-direction: column;
     }
@@ -202,7 +205,7 @@
 @media (max-width: 699px) {
     .mainContent {
         padding-top: calc(var(--navbar-height-mobile) + var(--padding-large));
-        max-width: var(--width-mobile);
+        max-width: 90%;
     }
 }
 
@@ -213,16 +216,5 @@
     padding: var(--padding-large);
     border-radius: var(--border-radius-large);
     box-shadow: inset 0 4px 8px rgba(0, 0, 0, 0.1);
-}
-
-@media (min-width: 1300px) {
-    .styledContainer {
-        max-width: var(--max-width-large);
-    }
-}
-
-@media (max-width: 1299px) {
-    .styledContainer {
-        max-width: var(--max-width-medium);
-    }
+    box-sizing: border-box;
 }

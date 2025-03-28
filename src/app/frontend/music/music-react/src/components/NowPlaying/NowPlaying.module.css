@@ -43,7 +43,7 @@
     }
 }
 
-@media (min-width: 680px) and (max-width: 1199px) {
+@media (min-width: 700px) and (max-width: 1199px) {
     .nowPlayingComponent img {
         width: var(--album-art-size-medium);
         height: var(--album-art-size-medium);
@@ -178,8 +178,7 @@
     }
 }
 
-@media (max-width: 680px) {
-
+@media (max-width: 699px) {
     .nowPlayingComponent,
     .nowPlayingComponent h1,
     .nowPlayingComponent img,
@@ -193,7 +192,8 @@
     }
 
     .nowPlayingComponent img {
-        height: auto;
+        height: 100%;
+        width: 100%;
         margin: var(--margin-medium) 0;
     }
 
@@ -206,6 +206,7 @@
     }
 
     .nowPlayingComponentTextContainer {
+        align-self: start;
         height: auto;
         max-width: 100%;
     }

@@ -6,15 +6,15 @@
 }
 
 .recentlyPlayedListComponent h1 {
+  /* Have to manually set back 'side' padding to keep 'overflow' style working */
+  padding-left: var(--padding-large);
+  padding-right: var(--padding-large);
+
   width: 100%;
   text-align: left;
   margin: 0 0 var(--margin-medium);
-}
-
-.recentlyPlayedListComponentListContainer {
-  position: relative;
-  width: 100%;
-  padding: 5px 5px 10px 5px;
+  text-overflow: ellipsis;
+  overflow: hidden;
 }
 
 @media (max-width: 680px) {

@@ -1,3 +1,8 @@
+.recommendation-list-component h1 {
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+
 .recommendation-list-component::-webkit-scrollbar {
     width: 12px;
 }

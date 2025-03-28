@@ -26,9 +26,7 @@ const RecentlyPlayedList: React.FC = () => {
     return (
       <div className={styles.recentlyPlayedListComponent}>
         <h1>Recently Played</h1>
-        <div className={styles.recentlyPlayedListComponentListContainer}>
-          <SkeletonLoader />
-        </div>
+        <SkeletonLoader />
       </div>
     );
   }
@@ -38,9 +36,7 @@ const RecentlyPlayedList: React.FC = () => {
     return (
       <div className={styles.recentlyPlayedListComponent}>
         <h1>Recently Played</h1>
-        <div className={styles.recentlyPlayedListComponentListContainer}>
-          <p>Error loading tracks: {error}</p>
-        </div>
+        <p>Error loading tracks: {error}</p>
       </div>
     );
   }
@@ -48,32 +44,30 @@ const RecentlyPlayedList: React.FC = () => {
   return (
     <div className={styles.recentlyPlayedListComponent}>
       <h1>Recently Played</h1>
-      <div className={styles.recentlyPlayedListComponentListContainer}>
-        {recentlyPlayed.length > 0 ? (
-          <>
-            {/* Top row slider - moves left to right */}
-            <CarouselRow
-              tracks={topRowTracks}
-              settings={topSliderSettings}
-              rowName="top"
-            />
-            {/* Middle row slider - moves right to left */}
-            <CarouselRow
-              tracks={middleRowTracks}
-              settings={middleSliderSettings}
-              rowName="middle"
-            />
-            {/* Bottom row slider - moves left to right slower */}
-            <CarouselRow
-              tracks={bottomRowTracks}
-              settings={bottomSliderSettings}
-              rowName="bottom"
-            />
-          </>
-        ) : (
-          <p>No recently played tracks available</p>
-        )}
-      </div>
+      {recentlyPlayed.length > 0 ? (
+        <>
+          {/* Top row slider - moves left to right */}
+          <CarouselRow
+            tracks={topRowTracks}
+            settings={topSliderSettings}
+            rowName="top"
+          />
+          {/* Middle row slider - moves right to left */}
+          <CarouselRow
+            tracks={middleRowTracks}
+            settings={middleSliderSettings}
+            rowName="middle"
+          />
+          {/* Bottom row slider - moves left to right slower */}
+          <CarouselRow
+            tracks={bottomRowTracks}
+            settings={bottomSliderSettings}
+            rowName="bottom"
+          />
+        </>
+      ) : (
+        <p>No recently played tracks available</p>
+      )}
     </div>
   );
 };
