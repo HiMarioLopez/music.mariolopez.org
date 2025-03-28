@@ -1,4 +1,4 @@
-﻿using Amazon.CDK;
+using Amazon.CDK;
 using Music.Infra.Stacks;
 using Music.Infra.Config;
 
@@ -52,6 +52,17 @@ public static class Program
 
         // Add dependency on the API stack as we'll need the Apple Music token
         historyStack.AddDependency(apiStack);
+
+        // Add Recommendation stack
+        var recommendationStack = new RecommendationStack(app, "RecommendationStack", new StackProps
+        {
+            Env = env,
+            StackName = "RecommendationStack",
+            Description = "This stack contains resources for storing and retrieving music recommendations."
+        }, configuration);
+
+        // Add dependency on the API stack for integration
+        recommendationStack.AddDependency(apiStack);
 
         app.Synth();
     }
