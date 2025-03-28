@@ -17,45 +17,6 @@
     overflow: hidden;
 }
 
-@media (min-width: 1500px) {
-    .nowPlayingComponent img {
-        width: var(--album-art-size-large);
-        height: var(--album-art-size-large);
-    }
-
-    .nowPlayingComponentTextContainer {
-        height: var(--album-art-size-large);
-        /* Matching the size of the album art */
-        max-width: calc(100% - var(--album-art-size-large) - var(--margin-large));
-    }
-}
-
-@media (min-width: 1200px) and (max-width: 1499px) {
-    .nowPlayingComponent img {
-        width: var(--album-art-size-medium);
-        height: var(--album-art-size-medium);
-    }
-
-    .nowPlayingComponentTextContainer {
-        height: var(--album-art-size-medium);
-        /* Matching the size of the album art */
-        max-width: calc(100% - var(--album-art-size-medium) - var(--margin-large));
-    }
-}
-
-@media (min-width: 700px) and (max-width: 1199px) {
-    .nowPlayingComponent img {
-        width: var(--album-art-size-medium);
-        height: var(--album-art-size-medium);
-    }
-
-    .nowPlayingComponentTextContainer {
-        height: var(--album-art-size-medium);
-        /* Matching the size of the album art */
-        max-width: calc(100% - var(--album-art-size-medium) - var(--margin-large));
-    }
-}
-
 .nowPlayingHeader {
     display: flex;
     align-items: baseline;
@@ -112,8 +73,8 @@
     font-size: 1.5rem;
     margin-bottom: 0.25rem;
     display: -webkit-box;
-    -webkit-line-clamp: 2;
-    line-clamp: 2;
+    -webkit-line-clamp: 1;
+    line-clamp: 1;
     -webkit-box-orient: vertical;
     white-space: normal;
     max-height: 3.6rem; /* Fallback for browsers that don't support line-clamp */
@@ -175,6 +136,51 @@
 @keyframes shimmer {
     100% {
         transform: translateX(100%);
+    }
+}
+
+@media (min-width: 1600px) {
+    .nowPlayingComponent img {
+        width: var(--album-art-size-large);
+        height: var(--album-art-size-large);
+    }
+
+    .nowPlayingComponentTextContainer {
+        height: var(--album-art-size-large);
+        /* Matching the size of the album art */
+        max-width: calc(100% - var(--album-art-size-large) - var(--margin-large));
+    }
+
+    .nowPlayingComponentText h2 {
+        -webkit-line-clamp: 2;
+        line-clamp: 2;
+        max-height: 3.6rem; /* Fallback for browsers that don't support line-clamp */
+    }
+}
+
+@media (min-width: 1300px) and (max-width: 1599px) {
+    .nowPlayingComponent img {
+        width: var(--album-art-size-medium);
+        height: var(--album-art-size-medium);
+    }
+
+    .nowPlayingComponentTextContainer {
+        height: var(--album-art-size-medium);
+        /* Matching the size of the album art */
+        max-width: calc(100% - var(--album-art-size-medium) - var(--margin-large));
+    }
+}
+
+@media (min-width: 700px) and (max-width: 1299px) {
+    .nowPlayingComponent img {
+        width: var(--album-art-size-medium);
+        height: var(--album-art-size-medium);
+    }
+
+    .nowPlayingComponentTextContainer {
+        height: var(--album-art-size-medium);
+        /* Matching the size of the album art */
+        max-width: calc(100% - var(--album-art-size-medium) - var(--margin-large));
     }
 }
 
