@@ -1,16 +1,17 @@
 meta {
-  name: Recently Played Tracks (Limit 5)
+  name: Recently Played Tracks (Limit 5) [Songs]
   type: http
-  seq: 5
+  seq: 6
 }
 
 get {
-  url: https://api.music.apple.com/v1/me/recent/played/tracks?limit=5
+  url: https://api.music.apple.com/v1/me/recent/played/tracks?types=songs&limit=5
   body: none
   auth: bearer
 }
 
 params:query {
+  types: songs
   limit: 5
 }
 
