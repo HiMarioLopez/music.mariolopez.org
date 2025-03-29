@@ -122,15 +122,16 @@ const RecommendationForm: React.FC = () => {
           artistName: selectedItem.artist || "Unknown Artist",
           albumName: selectedItem.album || "Unknown Album",
           albumCoverUrl: selectedItem.artworkUrl || placeholderAlbumArt,
-          notes: from.trim()
-            ? [
-                {
-                  from: from.trim(),
-                  note: note.trim() || "",
-                  noteTimestamp: new Date().toISOString(),
-                },
-              ]
-            : [],
+          notes:
+            from.trim() || note.trim()
+              ? [
+                  {
+                    from: from.trim() || "",
+                    note: note.trim() || "",
+                    noteTimestamp: new Date().toISOString(),
+                  },
+                ]
+              : [],
         };
         addRecommendation("songs", songRecommendation);
       } else if (selectedItem.type === "albums") {
@@ -140,15 +141,16 @@ const RecommendationForm: React.FC = () => {
           artistName: selectedItem.artist || "Unknown Artist",
           albumCoverUrl: selectedItem.artworkUrl || placeholderAlbumArt,
           trackCount: selectedItem.trackCount,
-          notes: from.trim()
-            ? [
-                {
-                  from: from.trim(),
-                  note: note.trim() || "",
-                  noteTimestamp: new Date().toISOString(),
-                },
-              ]
-            : [],
+          notes:
+            from.trim() || note.trim()
+              ? [
+                  {
+                    from: from.trim() || "Anonymous",
+                    note: note.trim() || "",
+                    noteTimestamp: new Date().toISOString(),
+                  },
+                ]
+              : [],
         };
         addRecommendation("albums", albumRecommendation);
       } else if (selectedItem.type === "artists") {
@@ -157,15 +159,16 @@ const RecommendationForm: React.FC = () => {
           artistName: selectedItem.name,
           artistImageUrl: selectedItem.artworkUrl || placeholderAlbumArt,
           genres: selectedItem.genres || [],
-          notes: from.trim()
-            ? [
-                {
-                  from: from.trim(),
-                  note: note.trim() || "",
-                  noteTimestamp: new Date().toISOString(),
-                },
-              ]
-            : [],
+          notes:
+            from.trim() || note.trim()
+              ? [
+                  {
+                    from: from.trim() || "Anonymous",
+                    note: note.trim() || "",
+                    noteTimestamp: new Date().toISOString(),
+                  },
+                ]
+              : [],
         };
         addRecommendation("artists", artistRecommendation);
       }

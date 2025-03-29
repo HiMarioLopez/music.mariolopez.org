@@ -18,7 +18,6 @@ const SongRecommendationList: React.FC<SongRecommendationListProps> = ({
   onDownvote,
   votedItems,
   downvotedItems = {},
-  onAddNote,
 }) => {
   return (
     <BaseRecommendationList
@@ -31,12 +30,7 @@ const SongRecommendationList: React.FC<SongRecommendationListProps> = ({
       getImageAlt={() => "Album Cover"}
       getVotes={(item) => item.votes || 0}
       renderItem={(item) => (
-        <RecommendationItem
-          item={item}
-          type="song"
-          notes={item.notes}
-          onNoteClick={onAddNote ? () => onAddNote(item) : undefined}
-        />
+        <RecommendationItem item={item} type="song" notes={item.notes} />
       )}
     />
   );

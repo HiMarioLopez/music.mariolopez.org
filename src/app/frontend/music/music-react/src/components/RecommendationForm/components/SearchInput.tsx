@@ -51,7 +51,7 @@ const SearchInput: React.FC<SearchInputProps> = ({
         ref={inputRef}
         id={SEARCH_INPUT_ID}
         type="text"
-        placeholder="Search for a song, album, or artist"
+        placeholder="Search songs, albums, or artists"
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
         onFocus={() => {

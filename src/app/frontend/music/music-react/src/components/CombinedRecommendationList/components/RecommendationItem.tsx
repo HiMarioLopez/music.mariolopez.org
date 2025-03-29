@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useState, useRef } from "react";
+import { createPortal } from "react-dom";
 import {
   RecommendedSong,
   RecommendedAlbum,
@@ -7,20 +8,22 @@ import {
 import styles from "../styles/recommendationItem.module.css";
 import { Note } from "../types/CombinedRecommendationList.types";
 import { NoteIcon } from "../../Icons/Icons";
+import NotesPopup from "./NotesPopup";
 
 type RecommendationItemProps = {
   item: RecommendedSong | RecommendedAlbum | RecommendedArtist;
   type: "song" | "album" | "artist";
   notes?: Note[];
-  onNoteClick?: () => void;
 };
 
 const RecommendationItem: React.FC<RecommendationItemProps> = ({
   item,
   type,
-  notes,
-  onNoteClick,
+  notes = [],
 }) => {
+  const [showNotesPopup, setShowNotesPopup] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+
   let title = "";
   let subtitle = "";
 
@@ -41,8 +44,17 @@ const RecommendationItem: React.FC<RecommendationItemProps> = ({
         : "";
   }
 
+  const handleNoteButtonClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setShowNotesPopup(true);
+  };
+
+  const handleClosePopup = () => {
+    setShowNotesPopup(false);
+  };
+
   return (
-    <div className={styles.container}>
+    <div className={styles.container} ref={containerRef}>
       <div className={styles.content}>
         <h3 className={styles.title} title={title}>
           {title}
@@ -56,13 +68,19 @@ const RecommendationItem: React.FC<RecommendationItemProps> = ({
       {notes && notes.length > 0 && (
         <button
           className={styles.noteButton}
-          onClick={onNoteClick}
+          onClick={handleNoteButtonClick}
           title="Show Notes"
           data-testid="note-button"
         >
           <NoteIcon />
         </button>
       )}
+
+      {showNotesPopup &&
+        createPortal(
+          <NotesPopup notes={notes} onClose={handleClosePopup} />,
+          document.body,
+        )}
     </div>
   );
 };

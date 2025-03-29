@@ -4,6 +4,7 @@
   min-width: 0;
   overflow: hidden;
   width: 100%;
+  position: relative;
 }
 
 .content {
@@ -61,4 +62,13 @@
 .noteButton svg {
   width: 18px;
   height: 18px;
+}
+
+.popupContainer {
+  position: absolute;
+  z-index: 9999999;
+  width: 100%;
+  left: 0;
+  top: 100%;
+  margin-top: 5px;
 }
