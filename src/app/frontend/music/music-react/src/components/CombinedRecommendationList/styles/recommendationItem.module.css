@@ -1,0 +1,62 @@
+.container {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  overflow: hidden;
+  width: 100%;
+}
+
+.content {
+  flex: 1 1 auto;
+  min-width: 0;
+  margin-right: 8px;
+  color: var(--font-color);
+}
+
+.title {
+  margin: 0 0 4px 0;
+  font-weight: 600;
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.subtitle {
+  margin: 0;
+  opacity: 0.8;
+  font-size: 0.9em;
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.noteButton {
+  /* Prevent the button from shrinking */
+  flex-shrink: 0;
+  /* Keep fixed dimensions */
+  width: 32px;
+  height: 32px;
+  background: none;
+  border: none;
+  color: var(--text-secondary, #6c757d);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  background-color: rgba(0, 0, 0, 0.03);
+  border: 1px dashed red;
+}
+
+.noteButton:hover {
+  color: var(--text-primary, white);
+}
+
+.noteButton svg {
+  width: 18px;
+  height: 18px;
+}

@@ -1,6 +1,7 @@
 import React from "react";
 import { RecommendedAlbum } from "../../../types/Recommendations";
 import BaseRecommendationList from "./BaseRecommendationList";
+import RecommendationItem from "./RecommendationItem";
 
 type AlbumRecommendationListProps = {
   recommendations: RecommendedAlbum[];
@@ -28,13 +29,7 @@ const AlbumRecommendationList: React.FC<AlbumRecommendationListProps> = ({
       getImageAlt={() => "Album Cover"}
       getVotes={(item) => item.votes || 0}
       renderItem={(item) => (
-        <>
-          <h3>{item.albumTitle}</h3>
-          <p>
-            {item.artistName}{" "}
-            {item.trackCount ? `• ${item.trackCount} tracks` : ""}
-          </p>
-        </>
+        <RecommendationItem item={item} type="album" notes={item.notes} />
       )}
     />
   );

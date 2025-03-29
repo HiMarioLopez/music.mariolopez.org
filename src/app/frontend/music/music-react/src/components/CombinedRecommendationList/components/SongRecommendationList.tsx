@@ -1,6 +1,7 @@
 import React from "react";
 import { RecommendedSong } from "../../../types/Recommendations";
 import BaseRecommendationList from "./BaseRecommendationList";
+import RecommendationItem from "./RecommendationItem";
 
 type SongRecommendationListProps = {
   recommendations: RecommendedSong[];
@@ -8,6 +9,7 @@ type SongRecommendationListProps = {
   onDownvote?: (index: number) => void;
   votedItems: Record<string, boolean>;
   downvotedItems: Record<string, boolean>;
+  onAddNote?: (item: RecommendedSong) => void;
 };
 
 const SongRecommendationList: React.FC<SongRecommendationListProps> = ({
@@ -16,6 +18,7 @@ const SongRecommendationList: React.FC<SongRecommendationListProps> = ({
   onDownvote,
   votedItems,
   downvotedItems = {},
+  onAddNote,
 }) => {
   return (
     <BaseRecommendationList
@@ -28,12 +31,12 @@ const SongRecommendationList: React.FC<SongRecommendationListProps> = ({
       getImageAlt={() => "Album Cover"}
       getVotes={(item) => item.votes || 0}
       renderItem={(item) => (
-        <>
-          <h3>{item.songTitle}</h3>
-          <p>
-            {item.artistName} - {item.albumName}
-          </p>
-        </>
+        <RecommendationItem
+          item={item}
+          type="song"
+          notes={item.notes}
+          onNoteClick={onAddNote ? () => onAddNote(item) : undefined}
+        />
       )}
     />
   );

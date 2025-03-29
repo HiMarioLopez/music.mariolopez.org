@@ -1,6 +1,7 @@
 import React from "react";
 import { RecommendedArtist } from "../../../types/Recommendations";
 import BaseRecommendationList from "./BaseRecommendationList";
+import RecommendationItem from "./RecommendationItem";
 
 type ArtistRecommendationListProps = {
   recommendations: RecommendedArtist[];
@@ -28,12 +29,7 @@ const ArtistRecommendationList: React.FC<ArtistRecommendationListProps> = ({
       getImageAlt={() => "Artist"}
       getVotes={(item) => item.votes || 0}
       renderItem={(item) => (
-        <>
-          <h3>{item.artistName}</h3>
-          {item.genres && item.genres.length > 0 && (
-            <p>{item.genres.join(", ")}</p>
-          )}
-        </>
+        <RecommendationItem item={item} type="artist" notes={item.notes} />
       )}
     />
   );

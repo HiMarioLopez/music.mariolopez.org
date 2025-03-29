@@ -6,6 +6,12 @@ import {
 
 export type RecommendationType = "songs" | "albums" | "artists";
 
+export type Note = {
+  from: string;
+  note: string;
+  noteTimestamp: string;
+};
+
 export type RecommendationStateMap = {
   songs: {
     recommendations: RecommendedSong[];
