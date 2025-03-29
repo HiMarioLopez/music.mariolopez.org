@@ -69,6 +69,17 @@ export const handler = async (
 
     const requestBody = JSON.parse(event.body);
 
+    // Log the full request body for debugging
+    logger.info('Request body parsed', {
+      requestBody: JSON.stringify(requestBody),
+      hasNotes: !!requestBody.notes,
+      notesType: requestBody.notes ? typeof requestBody.notes : 'undefined',
+      notesIsArray: requestBody.notes
+        ? Array.isArray(requestBody.notes)
+        : false,
+      notesLength: requestBody.notes ? requestBody.notes.length : 0,
+    });
+
     // Validate request body
     if (!requestBody.entityType) {
       return {
@@ -138,6 +149,15 @@ export const handler = async (
 
     // Map the request body to the corresponding recommendation type
     let recommendation: Omit<Recommendation, 'timestamp'>;
+
+    // Use notes array from request body if it exists
+    const notes = requestBody.notes ? requestBody.notes : undefined;
+
+    logger.info('Notes being used for recommendation', {
+      notesSource: requestBody.notes ? 'from request body notes array' : 'none',
+      notesCount: notes?.length || 0,
+    });
+
     if (requestBody.entityType === 'SONG') {
       recommendation = {
         entityType: 'SONG',
@@ -145,8 +165,7 @@ export const handler = async (
         artistName: requestBody.artistName,
         albumName: requestBody.albumName,
         albumCoverUrl: requestBody.albumCoverUrl || '',
-        from: requestBody.from,
-        note: requestBody.note,
+        notes,
       } as SongRecommendation;
     } else if (requestBody.entityType === 'ALBUM') {
       recommendation = {
@@ -156,8 +175,7 @@ export const handler = async (
         albumCoverUrl: requestBody.albumCoverUrl || '',
         trackCount: requestBody.trackCount,
         releaseDate: requestBody.releaseDate,
-        from: requestBody.from,
-        note: requestBody.note,
+        notes,
       } as AlbumRecommendation;
     } else {
       recommendation = {
@@ -165,8 +183,7 @@ export const handler = async (
         artistName: requestBody.artistName,
         artistImageUrl: requestBody.artistImageUrl || '',
         genres: requestBody.genres,
-        from: requestBody.from,
-        note: requestBody.note,
+        notes,
       } as ArtistRecommendation;
     }
 

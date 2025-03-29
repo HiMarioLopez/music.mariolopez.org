@@ -116,35 +116,56 @@ const RecommendationForm: React.FC = () => {
 
       // Process the recommendation based on the type
       if (selectedItem.type === "songs") {
-        // Create a Song recommendation
+        // Create a Song recommendation with notes array
         const songRecommendation: RecommendedSong = {
           songTitle: selectedItem.name,
           artistName: selectedItem.artist || "Unknown Artist",
           albumName: selectedItem.album || "Unknown Album",
           albumCoverUrl: selectedItem.artworkUrl || placeholderAlbumArt,
-          from: from.trim(),
-          note: note.trim() || undefined,
+          notes: from.trim()
+            ? [
+                {
+                  from: from.trim(),
+                  note: note.trim() || "",
+                  noteTimestamp: new Date().toISOString(),
+                },
+              ]
+            : [],
         };
         addRecommendation("songs", songRecommendation);
       } else if (selectedItem.type === "albums") {
-        // Create an Album recommendation
+        // Create an Album recommendation with notes array
         const albumRecommendation: RecommendedAlbum = {
           albumTitle: selectedItem.name,
           artistName: selectedItem.artist || "Unknown Artist",
           albumCoverUrl: selectedItem.artworkUrl || placeholderAlbumArt,
           trackCount: selectedItem.trackCount,
-          from: from.trim(),
-          note: note.trim() || undefined,
+          notes: from.trim()
+            ? [
+                {
+                  from: from.trim(),
+                  note: note.trim() || "",
+                  noteTimestamp: new Date().toISOString(),
+                },
+              ]
+            : [],
         };
         addRecommendation("albums", albumRecommendation);
       } else if (selectedItem.type === "artists") {
-        // Create an Artist recommendation
+        // Create an Artist recommendation with notes array
         const artistRecommendation: RecommendedArtist = {
           artistName: selectedItem.name,
           artistImageUrl: selectedItem.artworkUrl || placeholderAlbumArt,
           genres: selectedItem.genres || [],
-          from: from.trim(),
-          note: note.trim() || undefined,
+          notes: from.trim()
+            ? [
+                {
+                  from: from.trim(),
+                  note: note.trim() || "",
+                  noteTimestamp: new Date().toISOString(),
+                },
+              ]
+            : [],
         };
         addRecommendation("artists", artistRecommendation);
       }

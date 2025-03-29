@@ -5,6 +5,8 @@ import {
   DynamoDBDocumentClient,
   QueryCommand,
   PutCommand,
+  ScanCommand,
+  ScanCommandInput,
 } from '@aws-sdk/lib-dynamodb';
 
 const logger = new Logger({ serviceName: 'dynamodb-recommendations' });
@@ -26,12 +28,18 @@ interface PaginationResult {
   lastEvaluatedKey?: string;
 }
 
+// Note object structure for recommendations
+export interface NoteItem {
+  from: string;
+  note: string;
+  noteTimestamp: string;
+}
+
 // Define types for recommendations based on front-end types
 export interface BaseRecommendation {
   entityType: string;
   timestamp: string;
-  from?: string;
-  note?: string;
+  notes?: NoteItem[];
   votes?: number;
 }
 
@@ -250,54 +258,56 @@ export const getRecommendationsByFrom = async (
   try {
     const effectiveLimit = Math.min(limit, MAX_LIMIT);
 
-    // Use QueryCommand with GSI and FilterExpression for creator filter
-    const params: any = {
-      TableName: tableName,
-      IndexName: 'EntityTypeVotesIndex', // Use the GSI for sorting by votes
-      KeyConditionExpression: 'entityType = :entityType',
-      FilterExpression: '#from = :from',
-      ExpressionAttributeNames: {
-        '#from': 'from',
-      },
-      ExpressionAttributeValues: {
-        ':entityType': 'SONG',
-        ':from': fromPerson,
-      },
-      ScanIndexForward: false, // Descending order by votes
-      Limit: effectiveLimit,
-    };
-
-    // Add ExclusiveStartKey for pagination if provided
-    if (startKey) {
-      try {
-        params.ExclusiveStartKey = JSON.parse(startKey);
-      } catch (e) {
-        logger.error('Failed to parse startKey', { startKey, error: e });
-      }
-    }
-
-    logger.info('Querying recommendations by creator using GSI', {
+    logger.info('Scanning recommendations by creator in notes array', {
       tableName,
       fromPerson,
       limit: effectiveLimit,
       startKey: startKey || 'none',
     });
 
-    const result = await docClient.send(new QueryCommand(params));
+    // Get all recommendations and filter client-side for those that have
+    // a note from the specified person to handle the nested array search
+    const scanParams: ScanCommandInput = {
+      TableName: tableName,
+      Limit: 1000, // Get more items than needed to filter through
+    };
 
-    // Results are already sorted by votes due to GSI sort key and ScanIndexForward: false
-    const recommendations = result.Items || [];
+    // Add ExclusiveStartKey for pagination if provided
+    if (startKey) {
+      try {
+        scanParams.ExclusiveStartKey = JSON.parse(startKey);
+      } catch (e) {
+        logger.error('Failed to parse startKey', { startKey, error: e });
+      }
+    }
+
+    const result = await docClient.send(new ScanCommand(scanParams));
+
+    // Filter manually to find recommendations where any note has matching 'from'
+    const recommendations = (result.Items || [])
+      .filter((item) => {
+        // Handle both old schema (from field directly on item) and new schema (notes array)
+        if (item.from === fromPerson) {
+          return true;
+        }
+
+        if (Array.isArray(item.notes)) {
+          return item.notes.some((note) => note.from === fromPerson);
+        }
+
+        return false;
+      })
+      .sort((a, b) => (b.votes || 0) - (a.votes || 0)) // Sort by votes
+      .slice(0, effectiveLimit); // Apply limit
 
     logger.info('Retrieved recommendations by creator', {
       fromPerson,
       count: recommendations.length,
     });
 
-    // Stringify the LastEvaluatedKey for pagination
+    // Pagination won't work properly with client-side filtering
+    // We're not returning a LastEvaluatedKey intentionally
     let lastEvaluatedKey = undefined;
-    if (result.LastEvaluatedKey) {
-      lastEvaluatedKey = JSON.stringify(result.LastEvaluatedKey);
-    }
 
     return {
       items: recommendations,
@@ -333,6 +343,9 @@ export const createRecommendation = async (
     // Create a complete recommendation object with entityType and timestamp
     let completeRecommendation: Recommendation;
 
+    // Handle legacy input format with from/note fields
+    let notes: NoteItem[] | undefined = recommendation.notes;
+
     // Create the appropriate recommendation type based on the 'type' property
     if (recommendation.entityType === 'SONG') {
       completeRecommendation = {
@@ -340,6 +353,7 @@ export const createRecommendation = async (
         entityType: 'SONG',
         timestamp,
         votes,
+        notes,
       } as SongRecommendation;
     } else if (recommendation.entityType === 'ALBUM') {
       completeRecommendation = {
@@ -347,6 +361,7 @@ export const createRecommendation = async (
         entityType: 'ALBUM',
         timestamp,
         votes,
+        notes,
       } as AlbumRecommendation;
     } else if (recommendation.entityType === 'ARTIST') {
       completeRecommendation = {
@@ -357,6 +372,7 @@ export const createRecommendation = async (
         entityType: 'ARTIST',
         timestamp,
         votes,
+        notes,
       } as ArtistRecommendation;
     } else {
       throw new Error(
@@ -367,15 +383,51 @@ export const createRecommendation = async (
     logger.info('Creating new recommendation', {
       tableName,
       entityType: recommendation.entityType,
+      hasNotes: !!notes,
+      notesCount: notes?.length || 0,
     });
 
-    // Use PutCommand to add the recommendation to DynamoDB
-    await docClient.send(
-      new PutCommand({
-        TableName: tableName,
-        Item: completeRecommendation,
-      })
-    );
+    // Log the complete recommendation for debugging
+    logger.info('Complete recommendation object', {
+      completeRecommendation: JSON.stringify(completeRecommendation),
+    });
+
+    // Ensure notes is properly formatted for DynamoDB
+    // This avoids potential issues with complex nested objects
+    if (
+      completeRecommendation.notes &&
+      Array.isArray(completeRecommendation.notes)
+    ) {
+      logger.info('Notes array found, preparing for DynamoDB', {
+        notesCount: completeRecommendation.notes.length,
+      });
+
+      // Create a clean copy to ensure it's properly formatted for DynamoDB
+      const cleanItem = {
+        ...completeRecommendation,
+        notes: JSON.parse(JSON.stringify(completeRecommendation.notes)),
+      };
+
+      // Use PutCommand to add the recommendation to DynamoDB
+      await docClient.send(
+        new PutCommand({
+          TableName: tableName,
+          Item: cleanItem,
+        })
+      );
+    } else {
+      logger.warn('No notes array found or invalid format', {
+        notesValue: completeRecommendation.notes,
+      });
+
+      // Use PutCommand to add the recommendation to DynamoDB
+      await docClient.send(
+        new PutCommand({
+          TableName: tableName,
+          Item: completeRecommendation,
+        })
+      );
+    }
 
     logger.info('Successfully created recommendation', {
       entityType: recommendation.entityType,

@@ -1,3 +1,9 @@
+export type NoteItem = {
+  from: string;
+  note: string;
+  noteTimestamp: string;
+};
+
 export type RecommendedSong = {
   id?: string;
   songTitle: string;
@@ -5,9 +11,8 @@ export type RecommendedSong = {
   albumName: string;
   albumCoverUrl: string;
   votes?: number;
-  userVoted?: 'up' | 'down';
-  from?: string;
-  note?: string;
+  userVoted?: "up" | "down";
+  notes?: NoteItem[];
 };
 
 export type RecommendedAlbum = {
@@ -18,9 +23,8 @@ export type RecommendedAlbum = {
   trackCount?: number;
   releaseDate?: string;
   votes?: number;
-  userVoted?: 'up' | 'down';
-  from?: string;
-  note?: string;
+  userVoted?: "up" | "down";
+  notes?: NoteItem[];
 };
 
 export type RecommendedArtist = {
@@ -29,7 +33,6 @@ export type RecommendedArtist = {
   artistImageUrl: string;
   genres?: string[];
   votes?: number;
-  userVoted?: 'up' | 'down';
-  from?: string;
-  note?: string;
+  userVoted?: "up" | "down";
+  notes?: NoteItem[];
 };

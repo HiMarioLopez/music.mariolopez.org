@@ -98,51 +98,54 @@ export const RecommendationsProvider: React.FC<{
             if (type === "songs") {
               items = response.items
                 .filter((item) => item.entityType === "SONG")
-                .map(
-                  (item) =>
-                    ({
-                      id: item.id || `SONG_${item.timestamp}`,
-                      songTitle: item.songTitle,
-                      artistName: item.artistName,
-                      albumName: item.albumName,
-                      albumCoverUrl: item.albumCoverUrl || "",
-                      votes: item.votes || 0,
-                      from: item.from,
-                      note: item.note,
-                    }) as RecommendedSong,
-                );
+                .map((item) => {
+                  // Extract notes array or create empty array if not present
+                  const notes = Array.isArray(item.notes) ? item.notes : [];
+
+                  return {
+                    id: item.id || `SONG_${item.timestamp}`,
+                    songTitle: item.songTitle,
+                    artistName: item.artistName,
+                    albumName: item.albumName,
+                    albumCoverUrl: item.albumCoverUrl || "",
+                    votes: item.votes || 0,
+                    notes: notes,
+                  } as RecommendedSong;
+                });
             } else if (type === "albums") {
               items = response.items
                 .filter((item) => item.entityType === "ALBUM")
-                .map(
-                  (item) =>
-                    ({
-                      id: item.id || `ALBUM_${item.timestamp}`,
-                      albumTitle: item.albumTitle,
-                      artistName: item.artistName,
-                      albumCoverUrl: item.albumCoverUrl || "",
-                      trackCount: item.trackCount,
-                      releaseDate: item.releaseDate,
-                      votes: item.votes || 0,
-                      from: item.from,
-                      note: item.note,
-                    }) as RecommendedAlbum,
-                );
+                .map((item) => {
+                  // Extract notes array or create empty array if not present
+                  const notes = Array.isArray(item.notes) ? item.notes : [];
+
+                  return {
+                    id: item.id || `ALBUM_${item.timestamp}`,
+                    albumTitle: item.albumTitle,
+                    artistName: item.artistName,
+                    albumCoverUrl: item.albumCoverUrl || "",
+                    trackCount: item.trackCount,
+                    releaseDate: item.releaseDate,
+                    votes: item.votes || 0,
+                    notes: notes,
+                  } as RecommendedAlbum;
+                });
             } else {
               items = response.items
                 .filter((item) => item.entityType === "ARTIST")
-                .map(
-                  (item) =>
-                    ({
-                      id: item.id || `ARTIST_${item.timestamp}`,
-                      artistName: item.artistName,
-                      artistImageUrl: item.artistImageUrl || "",
-                      genres: item.genres,
-                      votes: item.votes || 0,
-                      from: item.from,
-                      note: item.note,
-                    }) as RecommendedArtist,
-                );
+                .map((item) => {
+                  // Extract notes array or create empty array if not present
+                  const notes = Array.isArray(item.notes) ? item.notes : [];
+
+                  return {
+                    id: item.id || `ARTIST_${item.timestamp}`,
+                    artistName: item.artistName,
+                    artistImageUrl: item.artistImageUrl || "",
+                    genres: item.genres,
+                    votes: item.votes || 0,
+                    notes: notes,
+                  } as RecommendedArtist;
+                });
             }
 
             dispatch({
@@ -186,8 +189,7 @@ export const RecommendationsProvider: React.FC<{
           artistName: songItem.artistName,
           albumName: songItem.albumName,
           albumCoverUrl: songItem.albumCoverUrl,
-          from: songItem.from,
-          note: songItem.note,
+          notes: songItem.notes,
         };
       } else if (type === "albums") {
         const albumItem = item as RecommendedAlbum;
@@ -197,8 +199,7 @@ export const RecommendationsProvider: React.FC<{
           albumCoverUrl: albumItem.albumCoverUrl,
           trackCount: albumItem.trackCount,
           releaseDate: albumItem.releaseDate,
-          from: albumItem.from,
-          note: albumItem.note,
+          notes: albumItem.notes,
         };
       } else {
         const artistItem = item as RecommendedArtist;
@@ -206,8 +207,7 @@ export const RecommendationsProvider: React.FC<{
           artistName: artistItem.artistName,
           artistImageUrl: artistItem.artistImageUrl,
           genres: artistItem.genres,
-          from: artistItem.from,
-          note: artistItem.note,
+          notes: artistItem.notes,
         };
       }
 
