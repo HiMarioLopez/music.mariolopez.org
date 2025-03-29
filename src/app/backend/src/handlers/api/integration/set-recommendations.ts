@@ -8,10 +8,13 @@ import {
 } from 'aws-lambda';
 import {
   createRecommendation,
+  getRecommendation,
+  updateRecommendation,
   Recommendation,
   SongRecommendation,
   AlbumRecommendation,
   ArtistRecommendation,
+  NoteItem,
 } from '../../../services/dynamodb/recommendations';
 import { getParameter } from '../../../services/parameter';
 import { getCorsHeaders } from '../../../utils/cors';
@@ -21,7 +24,7 @@ const tracer = new Tracer({ serviceName: 'set-recommendations' });
 const metrics = new Metrics({ namespace: 'set-recommendations' });
 
 /**
- * API Gateway handler function to create a new recommendation
+ * API Gateway handler function to create or update a recommendation
  */
 export const handler = async (
   event: APIGatewayProxyEventV2,
@@ -142,84 +145,147 @@ export const handler = async (
       }
     }
 
-    // Create the recommendation in DynamoDB
-    logger.info('Creating recommendation', {
-      entityType: requestBody.entityType,
-    });
-
-    // Map the request body to the corresponding recommendation type
-    let recommendation: Omit<Recommendation, 'timestamp'>;
-
     // Use notes array from request body if it exists
     const notes = requestBody.notes ? requestBody.notes : undefined;
 
-    logger.info('Notes being used for recommendation', {
+    // Extract vote change if specified
+    const voteChange = requestBody.voteChange !== undefined 
+      ? Number(requestBody.voteChange) 
+      : undefined;
+    
+    logger.info('Processing recommendation request', {
       notesSource: requestBody.notes ? 'from request body notes array' : 'none',
       notesCount: notes?.length || 0,
+      voteChange: voteChange,
     });
 
-    if (requestBody.entityType === 'SONG') {
-      recommendation = {
-        entityType: 'SONG',
-        songTitle: requestBody.songTitle,
-        artistName: requestBody.artistName,
-        albumName: requestBody.albumName,
-        albumCoverUrl: requestBody.albumCoverUrl || '',
-        notes,
-      } as SongRecommendation;
-    } else if (requestBody.entityType === 'ALBUM') {
-      recommendation = {
-        entityType: 'ALBUM',
-        albumTitle: requestBody.albumTitle,
-        artistName: requestBody.artistName,
-        albumCoverUrl: requestBody.albumCoverUrl || '',
-        trackCount: requestBody.trackCount,
-        releaseDate: requestBody.releaseDate,
-        notes,
-      } as AlbumRecommendation;
-    } else {
-      recommendation = {
-        entityType: 'ARTIST',
-        artistName: requestBody.artistName,
-        artistImageUrl: requestBody.artistImageUrl || '',
-        genres: requestBody.genres,
-        notes,
-      } as ArtistRecommendation;
-    }
+    // Check if the recommendation already exists
+    const searchAttributes = {
+      artistName: requestBody.artistName,
+      songTitle: requestBody.entityType === 'SONG' ? requestBody.songTitle : undefined,
+      albumName: requestBody.entityType === 'SONG' ? requestBody.albumName : undefined,
+      albumTitle: requestBody.entityType === 'ALBUM' ? requestBody.albumTitle : undefined,
+    };
 
-    // Store in DynamoDB
-    const result = await createRecommendation(tableName, recommendation);
-
-    // Record metrics based on recommendation type
-    metrics.addMetric(
-      `${requestBody.entityType}RecommendationCount`,
-      MetricUnit.Count,
-      1
+    const existingRecommendation = await getRecommendation(
+      tableName,
+      requestBody.entityType as 'SONG' | 'ALBUM' | 'ARTIST',
+      searchAttributes
     );
 
-    logger.info('Successfully created recommendation', {
+    let result: Recommendation;
+
+    // If recommendation exists, update it; otherwise create a new one
+    if (existingRecommendation) {
+      logger.info('Found existing recommendation, updating', {
+        entityType: requestBody.entityType,
+        timestamp: existingRecommendation.timestamp,
+      });
+
+      // Prepare updates
+      const updates: {
+        notes?: NoteItem[];
+        voteChange?: number;
+      } = {};
+
+      // Add notes if provided
+      if (notes && notes.length > 0) {
+        updates.notes = notes;
+      }
+      
+      // Handle vote change
+      // If voteChange is explicitly provided, use it
+      // If voteChange is not provided but notes are added, don't change votes
+      // If neither voteChange nor notes are provided, increment vote by default
+      if (voteChange !== undefined) {
+        updates.voteChange = voteChange;
+      } else if (!notes || notes.length === 0) {
+        // Auto-increment vote by 1 if this is a simple re-recommendation with no notes/votes specified
+        updates.voteChange = 1;
+      }
+
+      // Update the recommendation
+      result = await updateRecommendation(tableName, existingRecommendation, updates);
+      
+      metrics.addMetric(
+        `${requestBody.entityType}RecommendationUpdateCount`,
+        MetricUnit.Count,
+        1
+      );
+    } else {
+      // Create a new recommendation
+      logger.info('Creating new recommendation', {
+        entityType: requestBody.entityType,
+      });
+      
+      // Map the request body to the corresponding recommendation type
+      let newRecommendation: Omit<Recommendation, 'timestamp' | 'votes'>;
+
+      if (requestBody.entityType === 'SONG') {
+        newRecommendation = {
+          entityType: 'SONG',
+          songTitle: requestBody.songTitle,
+          artistName: requestBody.artistName,
+          albumName: requestBody.albumName,
+          albumCoverUrl: requestBody.albumCoverUrl || '',
+          notes,
+        } as Omit<SongRecommendation, 'timestamp' | 'votes'>;
+      } else if (requestBody.entityType === 'ALBUM') {
+        newRecommendation = {
+          entityType: 'ALBUM',
+          albumTitle: requestBody.albumTitle,
+          artistName: requestBody.artistName,
+          albumCoverUrl: requestBody.albumCoverUrl || '',
+          trackCount: requestBody.trackCount,
+          releaseDate: requestBody.releaseDate,
+          notes,
+        } as Omit<AlbumRecommendation, 'timestamp' | 'votes'>;
+      } else {
+        newRecommendation = {
+          entityType: 'ARTIST',
+          artistName: requestBody.artistName,
+          artistImageUrl: requestBody.artistImageUrl || '',
+          genres: requestBody.genres,
+          notes,
+        } as Omit<ArtistRecommendation, 'timestamp' | 'votes'>;
+      }
+
+      // Store in DynamoDB
+      result = await createRecommendation(tableName, newRecommendation);
+
+      metrics.addMetric(
+        `${requestBody.entityType}RecommendationCreateCount`,
+        MetricUnit.Count,
+        1
+      );
+    }
+
+    logger.info('Successfully processed recommendation', {
       entityType: requestBody.entityType,
       timestamp: result.timestamp,
+      isNewRecord: !existingRecommendation,
     });
 
-    // Return success response with the created recommendation
+    // Return success response with the created or updated recommendation
+    const operation = existingRecommendation ? 'updated' : 'created';
+    
     return {
-      statusCode: 201,
+      statusCode: 200,
       headers: getCorsHeaders(event.headers?.origin, 'POST,OPTIONS'),
       body: JSON.stringify({
-        message: 'Recommendation created successfully',
+        message: `Recommendation ${operation} successfully`,
         recommendation: result,
       }),
     };
   } catch (error) {
-    logger.error('Error creating recommendation', { error });
+    logger.error('Error processing recommendation', { error });
     metrics.addMetric('ErrorCount', MetricUnit.Count, 1);
 
     return {
       statusCode: 500,
       headers: getCorsHeaders(event.headers?.origin, 'POST,OPTIONS'),
       body: JSON.stringify({
-        message: 'Failed to create recommendation',
+        message: 'Failed to process recommendation',
         error: error instanceof Error ? error.message : 'Unknown error',
       }),
     };

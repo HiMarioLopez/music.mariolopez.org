@@ -475,3 +475,162 @@ export const updateRecommendationVotes = async (
     throw error;
   }
 };
+
+/**
+ * Get a specific recommendation by its identifying attributes
+ * 
+ * @param tableName - DynamoDB table name
+ * @param entityType - Type of recommendation (SONG, ALBUM, or ARTIST)
+ * @param attributes - Identifying attributes based on entity type
+ * @returns Promise resolving to the recommendation if found, null otherwise
+ */
+export const getRecommendation = async (
+  tableName: string,
+  entityType: 'SONG' | 'ALBUM' | 'ARTIST',
+  attributes: {
+    songTitle?: string;
+    artistName: string;
+    albumName?: string;
+    albumTitle?: string;
+  }
+): Promise<Recommendation | null> => {
+  try {
+    logger.info('Looking for existing recommendation', {
+      tableName,
+      entityType,
+      attributes,
+    });
+
+    // Construct filter expression and attribute values based on entity type
+    let filterExpression = 'entityType = :entityType';
+    let expressionAttributeValues: Record<string, any> = {
+      ':entityType': entityType,
+    };
+
+    if (entityType === 'SONG') {
+      if (!attributes.songTitle || !attributes.artistName || !attributes.albumName) {
+        throw new Error('songTitle, artistName, and albumName are required for SONG recommendations');
+      }
+      filterExpression += ' AND songTitle = :songTitle AND artistName = :artistName AND albumName = :albumName';
+      expressionAttributeValues[':songTitle'] = attributes.songTitle;
+      expressionAttributeValues[':artistName'] = attributes.artistName;
+      expressionAttributeValues[':albumName'] = attributes.albumName;
+    } else if (entityType === 'ALBUM') {
+      if (!attributes.albumTitle || !attributes.artistName) {
+        throw new Error('albumTitle and artistName are required for ALBUM recommendations');
+      }
+      filterExpression += ' AND albumTitle = :albumTitle AND artistName = :artistName';
+      expressionAttributeValues[':albumTitle'] = attributes.albumTitle;
+      expressionAttributeValues[':artistName'] = attributes.artistName;
+    } else if (entityType === 'ARTIST') {
+      if (!attributes.artistName) {
+        throw new Error('artistName is required for ARTIST recommendations');
+      }
+      filterExpression += ' AND artistName = :artistName';
+      expressionAttributeValues[':artistName'] = attributes.artistName;
+    }
+
+    // Configure scan parameters
+    const params = {
+      TableName: tableName,
+      FilterExpression: filterExpression,
+      ExpressionAttributeValues: expressionAttributeValues,
+    };
+
+    logger.info('Scanning for existing recommendation', {
+      filterExpression,
+      expressionAttributeValues,
+    });
+
+    // Execute scan
+    const result = await docClient.send(new ScanCommand(params));
+    
+    if (result.Items && result.Items.length > 0) {
+      logger.info('Found existing recommendation', {
+        entityType,
+        count: result.Items.length,
+      });
+      return result.Items[0] as Recommendation;
+    }
+
+    logger.info('No existing recommendation found');
+    return null;
+  } catch (error) {
+    logger.error('Error looking for existing recommendation', { error });
+    throw error;
+  }
+};
+
+/**
+ * Update an existing recommendation in DynamoDB
+ * 
+ * @param tableName - DynamoDB table name
+ * @param existingRecommendation - The existing recommendation to update
+ * @param updates - Updates to apply (new notes, vote changes)
+ * @returns Promise resolving to the updated recommendation
+ */
+export const updateRecommendation = async (
+  tableName: string,
+  existingRecommendation: Recommendation,
+  updates: {
+    notes?: NoteItem[];
+    voteChange?: number;
+  }
+): Promise<Recommendation> => {
+  try {
+    logger.info('Updating recommendation', {
+      tableName,
+      entityType: existingRecommendation.entityType,
+      addingNotes: !!updates.notes && updates.notes.length > 0,
+      voteChange: updates.voteChange,
+    });
+
+    // Create the updated recommendation
+    const updatedRecommendation: Recommendation = { 
+      ...existingRecommendation 
+    };
+
+    // Merge notes if provided
+    if (updates.notes && updates.notes.length > 0) {
+      updatedRecommendation.notes = [
+        ...(existingRecommendation.notes || []),
+        ...updates.notes
+      ];
+
+      logger.info('Merging notes', { 
+        existingCount: existingRecommendation.notes?.length || 0,
+        newCount: updates.notes.length,
+        totalCount: updatedRecommendation.notes.length
+      });
+    }
+
+    // Update votes if a vote change is provided
+    if (updates.voteChange !== undefined) {
+      const currentVotes = existingRecommendation.votes || 0;
+      updatedRecommendation.votes = Math.max(0, currentVotes + updates.voteChange);
+
+      logger.info('Updating vote count', {
+        oldVotes: currentVotes,
+        change: updates.voteChange,
+        newVotes: updatedRecommendation.votes
+      });
+    }
+
+    // Use PutCommand to update the recommendation in DynamoDB
+    await docClient.send(
+      new PutCommand({
+        TableName: tableName,
+        Item: updatedRecommendation,
+      })
+    );
+
+    logger.info('Successfully updated recommendation', {
+      entityType: existingRecommendation.entityType,
+    });
+
+    return updatedRecommendation;
+  } catch (error) {
+    logger.error('Error updating recommendation', { error });
+    throw error;
+  }
+};
