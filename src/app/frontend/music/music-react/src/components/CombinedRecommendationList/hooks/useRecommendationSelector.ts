@@ -1,11 +1,7 @@
 import { useState, useRef, useEffect } from "react";
+import { simulateNetworkDelay } from "../../../utils/network";
 
 type RecommendationType = "songs" | "albums" | "artists";
-
-// Add this new utility function for artificial delay
-export const simulateNetworkDelay = (ms: number = 1500): Promise<void> => {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-};
 
 export const useRecommendationSelector = (
   initialType: RecommendationType = "songs",

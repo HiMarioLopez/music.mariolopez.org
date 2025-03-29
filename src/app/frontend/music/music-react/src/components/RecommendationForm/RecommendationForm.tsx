@@ -23,6 +23,7 @@ import SearchInput from "./components/SearchInput";
 import ResultsList from "./components/ResultsList";
 import CollapsibleFormSection from "./components/CollapsibleFormSection";
 import FormActions from "./components/FormActions";
+import { simulateNetworkDelay } from "../../utils/network";
 
 // Create a stable ID to reduce unnecessary re-renders
 const DEFAULT_VISIBLE_ITEMS_COUNT = 3;
@@ -42,6 +43,30 @@ const RecommendationForm: React.FC = () => {
   const [isFormExpanded, setIsFormExpanded] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [status, setStatus] = useState<string | null>(null);
+  const [shouldFadeOut, setShouldFadeOut] = useState(false);
+
+  // Handle status message fade out after 5 seconds
+  useEffect(() => {
+    if (status) {
+      // Reset fade state when status changes
+      setShouldFadeOut(false);
+
+      // After 5 seconds, start fading out
+      const timer = setTimeout(() => {
+        setShouldFadeOut(true);
+      }, 5000);
+
+      // After fade out completes (additional 0.5s for transition), clear the status
+      const clearTimer = setTimeout(() => {
+        setStatus(null);
+      }, 5500);
+
+      return () => {
+        clearTimeout(timer);
+        clearTimeout(clearTimer);
+      };
+    }
+  }, [status]);
 
   const {
     searchTerm,
@@ -72,8 +97,10 @@ const RecommendationForm: React.FC = () => {
       setSelectedItem(result);
       setSearchTerm("");
       handleResultsVisibility(false);
+      // Clear any existing status message when a new item is selected
+      setStatus(null);
     },
-    [setSearchTerm, handleResultsVisibility],
+    [setSearchTerm, handleResultsVisibility, setStatus],
   );
 
   // Handle form submission
@@ -121,6 +148,9 @@ const RecommendationForm: React.FC = () => {
       setIsSubmitting(true);
 
       try {
+        // Add a delay to make the loading animation more visible
+        await simulateNetworkDelay(1000); // 1 second delay
+
         // Process the recommendation based on the type
         if (selectedItem.type === "songs") {
           // Create a Song recommendation with notes array
@@ -205,7 +235,9 @@ const RecommendationForm: React.FC = () => {
   // Clear selection handler
   const handleClearSelection = useCallback(() => {
     setSelectedItem(null);
-  }, []);
+    // Clear any existing status message when clearing selection
+    setStatus(null);
+  }, [setStatus]);
 
   // Combined results for keyboard navigation
   const allVisibleResults = useMemo(() => {
@@ -330,24 +362,39 @@ const RecommendationForm: React.FC = () => {
           )}
         </div>
 
-        <CollapsibleFormSection
-          isFormExpanded={isFormExpanded}
-          setIsFormExpanded={setIsFormExpanded}
-          from={from}
-          setFrom={setFrom}
-          note={note}
-          setNote={setNote}
-          formErrors={{
-            from: formErrors.from,
-            note: formErrors.note,
-          }}
-        />
+        {selectedItem && (
+          <>
+            <CollapsibleFormSection
+              isFormExpanded={isFormExpanded}
+              setIsFormExpanded={setIsFormExpanded}
+              from={from}
+              setFrom={setFrom}
+              note={note}
+              setNote={setNote}
+              formErrors={{
+                from: formErrors.from,
+                note: formErrors.note,
+              }}
+            />
 
-        <FormActions
-          selectedItem={selectedItem}
-          isSubmitting={isSubmitting}
-          status={status}
-        />
+            <FormActions
+              selectedItem={selectedItem}
+              isSubmitting={isSubmitting}
+            />
+          </>
+        )}
+
+        {!selectedItem && status && (
+          <div
+            className={`standalone-status-container ${shouldFadeOut ? "fade-out" : ""}`}
+          >
+            <div
+              className={`status-message ${status.includes("Error") || status.includes("error") ? "error" : "success"}`}
+            >
+              {status}
+            </div>
+          </div>
+        )}
       </form>
     </div>
   );

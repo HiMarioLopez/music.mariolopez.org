@@ -9,10 +9,8 @@ import ArtistRecommendationList from "./components/ArtistRecommendationList";
 import SkeletonLoader from "./components/SkeletonLoader";
 import SongRecommendationList from "./components/SongRecommendationList";
 import "./styles/index.css";
-import {
-  simulateNetworkDelay,
-  useRecommendationSelector,
-} from "./hooks/useRecommendationSelector";
+import { useRecommendationSelector } from "./hooks/useRecommendationSelector";
+import { simulateNetworkDelay } from "../../utils/network";
 
 const CombinedRecommendationList: React.FC = () => {
   const {
