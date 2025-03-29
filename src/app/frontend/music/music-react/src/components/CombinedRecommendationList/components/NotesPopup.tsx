@@ -48,9 +48,7 @@ const NotesPopup: React.FC<NotesPopupProps> = ({ notes, onClose }) => {
             {notes.map((note, index) => (
               <li key={index} className={styles.noteItem}>
                 <div className={styles.noteContent}>
-                  <p className={styles.noteText}>
-                    {note.note || "No note content provided."}
-                  </p>
+                  {note.note && <p className={styles.noteText}>{note.note}</p>}
                   <div className={styles.noteFooter}>
                     <span className={styles.noteFrom}>
                       From: {note.from || "Anonymous"}
