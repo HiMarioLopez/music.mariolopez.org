@@ -40,6 +40,8 @@ const RecommendationForm: React.FC = () => {
     selectedItem?: string;
   }>({});
   const [isFormExpanded, setIsFormExpanded] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [status, setStatus] = useState<string | null>(null);
 
   const {
     searchTerm,
@@ -76,7 +78,7 @@ const RecommendationForm: React.FC = () => {
 
   // Handle form submission
   const handleSubmit = useCallback(
-    (e: FormEvent) => {
+    async (e: FormEvent) => {
       e.preventDefault();
       const errors: { from?: string; note?: string; selectedItem?: string } =
         {};
@@ -108,77 +110,94 @@ const RecommendationForm: React.FC = () => {
         return;
       }
 
-      // Clear any previous errors
+      // Clear any previous errors and status
       setFormErrors({});
+      setStatus(null);
 
       // Must have a selected item at this point
       if (!selectedItem) return;
 
-      // Process the recommendation based on the type
-      if (selectedItem.type === "songs") {
-        // Create a Song recommendation with notes array
-        const songRecommendation: RecommendedSong = {
-          songTitle: selectedItem.name,
-          artistName: selectedItem.artist || "Unknown Artist",
-          albumName: selectedItem.album || "Unknown Album",
-          albumCoverUrl: selectedItem.artworkUrl || placeholderAlbumArt,
-          notes:
-            from.trim() || note.trim()
-              ? [
-                  {
-                    from: from.trim() || "",
-                    note: note.trim() || "",
-                    noteTimestamp: new Date().toISOString(),
-                  },
-                ]
-              : [],
-        };
-        addRecommendation("songs", songRecommendation);
-      } else if (selectedItem.type === "albums") {
-        // Create an Album recommendation with notes array
-        const albumRecommendation: RecommendedAlbum = {
-          albumTitle: selectedItem.name,
-          artistName: selectedItem.artist || "Unknown Artist",
-          albumCoverUrl: selectedItem.artworkUrl || placeholderAlbumArt,
-          trackCount: selectedItem.trackCount,
-          notes:
-            from.trim() || note.trim()
-              ? [
-                  {
-                    from: from.trim() || "Anonymous",
-                    note: note.trim() || "",
-                    noteTimestamp: new Date().toISOString(),
-                  },
-                ]
-              : [],
-        };
-        addRecommendation("albums", albumRecommendation);
-      } else if (selectedItem.type === "artists") {
-        // Create an Artist recommendation with notes array
-        const artistRecommendation: RecommendedArtist = {
-          artistName: selectedItem.name,
-          artistImageUrl: selectedItem.artworkUrl || placeholderAlbumArt,
-          genres: selectedItem.genres || [],
-          notes:
-            from.trim() || note.trim()
-              ? [
-                  {
-                    from: from.trim() || "Anonymous",
-                    note: note.trim() || "",
-                    noteTimestamp: new Date().toISOString(),
-                  },
-                ]
-              : [],
-        };
-        addRecommendation("artists", artistRecommendation);
-      }
+      // Set submitting state to true
+      setIsSubmitting(true);
 
-      // Reset form after submission
-      setSelectedItem(null);
-      setFrom("");
-      setNote("");
-      setSearchTerm("");
-      setIsFormExpanded(false);
+      try {
+        // Process the recommendation based on the type
+        if (selectedItem.type === "songs") {
+          // Create a Song recommendation with notes array
+          const songRecommendation: RecommendedSong = {
+            songTitle: selectedItem.name,
+            artistName: selectedItem.artist || "Unknown Artist",
+            albumName: selectedItem.album || "Unknown Album",
+            albumCoverUrl: selectedItem.artworkUrl || placeholderAlbumArt,
+            notes:
+              from.trim() || note.trim()
+                ? [
+                    {
+                      from: from.trim() || "",
+                      note: note.trim() || "",
+                      noteTimestamp: new Date().toISOString(),
+                    },
+                  ]
+                : [],
+          };
+          await addRecommendation("songs", songRecommendation);
+        } else if (selectedItem.type === "albums") {
+          // Create an Album recommendation with notes array
+          const albumRecommendation: RecommendedAlbum = {
+            albumTitle: selectedItem.name,
+            artistName: selectedItem.artist || "Unknown Artist",
+            albumCoverUrl: selectedItem.artworkUrl || placeholderAlbumArt,
+            trackCount: selectedItem.trackCount,
+            notes:
+              from.trim() || note.trim()
+                ? [
+                    {
+                      from: from.trim() || "Anonymous",
+                      note: note.trim() || "",
+                      noteTimestamp: new Date().toISOString(),
+                    },
+                  ]
+                : [],
+          };
+          await addRecommendation("albums", albumRecommendation);
+        } else if (selectedItem.type === "artists") {
+          // Create an Artist recommendation with notes array
+          const artistRecommendation: RecommendedArtist = {
+            artistName: selectedItem.name,
+            artistImageUrl: selectedItem.artworkUrl || placeholderAlbumArt,
+            genres: selectedItem.genres || [],
+            notes:
+              from.trim() || note.trim()
+                ? [
+                    {
+                      from: from.trim() || "Anonymous",
+                      note: note.trim() || "",
+                      noteTimestamp: new Date().toISOString(),
+                    },
+                  ]
+                : [],
+          };
+          await addRecommendation("artists", artistRecommendation);
+        }
+
+        // Show success message
+        setStatus("Recommendation submitted successfully!");
+
+        // Reset form after submission
+        setSelectedItem(null);
+        setFrom("");
+        setNote("");
+        setSearchTerm("");
+        setIsFormExpanded(false);
+      } catch (error) {
+        // Show error message
+        setStatus(
+          `Error: ${error instanceof Error ? error.message : "Failed to submit recommendation"}`,
+        );
+      } finally {
+        // Set submitting state back to false
+        setIsSubmitting(false);
+      }
     },
     [addRecommendation, from, note, selectedItem, setSearchTerm],
   );
@@ -324,7 +343,11 @@ const RecommendationForm: React.FC = () => {
           }}
         />
 
-        <FormActions selectedItem={selectedItem} />
+        <FormActions
+          selectedItem={selectedItem}
+          isSubmitting={isSubmitting}
+          status={status}
+        />
       </form>
     </div>
   );

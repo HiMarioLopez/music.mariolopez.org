@@ -32,7 +32,7 @@ const CollapsibleFormSection: React.FC<CollapsibleFormSectionProps> = ({
         aria-expanded={isFormExpanded}
         aria-controls="form-fields-container"
       >
-        <span>Note (Optional)</span>
+        <span>Add a Note (Optional)</span>
         <span className="toggle-icon">▲</span>
       </button>
 
