@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { MusicItem } from "../../../context/MusicContext";
+import { MusicItem } from "../../../models/MusicItem";
 
 /**
  * Hook to distribute songs across three carousels

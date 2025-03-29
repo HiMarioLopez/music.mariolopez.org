@@ -1,6 +1,6 @@
 import { ReactNode } from "react";
 import { vi } from "vitest";
-import { MusicItem } from "../../context/MusicContext";
+import { MusicItem } from "../../models/MusicItem";
 
 // Mock for the MusicContext with proper types
 export const createMockMusicItem = (overrides = {}): MusicItem => ({

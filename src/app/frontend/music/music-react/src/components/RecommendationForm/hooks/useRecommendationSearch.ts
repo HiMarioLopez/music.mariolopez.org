@@ -10,7 +10,7 @@ import { useDebouncedCallback } from "use-debounce";
 import {
   ApiError,
   authService,
-  musicApiService,
+  apiService,
 } from "../../../services/apiService";
 import { Result } from "../types/RecommendationForm.types";
 
@@ -86,7 +86,7 @@ export const useRecommendationSearch = () => {
         }
 
         const { termSuggestions, contentResults } =
-          await musicApiService.searchSuggestions(term, limit);
+          await apiService.searchSuggestions(term, limit);
 
         // If we're loading more, append to existing results
         // If it's a new search, replace results

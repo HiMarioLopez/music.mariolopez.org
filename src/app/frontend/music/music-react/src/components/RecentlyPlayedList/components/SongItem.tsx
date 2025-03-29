@@ -1,6 +1,6 @@
 import React, { memo, useMemo, useState } from "react";
 import albumPlaceholder from "../../../assets/album-placeholder.svg";
-import { MusicItem } from "../../../context/MusicContext";
+import { MusicItem } from "../../../models/MusicItem";
 import { getProcessedArtworkUrl } from "../../../utils/imageProcessing";
 import styles from "../styles/SongItem.module.css";
 

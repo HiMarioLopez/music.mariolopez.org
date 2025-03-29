@@ -7,13 +7,13 @@ import {
 } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { musicApiService } from "../../../services/apiService";
+import { apiService } from "../../../services/apiService";
 import RecommendationForm from "../RecommendationForm";
 import { mockApiResponse } from "./RecommendationForm.mock";
 
 // Mock the API service
 vi.mock("../../../services/apiService", () => ({
-  musicApiService: {
+  apiService: {
     searchSuggestions: vi.fn(),
   },
   authService: {
@@ -50,9 +50,7 @@ describe("RecommendationForm", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     // Set up default mock implementation
-    (musicApiService.searchSuggestions as any).mockResolvedValue(
-      mockApiResponse,
-    );
+    (apiService.searchSuggestions as any).mockResolvedValue(mockApiResponse);
   });
 
   it("renders the component correctly", async () => {
@@ -90,10 +88,7 @@ describe("RecommendationForm", () => {
 
     // Wait for the search call
     await waitFor(() => {
-      expect(musicApiService.searchSuggestions).toHaveBeenCalledWith(
-        "bohemian",
-        3,
-      );
+      expect(apiService.searchSuggestions).toHaveBeenCalledWith("bohemian", 3);
     });
   });
 
@@ -209,7 +204,7 @@ describe("RecommendationForm", () => {
 
     // Verify API was called with new search term
     await waitFor(() => {
-      expect(musicApiService.searchSuggestions).toHaveBeenCalledWith(
+      expect(apiService.searchSuggestions).toHaveBeenCalledWith(
         "bohemian rhapsody",
         3,
       );
@@ -367,7 +362,7 @@ describe("RecommendationForm", () => {
     });
 
     // Create custom search implementation with delay
-    (musicApiService.searchSuggestions as any).mockImplementation(async () => {
+    (apiService.searchSuggestions as any).mockImplementation(async () => {
       // Longer delay to simulate API call
       await new Promise((resolve) => setTimeout(resolve, 200));
       return mockApiResponse;
@@ -472,10 +467,7 @@ describe("RecommendationForm", () => {
     // Wait for the search and verify auth was called
     await waitFor(() => {
       expect(authService.getTokenWithCache).toHaveBeenCalledTimes(1);
-      expect(musicApiService.searchSuggestions).toHaveBeenCalledWith(
-        "bohemian",
-        3,
-      );
+      expect(apiService.searchSuggestions).toHaveBeenCalledWith("bohemian", 3);
     });
   });
 

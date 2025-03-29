@@ -1,6 +1,6 @@
 import React, { memo } from "react";
 import Slider from "react-slick";
-import { MusicItem } from "../../../context/MusicContext";
+import { MusicItem } from "../../../models/MusicItem";
 import styles from "../styles/CarouselRow.module.css";
 import SongItem from "./SongItem";
 

@@ -2,7 +2,7 @@ import { describe, it, expect } from "vitest";
 import { renderHook } from "@testing-library/react";
 import { useSongDistribution } from "../hooks/useSongDistribution";
 import { createMockMusicItem } from "../../../mocks/context/MusicContextMock";
-import { MusicItem } from "../../../context/MusicContext";
+import { MusicItem } from "../../../models/MusicItem";
 
 describe("useSongDistribution Hook", () => {
   // Create sample song data

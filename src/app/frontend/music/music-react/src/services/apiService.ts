@@ -2,7 +2,7 @@ import {
   Hint,
   Result,
 } from "../components/RecommendationForm/types/RecommendationForm.types";
-import { MusicHistoryResponse } from "../context/MusicContext";
+import { MusicHistoryResponse } from "../models/MusicHistoryResponse";
 
 const API_BASE_URL = "/api/nodejs";
 
@@ -205,74 +205,68 @@ const fetchWithAuthRetry = async <T>(
 
 // Export a unified API service
 export const apiService = {
-  // Music API methods
-  music: {
-    // All API methods will trigger auth only when called
-    async searchSuggestions(
-      term: string,
-      limit: number = 3,
-      types: string[] = ["songs", "albums", "artists"],
-      kinds: string[] = ["terms", "topResults"],
-    ): Promise<{
-      termSuggestions: Result[];
-      contentResults: Result[];
-    }> {
-      const queryParams = new URLSearchParams({
-        term: term,
-        limit: limit.toString(),
-        types: types.join(","),
-        kinds: kinds.join(","),
-      });
+  // All API methods will trigger auth only when called
+  async searchSuggestions(
+    term: string,
+    limit: number = 3,
+    types: string[] = ["songs", "albums", "artists"],
+    kinds: string[] = ["terms", "topResults"],
+  ): Promise<{
+    termSuggestions: Result[];
+    contentResults: Result[];
+  }> {
+    const queryParams = new URLSearchParams({
+      term: term,
+      limit: limit.toString(),
+      types: types.join(","),
+      kinds: kinds.join(","),
+    });
 
-      // Using the new fetchWithAuthRetry which handles auth token internally
-      const data = await fetchWithAuthRetry<SearchSuggestionsResponse>(
-        `${API_BASE_URL}/apple-music/catalog/us/search/suggestions?${queryParams}`,
-        {},
-      );
+    // Using the new fetchWithAuthRetry which handles auth token internally
+    const data = await fetchWithAuthRetry<SearchSuggestionsResponse>(
+      `${API_BASE_URL}/apple-music/catalog/us/search/suggestions?${queryParams}`,
+      {},
+    );
 
-      // Parse term suggestions
-      const termSuggestions =
-        data.data.results.suggestions
-          .filter((suggestion: Hint) => suggestion.kind === "terms")
-          .map((suggestion: Hint) => ({
-            id: suggestion.searchTerm || suggestion.displayTerm || "",
-            name: suggestion.displayTerm || suggestion.searchTerm || "",
-            type: "hint" as const,
-          })) || [];
+    // Parse term suggestions
+    const termSuggestions =
+      data.data.results.suggestions
+        .filter((suggestion: Hint) => suggestion.kind === "terms")
+        .map((suggestion: Hint) => ({
+          id: suggestion.searchTerm || suggestion.displayTerm || "",
+          name: suggestion.displayTerm || suggestion.searchTerm || "",
+          type: "hint" as const,
+        })) || [];
 
-      // Parse content results
-      const contentResults =
-        data.data.results.suggestions
-          .filter(
-            (suggestion: Hint) =>
-              suggestion.kind === "topResults" && suggestion.content,
-          )
-          .map((suggestion: Hint) => {
-            const content = suggestion.content!;
-            return {
-              id: content.id,
-              name: content.attributes.name,
-              artist: content.attributes.artistName,
-              album: content.attributes.albumName,
-              artworkUrl: content.attributes.artwork?.url
-                ?.replace("{w}", "40")
-                .replace("{h}", "40"),
-              type: content.type,
-              trackCount: content.attributes.trackCount,
-              releaseDate: content.attributes.releaseDate,
-              genres: content.attributes.genreNames,
-            };
-          }) || [];
+    // Parse content results
+    const contentResults =
+      data.data.results.suggestions
+        .filter(
+          (suggestion: Hint) =>
+            suggestion.kind === "topResults" && suggestion.content,
+        )
+        .map((suggestion: Hint) => {
+          const content = suggestion.content!;
+          return {
+            id: content.id,
+            name: content.attributes.name,
+            artist: content.attributes.artistName,
+            album: content.attributes.albumName,
+            artworkUrl: content.attributes.artwork?.url
+              ?.replace("{w}", "40")
+              .replace("{h}", "40"),
+            type: content.type,
+            trackCount: content.attributes.trackCount,
+            releaseDate: content.attributes.releaseDate,
+            genres: content.attributes.genreNames,
+          };
+        }) || [];
 
-      return { termSuggestions, contentResults };
-    },
-    async getMusicHistory(limit: number = 5): Promise<MusicHistoryResponse> {
-      return fetchWithErrorHandling<MusicHistoryResponse>(
-        `${API_BASE_URL}/history/music?limit=${limit}`,
-      );
-    },
+    return { termSuggestions, contentResults };
+  },
+  async getMusicHistory(limit: number = 5): Promise<MusicHistoryResponse> {
+    return fetchWithErrorHandling<MusicHistoryResponse>(
+      `${API_BASE_URL}/history/music?limit=${limit}`,
+    );
   },
 };
-
-// For backward compatibility
-export const musicApiService = apiService.music;

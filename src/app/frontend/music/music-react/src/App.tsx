@@ -7,8 +7,8 @@ import NowPlaying from "./components/NowPlaying/NowPlaying";
 import QueuedSongsList from "./components/QueuedSongsList";
 import RecentlyPlayedList from "./components/RecentlyPlayedList/RecentlyPlayedList";
 import RecommendationForm from "./components/RecommendationForm/RecommendationForm";
-import { MusicProvider } from "./context/MusicContext";
-import { RecommendationsProvider } from "./context/RecommendationsContext";
+import { MusicProvider } from "./providers/MusicProvider";
+import { RecommendationsProvider } from "./providers/RecommendationsProvider";
 import styles from "./styles/App.module.css";
 
 const App: React.FC = () => {

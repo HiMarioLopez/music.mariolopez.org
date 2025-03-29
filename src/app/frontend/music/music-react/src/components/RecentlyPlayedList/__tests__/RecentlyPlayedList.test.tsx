@@ -2,7 +2,7 @@ import { render, screen } from "@testing-library/react";
 import { describe, it, expect, vi } from "vitest";
 import RecentlyPlayedList from "../RecentlyPlayedList";
 import { createMockMusicItem } from "../../../mocks/context/MusicContextMock";
-import { MusicItem } from "../../../context/MusicContext";
+import { MusicItem } from "../../../models/MusicItem";
 
 // Define the interface that matches MusicContextType from MusicContext.tsx
 interface MockMusicContextType {
