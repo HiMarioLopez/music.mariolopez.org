@@ -3,18 +3,18 @@
 .album-item,
 .artist-item,
 .recommendation-item {
-    display: block;
-    width: 100%;
-    margin-bottom: var(--margin-small);
-    border-radius: var(--border-radius-medium);
-    overflow: hidden;
+  display: block;
+  width: 100%;
+  margin-bottom: var(--margin-small);
+  border-radius: var(--border-radius-medium);
+  overflow: hidden;
 }
 
 .song-item:last-child,
 .album-item:last-child,
 .artist-item:last-child,
 .recommendation-item:last-child {
-    margin-bottom: 0;
+  margin-bottom: 0;
 }
 
 /* Add highlight animations for the item wrappers */
@@ -22,17 +22,17 @@
 .album-item-updating,
 .artist-item-updating,
 .recommendation-item-updating {
-    animation: highlight 1.5s ease-out;
+  animation: highlight 1.5s ease-out;
 }
 
 @keyframes highlight {
-    0% {
-        background-color: rgba(170, 175, 76, 0.2); /* Yellow background */
-        box-shadow: 0 0 8px rgba(170, 175, 76, 0.6); /* Yellow shadow */
-    }
+  0% {
+    background-color: rgba(76, 175, 91, 0.8); /* Green background */
+    box-shadow: 0 0 8px rgba(76, 175, 91, 0.6); /* Green shadow */
+  }
 
-    100% {
-        background-color: transparent;
-        box-shadow: none;
-    }
+  100% {
+    background-color: transparent;
+    box-shadow: none;
+  }
 }
