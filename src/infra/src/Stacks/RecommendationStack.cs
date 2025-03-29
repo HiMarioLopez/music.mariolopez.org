@@ -26,8 +26,17 @@ public class RecommendationStack : Stack
         {
             TableName = "MusicRecommendations",
             PartitionKey = new Attribute { Name = "entityType", Type = AttributeType.STRING },
-            SortKey = new Attribute { Name = "votes", Type = AttributeType.NUMBER },  // Using votes as sort key
+            SortKey = new Attribute { Name = "timestamp", Type = AttributeType.STRING },  // Using timestamp as sort key for uniqueness
             BillingMode = BillingMode.PAY_PER_REQUEST,
+        });
+
+        // Add a Global Secondary Index for sorting by votes (for Recommendation Leaderboards)
+        recommendationTable.AddGlobalSecondaryIndex(new GlobalSecondaryIndexProps
+        {
+            IndexName = "EntityTypeVotesIndex",
+            PartitionKey = new Attribute { Name = "entityType", Type = AttributeType.STRING },
+            SortKey = new Attribute { Name = "votes", Type = AttributeType.NUMBER },
+            ProjectionType = ProjectionType.ALL
         });
 
         #endregion
@@ -40,6 +49,13 @@ public class RecommendationStack : Stack
             ParameterName = "/Music/Recommendations/TableName",
             StringValue = recommendationTable.TableName,
             Description = "Name of the DynamoDB table storing music recommendations"
+        });
+
+        var recommendationTableIndexNameParameter = new StringParameter(this, "RecommendationTableIndexNameParameter", new StringParameterProps
+        {
+            ParameterName = "/Music/Recommendations/EntityTypeVotesIndexName",
+            StringValue = "EntityTypeVotesIndex",
+            Description = "Name of the DynamoDB table index storing music recommendations"
         });
 
         #endregion

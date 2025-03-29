@@ -225,7 +225,6 @@ export const apiService = {
     // Using the new fetchWithAuthRetry which handles auth token internally
     const data = await fetchWithAuthRetry<SearchSuggestionsResponse>(
       `${API_BASE_URL}/apple-music/catalog/us/search/suggestions?${queryParams}`,
-      {},
     );
 
     // Parse term suggestions
@@ -264,9 +263,83 @@ export const apiService = {
 
     return { termSuggestions, contentResults };
   },
+  // Music history API methods
   async getMusicHistory(limit: number = 5): Promise<MusicHistoryResponse> {
     return fetchWithErrorHandling<MusicHistoryResponse>(
       `${API_BASE_URL}/history/music?limit=${limit}`,
     );
+  },
+  // Recommendations API methods
+  async getRecommendations(
+    type?: "SONG" | "ALBUM" | "ARTIST",
+    from?: string,
+    limit: number = 50,
+    startKey?: string,
+  ): Promise<{
+    items: Array<{
+      entityType: string;
+      timestamp: string;
+      id?: string;
+      votes?: number;
+      [key: string]: any;
+    }>;
+    pagination: {
+      count: number;
+      hasMore: boolean;
+      nextToken?: string;
+    };
+  }> {
+    // Build query parameters
+    const params = new URLSearchParams();
+
+    if (type) {
+      params.append("entityType", type);
+    }
+
+    if (from) {
+      params.append("from", from);
+    }
+
+    if (limit !== 50) {
+      params.append("limit", limit.toString());
+    }
+
+    if (startKey) {
+      params.append("startKey", startKey);
+    }
+
+    const queryString = params.toString();
+    const url = `${API_BASE_URL}/recommendations${queryString ? `?${queryString}` : ""}`;
+
+    return fetchWithAuthRetry(url);
+  },
+
+  async createRecommendation(
+    type: "SONG" | "ALBUM" | "ARTIST",
+    data: Record<string, any>,
+  ): Promise<{
+    message: string;
+    recommendation: {
+      entityType: string;
+      timestamp: string;
+      id?: string;
+      votes?: number;
+      [key: string]: any;
+    };
+  }> {
+    const payload = {
+      entityType: type,
+      ...data,
+    };
+
+    const url = `${API_BASE_URL}/recommendation`;
+
+    return fetchWithAuthRetry(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    });
   },
 };

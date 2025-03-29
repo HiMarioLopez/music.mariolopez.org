@@ -46,7 +46,8 @@ export const handler = async (
       );
     }
 
-    // Get the table name from SSM Parameter Store
+    // Get DynamoDB table name from Parameter Store
+    logger.info('Retrieving table name from parameter', { tableNameParameter });
     const tableName = await getParameter(tableNameParameter);
 
     if (!tableName) {
@@ -139,6 +140,7 @@ export const handler = async (
     let recommendation: Omit<Recommendation, 'timestamp'>;
     if (requestBody.entityType === 'SONG') {
       recommendation = {
+        entityType: 'SONG',
         songTitle: requestBody.songTitle,
         artistName: requestBody.artistName,
         albumName: requestBody.albumName,
@@ -148,6 +150,7 @@ export const handler = async (
       } as SongRecommendation;
     } else if (requestBody.entityType === 'ALBUM') {
       recommendation = {
+        entityType: 'ALBUM',
         albumTitle: requestBody.albumTitle,
         artistName: requestBody.artistName,
         albumCoverUrl: requestBody.albumCoverUrl || '',
@@ -158,6 +161,7 @@ export const handler = async (
       } as AlbumRecommendation;
     } else {
       recommendation = {
+        entityType: 'ARTIST',
         artistName: requestBody.artistName,
         artistImageUrl: requestBody.artistImageUrl || '',
         genres: requestBody.genres,

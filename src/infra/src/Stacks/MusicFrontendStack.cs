@@ -198,7 +198,9 @@ public class MusicFrontendStack : Stack
                     }),
                     ViewerProtocolPolicy = ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
                     CachePolicy = CachePolicy.CACHING_DISABLED,
-                    OriginRequestPolicy = OriginRequestPolicy.ALL_VIEWER
+                    AllowedMethods = AllowedMethods.ALLOW_ALL,
+                    OriginRequestPolicy = OriginRequestPolicy.ALL_VIEWER,
+                    ResponseHeadersPolicy = ResponseHeadersPolicy.CORS_ALLOW_ALL_ORIGINS,
                 }
             },
             // Default Behavior: Redirect to the static site assets S3 bucket

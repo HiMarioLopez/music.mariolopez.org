@@ -5,18 +5,13 @@ using Amazon.CDK.AWS.CertificateManager;
 using Amazon.CDK.AWS.IAM;
 using Amazon.CDK.AWS.Lambda;
 using Amazon.CDK.AWS.SecretsManager;
-using Amazon.CDK.AWS.Lambda.EventSources;
 using Amazon.CDK.AWS.SNS;
 using Amazon.CDK.AWS.SNS.Subscriptions;
-using Amazon.CDK.AWS.SQS;
 using Amazon.CDK.AWS.SSM;
 using Amazon.CDK.AWS.CloudWatch;
 using Constructs;
 using Microsoft.Extensions.Configuration;
 using Music.Infra.Models.Settings;
-using Amazon.CDK.AWS.Events;
-using Amazon.CDK.AWS.Events.Targets;
-using Amazon.CDK.AWS.SES.Actions;
 
 namespace Music.Infra.Stacks;
 
@@ -43,6 +38,16 @@ public class IntegrationApiStack : Stack
         var rootCertificateArn = awsSettings?.CertificateArn;
         var rootCertificate = Certificate.FromCertificateArn(this, "Music-ApiCertificate", rootCertificateArn);
 
+        // Create a role for API Gateway to write to CloudWatch Logs
+        var apiGatewayCloudWatchRole = new Role(this, "Music-IntegrationApiGatewayCloudWatchRole", new RoleProps
+        {
+            AssumedBy = new ServicePrincipal("apigateway.amazonaws.com"),
+            ManagedPolicies =
+            [
+                ManagedPolicy.FromAwsManagedPolicyName("service-role/AmazonAPIGatewayPushToCloudWatchLogs")
+            ]
+        });
+
         // Create a new REST API
         var apiGateway = new RestApi(this, "Music-IntegrationApiGateway", new RestApiProps
         {
@@ -66,9 +71,9 @@ public class IntegrationApiStack : Stack
                     "X-Amz-Security-Token",
                     "Music-User-Token"
                 ],
-                AllowMethods = ["GET", "POST", "OPTIONS"],
-                AllowOrigins = corsSettings?.AllowedOrigins
-            }
+                AllowOrigins = corsSettings?.AllowedOrigins,
+                AllowMethods = Cors.ALL_METHODS
+            },
         });
 
         #endregion
@@ -403,7 +408,7 @@ public class IntegrationApiStack : Stack
                     Region,
                     ":",
                     Account,
-                    ":table/MusicRecommendations"
+                    ":table/MusicRecommendations/index/EntityTypeVotesIndex"
                 ])
             ]
         }));
@@ -421,7 +426,10 @@ public class IntegrationApiStack : Stack
         {
             Effect = Effect.ALLOW,
             Actions = ["ssm:GetParameter"],
-            Resources = [$"arn:aws:ssm:{Region}:{Account}:parameter/Music/Recommendations/TableName"]
+            Resources = [
+                $"arn:aws:ssm:{Region}:{Account}:parameter/Music/Recommendations/TableName",
+                $"arn:aws:ssm:{Region}:{Account}:parameter/Music/Recommendations/EntityTypeVotesIndexName"
+            ]
         }));
 
         // Get Recommendations Lambda - To be implemented
@@ -429,7 +437,7 @@ public class IntegrationApiStack : Stack
         {
             Runtime = Runtime.NODEJS_22_X,
             Handler = "get-recommendations.handler",
-            Code = Code.FromAsset("../app/backend/dist/handlers/api/integration"), // You'll need to create this handler
+            Code = Code.FromAsset("../app/backend/dist/handlers/api/integration"),
             Role = getRecommendationsLambdaRole,
             MemorySize = 128,
             Timeout = Duration.Seconds(29),
@@ -437,7 +445,8 @@ public class IntegrationApiStack : Stack
             Environment = new Dictionary<string, string>
             {
                 ["AWS_NODEJS_CONNECTION_REUSE_ENABLED"] = "1",
-                ["DYNAMODB_TABLE_NAME_PARAMETER"] = "/Music/Recommendations/TableName"
+                ["DYNAMODB_TABLE_NAME_PARAMETER"] = "/Music/Recommendations/TableName",
+                ["DYNAMODB_TABLE_INDEX_NAME_PARAMETER"] = "/Music/Recommendations/EntityTypeVotesIndexName"
             },
             Tracing = Tracing.ACTIVE
         });
@@ -464,7 +473,7 @@ public class IntegrationApiStack : Stack
             Actions = [
                 "dynamodb:PutItem",
                 "dynamodb:UpdateItem",
-                "dynamodb:DeleteItem"
+                "dynamodb:Query"
             ],
             Resources = [
                 Fn.Join("", [
@@ -473,7 +482,7 @@ public class IntegrationApiStack : Stack
                     ":",
                     Account,
                     ":table/MusicRecommendations"
-                ])
+                ]),
             ]
         }));
 
@@ -490,7 +499,9 @@ public class IntegrationApiStack : Stack
         {
             Effect = Effect.ALLOW,
             Actions = ["ssm:GetParameter"],
-            Resources = [$"arn:aws:ssm:{Region}:{Account}:parameter/Music/Recommendations/TableName"]
+            Resources = [
+                $"arn:aws:ssm:{Region}:{Account}:parameter/Music/Recommendations/TableName"
+            ]
         }));
 
         // Set Recommendations Lambda - To be implemented
@@ -498,7 +509,7 @@ public class IntegrationApiStack : Stack
         {
             Runtime = Runtime.NODEJS_22_X,
             Handler = "set-recommendations.handler",
-            Code = Code.FromAsset("../app/backend/dist/handlers/api/integration"), // TODO: Create handler
+            Code = Code.FromAsset("../app/backend/dist/handlers/api/integration"),
             Role = setRecommendationsLambdaRole,
             MemorySize = 128,
             Timeout = Duration.Seconds(29),
@@ -554,12 +565,12 @@ public class IntegrationApiStack : Stack
             });
 
         // Add recommendation endpoints to API Gateway
-        var recommendationsResource = nodejsResource.AddResource("recommendations");
 
-        // Add GET method for retrieving recommendations
-        recommendationsResource.AddMethod(
-            "GET",
-            new LambdaIntegration(getRecommendationsLambda, new LambdaIntegrationOptions
+        // Add POST method for creating (single) recommendation
+        var recommendationResource = nodejsResource.AddResource("recommendation");
+        recommendationResource.AddMethod(
+            "POST",
+            new LambdaIntegration(setRecommendationsLambda, new LambdaIntegrationOptions
             {
                 Timeout = Duration.Seconds(29),
                 AllowTestInvoke = true
@@ -568,10 +579,11 @@ public class IntegrationApiStack : Stack
                 AuthorizationType = AuthorizationType.NONE
             });
 
-        // Add POST method for creating recommendations
+        // Add GET method for retrieving (multiple) recommendations
+        var recommendationsResource = nodejsResource.AddResource("recommendations");
         recommendationsResource.AddMethod(
-            "POST",
-            new LambdaIntegration(setRecommendationsLambda, new LambdaIntegrationOptions
+            "GET",
+            new LambdaIntegration(getRecommendationsLambda, new LambdaIntegrationOptions
             {
                 Timeout = Duration.Seconds(29),
                 AllowTestInvoke = true

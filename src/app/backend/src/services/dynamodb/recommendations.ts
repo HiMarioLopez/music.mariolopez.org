@@ -80,16 +80,15 @@ export const getAllRecommendations = async (
   try {
     const effectiveLimit = Math.min(limit, MAX_LIMIT);
 
-    // Create query parameters for scanning all entity types
+    // Create query parameters with GSI for sorting by votes
     const params: any = {
       TableName: tableName,
-      FilterExpression: 'entityType IN (:song, :album, :artist)',
+      IndexName: 'EntityTypeVotesIndex', // Use the GSI for sorting by votes
+      KeyConditionExpression: 'entityType = :entityType',
       ExpressionAttributeValues: {
-        ':song': 'SONG',
-        ':album': 'ALBUM',
-        ':artist': 'ARTIST',
+        ':entityType': 'SONG', // Query by one entity type at a time, will combine results
       },
-      ScanIndexForward: false, // Descending order by sort key (votes)
+      ScanIndexForward: false, // Descending order by votes
       Limit: effectiveLimit,
     };
 
@@ -103,30 +102,51 @@ export const getAllRecommendations = async (
       }
     }
 
-    logger.info('Querying all recommendations by votes', {
+    logger.info('Querying song recommendations by votes', {
       tableName,
       limit: effectiveLimit,
       startKey: startKey || 'none',
     });
 
-    // Use QueryCommand
-    const result = await docClient.send(new QueryCommand(params));
+    // Query for SONG type
+    const songResult = await docClient.send(new QueryCommand(params));
+    const songRecommendations = songResult.Items || [];
 
-    // Items are already sorted by votes (highest first) due to ScanIndexForward: false
-    const recommendations = result.Items || [];
+    // Update params for ALBUM type
+    params.ExpressionAttributeValues = {
+      ':entityType': 'ALBUM',
+    };
+    logger.info('Querying album recommendations by votes');
+    const albumResult = await docClient.send(new QueryCommand(params));
+    const albumRecommendations = albumResult.Items || [];
 
-    logger.info('Retrieved recommendations', {
-      count: recommendations.length,
+    // Update params for ARTIST type
+    params.ExpressionAttributeValues = {
+      ':entityType': 'ARTIST',
+    };
+    logger.info('Querying artist recommendations by votes');
+    const artistResult = await docClient.send(new QueryCommand(params));
+    const artistRecommendations = artistResult.Items || [];
+
+    // Combine and sort all recommendations by votes (highest first)
+    const allRecommendations = [
+      ...songRecommendations,
+      ...albumRecommendations,
+      ...artistRecommendations,
+    ]
+      .sort((a, b) => (b.votes || 0) - (a.votes || 0))
+      .slice(0, effectiveLimit);
+
+    logger.info('Retrieved combined recommendations', {
+      count: allRecommendations.length,
     });
 
-    // Stringify the LastEvaluatedKey for pagination
+    // For pagination, we'd need a more complex approach with combined results
+    // For now, we'll skip pagination for combined results
     let lastEvaluatedKey = undefined;
-    if (result.LastEvaluatedKey) {
-      lastEvaluatedKey = JSON.stringify(result.LastEvaluatedKey);
-    }
 
     return {
-      items: recommendations,
+      items: allRecommendations,
       lastEvaluatedKey,
     };
   } catch (error) {
@@ -139,6 +159,7 @@ export const getAllRecommendations = async (
  * Get recommendations by type from DynamoDB with pagination
  *
  * @param tableName - DynamoDB table name
+ * @param tableIndexName - DynamoDB table index name
  * @param entityType - Type to filter by (SONG, ALBUM, or ARTIST)
  * @param limit - Maximum number of items to return
  * @param startKey - Starting key for pagination
@@ -146,6 +167,7 @@ export const getAllRecommendations = async (
  */
 export const getRecommendationsByEntityType = async (
   tableName: string,
+  tableIndexName: string,
   entityType: 'SONG' | 'ALBUM' | 'ARTIST',
   limit = DEFAULT_LIMIT,
   startKey?: string
@@ -153,9 +175,10 @@ export const getRecommendationsByEntityType = async (
   try {
     const effectiveLimit = Math.min(limit, MAX_LIMIT);
 
-    // Use QueryCommand with FilterExpression
+    // Use QueryCommand with the GSI
     const params: any = {
       TableName: tableName,
+      IndexName: tableIndexName, // Use the GSI for sorting by votes
       KeyConditionExpression: 'entityType = :entityType',
       ExpressionAttributeValues: {
         ':entityType': entityType,
@@ -173,7 +196,7 @@ export const getRecommendationsByEntityType = async (
       }
     }
 
-    logger.info('Querying recommendations by type', {
+    logger.info('Querying recommendations by type using GSI', {
       tableName,
       entityType,
       limit: effectiveLimit,
@@ -182,7 +205,7 @@ export const getRecommendationsByEntityType = async (
 
     const result = await docClient.send(new QueryCommand(params));
 
-    // Results are already sorted by votes
+    // Results are already sorted by votes due to GSI sort key and ScanIndexForward: false
     const recommendations = result.Items || [];
 
     logger.info('Retrieved recommendations by type', {
@@ -227,9 +250,10 @@ export const getRecommendationsByFrom = async (
   try {
     const effectiveLimit = Math.min(limit, MAX_LIMIT);
 
-    // Use QueryCommand with FilterExpression for creator filter
+    // Use QueryCommand with GSI and FilterExpression for creator filter
     const params: any = {
       TableName: tableName,
+      IndexName: 'EntityTypeVotesIndex', // Use the GSI for sorting by votes
       KeyConditionExpression: 'entityType = :entityType',
       FilterExpression: '#from = :from',
       ExpressionAttributeNames: {
@@ -252,7 +276,7 @@ export const getRecommendationsByFrom = async (
       }
     }
 
-    logger.info('Querying recommendations by creator', {
+    logger.info('Querying recommendations by creator using GSI', {
       tableName,
       fromPerson,
       limit: effectiveLimit,
@@ -261,7 +285,7 @@ export const getRecommendationsByFrom = async (
 
     const result = await docClient.send(new QueryCommand(params));
 
-    // Results are already sorted by votes (highest first) due to ScanIndexForward: false
+    // Results are already sorted by votes due to GSI sort key and ScanIndexForward: false
     const recommendations = result.Items || [];
 
     logger.info('Retrieved recommendations by creator', {
@@ -303,8 +327,8 @@ export const createRecommendation = async (
     // Generate current timestamp
     const timestamp = new Date().toISOString();
 
-    // Default votes to 0 for new recommendations
-    const votes = 0;
+    // Default votes to 1 for new recommendations
+    const votes = 1;
 
     // Create a complete recommendation object with entityType and timestamp
     let completeRecommendation: Recommendation;

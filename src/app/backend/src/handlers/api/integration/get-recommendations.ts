@@ -57,6 +57,14 @@ export const handler = async (
       );
     }
 
+    const tableIndexNameParameter =
+      process.env.DYNAMODB_TABLE_INDEX_NAME_PARAMETER;
+    if (!tableIndexNameParameter) {
+      throw new Error(
+        'Missing required environment variable: DYNAMODB_TABLE_INDEX_NAME_PARAMETER'
+      );
+    }
+
     // Get the table name from SSM Parameter Store using our parameter service
     const tableName = await getParameter(tableNameParameter);
 
@@ -64,6 +72,25 @@ export const handler = async (
       throw new Error(
         `Failed to retrieve DynamoDB table name from parameter: ${tableNameParameter}`
       );
+    }
+
+    // Try to get the index name, but use a hardcoded fallback if it fails
+    let tableIndexName: string;
+    try {
+      const indexNameFromParam = await getParameter(tableIndexNameParameter);
+      if (!indexNameFromParam) {
+        logger.warn(
+          `Failed to retrieve DynamoDB table index name from parameter: ${tableIndexNameParameter}, using fallback value`
+        );
+        tableIndexName = 'EntityTypeVotesIndex'; // Fallback value
+      } else {
+        tableIndexName = indexNameFromParam;
+      }
+    } catch (error) {
+      logger.warn(
+        `Error retrieving DynamoDB table index name from parameter: ${error}, using fallback value`
+      );
+      tableIndexName = 'EntityTypeVotesIndex'; // Fallback value
     }
 
     // Get query parameters
@@ -110,6 +137,7 @@ export const handler = async (
       });
       result = await getRecommendationsByEntityType(
         tableName,
+        tableIndexName,
         entityType,
         limit,
         startKey

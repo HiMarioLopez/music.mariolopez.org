@@ -1,0 +1,20 @@
+meta {
+  name: Recommendations (Song)
+  type: http
+  seq: 1
+}
+
+get {
+  url: https://music.mariolopez.org/api/nodejs/recommendations?entityType=SONG&limit=5
+  body: none
+  auth: bearer
+}
+
+params:query {
+  entityType: SONG
+  limit: 5
+}
+
+auth:bearer {
+  token: {{AUTH_TOKEN}}
+}
