@@ -11,7 +11,7 @@
   list-style-type: none;
   padding-left: 0;
   width: 100%;
-  max-height: calc(4 * var(--recommended-track-size));
+  max-height: calc(5 * var(--recommended-track-size));
   overflow-y: auto;
   scrollbar-width: thin;
   scrollbar-color: var(--scrollbar-start-color) var(--scrollbar-end-color);
