@@ -127,50 +127,53 @@ export function recommendationsReducer(
     case "UPDATE_RECOMMENDATION": {
       // Find index of item with matching ID
       const index = state[action.recommendationType].items.findIndex(
-        (item) => item.id === action.id
+        (item) => item.id === action.id,
       );
-      
+
       // If item not found, return state unchanged
       if (index === -1) {
         return state;
       }
-      
+
       // Create a new items array with the updated item
       const items = [...state[action.recommendationType].items];
       const existingItem = items[index];
-      
+
       // Special handling for notes array to ensure proper merging
       let mergedNotes = existingItem.notes || [];
-      
+
       // If the incoming item has notes, merge them
       if (action.item.notes && Array.isArray(action.item.notes)) {
         // Only add notes that don't already exist in the array
         // We're considering a note unique if it has the same from+note+timestamp combination
         action.item.notes.forEach((newNote) => {
           const noteExists = mergedNotes.some(
-            (existingNote) => 
-              existingNote.from === newNote.from && 
+            (existingNote) =>
+              existingNote.from === newNote.from &&
               existingNote.note === newNote.note &&
-              existingNote.noteTimestamp === newNote.noteTimestamp
+              existingNote.noteTimestamp === newNote.noteTimestamp,
           );
-          
+
           if (!noteExists) {
             mergedNotes = [...mergedNotes, newNote];
           }
         });
       }
-      
+
       // Update the item with merged properties
-      items[index] = { 
+      items[index] = {
         ...existingItem,
         ...action.item,
-        // Preserve the existing ID and votes
+        // Preserve the existing ID and use votes from action if provided, otherwise keep existing
         id: existingItem.id,
-        votes: existingItem.votes,
+        votes:
+          action.item.votes !== undefined
+            ? action.item.votes
+            : existingItem.votes,
         // Use our merged notes array
-        notes: mergedNotes
+        notes: mergedNotes,
       };
-      
+
       return {
         ...state,
         [action.recommendationType]: {

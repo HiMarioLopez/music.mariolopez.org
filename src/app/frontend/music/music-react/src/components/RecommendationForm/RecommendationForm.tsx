@@ -23,7 +23,6 @@ import SearchInput from "./components/SearchInput";
 import ResultsList from "./components/ResultsList";
 import CollapsibleFormSection from "./components/CollapsibleFormSection";
 import FormActions from "./components/FormActions";
-import { simulateNetworkDelay } from "../../utils/network";
 
 // Create a stable ID to reduce unnecessary re-renders
 const DEFAULT_VISIBLE_ITEMS_COUNT = 3;
@@ -148,9 +147,6 @@ const RecommendationForm: React.FC = () => {
       setIsSubmitting(true);
 
       try {
-        // Add a delay to make the loading animation more visible
-        await simulateNetworkDelay(1000); // 1 second delay
-
         // Process the recommendation based on the type
         if (selectedItem.type === "songs") {
           // Create a Song recommendation with notes array

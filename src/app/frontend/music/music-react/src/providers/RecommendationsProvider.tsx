@@ -179,34 +179,39 @@ export const RecommendationsProvider: React.FC<{
       // Map frontend recommendation type to backend entityType
       const entityType =
         type === "songs" ? "SONG" : type === "albums" ? "ALBUM" : "ARTIST";
-        
+
       // First, check if this item already exists in our state
       // We'll compare based on key fields depending on the type
       let existingItemIndex = -1;
       let existingItemId: string | undefined;
-      
+
       if (type === "songs") {
         const songItem = item as RecommendedSong;
         existingItemIndex = state[type].items.findIndex(
-          (existingItem) => 
-            (existingItem as RecommendedSong).songTitle === songItem.songTitle &&
-            (existingItem as RecommendedSong).artistName === songItem.artistName
+          (existingItem) =>
+            (existingItem as RecommendedSong).songTitle ===
+              songItem.songTitle &&
+            (existingItem as RecommendedSong).artistName ===
+              songItem.artistName,
         );
       } else if (type === "albums") {
         const albumItem = item as RecommendedAlbum;
         existingItemIndex = state[type].items.findIndex(
-          (existingItem) => 
-            (existingItem as RecommendedAlbum).albumTitle === albumItem.albumTitle &&
-            (existingItem as RecommendedAlbum).artistName === albumItem.artistName
+          (existingItem) =>
+            (existingItem as RecommendedAlbum).albumTitle ===
+              albumItem.albumTitle &&
+            (existingItem as RecommendedAlbum).artistName ===
+              albumItem.artistName,
         );
       } else if (type === "artists") {
         const artistItem = item as RecommendedArtist;
         existingItemIndex = state[type].items.findIndex(
-          (existingItem) => 
-            (existingItem as RecommendedArtist).artistName === artistItem.artistName
+          (existingItem) =>
+            (existingItem as RecommendedArtist).artistName ===
+            artistItem.artistName,
         );
       }
-      
+
       if (existingItemIndex !== -1) {
         existingItemId = state[type].items[existingItemIndex].id;
       }
@@ -254,33 +259,44 @@ export const RecommendationsProvider: React.FC<{
               ...state[type].items[existingItemIndex],
               ...item, // Merge in any new properties
               id: existingItemId, // Preserve the existing ID
-              // For simplicity, we'll leave the votes unchanged
+              // Increment votes by 1 since this is a duplicate recommendation
+              votes: (state[type].items[existingItemIndex].votes || 0) + 1,
             };
-            
+
             dispatch({
               type: "UPDATE_RECOMMENDATION",
               recommendationType: type,
               item: updatedItem as any,
               id: existingItemId,
             });
-          } else if (response.recommendation.wasUpdated === true && response.recommendation.id) {
+          } else if (
+            response.recommendation.wasUpdated === true &&
+            response.recommendation.id
+          ) {
             // This is a fallback for when the backend indicates it was updated
             // but we didn't find a match in our state (perhaps it was added in another session)
-            console.log("Backend reports update, but no matching item found in local state.", response.recommendation);
-            
+            console.log(
+              "Backend reports update, but no matching item found in local state.",
+              response.recommendation,
+            );
+
             // Try to find the item by the ID returned from the backend
             const itemIndex = state[type].items.findIndex(
-              (existingItem) => existingItem.id === response.recommendation.id
+              (existingItem) => existingItem.id === response.recommendation.id,
             );
-            
+
             if (itemIndex !== -1) {
               // If we find it by ID, update it
               const updatedItem = {
                 ...state[type].items[itemIndex],
                 ...item,
                 id: response.recommendation.id,
+                // Increment votes by 1 if the backend indicates this was a duplicate (wasUpdated)
+                votes: response.recommendation.wasUpdated
+                  ? (state[type].items[itemIndex].votes || 0) + 1
+                  : state[type].items[itemIndex].votes,
               };
-              
+
               dispatch({
                 type: "UPDATE_RECOMMENDATION",
                 recommendationType: type,
