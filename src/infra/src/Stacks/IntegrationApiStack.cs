@@ -473,7 +473,8 @@ public class IntegrationApiStack : Stack
             Actions = [
                 "dynamodb:PutItem",
                 "dynamodb:UpdateItem",
-                "dynamodb:Query"
+                "dynamodb:Query",
+                "dynamodb:Scan"
             ],
             Resources = [
                 Fn.Join("", [
