@@ -10,10 +10,11 @@ import {
   createRecommendation,
   getRecommendation,
   updateRecommendation,
+  getRecommendationById,
 } from '../../../services/dynamodb/recommendations';
 import { getParameter } from '../../../services/parameter';
 import { getCorsHeaders } from '../../../utils/cors';
-import { AlbumRecommendation, ArtistRecommendation, EntityType, Recommendation, SongRecommendation } from '../../../models/recommendation';
+import { AlbumRecommendation, ArtistRecommendation, EntityType, Recommendation, SongRecommendation, UserInteractionStatus } from '../../../models/recommendation';
 
 const logger = new Logger({ serviceName: 'set-recommendations' });
 const tracer = new Tracer({ serviceName: 'set-recommendations' });
@@ -73,7 +74,84 @@ export const handler = async (
       requestBody: JSON.stringify(requestBody),
     });
 
-    // Validate request body
+    // Check if we're updating an existing recommendation by ID
+    if (requestBody.recommendationId) {
+      logger.info('Updating recommendation by ID', {
+        recommendationId: requestBody.recommendationId,
+      });
+
+      // Get the existing recommendation
+      const existingRecommendation = await getRecommendationById(
+        tableName,
+        requestBody.recommendationId
+      );
+
+      if (!existingRecommendation) {
+        return {
+          statusCode: 404,
+          headers: getCorsHeaders(event.headers?.origin, 'POST,OPTIONS'),
+          body: JSON.stringify({
+            message: `Recommendation with ID ${requestBody.recommendationId} not found`,
+          }),
+        };
+      }
+
+      // Prepare updates
+      const updates: {
+        voteChange?: number;
+        userStatus?: UserInteractionStatus;
+        reviewedByMario?: boolean;
+      } = {};
+
+      // Handle vote change
+      if (requestBody.voteChange !== undefined) {
+        updates.voteChange = Number(requestBody.voteChange);
+      }
+
+      // Handle user status
+      if (requestBody.userStatus) {
+        if (!['liked', 'disliked', 'dismissed'].includes(requestBody.userStatus)) {
+          return {
+            statusCode: 400,
+            headers: getCorsHeaders(event.headers?.origin, 'POST,OPTIONS'),
+            body: JSON.stringify({
+              message: 'userStatus must be one of: liked, disliked, or dismissed',
+            }),
+          };
+        }
+        updates.userStatus = requestBody.userStatus as UserInteractionStatus;
+      }
+
+      // Handle reviewedByMario
+      if (requestBody.reviewedByMario !== undefined) {
+        updates.reviewedByMario = Boolean(requestBody.reviewedByMario);
+      }
+
+      // Update the recommendation
+      const result = await updateRecommendation(tableName, existingRecommendation, updates);
+
+      metrics.addMetric(
+        `${existingRecommendation.entityType}RecommendationUpdateCount`,
+        MetricUnit.Count,
+        1
+      );
+
+      logger.info('Successfully updated recommendation by ID', {
+        recommendationId: result.recommendationId,
+        entityType: result.entityType,
+      });
+
+      return {
+        statusCode: 200,
+        headers: getCorsHeaders(event.headers?.origin, 'POST,OPTIONS'),
+        body: JSON.stringify({
+          message: 'Recommendation updated successfully.',
+          recommendation: result,
+        }),
+      };
+    }
+
+    // Validate request body for new recommendation
     if (!requestBody.entityType) {
       return {
         statusCode: 400,
@@ -164,18 +242,39 @@ export const handler = async (
     if (existingRecommendation) {
       logger.info('Found existing recommendation, updating', {
         entityType: requestBody.entityType,
-        createdAt: existingRecommendation.createdAt,
+        recommendationId: existingRecommendation.recommendationId,
       });
 
       // Prepare updates
       const updates: {
         voteChange?: number;
+        userStatus?: UserInteractionStatus;
+        reviewedByMario?: boolean;
       } = {};
 
       // Handle vote change
       // If voteChange is explicitly provided, use it
       if (voteChange !== undefined) {
         updates.voteChange = voteChange;
+      }
+
+      // Handle user status if provided
+      if (requestBody.userStatus) {
+        if (!['liked', 'disliked', 'dismissed'].includes(requestBody.userStatus)) {
+          return {
+            statusCode: 400,
+            headers: getCorsHeaders(event.headers?.origin, 'POST,OPTIONS'),
+            body: JSON.stringify({
+              message: 'userStatus must be one of: liked, disliked, or dismissed',
+            }),
+          };
+        }
+        updates.userStatus = requestBody.userStatus as UserInteractionStatus;
+      }
+
+      // Handle reviewedByMario if provided
+      if (requestBody.reviewedByMario !== undefined) {
+        updates.reviewedByMario = Boolean(requestBody.reviewedByMario);
       }
 
       // Update the recommendation
@@ -193,7 +292,7 @@ export const handler = async (
       });
 
       // Map the request body to the corresponding recommendation type
-      let newRecommendation: Omit<Recommendation, 'createdAt' | 'votes'>;
+      let newRecommendation: Omit<Recommendation, 'createdAt' | 'votes' | 'recommendationId' | 'reviewedByMario'>;
 
       if (requestBody.entityType === 'SONG') {
         newRecommendation = {
@@ -202,7 +301,7 @@ export const handler = async (
           artistName: requestBody.artistName,
           albumName: requestBody.albumName,
           albumCoverUrl: requestBody.albumCoverUrl || '',
-        } as Omit<SongRecommendation, 'createdAt' | 'votes'>;
+        } as Omit<SongRecommendation, 'createdAt' | 'votes' | 'recommendationId' | 'reviewedByMario'>;
       } else if (requestBody.entityType === 'ALBUM') {
         newRecommendation = {
           entityType: 'ALBUM',
@@ -211,14 +310,14 @@ export const handler = async (
           albumCoverUrl: requestBody.albumCoverUrl || '',
           trackCount: requestBody.trackCount,
           releaseDate: requestBody.releaseDate,
-        } as Omit<AlbumRecommendation, 'createdAt' | 'votes'>;
+        } as Omit<AlbumRecommendation, 'createdAt' | 'votes' | 'recommendationId' | 'reviewedByMario'>;
       } else {
         newRecommendation = {
           entityType: 'ARTIST',
           artistName: requestBody.artistName,
           artistImageUrl: requestBody.artistImageUrl || '',
           genres: requestBody.genres,
-        } as Omit<ArtistRecommendation, 'createdAt' | 'votes'>;
+        } as Omit<ArtistRecommendation, 'createdAt' | 'votes' | 'recommendationId' | 'reviewedByMario'>;
       }
 
       // Store in DynamoDB
@@ -233,7 +332,7 @@ export const handler = async (
 
     logger.info('Successfully processed recommendation', {
       entityType: requestBody.entityType,
-      createdAt: result.createdAt,
+      recommendationId: result.recommendationId,
       isNewRecord: !existingRecommendation,
     });
 

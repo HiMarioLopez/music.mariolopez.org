@@ -9,6 +9,9 @@ import {
 import {
   getAllRecommendations,
   getRecommendationsByEntityType,
+  getReviewedRecommendations,
+  getUnreviewedRecommendations,
+  getRecommendationById,
 } from '../../../services/dynamodb/recommendations';
 import { getParameter } from '../../../services/parameter';
 import { getCorsHeaders } from '../../../utils/cors';
@@ -96,12 +99,48 @@ export const handler = async (
     const entityType = queryParams.entityType as
       | EntityType
       | undefined;
-    const from = queryParams.from;
+    const recommendationId = queryParams.recommendationId;
+    const reviewedByMario = queryParams.reviewedByMario !== undefined
+      ? queryParams.reviewedByMario === 'true'
+      : undefined;
 
     // Get starting key for pagination if provided
     const startKey = queryParams.startKey
       ? decodeURIComponent(queryParams.startKey)
       : undefined;
+
+    // Check if we're fetching a specific recommendation by ID
+    if (recommendationId) {
+      logger.info('Fetching recommendation by ID', {
+        recommendationId,
+      });
+
+      const recommendation = await getRecommendationById(
+        tableName,
+        recommendationId
+      );
+
+      if (!recommendation) {
+        return {
+          statusCode: 404,
+          headers: getCorsHeaders(event.headers?.origin, 'GET,OPTIONS'),
+          body: JSON.stringify({
+            message: `Recommendation with ID ${recommendationId} not found`,
+          }),
+        };
+      }
+
+      metrics.addMetric('RecommendationByIdQuery', MetricUnit.Count, 1);
+
+      // Return the single recommendation
+      return {
+        statusCode: 200,
+        headers: getCorsHeaders(event.headers?.origin, 'GET,OPTIONS'),
+        body: JSON.stringify({
+          item: recommendation,
+        }),
+      };
+    }
 
     // Fetch recommendations from DynamoDB sorted by votes
     let result;
@@ -132,6 +171,28 @@ export const handler = async (
         startKey,
       );
       metrics.addMetric('EntityTypeVotesFilteredQuery', MetricUnit.Count, 1);
+    } else if (reviewedByMario !== undefined) {
+      // Filter by reviewedByMario status
+      logger.info('Fetching recommendations by reviewedByMario status', {
+        reviewedByMario,
+        limit,
+      });
+
+      if (reviewedByMario) {
+        result = await getReviewedRecommendations(
+          tableName,
+          limit,
+          startKey,
+        );
+        metrics.addMetric('ReviewedRecommendationsQuery', MetricUnit.Count, 1);
+      } else {
+        result = await getUnreviewedRecommendations(
+          tableName,
+          limit,
+          startKey,
+        );
+        metrics.addMetric('UnreviewedRecommendationsQuery', MetricUnit.Count, 1);
+      }
     } else {
       logger.info('Fetching all recommendations sorted by votes', {
         limit,
