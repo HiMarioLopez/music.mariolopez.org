@@ -90,11 +90,10 @@ public class IntegrationApiStack : Stack
         var keyId = appleSettings.KeyId;
 
         // SSM Parameter Store for Apple Music API Token
-        var appleMusicTokenParameter = StringParameter.FromSecureStringParameterAttributes(this, "AppleMusicApiToken",
-            new SecureStringParameterAttributes
-            {
-                ParameterName = "/Music/AdminPanel/MUT",
-            });
+        var appleMusicTokenParameter = StringParameter.FromSecureStringParameterAttributes(this, "AppleMusicApiToken", new SecureStringParameterAttributes
+        {
+            ParameterName = "/Music/AdminPanel/MUT",
+        });
 
         #endregion
 
@@ -525,6 +524,156 @@ public class IntegrationApiStack : Stack
 
         #endregion
 
+        // #region Get Recommendation Notes Lambda
+
+        // // Role for the Get Recommendation Notes Lambda
+        // var getRecommendationNotesLambdaRole = new Role(this, "GetRecommendationNotesLambdaRole", new RoleProps
+        // {
+        //     AssumedBy = new ServicePrincipal("lambda.amazonaws.com"),
+        //     Description = "Role for get-recommendation-notes Lambda function",
+        //     ManagedPolicies =
+        //     [
+        //         ManagedPolicy.FromAwsManagedPolicyName("service-role/AWSLambdaBasicExecutionRole")
+        //     ]
+        // });
+
+        // // Add DynamoDB read permissions
+        // getRecommendationNotesLambdaRole.AddToPolicy(new PolicyStatement(new PolicyStatementProps
+        // {
+        //     Effect = Effect.ALLOW,
+        //     Actions = [
+        //         "dynamodb:Query",
+        //         "dynamodb:Scan",
+        //         "dynamodb:GetItem"
+        //     ],
+        //     Resources = [
+        //         Fn.Join("", [
+        //             "arn:aws:dynamodb:",
+        //             Region,
+        //             ":",
+        //             Account,
+        //             ":table/MusicRecommendationNotes"
+        //         ])
+        //     ]
+        // }));
+
+        // // Add CloudWatch permissions
+        // getRecommendationNotesLambdaRole.AddToPolicy(new PolicyStatement(new PolicyStatementProps
+        // {
+        //     Effect = Effect.ALLOW,
+        //     Actions = ["cloudwatch:PutMetricData"],
+        //     Resources = ["*"]
+        // }));
+
+        // // Add SSM Parameter Store read permission
+        // getRecommendationNotesLambdaRole.AddToPolicy(new PolicyStatement(new PolicyStatementProps
+        // {
+        //     Effect = Effect.ALLOW,
+        //     Actions = ["ssm:GetParameter"],
+        //     Resources = [
+        //         $"arn:aws:ssm:{Region}:{Account}:parameter/Music/Recommendations/TableName",
+        //         $"arn:aws:ssm:{Region}:{Account}:parameter/Music/Recommendations/NotesTableName",
+        //         $"arn:aws:ssm:{Region}:{Account}:parameter/Music/Recommendations/NotesModerationStatusIndexName"
+        //     ]
+        // }));
+
+        // // Get Recommendations Lambda - To be implemented
+        // var getRecommendationNotesLambda = new Function(this, "GetRecommendationNotesFunction", new FunctionProps
+        // {
+        //     Runtime = Runtime.NODEJS_22_X,
+        //     Handler = "get-recommendation-notes.handler",
+        //     Code = Code.FromAsset("../app/backend/dist/handlers/api/integration"),
+        //     Role = getRecommendationNotesLambdaRole,
+        //     MemorySize = 128,
+        //     Timeout = Duration.Seconds(29),
+        //     Description = "Fetches music recommendation notes from DynamoDB",
+        //     Environment = new Dictionary<string, string>
+        //     {
+        //         ["AWS_NODEJS_CONNECTION_REUSE_ENABLED"] = "1",
+        //         ["DYNAMODB_TABLE_NAME_PARAMETER"] = "/Music/Recommendations/TableName",
+        //         ["DYNAMODB_TABLE_INDEX_NAME_PARAMETER"] = "/Music/Recommendations/NotesModerationStatusIndexName"
+        //     },
+        //     Tracing = Tracing.ACTIVE
+        // });
+
+        // #endregion
+
+        // #region Set Recommendation Notes Lambda
+
+        // // Role for the Set Recommendation Notes Lambda
+        // var setRecommendationNotesLambdaRole = new Role(this, "SetRecommendationNotesLambdaRole", new RoleProps
+        // {
+        //     AssumedBy = new ServicePrincipal("lambda.amazonaws.com"),
+        //     Description = "Role for set-recommendation-notes Lambda function",
+        //     ManagedPolicies =
+        //     [
+        //         ManagedPolicy.FromAwsManagedPolicyName("service-role/AWSLambdaBasicExecutionRole")
+        //     ]
+        // });
+
+        // // Add DynamoDB write permissions
+        // setRecommendationNotesLambdaRole.AddToPolicy(new PolicyStatement(new PolicyStatementProps
+        // {
+        //     Effect = Effect.ALLOW,
+        //     Actions = [
+        //         "dynamodb:PutItem",
+        //         "dynamodb:UpdateItem",
+        //         "dynamodb:Query",
+        //         "dynamodb:Scan"
+        //     ],
+        //     Resources = [
+        //         Fn.Join("", [
+        //             "arn:aws:dynamodb:",
+        //             Region,
+        //             ":",
+        //             Account,
+        //             ":table/MusicRecommendationNotes"
+        //         ]),
+        //     ]
+        // }));
+
+        // // Add CloudWatch permissions
+        // setRecommendationNotesLambdaRole.AddToPolicy(new PolicyStatement(new PolicyStatementProps
+        // {
+        //     Effect = Effect.ALLOW,
+        //     Actions = ["cloudwatch:PutMetricData"],
+        //     Resources = ["*"]
+        // }));
+
+        // // Add SSM Parameter Store read permission
+        // setRecommendationNotesLambdaRole.AddToPolicy(new PolicyStatement(new PolicyStatementProps
+        // {
+        //     Effect = Effect.ALLOW,
+        //     Actions = ["ssm:GetParameter"],
+        //     Resources = [
+        //         $"arn:aws:ssm:{Region}:{Account}:parameter/Music/RecommendationNotes/TableName",
+        //         $"arn:aws:ssm:{Region}:{Account}:parameter/Music/RecommendationNotes/NotesModerationStatusIndexName",
+        //         $"arn:aws:ssm:{Region}:{Account}:parameter/Music/Moderation/OpenAIApiKey"
+        //     ]
+        // }));
+
+        // // Set Recommendations Lambda - To be implemented
+        // var setRecommendationNotesLambda = new Function(this, "SetRecommendationNotesFunction", new FunctionProps
+        // {
+        //     Runtime = Runtime.NODEJS_22_X,
+        //     Handler = "set-recommendation-notes.handler",
+        //     Code = Code.FromAsset("../app/backend/dist/handlers/api/integration"),
+        //     Role = setRecommendationNotesLambdaRole,
+        //     MemorySize = 128,
+        //     Timeout = Duration.Seconds(29),
+        //     Description = "Creates and stores music recommendation notes in DynamoDB",
+        //     Environment = new Dictionary<string, string>
+        //     {
+        //         ["AWS_NODEJS_CONNECTION_REUSE_ENABLED"] = "1",
+        //         ["DYNAMODB_TABLE_NAME_PARAMETER"] = "/Music/RecommendationNotes/TableName",
+        //         ["DYNAMODB_TABLE_INDEX_NAME_PARAMETER"] = "/Music/RecommendationNotes/NotesModerationStatusIndexName",
+        //         ["OPENAI_API_KEY_PARAMETER"] = "/Music/Moderation/OpenAIApiKey"
+        //     },
+        //     Tracing = Tracing.ACTIVE
+        // });
+
+        // #endregion
+
         #endregion
 
         #region Event Sources and Subscriptions
@@ -565,8 +714,6 @@ public class IntegrationApiStack : Stack
                 AuthorizationType = AuthorizationType.NONE
             });
 
-        // Add recommendation endpoints to API Gateway
-
         // Add POST method for creating (single) recommendation
         var recommendationResource = nodejsResource.AddResource("recommendation");
         recommendationResource.AddMethod(
@@ -592,6 +739,94 @@ public class IntegrationApiStack : Stack
             {
                 AuthorizationType = AuthorizationType.NONE
             });
+
+        // #region Moderation Checking Lambda and EventBridge Schedule
+
+        // // Role for the Check Pending Moderations Lambda
+        // var checkPendingModerationsLambdaRole = new Role(this, "CheckPendingModerationsLambdaRole", new RoleProps
+        // {
+        //     AssumedBy = new ServicePrincipal("lambda.amazonaws.com"),
+        //     Description = "Role for the check-pending-moderations Lambda function",
+        //     ManagedPolicies =
+        //     [
+        //         ManagedPolicy.FromAwsManagedPolicyName("service-role/AWSLambdaBasicExecutionRole")
+        //     ]
+        // });
+
+        // // Add DynamoDB permissions to the role
+        // checkPendingModerationsLambdaRole.AddToPolicy(new PolicyStatement(new PolicyStatementProps
+        // {
+        //     Effect = Effect.ALLOW,
+        //     Actions = [
+        //         "dynamodb:Query",
+        //         "dynamodb:Scan"
+        //     ],
+        //     Resources = [
+        //         $"arn:aws:dynamodb:{Region}:{Account}:table/MusicRecommendations",
+        //         $"arn:aws:dynamodb:{Region}:{Account}:table/MusicRecommendations/index/ModerationStatusIndex"
+        //     ]
+        // }));
+
+        // // Add SSM Parameter Store read permission
+        // checkPendingModerationsLambdaRole.AddToPolicy(new PolicyStatement(new PolicyStatementProps
+        // {
+        //     Effect = Effect.ALLOW,
+        //     Actions = ["ssm:GetParameter"],
+        //     Resources = [
+        //         $"arn:aws:ssm:{Region}:{Account}:parameter/Music/Recommendations/TableName"
+        //     ]
+        // }));
+
+        // // Add SES permissions for sending emails
+        // checkPendingModerationsLambdaRole.AddToPolicy(new PolicyStatement(new PolicyStatementProps
+        // {
+        //     Effect = Effect.ALLOW,
+        //     Actions = ["ses:SendEmail"],
+        //     Resources = [
+        //         $"arn:aws:ses:{Region}:{Account}:identity/*"
+        //     ]
+        // }));
+
+        // // Add CloudWatch permissions
+        // checkPendingModerationsLambdaRole.AddToPolicy(new PolicyStatement(new PolicyStatementProps
+        // {
+        //     Effect = Effect.ALLOW,
+        //     Actions = ["cloudwatch:PutMetricData"],
+        //     Resources = ["*"]
+        // }));
+
+        // // Create check-pending-moderations Lambda function
+        // var checkPendingModerationsLambda = new Function(this, "CheckPendingModerationsFunction", new FunctionProps
+        // {
+        //     Runtime = Runtime.NODEJS_22_X,
+        //     Handler = "check-pending-moderations.handler",
+        //     Code = Code.FromAsset("../app/backend/dist/handlers/event-handlers"),
+        //     Role = checkPendingModerationsLambdaRole,
+        //     MemorySize = 128,
+        //     Timeout = Duration.Seconds(60),
+        //     Description = "Checks for pending moderations and sends notification emails",
+        //     Environment = new Dictionary<string, string>
+        //     {
+        //         ["AWS_NODEJS_CONNECTION_REUSE_ENABLED"] = "1",
+        //         ["DYNAMODB_TABLE_NAME_PARAMETER"] = "/Music/Recommendations/TableName",
+        //         ["ADMIN_EMAIL"] = configuration["MusicAdminSettings:AdminEmail"] ?? "admin@example.com",
+        //         ["SOURCE_EMAIL"] = configuration["MusicAdminSettings:SourceEmail"] ?? "noreply@example.com"
+        //     },
+        //     Tracing = Tracing.ACTIVE
+        // });
+
+        // // Create EventBridge rule to run check-pending-moderations on a schedule
+        // var checkPendingModerationsRule = new Amazon.CDK.AWS.Events.Rule(this, "CheckPendingModerationsRule", new Amazon.CDK.AWS.Events.RuleProps
+        // {
+        //     Schedule = Amazon.CDK.AWS.Events.Schedule.Rate(Duration.Hours(12)),
+        //     Description = "Runs every 12 hours to check for pending moderations",
+        //     Enabled = true
+        // });
+
+        // // Add the Lambda as a target for the rule
+        // checkPendingModerationsRule.AddTarget(new Amazon.CDK.AWS.Events.Targets.LambdaFunction(checkPendingModerationsLambda));
+
+        // #endregion
 
         // Apple Music API endpoints
         var appleMusicResource = nodejsResource.AddResource("apple-music");

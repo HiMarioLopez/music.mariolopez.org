@@ -9,27 +9,18 @@ import {
 import {
   getAllRecommendations,
   getRecommendationsByEntityType,
-  getRecommendationsByFrom,
 } from '../../../services/dynamodb/recommendations';
 import { getParameter } from '../../../services/parameter';
 import { getCorsHeaders } from '../../../utils/cors';
+import { EntityType } from '../../../models/recommendation';
+import { PaginatedResponse } from '../../../models/paginated-response';
 
 const logger = new Logger({ serviceName: 'get-recommendations' });
 const tracer = new Tracer({ serviceName: 'get-recommendations' });
 const metrics = new Metrics({ namespace: 'get-recommendations' });
 
-// Default limit for queries
+// Default limit for recommendation queries
 const DEFAULT_LIMIT = 50;
-
-// Define response type
-interface PaginatedResponse {
-  items: any[];
-  pagination: {
-    count: number;
-    hasMore: boolean;
-    nextToken?: string;
-  };
-}
 
 /**
  * API Gateway handler function to fetch recommendations
@@ -103,9 +94,7 @@ export const handler = async (
 
     // Get filters if provided
     const entityType = queryParams.entityType as
-      | 'SONG'
-      | 'ALBUM'
-      | 'ARTIST'
+      | EntityType
       | undefined;
     const from = queryParams.from;
 
@@ -140,19 +129,18 @@ export const handler = async (
         tableIndexName,
         entityType,
         limit,
-        startKey
+        startKey,
       );
       metrics.addMetric('EntityTypeVotesFilteredQuery', MetricUnit.Count, 1);
-    } else if (from) {
-      logger.info('Fetching recommendations by creator, sorted by votes', {
-        from,
+    } else {
+      logger.info('Fetching all recommendations sorted by votes', {
         limit,
       });
-      result = await getRecommendationsByFrom(tableName, from, limit, startKey);
-      metrics.addMetric('FromVotesFilteredQuery', MetricUnit.Count, 1);
-    } else {
-      logger.info('Fetching all recommendations sorted by votes', { limit });
-      result = await getAllRecommendations(tableName, limit, startKey);
+      result = await getAllRecommendations(
+        tableName,
+        limit,
+        startKey,
+      );
       metrics.addMetric('AllRecommendationsByVotesQuery', MetricUnit.Count, 1);
     }
 

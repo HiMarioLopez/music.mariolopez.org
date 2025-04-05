@@ -10,14 +10,10 @@ import {
   createRecommendation,
   getRecommendation,
   updateRecommendation,
-  Recommendation,
-  SongRecommendation,
-  AlbumRecommendation,
-  ArtistRecommendation,
-  NoteItem,
 } from '../../../services/dynamodb/recommendations';
 import { getParameter } from '../../../services/parameter';
 import { getCorsHeaders } from '../../../utils/cors';
+import { AlbumRecommendation, ArtistRecommendation, EntityType, Recommendation, SongRecommendation } from '../../../models/recommendation';
 
 const logger = new Logger({ serviceName: 'set-recommendations' });
 const tracer = new Tracer({ serviceName: 'set-recommendations' });
@@ -75,12 +71,6 @@ export const handler = async (
     // Log the full request body for debugging
     logger.info('Request body parsed', {
       requestBody: JSON.stringify(requestBody),
-      hasNotes: !!requestBody.notes,
-      notesType: requestBody.notes ? typeof requestBody.notes : 'undefined',
-      notesIsArray: requestBody.notes
-        ? Array.isArray(requestBody.notes)
-        : false,
-      notesLength: requestBody.notes ? requestBody.notes.length : 0,
     });
 
     // Validate request body
@@ -145,17 +135,12 @@ export const handler = async (
       }
     }
 
-    // Use notes array from request body if it exists
-    const notes = requestBody.notes ? requestBody.notes : undefined;
-
     // Extract vote change if specified
-    const voteChange = requestBody.voteChange !== undefined 
-      ? Number(requestBody.voteChange) 
+    const voteChange = requestBody.voteChange !== undefined
+      ? Number(requestBody.voteChange)
       : undefined;
-    
+
     logger.info('Processing recommendation request', {
-      notesSource: requestBody.notes ? 'from request body notes array' : 'none',
-      notesCount: notes?.length || 0,
       voteChange: voteChange,
     });
 
@@ -169,7 +154,7 @@ export const handler = async (
 
     const existingRecommendation = await getRecommendation(
       tableName,
-      requestBody.entityType as 'SONG' | 'ALBUM' | 'ARTIST',
+      requestBody.entityType as EntityType,
       searchAttributes
     );
 
@@ -179,34 +164,23 @@ export const handler = async (
     if (existingRecommendation) {
       logger.info('Found existing recommendation, updating', {
         entityType: requestBody.entityType,
-        timestamp: existingRecommendation.timestamp,
+        createdAt: existingRecommendation.createdAt,
       });
 
       // Prepare updates
       const updates: {
-        notes?: NoteItem[];
         voteChange?: number;
       } = {};
 
-      // Add notes if provided
-      if (notes && notes.length > 0) {
-        updates.notes = notes;
-      }
-      
       // Handle vote change
       // If voteChange is explicitly provided, use it
-      // If voteChange is not provided but notes are added, don't change votes
-      // If neither voteChange nor notes are provided, increment vote by default
       if (voteChange !== undefined) {
         updates.voteChange = voteChange;
-      } else if (!notes || notes.length === 0) {
-        // Auto-increment vote by 1 if this is a simple re-recommendation with no notes/votes specified
-        updates.voteChange = 1;
       }
 
       // Update the recommendation
       result = await updateRecommendation(tableName, existingRecommendation, updates);
-      
+
       metrics.addMetric(
         `${requestBody.entityType}RecommendationUpdateCount`,
         MetricUnit.Count,
@@ -217,9 +191,9 @@ export const handler = async (
       logger.info('Creating new recommendation', {
         entityType: requestBody.entityType,
       });
-      
+
       // Map the request body to the corresponding recommendation type
-      let newRecommendation: Omit<Recommendation, 'timestamp' | 'votes'>;
+      let newRecommendation: Omit<Recommendation, 'createdAt' | 'votes'>;
 
       if (requestBody.entityType === 'SONG') {
         newRecommendation = {
@@ -228,8 +202,7 @@ export const handler = async (
           artistName: requestBody.artistName,
           albumName: requestBody.albumName,
           albumCoverUrl: requestBody.albumCoverUrl || '',
-          notes,
-        } as Omit<SongRecommendation, 'timestamp' | 'votes'>;
+        } as Omit<SongRecommendation, 'createdAt' | 'votes'>;
       } else if (requestBody.entityType === 'ALBUM') {
         newRecommendation = {
           entityType: 'ALBUM',
@@ -238,16 +211,14 @@ export const handler = async (
           albumCoverUrl: requestBody.albumCoverUrl || '',
           trackCount: requestBody.trackCount,
           releaseDate: requestBody.releaseDate,
-          notes,
-        } as Omit<AlbumRecommendation, 'timestamp' | 'votes'>;
+        } as Omit<AlbumRecommendation, 'createdAt' | 'votes'>;
       } else {
         newRecommendation = {
           entityType: 'ARTIST',
           artistName: requestBody.artistName,
           artistImageUrl: requestBody.artistImageUrl || '',
           genres: requestBody.genres,
-          notes,
-        } as Omit<ArtistRecommendation, 'timestamp' | 'votes'>;
+        } as Omit<ArtistRecommendation, 'createdAt' | 'votes'>;
       }
 
       // Store in DynamoDB
@@ -262,18 +233,22 @@ export const handler = async (
 
     logger.info('Successfully processed recommendation', {
       entityType: requestBody.entityType,
-      timestamp: result.timestamp,
+      createdAt: result.createdAt,
       isNewRecord: !existingRecommendation,
     });
 
     // Return success response with the created or updated recommendation
     const operation = existingRecommendation ? 'updated' : 'created';
-    
+
+    logger.info('Returning response', {
+      operation,
+    });
+
     return {
       statusCode: 200,
       headers: getCorsHeaders(event.headers?.origin, 'POST,OPTIONS'),
       body: JSON.stringify({
-        message: `Recommendation ${operation} successfully`,
+        message: `Recommendation ${operation} successfully.`,
         recommendation: result,
       }),
     };
