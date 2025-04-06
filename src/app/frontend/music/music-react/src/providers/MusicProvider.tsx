@@ -1,7 +1,7 @@
 import { ReactNode, useEffect, useState } from "react";
 import { MusicContext } from "../context/MusicContext";
 import { apiService } from "../services/apiService";
-import { MusicItem } from "../models/MusicItem";
+import { AppleMusicSong } from "../models/AppleMusicSong";
 
 interface MusicProviderProps {
   children: ReactNode;
@@ -11,8 +11,8 @@ const HISTORY_AUTO_REFRESH_INTERVAL = 60000; // Refresh every minute
 const HISTORY_TRACK_LIMIT = 16; // (5 x 3) carousels + 1 for now playing
 
 export const MusicProvider: React.FC<MusicProviderProps> = ({ children }) => {
-  const [nowPlaying, setNowPlaying] = useState<MusicItem | null>(null);
-  const [recentlyPlayed, setRecentlyPlayed] = useState<MusicItem[]>([]);
+  const [nowPlaying, setNowPlaying] = useState<AppleMusicSong | null>(null);
+  const [recentlyPlayed, setRecentlyPlayed] = useState<AppleMusicSong[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 

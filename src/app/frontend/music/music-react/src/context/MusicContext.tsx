@@ -1,9 +1,9 @@
 import { createContext, useContext } from "react";
-import { MusicItem } from "../models/MusicItem";
+import { AppleMusicSong } from "../models/AppleMusicSong";
 
 interface MusicContextType {
-  nowPlaying: MusicItem | null;
-  recentlyPlayed: MusicItem[];
+  nowPlaying: AppleMusicSong | null;
+  recentlyPlayed: AppleMusicSong[];
   loading: boolean;
   error: string | null;
   refreshMusicHistory: () => Promise<void>;

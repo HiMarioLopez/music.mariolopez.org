@@ -1,5 +1,5 @@
-// Define types for our music data based on the API response
-export interface MusicItem {
+// Apple Music Song API response
+export interface AppleMusicSong {
   processedTimestamp: string;
   isrc: string;
   durationInMillis: number;

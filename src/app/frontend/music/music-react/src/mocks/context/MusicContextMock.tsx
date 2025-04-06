@@ -1,9 +1,9 @@
 import { ReactNode } from "react";
 import { vi } from "vitest";
-import { MusicItem } from "../../models/MusicItem";
+import { AppleMusicSong } from "../../models/AppleMusicSong";
 
 // Mock for the MusicContext with proper types
-export const createMockMusicItem = (overrides = {}): MusicItem => ({
+export const createMockMusicItem = (overrides = {}): AppleMusicSong => ({
   processedTimestamp: new Date().toISOString(),
   isrc: "mock-isrc",
   durationInMillis: 180000,

@@ -1,7 +1,7 @@
-import { MusicItem } from "./MusicItem";
+import { AppleMusicSong } from "./AppleMusicSong";
 import { Pagination } from "./Pagination";
 
 export interface MusicHistoryResponse {
-  items: MusicItem[];
+  items: AppleMusicSong[];
   pagination: Pagination;
 }
