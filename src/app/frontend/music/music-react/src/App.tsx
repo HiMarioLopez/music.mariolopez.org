@@ -2,7 +2,6 @@ import cx from "classix";
 import React from "react";
 import CombinedRecommendationList from "./components/CombinedRecommendationList/CombinedRecommendationList";
 import Footer from "./components/Footer/Footer";
-import Navbar from "./components/Navbar/Navbar";
 import NowPlaying from "./components/NowPlaying/NowPlaying";
 import QueuedSongsList from "./components/QueuedSongsList";
 import RecentlyPlayedList from "./components/RecentlyPlayedList/RecentlyPlayedList";
@@ -16,7 +15,6 @@ const App: React.FC = () => {
     <>
       <div className={styles.appBg} />
       <div className={styles.app}>
-        <Navbar />
         <div className={styles.mainContent}>
           <div className={styles.leftColumn}>
             <RecommendationsProvider>
