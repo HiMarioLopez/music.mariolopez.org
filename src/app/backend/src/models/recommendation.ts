@@ -1,6 +1,6 @@
 export interface BaseRecommendation {
-  recommendationId: string; // UUID or composite key string
-  entityType: EntityType; // Type of entity (song, album, artist)
+  recommendationId: string; // UUID
+  entityType: EntityType; // Type of entity ('SONG', 'ALBUM', 'ARTIST')
   createdAt: string; // ISO timestamp
   votes: number;
   reviewedByMario: boolean; // Whether the recommendation has been reviewed by Mario
@@ -37,9 +37,9 @@ export type EntityType =
   | 'ARTIST';
 
 export type UserInteractionStatus =
-  | 'liked' // Mario explicitly liked it
-  | 'disliked' // Mario explicitly disliked it
-  | 'dismissed'; // Mario dismissed or declined the recommendation
+  | 'LIKED' // Mario explicitly liked it
+  | 'DISLIKED' // Mario explicitly disliked it
+  | 'DISMISSED'; // Mario dismissed or declined the recommendation
 
 export type Recommendation =
   | SongRecommendation

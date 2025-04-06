@@ -1,6 +1,6 @@
 export interface RecommendationNote {
   recommendationId: string; // PK, links to the recommendation
-  noteId: string; // SK, UUID or timestamp string
+  noteId: string; // SK, UUID string
   from: string; // User who submitted (could be anonymous)
   note: string; // The note content
   isFromMario: boolean; // Whether the note is from Mario
@@ -14,7 +14,4 @@ export interface RecommendationNote {
   };
 }
 
-export type ModerationStatus =
-  | 'approved'
-  | 'pending_review'
-  | 'rejected';
+export type ModerationStatus = 'APPROVED' | 'PENDING_REVIEW' | 'REJECTED';

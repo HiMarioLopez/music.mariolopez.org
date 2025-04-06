@@ -9,7 +9,7 @@ import {
   ScanCommandInput,
 } from '@aws-sdk/lib-dynamodb';
 import { PaginationResult } from '../../models/pagination-result';
-import { AlbumRecommendation, ArtistRecommendation, EntityType, Recommendation, SongRecommendation } from '../../models/recommendation';
+import { AlbumRecommendation, ArtistRecommendation, EntityType, Recommendation, SongRecommendation, UserInteractionStatus } from '../../models/recommendation';
 import { generateUUID } from '../../utils/uuid';
 
 const logger = new Logger({ serviceName: 'dynamodb-recommendations' });
@@ -393,7 +393,7 @@ export async function updateRecommendation(
   existingRecommendation: Recommendation,
   updates: {
     voteChange?: number;
-    userStatus?: 'liked' | 'disliked' | 'dismissed';
+    userStatus?: UserInteractionStatus;
     reviewedByMario?: boolean;
   }
 ): Promise<Recommendation> {
