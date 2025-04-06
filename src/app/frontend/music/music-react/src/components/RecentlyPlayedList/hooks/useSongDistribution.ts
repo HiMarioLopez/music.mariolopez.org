@@ -1,10 +1,10 @@
 import { useMemo } from "react";
-import { MusicItem } from "../../../models/MusicItem";
+import { AppleMusicSong } from "../../../models/AppleMusicSong";
 
 /**
  * Hook to distribute songs across three carousels
  */
-export const useSongDistribution = (recentlyPlayed: MusicItem[]) => {
+export const useSongDistribution = (recentlyPlayed: AppleMusicSong[]) => {
   return useMemo(() => {
     // Prepare song data - if we have fewer than desired songs, duplicate them
     const processedSongs =
@@ -21,7 +21,7 @@ export const useSongDistribution = (recentlyPlayed: MusicItem[]) => {
     const bottomRowSongs = processedSongs.slice(rowSize * 2);
 
     // Fallback if not enough songs for any row
-    const ensureSongsForRow = (rowSongs: MusicItem[]) => {
+    const ensureSongsForRow = (rowSongs: AppleMusicSong[]) => {
       return rowSongs.length > 0 ? rowSongs : [...topRowSongs];
     };
 

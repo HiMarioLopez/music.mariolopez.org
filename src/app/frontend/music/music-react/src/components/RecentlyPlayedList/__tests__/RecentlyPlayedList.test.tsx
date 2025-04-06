@@ -2,12 +2,12 @@ import { render, screen } from "@testing-library/react";
 import { describe, it, expect, vi } from "vitest";
 import RecentlyPlayedList from "../RecentlyPlayedList";
 import { createMockMusicItem } from "../../../mocks/context/MusicContextMock";
-import { MusicItem } from "../../../models/MusicItem";
+import { AppleMusicSong } from "../../../models/AppleMusicSong";
 
 // Define the interface that matches MusicContextType from MusicContext.tsx
 interface MockMusicContextType {
-  nowPlaying: MusicItem | null;
-  recentlyPlayed: MusicItem[];
+  nowPlaying: AppleMusicSong | null;
+  recentlyPlayed: AppleMusicSong[];
   loading: boolean;
   error: string | null;
   refreshMusicHistory: () => Promise<void>;
@@ -51,7 +51,7 @@ vi.mock("../hooks/useCarouselSettings", () => ({
 }));
 
 // Sample track data
-const mockTracks: MusicItem[] = [
+const mockTracks: AppleMusicSong[] = [
   createMockMusicItem({
     id: "1",
     name: "Track 1",

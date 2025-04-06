@@ -1,11 +1,11 @@
 import React, { memo, useMemo, useState } from "react";
 import albumPlaceholder from "../../../assets/album-placeholder.svg";
-import { MusicItem } from "../../../models/MusicItem";
+import { AppleMusicSong } from "../../../models/AppleMusicSong";
 import { getProcessedArtworkUrl } from "../../../utils/imageProcessing";
 import styles from "../styles/SongItem.module.css";
 
 interface SongItemProps {
-  song: MusicItem;
+  song: AppleMusicSong;
   index: number;
   rowName: string;
 }

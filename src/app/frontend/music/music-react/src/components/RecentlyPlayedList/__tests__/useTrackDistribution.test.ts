@@ -2,11 +2,11 @@ import { describe, it, expect } from "vitest";
 import { renderHook } from "@testing-library/react";
 import { useSongDistribution } from "../hooks/useSongDistribution";
 import { createMockMusicItem } from "../../../mocks/context/MusicContextMock";
-import { MusicItem } from "../../../models/MusicItem";
+import { AppleMusicSong } from "../../../models/AppleMusicSong";
 
 describe("useSongDistribution Hook", () => {
   // Create sample song data
-  const generateSongs = (count: number): MusicItem[] => {
+  const generateSongs = (count: number): AppleMusicSong[] => {
     return Array.from({ length: count }, (_, i) =>
       createMockMusicItem({
         id: `song-${i + 1}`,
@@ -47,21 +47,15 @@ describe("useSongDistribution Hook", () => {
     expect(result.current.bottomRowSongs).toHaveLength(3);
 
     // Should have duplicated the songs
-    expect(result.current.topRowSongs.map((t: MusicItem) => t.id)).toEqual([
-      "song-1",
-      "song-2",
-      "song-3",
-    ]);
-    expect(result.current.middleRowSongs.map((t: MusicItem) => t.id)).toEqual([
-      "song-1",
-      "song-2",
-      "song-3",
-    ]);
-    expect(result.current.bottomRowSongs.map((t: MusicItem) => t.id)).toEqual([
-      "song-1",
-      "song-2",
-      "song-3",
-    ]);
+    expect(result.current.topRowSongs.map((t: AppleMusicSong) => t.id)).toEqual(
+      ["song-1", "song-2", "song-3"],
+    );
+    expect(
+      result.current.middleRowSongs.map((t: AppleMusicSong) => t.id),
+    ).toEqual(["song-1", "song-2", "song-3"]);
+    expect(
+      result.current.bottomRowSongs.map((t: AppleMusicSong) => t.id),
+    ).toEqual(["song-1", "song-2", "song-3"]);
   });
 
   it("handles uneven distribution correctly", () => {

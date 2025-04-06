@@ -1,11 +1,11 @@
 import React, { memo } from "react";
 import Slider from "react-slick";
-import { MusicItem } from "../../../models/MusicItem";
+import { AppleMusicSong } from "../../../models/AppleMusicSong";
 import styles from "../styles/CarouselRow.module.css";
 import SongItem from "./SongItem";
 
 interface CarouselRowProps {
-  songs: MusicItem[];
+  songs: AppleMusicSong[];
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   settings: any; // React-slick settings
   rowName: string;
