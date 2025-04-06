@@ -6,9 +6,9 @@ using Amazon.CDK.AWS.Lambda;
 using Amazon.CDK.AWS.Events;
 using Amazon.CDK.AWS.Events.Targets;
 using Amazon.CDK.AWS.SSM;
-using Amazon.CDK.AWS.CloudWatch;
 using Constructs;
 using Microsoft.Extensions.Configuration;
+using Music.Infra.Constructs;
 
 namespace Music.Infra.Stacks;
 
@@ -24,62 +24,31 @@ namespace Music.Infra.Stacks;
 /// </remarks>
 public class AppleMusicHistoryStack : Stack
 {
+    /// <summary>
+    /// Gets the name of the Lambda function that updates the Apple Music history
+    /// </summary>
+    public string UpdateHistoryJobLambdaName => updateHistoryJobLambda.FunctionName;
+
+    /// <summary>
+    /// Gets the name of the DynamoDB table that stores the Apple Music history
+    /// </summary>
+    public string HistoryTableName => historyTable.TableName;
+
+    private readonly Function updateHistoryJobLambda;
+    private readonly Table historyTable;
+
     internal AppleMusicHistoryStack(Construct scope, string id, IStackProps? props = null, IConfiguration? configuration = null)
         : base(scope, id, props)
     {
         #region DynamoDB Table
 
-        var historyTable = new Table(this, "AppleMusicHistory", new TableProps
+        historyTable = new Table(this, "AppleMusicHistory", new TableProps
         {
             TableName = "AppleMusicHistory",
             PartitionKey = new Attribute { Name = "entityType", Type = AttributeType.STRING },
             SortKey = new Attribute { Name = "processedTimestamp", Type = AttributeType.STRING },
             BillingMode = BillingMode.PAY_PER_REQUEST,
         });
-
-        #endregion
-
-        #region IAM Role for Lambda
-
-        var updateHistoryJobLambdaRole = new Role(this, "UpdateAppleMusicHistoryJobLambdaRole", new RoleProps
-        {
-            AssumedBy = new ServicePrincipal("lambda.amazonaws.com"),
-            Description = "Role for Apple Music History Lambda function",
-            ManagedPolicies =
-            [
-                ManagedPolicy.FromAwsManagedPolicyName("service-role/AWSLambdaBasicExecutionRole")
-            ]
-        });
-
-        // Add permissions for DynamoDB and SSM
-        updateHistoryJobLambdaRole.AddToPolicy(new PolicyStatement(new PolicyStatementProps
-        {
-            Effect = Effect.ALLOW,
-            Actions =
-            [
-                "dynamodb:PutItem",
-                "dynamodb:GetItem",
-                "dynamodb:Query",
-                "dynamodb:Scan",
-                "ssm:GetParameter",
-                "ssm:PutParameter"
-            ],
-            Resources =
-            [
-                historyTable.TableArn,
-                $"arn:aws:ssm:{Region}:{Account}:parameter/Music/AppleMusicHistory/LastProcessedSongId",
-                $"arn:aws:ssm:{Region}:{Account}:parameter/Music/AdminPanel/MUT",
-                $"arn:aws:ssm:{Region}:{Account}:parameter/Music/AppleMusicHistory/SongLimit"
-            ]
-        }));
-
-        // Add CloudWatch permissions
-        updateHistoryJobLambdaRole.AddToPolicy(new PolicyStatement(new PolicyStatementProps
-        {
-            Effect = Effect.ALLOW,
-            Actions = ["cloudwatch:PutMetricData"],
-            Resources = ["*"]
-        }));
 
         #endregion
 
@@ -118,30 +87,68 @@ public class AppleMusicHistoryStack : Stack
 
         #region Lambda Functions
 
-        // Scheduler Lambda for fetching and storing history
-        var updateHistoryJobLambda = new Function(this, "UpdateAppleMusicHistoryJobLambda", new FunctionProps
+        #region Update History Job Lambda
+
+        // Create a custom role for the Lambda with specific permissions
+        var updateHistoryJobLambdaRole = new Role(this, "UpdateAppleMusicHistoryJobLambdaRole", new RoleProps
         {
-            Runtime = Runtime.NODEJS_22_X,
+            AssumedBy = new ServicePrincipal("lambda.amazonaws.com"),
+            Description = "Role for Apple Music History Lambda function",
+            ManagedPolicies = [ManagedPolicy.FromAwsManagedPolicyName("service-role/AWSLambdaBasicExecutionRole")]
+        });
+
+        // Add permissions for DynamoDB and SSM
+        updateHistoryJobLambdaRole.AddToPolicy(new PolicyStatement(new PolicyStatementProps
+        {
+            Effect = Effect.ALLOW,
+            Actions =
+            [
+                "dynamodb:PutItem",
+                "dynamodb:GetItem",
+                "dynamodb:Query",
+                "dynamodb:Scan",
+                "ssm:GetParameter",
+                "ssm:PutParameter"
+            ],
+            Resources =
+            [
+                historyTable.TableArn,
+                $"arn:aws:ssm:{Region}:{Account}:parameter/Music/AppleMusicHistory/LastProcessedSongId",
+                $"arn:aws:ssm:{Region}:{Account}:parameter/Music/AdminPanel/MUT",
+                $"arn:aws:ssm:{Region}:{Account}:parameter/Music/AppleMusicHistory/SongLimit"
+            ]
+        }));
+
+        // Add CloudWatch permissions
+        updateHistoryJobLambdaRole.AddToPolicy(new PolicyStatement(new PolicyStatementProps
+        {
+            Effect = Effect.ALLOW,
+            Actions = ["cloudwatch:PutMetricData"],
+            Resources = ["*"]
+        }));
+
+        // Use the NodejsLambdaFunction construct instead of directly creating a Function
+        var updateHistoryJobLambdaConstruct = new NodejsLambdaFunction(this, "UpdateAppleMusicHistoryJobLambda", new NodejsLambdaFunctionProps
+        {
             Handler = "update-song-history.handler",
             Code = Code.FromAsset("../app/backend/dist/handlers/jobs"),
             Role = updateHistoryJobLambdaRole,
-            MemorySize = 256,
-            Timeout = Duration.Seconds(60),
             Description = "Fetches and stores Apple Music listening history",
             Environment = new Dictionary<string, string>
             {
-                ["AWS_NODEJS_CONNECTION_REUSE_ENABLED"] = "1",
                 ["DYNAMODB_TABLE_NAME"] = historyTable.TableName,
                 ["LAST_PROCESSED_SONG_PARAMETER"] = lastProcessedSongIdParameter.ParameterName,
                 ["MUSIC_USER_TOKEN_PARAMETER"] = "/Music/AdminPanel/MUT",
                 ["SONG_LIMIT_PARAMETER"] = songLimitParameter.ParameterName
-            },
-            Tracing = Tracing.ACTIVE
+            }
         });
+
+        // Get the Function from the construct
+        updateHistoryJobLambda = updateHistoryJobLambdaConstruct.Function;
 
         #endregion
 
-        #region CloudWatch Event Rule (Scheduler)
+        #region Update Schedule Lambda
 
         var rule = new Rule(this, "UpdateAppleMusicHistoryJobSchedule", new RuleProps
         {
@@ -149,24 +156,17 @@ public class AppleMusicHistoryStack : Stack
             Description = "Schedule for fetching Apple Music history"
         });
 
-        // Add Lambda to update the rule schedule
-        var updateScheduleLambda = new Function(this, "UpdateScheduleLambda", new FunctionProps
+        // Create a role for the update schedule Lambda
+        var updateScheduleLambdaRole = new Role(this, "UpdateScheduleLambdaRole", new RoleProps
         {
-            Runtime = Runtime.NODEJS_22_X,
-            Handler = "update-schedule.handler",
-            Code = Code.FromAsset("../app/backend/dist/handlers/event-handlers"),
-            MemorySize = 128,
-            Timeout = Duration.Seconds(30),
-            Description = "Updates EventBridge rule schedule when SSM parameter changes",
-            Environment = new Dictionary<string, string>
-            {
-                ["RULE_NAME"] = rule.RuleName
-            },
-            Tracing = Tracing.ACTIVE
+            AssumedBy = new ServicePrincipal("lambda.amazonaws.com"),
+            Description = "Role for Apple Music History Schedule Update Lambda function",
+            ManagedPolicies =
+            [ManagedPolicy.FromAwsManagedPolicyName("service-role/AWSLambdaBasicExecutionRole")]
         });
 
         // Grant permissions to the Lambda to modify the rule and read SSM parameter
-        updateScheduleLambda.AddToRolePolicy(new PolicyStatement(new PolicyStatementProps
+        updateScheduleLambdaRole.AddToPolicy(new PolicyStatement(new PolicyStatementProps
         {
             Effect = Effect.ALLOW,
             Actions = ["events:PutRule"],
@@ -174,12 +174,26 @@ public class AppleMusicHistoryStack : Stack
         }));
 
         // Add SSM parameter read permission
-        updateScheduleLambda.AddToRolePolicy(new PolicyStatement(new PolicyStatementProps
+        updateScheduleLambdaRole.AddToPolicy(new PolicyStatement(new PolicyStatementProps
         {
             Effect = Effect.ALLOW,
             Actions = ["ssm:GetParameter"],
             Resources = [$"arn:aws:ssm:{Region}:{Account}:parameter/Music/AppleMusicHistory/ScheduleRate"]
         }));
+
+        var updateScheduleLambdaConstruct = new NodejsLambdaFunction(this, "UpdateScheduleLambda", new NodejsLambdaFunctionProps
+        {
+            Handler = "update-schedule.handler",
+            Code = Code.FromAsset("../app/backend/dist/handlers/event-handlers"),
+            Role = updateScheduleLambdaRole,
+            Description = "Updates EventBridge rule schedule when SSM parameter changes",
+            Environment = new Dictionary<string, string>
+            {
+                ["RULE_NAME"] = rule.RuleName
+            }
+        });
+
+        var updateScheduleLambda = updateScheduleLambdaConstruct.Function;
 
         // Create EventBridge rule to trigger Lambda when parameter changes
         var scheduleParameterChangeRule = new Rule(this, "ScheduleParameterChangeRule", new RuleProps
@@ -201,115 +215,6 @@ public class AppleMusicHistoryStack : Stack
         rule.AddTarget(new LambdaFunction(updateHistoryJobLambda));
 
         #endregion
-
-        #region CloudWatch Dashboard
-
-        var dashboard = new Dashboard(this, "UpdateAppleMusicHistoryJobDashboard", new DashboardProps
-        {
-            DashboardName = "UpdateAppleMusicHistoryJobDashboard"
-        });
-
-        dashboard.AddWidgets(
-        [
-            new GraphWidget(new GraphWidgetProps
-            {
-                Title = "Update Apple Music History Job",
-                Width = 12,
-                Height = 6,
-                Left =
-                [
-                    new Metric(new MetricProps
-                    {
-                        Namespace = "AWS/Lambda",
-                        MetricName = "Invocations",
-                        DimensionsMap = new Dictionary<string, string>
-                        {
-                            { "FunctionName", updateHistoryJobLambda.FunctionName }
-                        }
-                    }),
-                    new Metric(new MetricProps
-                    {
-                        Namespace = "AWS/Lambda",
-                        MetricName = "Errors",
-                        DimensionsMap = new Dictionary<string, string>
-                        {
-                            { "FunctionName", updateHistoryJobLambda.FunctionName }
-                        }
-                    }),
-                    new Metric(new MetricProps
-                    {
-                        Namespace = "AWS/Lambda",
-                        MetricName = "Duration",
-                        DimensionsMap = new Dictionary<string, string>
-                        {
-                            { "FunctionName", updateHistoryJobLambda.FunctionName }
-                        }
-                    })
-                ]
-            }),
-            new GraphWidget(new GraphWidgetProps
-            {
-                Title = "DynamoDB Table",
-                Width = 12,
-                Height = 6,
-                Left =
-                [
-                    new Metric(new MetricProps
-                    {
-                        Namespace = "AWS/DynamoDB",
-                        MetricName = "ConsumedReadCapacityUnits",
-                        DimensionsMap = new Dictionary<string, string>
-                        {
-                            { "TableName", historyTable.TableName }
-                        }
-                    }),
-                    new Metric(new MetricProps
-                    {
-                        Namespace = "AWS/DynamoDB",
-                        MetricName = "ConsumedWriteCapacityUnits",
-                        DimensionsMap = new Dictionary<string, string>
-                        {
-                            { "TableName", historyTable.TableName }
-                        }
-                    })
-                ]
-            }),
-            new LogQueryWidget(new LogQueryWidgetProps
-            {
-                Title = "Error Logs",
-                Width = 24,
-                Height = 6,
-                LogGroupNames =
-                [
-                    updateHistoryJobLambda.LogGroup.LogGroupName
-                ],
-                QueryString = "filter @message like /Error/\n| sort @timestamp desc\n| limit 20"
-            }),
-            new GraphWidget(new GraphWidgetProps
-            {
-                Title = "Songs Processed",
-                Width = 24,
-                Height = 8,
-                Left =
-                [
-                    new Metric(new MetricProps
-                    {
-                        Namespace = "AppleMusicHistory",
-                        MetricName = "SongsProcessed",
-                        Statistic = "Sum",
-                        Period = Duration.Minutes(5)
-                    }),
-                    new Metric(new MetricProps
-                    {
-                        Namespace = "AppleMusicHistory",
-                        MetricName = "NewSongsStored",
-                        Statistic = "Sum",
-                        Period = Duration.Minutes(5)
-                    })
-                ],
-                View = GraphWidgetView.TIME_SERIES
-            })
-        ]);
 
         #endregion
 

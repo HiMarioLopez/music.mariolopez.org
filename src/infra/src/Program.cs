@@ -42,7 +42,6 @@ public static class Program
         adminPanelStack.AddDependency(apiStack);
         adminPanelStack.AddDependency(frontendStack);
 
-        // Add Apple Music History stack
         var historyStack = new AppleMusicHistoryStack(app, "AppleMusicHistoryStack", new StackProps
         {
             Env = env,
@@ -50,10 +49,8 @@ public static class Program
             Description = "This stack contains resources for recording and displaying Apple Music listening history."
         }, configuration);
 
-        // Add dependency on the API stack as we'll need the Apple Music token
         historyStack.AddDependency(apiStack);
 
-        // Add Recommendation stack
         var recommendationStack = new RecommendationStack(app, "RecommendationStack", new StackProps
         {
             Env = env,
@@ -61,10 +58,8 @@ public static class Program
             Description = "This stack contains resources for storing and retrieving music recommendations."
         }, configuration);
 
-        // Add dependency on the API stack for integration
         recommendationStack.AddDependency(apiStack);
 
-        // Add CloudWatch Dashboards stack
         var observabilityStack = new ObservabilityStack(app, "ObservabilityStack", new StackProps
         {
             Env = env,
@@ -72,8 +67,8 @@ public static class Program
             Description = "This stack contains CloudWatch dashboards for monitoring the Music application."
         });
 
-        // Add dependency on the API stack as we need the Lambda functions for the dashboards
         observabilityStack.AddDependency(apiStack);
+        observabilityStack.AddDependency(historyStack);
 
         // Add widgets to the Apple Music dashboard
         observabilityStack.AddAppleMusicDashboardWidgets(
@@ -95,6 +90,12 @@ public static class Program
             apiStack.SetRecommendationNotesLambdaName,
             apiStack.GetRecommendationReviewsLambdaName,
             apiStack.SetRecommendationReviewLambdaName);
+
+        // Add widgets to the Apple Music History dashboard
+        observabilityStack.AddAppleMusicHistoryDashboardWidgets(
+            observabilityStack.AppleMusicHistoryDashboard,
+            historyStack.UpdateHistoryJobLambdaName,
+            historyStack.HistoryTableName);
 
         app.Synth();
     }

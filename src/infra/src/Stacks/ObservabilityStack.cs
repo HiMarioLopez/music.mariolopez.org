@@ -25,6 +25,11 @@ public class ObservabilityStack : Stack
     /// </summary>
     public Dashboard RecommendationsDashboard { get; }
 
+    /// <summary>
+    /// Dashboard for Apple Music History metrics
+    /// </summary>
+    public Dashboard AppleMusicHistoryDashboard { get; }
+
     internal ObservabilityStack(Construct scope, string id, IStackProps? props = null)
         : base(scope, id, props)
     {
@@ -44,6 +49,12 @@ public class ObservabilityStack : Stack
         RecommendationsDashboard = new Dashboard(this, "RecommendationsApiDashboard", new DashboardProps
         {
             DashboardName = "RecommendationsApiDashboard"
+        });
+
+        // Create the Apple Music History dashboard
+        AppleMusicHistoryDashboard = new Dashboard(this, "AppleMusicHistoryDashboard", new DashboardProps
+        {
+            DashboardName = "AppleMusicHistoryDashboard"
         });
     }
 
@@ -1142,5 +1153,116 @@ public class ObservabilityStack : Stack
                 Height = 8
             })
         );
+    }
+
+    /// <summary>
+    /// Adds widgets to the Apple Music History dashboard
+    /// </summary>
+    public void AddAppleMusicHistoryDashboardWidgets(
+        Dashboard dashboard,
+        string updateHistoryJobLambdaName,
+        string historyTableName)
+    {
+        dashboard.AddWidgets(
+        [
+            new GraphWidget(new GraphWidgetProps
+            {
+                Title = "Update Apple Music History Job",
+                Width = 12,
+                Height = 6,
+                Left =
+                [
+                    new Metric(new MetricProps
+                    {
+                        Namespace = "AWS/Lambda",
+                        MetricName = "Invocations",
+                        DimensionsMap = new Dictionary<string, string>
+                        {
+                            { "FunctionName", updateHistoryJobLambdaName }
+                        }
+                    }),
+                    new Metric(new MetricProps
+                    {
+                        Namespace = "AWS/Lambda",
+                        MetricName = "Errors",
+                        DimensionsMap = new Dictionary<string, string>
+                        {
+                            { "FunctionName", updateHistoryJobLambdaName }
+                        }
+                    }),
+                    new Metric(new MetricProps
+                    {
+                        Namespace = "AWS/Lambda",
+                        MetricName = "Duration",
+                        DimensionsMap = new Dictionary<string, string>
+                        {
+                            { "FunctionName", updateHistoryJobLambdaName }
+                        }
+                    })
+                ]
+            }),
+            new GraphWidget(new GraphWidgetProps
+            {
+                Title = "DynamoDB Table",
+                Width = 12,
+                Height = 6,
+                Left =
+                [
+                    new Metric(new MetricProps
+                    {
+                        Namespace = "AWS/DynamoDB",
+                        MetricName = "ConsumedReadCapacityUnits",
+                        DimensionsMap = new Dictionary<string, string>
+                        {
+                            { "TableName", historyTableName }
+                        }
+                    }),
+                    new Metric(new MetricProps
+                    {
+                        Namespace = "AWS/DynamoDB",
+                        MetricName = "ConsumedWriteCapacityUnits",
+                        DimensionsMap = new Dictionary<string, string>
+                        {
+                            { "TableName", historyTableName }
+                        }
+                    })
+                ]
+            }),
+            new LogQueryWidget(new LogQueryWidgetProps
+            {
+                Title = "Error Logs",
+                Width = 24,
+                Height = 6,
+                LogGroupNames =
+                [
+                    $"/aws/lambda/{updateHistoryJobLambdaName}"
+                ],
+                QueryString = "filter @message like /Error/\n| sort @timestamp desc\n| limit 20"
+            }),
+            new GraphWidget(new GraphWidgetProps
+            {
+                Title = "Songs Processed",
+                Width = 24,
+                Height = 8,
+                Left =
+                [
+                    new Metric(new MetricProps
+                    {
+                        Namespace = "AppleMusicHistory",
+                        MetricName = "SongsProcessed",
+                        Statistic = "Sum",
+                        Period = Duration.Minutes(5)
+                    }),
+                    new Metric(new MetricProps
+                    {
+                        Namespace = "AppleMusicHistory",
+                        MetricName = "NewSongsStored",
+                        Statistic = "Sum",
+                        Period = Duration.Minutes(5)
+                    })
+                ],
+                View = GraphWidgetView.TIME_SERIES
+            })
+        ]);
     }
 }

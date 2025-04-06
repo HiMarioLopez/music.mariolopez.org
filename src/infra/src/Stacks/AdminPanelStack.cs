@@ -83,6 +83,12 @@ public class AdminPanelStack : Stack
             }
         });
 
+        // Create the Cognito authorizer
+        var authorizer = new CognitoUserPoolsAuthorizer(this, "AdminAuthorizer", new CognitoUserPoolsAuthorizerProps
+        {
+            CognitoUserPools = [userPool]
+        });
+
         #endregion
 
         #region SSM Parameter
@@ -365,12 +371,6 @@ public class AdminPanelStack : Stack
                 AllowMethods = ["GET", "POST", "OPTIONS"],
                 AllowOrigins = corsSettings?.AllowedOrigins!
             }
-        });
-
-        // Create the Cognito authorizer
-        var authorizer = new CognitoUserPoolsAuthorizer(this, "AdminAuthorizer", new CognitoUserPoolsAuthorizerProps
-        {
-            CognitoUserPools = [userPool]
         });
 
         #region API Gateway Resources
