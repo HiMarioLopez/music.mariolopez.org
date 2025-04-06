@@ -265,7 +265,7 @@ export const handler = async (
       noteId,
       from: requestBody.from || 'anonymous',
       note: requestBody.note,
-      isFromMario: requestBody.isFromMario || false,
+      isFromUser: requestBody.isFromUser || false,
       noteTimestamp: new Date().toISOString(),
       moderationStatus: requestBody.moderationStatus || moderationStatus,
       moderationDetails: requestBody.moderationDetails || moderationDetails,

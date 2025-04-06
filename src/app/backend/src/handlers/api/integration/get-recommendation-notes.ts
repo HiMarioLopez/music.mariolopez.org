@@ -62,9 +62,9 @@ export const handler = async (
       );
     }
 
-    const marioNotesIndexNameParameter =
+    const userNotesIndexNameParameter =
       process.env.DYNAMODB_NOTES_MARIO_INDEX_NAME_PARAMETER;
-    if (!marioNotesIndexNameParameter) {
+    if (!userNotesIndexNameParameter) {
       throw new Error(
         'Missing required environment variable: DYNAMODB_NOTES_MARIO_INDEX_NAME_PARAMETER'
       );
@@ -81,7 +81,7 @@ export const handler = async (
 
     // Get index names from parameters
     let moderationIndexName: string;
-    let marioNotesIndexName: string;
+    let userNotesIndexName: string;
 
     try {
       const moderationIndexNameFromParam = await getParameter(
@@ -103,22 +103,22 @@ export const handler = async (
     }
 
     try {
-      const marioNotesIndexNameFromParam = await getParameter(
-        marioNotesIndexNameParameter
+      const userNotesIndexNameFromParam = await getParameter(
+        userNotesIndexNameParameter
       );
-      if (!marioNotesIndexNameFromParam) {
+      if (!userNotesIndexNameFromParam) {
         logger.warn(
-          `Failed to retrieve Mario notes index name from parameter: ${marioNotesIndexNameParameter}, using fallback value`
+          `Failed to retrieve Mario notes index name from parameter: ${userNotesIndexNameParameter}, using fallback value`
         );
-        marioNotesIndexName = 'MarioNotesIndex'; // Fallback value
+        userNotesIndexName = 'UserNotesIndex'; // Fallback value
       } else {
-        marioNotesIndexName = marioNotesIndexNameFromParam;
+        userNotesIndexName = userNotesIndexNameFromParam;
       }
     } catch (error) {
       logger.warn(
         `Error retrieving Mario notes index name from parameter: ${error}, using fallback value`
       );
-      marioNotesIndexName = 'MarioNotesIndex'; // Fallback value
+      userNotesIndexName = 'UserNotesIndex'; // Fallback value
     }
 
     // Get query parameters
@@ -135,9 +135,9 @@ export const handler = async (
     const moderationStatus = queryParams.moderationStatus as
       | ModerationStatus
       | undefined;
-    const isFromMario =
-      queryParams.isFromMario !== undefined
-        ? queryParams.isFromMario === 'true'
+    const isFromUser =
+      queryParams.isFromUser !== undefined
+        ? queryParams.isFromUser === 'true'
         : undefined;
 
     // Get starting key for pagination if provided
@@ -221,16 +221,16 @@ export const handler = async (
         startKey
       );
       metrics.addMetric('NotesByModerationStatusQuery', MetricUnit.Count, 1);
-    } else if (isFromMario !== undefined) {
+    } else if (isFromUser !== undefined) {
       // Get notes by Mario status
       logger.info('Fetching notes by Mario status', {
-        isFromMario,
+        isFromUser,
         limit,
       });
       result = await getNotesByMarioStatus(
         tableName,
-        marioNotesIndexName,
-        isFromMario,
+        userNotesIndexName,
+        isFromUser,
         limit,
         startKey
       );
@@ -245,7 +245,7 @@ export const handler = async (
         headers: getCorsHeaders(event.headers?.origin, 'GET,OPTIONS'),
         body: JSON.stringify({
           message:
-            'At least one filter (recommendationId, moderationStatus, or isFromMario) is required',
+            'At least one filter (recommendationId, moderationStatus, or isFromUser) is required',
         }),
       };
     }
@@ -377,16 +377,16 @@ async function getNotesByModerationStatus(
 async function getNotesByMarioStatus(
   tableName: string,
   indexName: string,
-  isFromMario: boolean,
+  isFromUser: boolean,
   limit: number,
   startKey?: string
 ): Promise<{ items: RecommendationNote[]; lastEvaluatedKey?: any }> {
   const command = new QueryCommand({
     TableName: tableName,
     IndexName: indexName,
-    KeyConditionExpression: 'isFromMario = :isFromMario',
+    KeyConditionExpression: 'isFromUser = :isFromUser',
     ExpressionAttributeValues: {
-      ':isFromMario': isFromMario ? 1 : 0, // DynamoDB doesn't support boolean types
+      ':isFromUser': isFromUser ? 1 : 0, // DynamoDB doesn't support boolean types
     },
     Limit: limit,
     ScanIndexForward: false, // Sort by noteTimestamp in descending order (newest first)

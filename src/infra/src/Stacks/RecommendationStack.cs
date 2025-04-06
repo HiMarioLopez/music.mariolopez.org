@@ -75,10 +75,10 @@ public class RecommendationStack : Stack
         // GSI to find all notes from (me) Mario (These notes resemble a 'review' of the recommendation)
         notesTable.AddGlobalSecondaryIndex(new GlobalSecondaryIndexProps
         {
-            IndexName = "MarioNotesIndex",
+            IndexName = "UserNotesIndex",
             PartitionKey = new Attribute
             {
-                Name = "isFromMario",
+                Name = "isFromUser",
                 Type = AttributeType.NUMBER // This is a bit of a hack to get around the fact that DynamoDB doesn't support boolean types
             },
             SortKey = new Attribute
@@ -121,10 +121,10 @@ public class RecommendationStack : Stack
             Description = "GSI for filtering notes by moderation status (for moderation queue)"
         });
 
-        var marioNotesIndexNameParameter = new StringParameter(this, "MarioNotesIndexNameParameter", new StringParameterProps
+        var userNotesIndexNameParameter = new StringParameter(this, "UserNotesIndexNameParameter", new StringParameterProps
         {
-            ParameterName = "/Music/Recommendations/MarioNotesIndexName",
-            StringValue = "MarioNotesIndex",
+            ParameterName = "/Music/Recommendations/UserNotesIndexName",
+            StringValue = "UserNotesIndex",
             Description = "GSI for querying Mario's reviews"
         });
 

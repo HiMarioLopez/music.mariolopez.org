@@ -2,7 +2,7 @@ export type Note = {
   noteId: string;
   from: string;
   note: string;
-  isFromMario: boolean;
+  isFromUser: boolean;
   noteTimestamp: string;
   moderationStatus: ModerationStatus;
   moderationDetails?: {

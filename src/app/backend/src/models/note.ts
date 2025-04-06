@@ -3,7 +3,7 @@ export interface RecommendationNote {
   noteId: string; // SK, UUID string
   from: string; // User who submitted (could be anonymous)
   note: string; // The note content
-  isFromMario: boolean; // Whether the note is from Mario
+  isFromUser: boolean; // Whether the note is from Mario
   noteTimestamp: string; // ISO timestamp of note creation
   moderationStatus: ModerationStatus;
   moderationDetails?: {
