@@ -14,7 +14,14 @@ import {
 } from '../../../services/dynamodb/recommendations';
 import { getParameter } from '../../../services/parameter';
 import { getCorsHeaders } from '../../../utils/cors';
-import { AlbumRecommendation, ArtistRecommendation, EntityType, Recommendation, SongRecommendation, UserInteractionStatus } from '../../../models/recommendation';
+import {
+  AlbumRecommendation,
+  ArtistRecommendation,
+  EntityType,
+  Recommendation,
+  SongRecommendation,
+  UserInteractionStatus,
+} from '../../../models/recommendation';
 
 const logger = new Logger({ serviceName: 'set-recommendations' });
 const tracer = new Tracer({ serviceName: 'set-recommendations' });
@@ -110,12 +117,15 @@ export const handler = async (
 
       // Handle user status
       if (requestBody.userStatus) {
-        if (!['liked', 'disliked', 'dismissed'].includes(requestBody.userStatus)) {
+        if (
+          !['LIKED', 'DISLIKED', 'DISMISSED'].includes(requestBody.userStatus)
+        ) {
           return {
             statusCode: 400,
             headers: getCorsHeaders(event.headers?.origin, 'POST,OPTIONS'),
             body: JSON.stringify({
-              message: 'userStatus must be one of: liked, disliked, or dismissed',
+              message:
+                'userStatus must be one of: LIKED, DISLIKED, or DISMISSED',
             }),
           };
         }
@@ -128,7 +138,11 @@ export const handler = async (
       }
 
       // Update the recommendation
-      const result = await updateRecommendation(tableName, existingRecommendation, updates);
+      const result = await updateRecommendation(
+        tableName,
+        existingRecommendation,
+        updates
+      );
 
       metrics.addMetric(
         `${existingRecommendation.entityType}RecommendationUpdateCount`,
@@ -214,9 +228,10 @@ export const handler = async (
     }
 
     // Extract vote change if specified
-    const voteChange = requestBody.voteChange !== undefined
-      ? Number(requestBody.voteChange)
-      : undefined;
+    const voteChange =
+      requestBody.voteChange !== undefined
+        ? Number(requestBody.voteChange)
+        : undefined;
 
     logger.info('Processing recommendation request', {
       voteChange: voteChange,
@@ -225,9 +240,12 @@ export const handler = async (
     // Check if the recommendation already exists
     const searchAttributes = {
       artistName: requestBody.artistName,
-      songTitle: requestBody.entityType === 'SONG' ? requestBody.songTitle : undefined,
-      albumName: requestBody.entityType === 'SONG' ? requestBody.albumName : undefined,
-      albumTitle: requestBody.entityType === 'ALBUM' ? requestBody.albumTitle : undefined,
+      songTitle:
+        requestBody.entityType === 'SONG' ? requestBody.songTitle : undefined,
+      albumName:
+        requestBody.entityType === 'SONG' ? requestBody.albumName : undefined,
+      albumTitle:
+        requestBody.entityType === 'ALBUM' ? requestBody.albumTitle : undefined,
     };
 
     const existingRecommendation = await getRecommendation(
@@ -260,12 +278,15 @@ export const handler = async (
 
       // Handle user status if provided
       if (requestBody.userStatus) {
-        if (!['liked', 'disliked', 'dismissed'].includes(requestBody.userStatus)) {
+        if (
+          !['LIKED', 'DISLIKED', 'DISMISSED'].includes(requestBody.userStatus)
+        ) {
           return {
             statusCode: 400,
             headers: getCorsHeaders(event.headers?.origin, 'POST,OPTIONS'),
             body: JSON.stringify({
-              message: 'userStatus must be one of: liked, disliked, or dismissed',
+              message:
+                'userStatus must be one of: LIKED, DISLIKED, or DISMISSED',
             }),
           };
         }
@@ -278,7 +299,11 @@ export const handler = async (
       }
 
       // Update the recommendation
-      result = await updateRecommendation(tableName, existingRecommendation, updates);
+      result = await updateRecommendation(
+        tableName,
+        existingRecommendation,
+        updates
+      );
 
       metrics.addMetric(
         `${requestBody.entityType}RecommendationUpdateCount`,
@@ -292,7 +317,10 @@ export const handler = async (
       });
 
       // Map the request body to the corresponding recommendation type
-      let newRecommendation: Omit<Recommendation, 'createdAt' | 'votes' | 'recommendationId' | 'reviewedByMario'>;
+      let newRecommendation: Omit<
+        Recommendation,
+        'createdAt' | 'votes' | 'recommendationId' | 'reviewedByMario'
+      >;
 
       if (requestBody.entityType === 'SONG') {
         newRecommendation = {
@@ -301,7 +329,10 @@ export const handler = async (
           artistName: requestBody.artistName,
           albumName: requestBody.albumName,
           albumCoverUrl: requestBody.albumCoverUrl || '',
-        } as Omit<SongRecommendation, 'createdAt' | 'votes' | 'recommendationId' | 'reviewedByMario'>;
+        } as Omit<
+          SongRecommendation,
+          'createdAt' | 'votes' | 'recommendationId' | 'reviewedByMario'
+        >;
       } else if (requestBody.entityType === 'ALBUM') {
         newRecommendation = {
           entityType: 'ALBUM',
@@ -310,14 +341,20 @@ export const handler = async (
           albumCoverUrl: requestBody.albumCoverUrl || '',
           trackCount: requestBody.trackCount,
           releaseDate: requestBody.releaseDate,
-        } as Omit<AlbumRecommendation, 'createdAt' | 'votes' | 'recommendationId' | 'reviewedByMario'>;
+        } as Omit<
+          AlbumRecommendation,
+          'createdAt' | 'votes' | 'recommendationId' | 'reviewedByMario'
+        >;
       } else {
         newRecommendation = {
           entityType: 'ARTIST',
           artistName: requestBody.artistName,
           artistImageUrl: requestBody.artistImageUrl || '',
           genres: requestBody.genres,
-        } as Omit<ArtistRecommendation, 'createdAt' | 'votes' | 'recommendationId' | 'reviewedByMario'>;
+        } as Omit<
+          ArtistRecommendation,
+          'createdAt' | 'votes' | 'recommendationId' | 'reviewedByMario'
+        >;
       }
 
       // Store in DynamoDB

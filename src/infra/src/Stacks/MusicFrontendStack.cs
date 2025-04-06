@@ -48,6 +48,7 @@ public class MusicFrontendStack : Stack
             Sources = [Source.Asset("../app/frontend/music/music-lit/dist")],
             DestinationBucket = siteBucket,
             DestinationKeyPrefix = "lit",
+            MemoryLimit = 256
         });
 
         // Deploy Qwik static site assets
@@ -56,6 +57,7 @@ public class MusicFrontendStack : Stack
             Sources = [Source.Asset("../app/frontend/music/music-qwik/dist")],
             DestinationBucket = siteBucket,
             DestinationKeyPrefix = "qwik",
+            MemoryLimit = 256
         });
 
         // Deploy React static site assets
@@ -64,6 +66,7 @@ public class MusicFrontendStack : Stack
             Sources = [Source.Asset("../app/frontend/music/music-react/dist")],
             DestinationBucket = siteBucket,
             DestinationKeyPrefix = "react",
+            MemoryLimit = 256
         });
 
         // Deploy Solid static site assets
@@ -72,6 +75,7 @@ public class MusicFrontendStack : Stack
             Sources = [Source.Asset("../app/frontend/music/music-solid/dist")],
             DestinationBucket = siteBucket,
             DestinationKeyPrefix = "solid",
+            MemoryLimit = 256
         });
 
         // Deploy Svelte static site assets
@@ -80,6 +84,7 @@ public class MusicFrontendStack : Stack
             Sources = [Source.Asset("../app/frontend/music/music-svelte/dist")],
             DestinationBucket = siteBucket,
             DestinationKeyPrefix = "svelte",
+            MemoryLimit = 256
         });
 
         // Deploy Vanilla static site assets
@@ -88,6 +93,7 @@ public class MusicFrontendStack : Stack
             Sources = [Source.Asset("../app/frontend/music/music-vanilla/dist")],
             DestinationBucket = siteBucket,
             DestinationKeyPrefix = "vanilla",
+            MemoryLimit = 256
         });
 
         // Deploy Vue static site assets
@@ -96,6 +102,7 @@ public class MusicFrontendStack : Stack
             Sources = [Source.Asset("../app/frontend/music/music-vue/dist")],
             DestinationBucket = siteBucket,
             DestinationKeyPrefix = "vue",
+            MemoryLimit = 256
         });
 
         // Deploy Preact static site assets
@@ -104,6 +111,7 @@ public class MusicFrontendStack : Stack
             Sources = [Source.Asset("../app/frontend/music/music-preact/dist")],
             DestinationBucket = siteBucket,
             DestinationKeyPrefix = "preact",
+            MemoryLimit = 256
         });
 
         // Deploy Next static site assets
@@ -112,6 +120,7 @@ public class MusicFrontendStack : Stack
             Sources = [Source.Asset("../app/frontend/music/music-next/dist")],
             DestinationBucket = siteBucket,
             DestinationKeyPrefix = "next",
+            MemoryLimit = 256
         });
 
         // Deploy Angular static site assets
@@ -120,6 +129,7 @@ public class MusicFrontendStack : Stack
             Sources = [Source.Asset("../app/frontend/music/music-angular/dist")],
             DestinationBucket = siteBucket,
             DestinationKeyPrefix = "angular",
+            MemoryLimit = 256
         });
 
         #endregion
