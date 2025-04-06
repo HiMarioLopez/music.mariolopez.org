@@ -1,5 +1,0 @@
-[build]
-# The public URL from which assets are to be served.
-public_url = "https://music.mariolopez.org/leptos/"
-# Allow disabling sub-resource integrity (SRI)
-no_sri = true

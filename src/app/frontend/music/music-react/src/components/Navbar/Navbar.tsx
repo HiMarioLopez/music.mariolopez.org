@@ -1,17 +1,15 @@
 import React from "react";
 import angularLogo from "../../assets/angular.svg";
-import blazorLogo from "../../assets/blazor.svg";
 import litLogo from "../../assets/lit.svg";
 import nextLogo from "../../assets/next.svg";
 import preactLogo from "../../assets/preact.svg";
 import qwikLogo from "../../assets/qwik.svg";
+import randomLogo from "../../assets/random.svg";
 import reactLogo from "../../assets/react.svg";
 import solidLogo from "../../assets/solid.svg";
 import svelteLogo from "../../assets/svelte.svg";
 import tsLogo from "../../assets/typescript.svg";
 import vueLogo from "../../assets/vue.svg";
-import leptosLogo from "../../assets/leptos.svg";
-import randomLogo from "../../assets/random.svg";
 import styles from "./Navbar.module.css";
 
 const Navbar: React.FC = () => {
@@ -111,24 +109,6 @@ const Navbar: React.FC = () => {
         title="The Next.js version is under construction. Check back soon!"
       >
         <img src={nextLogo} alt="Next" />
-      </a>
-      <a
-        href="https://music.mariolopez.org/blazor"
-        target="_self"
-        rel="alternate"
-        className={styles.underConstruction}
-        title="The Blazor version is under construction. Check back soon!"
-      >
-        <img src={blazorLogo} alt="Blazor" />
-      </a>
-      <a
-        href="https://music.mariolopez.org/leptos"
-        target="_self"
-        rel="alternate"
-        className={styles.underConstruction}
-        title="The Leptos version is under construction. Check back soon!"
-      >
-        <img src={leptosLogo} alt="Leptos" />
       </a>
     </nav>
   );

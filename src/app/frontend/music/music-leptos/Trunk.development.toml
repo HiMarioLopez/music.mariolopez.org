@@ -1,7 +1,0 @@
-[build]
-public_url = "/"
-no_sri = true
-
-[serve]
-address = "127.0.0.1"
-port = 3000 

@@ -122,22 +122,6 @@ public class MusicFrontendStack : Stack
             DestinationKeyPrefix = "angular",
         });
 
-        // Deploy Blazor static site assets
-        var deployBlazorSite = new BucketDeployment(this, "Music-DeployBlazorSite", new BucketDeploymentProps
-        {
-            Sources = [Source.Asset("../app/frontend/music/music-blazor/dist")],
-            DestinationBucket = siteBucket,
-            DestinationKeyPrefix = "blazor",
-        });
-
-        // Deploy Leptos static site assets
-        var deployLeptosSite = new BucketDeployment(this, "Music-DeployLeptosSite", new BucketDeploymentProps
-        {
-            Sources = [Source.Asset("../app/frontend/music/music-leptos/dist")],
-            DestinationBucket = siteBucket,
-            DestinationKeyPrefix = "leptos",
-        });
-
         #endregion
 
         #region Route Randomization Handler
