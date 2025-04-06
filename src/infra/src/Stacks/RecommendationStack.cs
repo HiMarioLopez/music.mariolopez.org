@@ -18,7 +18,7 @@ namespace Music.Infra.Stacks;
 /// </remarks>
 public class RecommendationStack : Stack
 {
-    internal RecommendationStack(Construct scope, string id, IStackProps props = null, IConfiguration configuration = null)
+    internal RecommendationStack(Construct scope, string id, IStackProps? props = null, IConfiguration? configuration = null)
         : base(scope, id, props)
     {
         #region Recommendations Table (metadata, votes, etc.)

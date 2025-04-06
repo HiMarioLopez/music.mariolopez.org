@@ -24,7 +24,7 @@ namespace Music.Infra.Stacks;
 /// </remarks>
 public class MusicFrontendStack : Stack
 {
-    public MusicFrontendStack(Construct scope, string id, IStackProps props = null, IConfiguration configuration = null) : base(scope, id, props)
+    public MusicFrontendStack(Construct scope, string id, IStackProps? props = null, IConfiguration? configuration = null) : base(scope, id, props)
     {
         #region Bucket
 
@@ -156,7 +156,7 @@ public class MusicFrontendStack : Stack
         // Certificate for `music.mariolopez.org`
         var awsSettings = configuration?.GetSection("AWS").Get<AwsSettings>();
         var rootCertificateArn = awsSettings?.CertificateArn;
-        var rootCertificate = Certificate.FromCertificateArn(this, "Music-SiteCertificate", rootCertificateArn);
+        var rootCertificate = Certificate.FromCertificateArn(this, "Music-SiteCertificate", rootCertificateArn!);
 
         // Import the API Gateway's custom domain name
         var importedApiDomainName = Fn.ImportValue("Music-ApiGatewayCustomDomainName");

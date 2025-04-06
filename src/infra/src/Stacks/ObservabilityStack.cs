@@ -25,7 +25,7 @@ public class ObservabilityStack : Stack
     /// </summary>
     public Dashboard RecommendationsDashboard { get; }
 
-    internal ObservabilityStack(Construct scope, string id, IStackProps props = null)
+    internal ObservabilityStack(Construct scope, string id, IStackProps? props = null)
         : base(scope, id, props)
     {
         // Create the Apple Music API dashboard

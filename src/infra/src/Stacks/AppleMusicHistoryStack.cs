@@ -24,7 +24,7 @@ namespace Music.Infra.Stacks;
 /// </remarks>
 public class AppleMusicHistoryStack : Stack
 {
-    internal AppleMusicHistoryStack(Construct scope, string id, IStackProps props = null, IConfiguration configuration = null)
+    internal AppleMusicHistoryStack(Construct scope, string id, IStackProps? props = null, IConfiguration? configuration = null)
         : base(scope, id, props)
     {
         #region DynamoDB Table

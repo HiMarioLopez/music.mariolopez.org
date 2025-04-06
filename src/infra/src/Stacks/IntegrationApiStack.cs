@@ -11,6 +11,7 @@ using Amazon.CDK.AWS.SSM;
 using Constructs;
 using Microsoft.Extensions.Configuration;
 using Music.Infra.Models.Settings;
+using Music.Infra.Constructs;
 
 namespace Music.Infra.Stacks;
 
@@ -25,6 +26,8 @@ namespace Music.Infra.Stacks;
 /// </remarks>
 public class IntegrationApiStack : Stack
 {
+    #region Fields
+
     // Private fields for Lambda functions
     private readonly Function dataFetchingLambda;
     private readonly Function tokenRefreshNotificationLambda;
@@ -35,6 +38,10 @@ public class IntegrationApiStack : Stack
     private readonly Function setRecommendationNotesLambda;
     private readonly Function getRecommendationReviewsLambda;
     private readonly Function setRecommendationReviewLambda;
+
+    #endregion
+
+    #region Properties
 
     /// <summary>
     /// Gets the name of the Apple Music data fetching Lambda function
@@ -81,7 +88,11 @@ public class IntegrationApiStack : Stack
     /// </summary>
     public string SetRecommendationReviewLambdaName => setRecommendationReviewLambda.FunctionName;
 
-    internal IntegrationApiStack(Construct scope, string id, IStackProps props = null, IConfiguration configuration = null)
+    #endregion
+
+    /// <summary>
+    /// Initializes a new instance of the IntegrationApiStack class.
+    internal IntegrationApiStack(Construct scope, string id, IStackProps? props = null, IConfiguration? configuration = null)
         : base(scope, id, props)
     {
         var corsSettings = configuration?.GetSection("MusicApiSettings").Get<MusicApiSettings>();
@@ -91,7 +102,7 @@ public class IntegrationApiStack : Stack
         // Certificate for music.mariolopez.org
         var awsSettings = configuration?.GetSection("AWS").Get<AwsSettings>();
         var rootCertificateArn = awsSettings?.CertificateArn;
-        var rootCertificate = Certificate.FromCertificateArn(this, "Music-ApiCertificate", rootCertificateArn);
+        var rootCertificate = Certificate.FromCertificateArn(this, "Music-ApiCertificate", rootCertificateArn!);
 
         // Create a role for API Gateway to write to CloudWatch Logs
         var apiGatewayCloudWatchRole = new Role(this, "Music-IntegrationApiGatewayCloudWatchRole", new RoleProps
@@ -126,7 +137,7 @@ public class IntegrationApiStack : Stack
                     "X-Amz-Security-Token",
                     "Music-User-Token"
                 ],
-                AllowOrigins = corsSettings?.AllowedOrigins,
+                AllowOrigins = corsSettings?.AllowedOrigins!,
                 AllowMethods = Cors.ALL_METHODS
             },
         });
@@ -140,9 +151,9 @@ public class IntegrationApiStack : Stack
             SecretName = "AppleAuthKey"
         });
 
-        var appleSettings = configuration.GetSection("AppleSettings").Get<AppleDeveloperSettings>();
-        var teamId = appleSettings.TeamId;
-        var keyId = appleSettings.KeyId;
+        var appleSettings = configuration!.GetSection("AppleSettings").Get<AppleDeveloperSettings>();
+        var teamId = appleSettings!.TeamId;
+        var keyId = appleSettings!.KeyId;
 
         // SSM Parameter Store for Apple Music API Token
         var appleMusicTokenParameter = StringParameter.FromSecureStringParameterAttributes(this, "AppleMusicApiToken", new SecureStringParameterAttributes
@@ -165,7 +176,42 @@ public class IntegrationApiStack : Stack
 
         #region Lambda Functions and Roles
 
-        #region Apple Music Lambda
+        #region Get Developer Auth Token Lambda
+
+        // Auth Handler Lambda Role
+        var nodejsAuthLambdaRole = new Role(this, "Music-NodejsAuthHandlerExecutionRole", new RoleProps
+        {
+            AssumedBy = new ServicePrincipal("lambda.amazonaws.com"),
+            ManagedPolicies = [ManagedPolicy.FromAwsManagedPolicyName("service-role/AWSLambdaBasicExecutionRole")]
+        });
+
+        // Add Secret Manager permissions to Auth Handler role
+        nodejsAuthLambdaRole.AddToPolicy(new PolicyStatement(new PolicyStatementProps
+        {
+            Actions = ["secretsmanager:GetSecretValue"],
+            Resources = [appleAuthKey.SecretArn],
+            Effect = Effect.ALLOW
+        }));
+
+        // Get Developer Token Handler Lambda
+        var nodejsAuthHandlerFunction = new NodejsLambdaFunction(this, "Music-NodejsAuthHandlerLambda", new NodejsLambdaFunctionProps
+        {
+            Handler = "get-developer-token.handler",
+            Code = Code.FromAsset("../app/backend/dist/handlers/api/integration"),
+            Role = nodejsAuthLambdaRole,
+            Description = "Generates a token for use with Apple's Music API. Built with Node.js.",
+            Environment = new Dictionary<string, string>
+            {
+                ["AWS_NODEJS_CONNECTION_REUSE_ENABLED"] = "1",
+                ["APPLE_AUTH_KEY_SECRET_NAME"] = appleAuthKey.SecretName,
+                ["APPLE_TEAM_ID"] = teamId,
+                ["APPLE_KEY_ID"] = keyId
+            },
+        }).Function;
+
+        #endregion
+
+        #region Get Data from Apple Music Lambda
 
         // Role for the Apple Music API Lambda functions
         var appleMusicLambdaRole = new Role(this, "AppleMusicApiLambdaRole", new RoleProps
@@ -183,14 +229,8 @@ public class IntegrationApiStack : Stack
         appleMusicLambdaRole.AddToPolicy(new PolicyStatement(new PolicyStatementProps
         {
             Effect = Effect.ALLOW,
-            Actions =
-            [
-                "sns:Publish"
-            ],
-            Resources =
-            [
-                tokenRefreshTopic.TopicArn
-            ]
+            Actions = ["sns:Publish"],
+            Resources = [tokenRefreshTopic.TopicArn]
         }));
 
         // Add CloudWatch permissions to Lambda role
@@ -202,129 +242,27 @@ public class IntegrationApiStack : Stack
         }));
 
         // Apple Music API Data Fetching Lambda
-        dataFetchingLambda = new Function(this, "AppleMusicApiDataFetchingLambda", new FunctionProps
+        var dataFetchingLambdaConstruct = new NodejsLambdaFunction(this, "AppleMusicApiDataFetchingLambda", new NodejsLambdaFunctionProps
         {
-            Runtime = Runtime.NODEJS_22_X,
             Handler = "apple-music-data-fetching.handler",
             Code = Code.FromAsset("../app/backend/dist/handlers/api/integration"),
             Role = appleMusicLambdaRole,
-            MemorySize = 512,
-            Timeout = Duration.Seconds(30),
+            MemorySize = 256,
             Description = "Fetches data from Apple Music API and handles caching strategies",
             Environment = new Dictionary<string, string>
             {
                 ["AWS_NODEJS_CONNECTION_REUSE_ENABLED"] = "1",
                 ["TOKEN_REFRESH_SNS_TOPIC_ARN"] = tokenRefreshTopic.TopicArn,
-                ["UPSTASH_REDIS_URL"] = configuration["AppleMusicApi:UpstashRedis:Url"],
-                ["UPSTASH_REDIS_TOKEN"] = configuration["AppleMusicApi:UpstashRedis:Token"],
+                ["UPSTASH_REDIS_URL"] = configuration["AppleMusicApi:UpstashRedis:Url"]!,
+                ["UPSTASH_REDIS_TOKEN"] = configuration["AppleMusicApi:UpstashRedis:Token"]!,
                 ["MUSIC_USER_TOKEN_PARAMETER"] = "/Music/AdminPanel/MUT"
             },
-            Tracing = Tracing.ACTIVE
         });
+        dataFetchingLambda = dataFetchingLambdaConstruct.Function;
 
         #endregion
 
-        #region Token Refresh Notification Lambda
-
-        // Role for the Token Refresh Notification Lambda
-        var tokenRefreshNotificationLambdaRole = new Role(this, "TokenRefreshNotificationLambdaRole", new RoleProps
-        {
-            AssumedBy = new ServicePrincipal("lambda.amazonaws.com"),
-            Description = "Role for Token Refresh Notification Lambda functions",
-            ManagedPolicies =
-            [
-                ManagedPolicy.FromAwsManagedPolicyName("service-role/AWSLambdaBasicExecutionRole"),
-            ]
-        });
-
-        // Add permissions for SES
-        tokenRefreshNotificationLambdaRole.AddToPolicy(new PolicyStatement(new PolicyStatementProps
-        {
-            Effect = Effect.ALLOW,
-            Actions =
-            [
-                "ses:SendEmail"
-            ],
-            Resources =
-            [
-                $"arn:aws:ses:{Region}:{Account}:identity/*"
-            ]
-        }));
-
-        // Add CloudWatch permissions to Lambda role
-        tokenRefreshNotificationLambdaRole.AddToPolicy(new PolicyStatement(new PolicyStatementProps
-        {
-            Effect = Effect.ALLOW,
-            Actions = ["cloudwatch:PutMetricData"],
-            Resources = ["*"]
-        }));
-
-        // Token Refresh Notification Lambda
-        tokenRefreshNotificationLambda = new Function(this, "AppleMusicApiTokenRefreshNotificationLambda", new FunctionProps
-        {
-            Runtime = Runtime.NODEJS_22_X,
-            Handler = "token-refresh-notification.handler",
-            Code = Code.FromAsset("../app/backend/dist/handlers/event-handlers"),
-            Role = tokenRefreshNotificationLambdaRole,
-            MemorySize = 256,
-            Timeout = Duration.Seconds(10),
-            Description = "Sends notifications when Apple Music API token needs to be refreshed",
-            Environment = new Dictionary<string, string>
-            {
-                ["AWS_NODEJS_CONNECTION_REUSE_ENABLED"] = "1",
-                ["ADMIN_EMAIL"] = configuration["AppleMusicApi:Email:AdminEmail"],
-                ["SOURCE_EMAIL"] = configuration["AppleMusicApi:Email:SourceEmail"]
-            },
-            Tracing = Tracing.ACTIVE
-        });
-
-        #endregion
-
-        #region Auth Handler Lambda
-
-        // Auth Handler Lambda Role
-        var nodejsAuthLambdaRole = new Role(this, "Music-NodejsAuthHandlerExecutionRole", new RoleProps
-        {
-            AssumedBy = new ServicePrincipal("lambda.amazonaws.com"),
-            ManagedPolicies =
-            [
-                ManagedPolicy.FromAwsManagedPolicyName("service-role/AWSLambdaBasicExecutionRole")
-            ]
-        });
-
-        // Add Secret Manager permissions to Auth Handler role
-        nodejsAuthLambdaRole.AddToPolicy(new PolicyStatement(new PolicyStatementProps
-        {
-            Actions = ["secretsmanager:GetSecretValue"],
-            Resources = [appleAuthKey.SecretArn],
-            Effect = Effect.ALLOW
-        }));
-
-        // Get Developer Token Handler Lambda
-        var nodejsAuthHandlerFunction = new Function(this, "Music-NodejsAuthHandlerLambda", new FunctionProps
-        {
-            Runtime = Runtime.NODEJS_22_X,
-            Role = nodejsAuthLambdaRole,
-            Handler = "get-developer-token.handler",
-            Code = Code.FromAsset("../app/backend/dist/handlers/api/integration"),
-            Environment = new Dictionary<string, string>
-            {
-                ["AWS_NODEJS_CONNECTION_REUSE_ENABLED"] = "1",
-                ["APPLE_AUTH_KEY_SECRET_NAME"] = appleAuthKey.SecretName,
-                ["APPLE_TEAM_ID"] = teamId,
-                ["APPLE_KEY_ID"] = keyId
-            },
-            Description = "Generates a token for use with Apple's Music API. Built with Node.js.",
-            Architecture = Architecture.ARM_64,
-            MemorySize = 128,
-            EphemeralStorageSize = Size.Mebibytes(512),
-            Timeout = Duration.Seconds(29),
-            Tracing = Tracing.ACTIVE
-        });
-
-        #endregion
-
-        #region MusicBrainz Lambda
+        #region Get Data from MusicBrainz Lambda
 
         // MusicBrainz API Data Fetching Lambda
         var musicBrainzLambdaRole = new Role(this, "MusicBrainzApiLambdaRole", new RoleProps
@@ -345,23 +283,20 @@ public class IntegrationApiStack : Stack
             Resources = ["*"]
         }));
 
-        musicBrainzDataFetchingLambda = new Function(this, "MusicBrainzApiDataFetchingLambda", new FunctionProps
+        var musicBrainzDataFetchingLambdaConstruct = new NodejsLambdaFunction(this, "MusicBrainzApiDataFetchingLambda", new NodejsLambdaFunctionProps
         {
-            Runtime = Runtime.NODEJS_22_X,
             Handler = "musicbrainz-data-fetching.handler",
             Code = Code.FromAsset("../app/backend/dist/handlers/api/integration"),
             Role = musicBrainzLambdaRole,
-            MemorySize = 512,
-            Timeout = Duration.Seconds(30),
             Description = "Fetches data from MusicBrainz API for music recommendations",
             Environment = new Dictionary<string, string>
             {
                 ["AWS_NODEJS_CONNECTION_REUSE_ENABLED"] = "1",
-                ["UPSTASH_REDIS_URL"] = configuration["AppleMusicApi:UpstashRedis:Url"],
-                ["UPSTASH_REDIS_TOKEN"] = configuration["AppleMusicApi:UpstashRedis:Token"]
-            },
-            Tracing = Tracing.ACTIVE
+                ["UPSTASH_REDIS_URL"] = configuration["AppleMusicApi:UpstashRedis:Url"]!,
+                ["UPSTASH_REDIS_TOKEN"] = configuration["AppleMusicApi:UpstashRedis:Token"]!
+            }
         });
+        musicBrainzDataFetchingLambda = musicBrainzDataFetchingLambdaConstruct.Function;
 
         #endregion
 
@@ -371,10 +306,7 @@ public class IntegrationApiStack : Stack
         {
             AssumedBy = new ServicePrincipal("lambda.amazonaws.com"),
             Description = "Role for get-song-history Lambda function",
-            ManagedPolicies =
-            [
-                ManagedPolicy.FromAwsManagedPolicyName("service-role/AWSLambdaBasicExecutionRole")
-            ]
+            ManagedPolicies = [ManagedPolicy.FromAwsManagedPolicyName("service-role/AWSLambdaBasicExecutionRole")]
         });
 
         // Add CloudWatch permissions to MusicBrainz Lambda role
@@ -394,15 +326,7 @@ public class IntegrationApiStack : Stack
                 "dynamodb:Scan",
                 "dynamodb:GetItem"
             ],
-            Resources = [
-                Fn.Join("", [
-                    "arn:aws:dynamodb:",
-                    Region,
-                    ":",
-                    Account,
-                    ":table/AppleMusicHistory"
-                ])
-            ]
+            Resources = [Fn.Join("", ["arn:aws:dynamodb:", Region, ":", Account, ":table/AppleMusicHistory"])]
         }));
 
         // Add SSM Parameter Store read permission
@@ -413,24 +337,20 @@ public class IntegrationApiStack : Stack
             Resources = [$"arn:aws:ssm:{Region}:{Account}:parameter/Music/AppleMusicHistory/TableName"]
         }));
 
-        var getSongHistoryLambda = new Function(this, "GetSongHistoryFunction", new FunctionProps
+        var getSongHistoryLambda = new NodejsLambdaFunction(this, "GetSongHistoryFunction", new NodejsLambdaFunctionProps
         {
-            Runtime = Runtime.NODEJS_22_X,
             Handler = "get-song-history.handler",
             Code = Code.FromAsset("../app/backend/dist/handlers/api/integration"),
             Role = getSongHistoryLambdaRole,
-            MemorySize = 128,
-            Timeout = Duration.Seconds(29),
             Description = "Fetches song history from DynamoDB",
             Environment = new Dictionary<string, string>
             {
                 ["AWS_NODEJS_CONNECTION_REUSE_ENABLED"] = "1",
                 ["DYNAMODB_TABLE_NAME_PARAMETER"] = "/Music/AppleMusicHistory/TableName",
-                ["UPSTASH_REDIS_URL"] = configuration["AppleMusicApi:UpstashRedis:Url"],
-                ["UPSTASH_REDIS_TOKEN"] = configuration["AppleMusicApi:UpstashRedis:Token"]
-            },
-            Tracing = Tracing.ACTIVE
-        });
+                ["UPSTASH_REDIS_URL"] = configuration["AppleMusicApi:UpstashRedis:Url"]!,
+                ["UPSTASH_REDIS_TOKEN"] = configuration["AppleMusicApi:UpstashRedis:Token"]!
+            }
+        }).Function;
 
         #endregion
 
@@ -441,10 +361,7 @@ public class IntegrationApiStack : Stack
         {
             AssumedBy = new ServicePrincipal("lambda.amazonaws.com"),
             Description = "Role for get-recommendations Lambda function",
-            ManagedPolicies =
-            [
-                ManagedPolicy.FromAwsManagedPolicyName("service-role/AWSLambdaBasicExecutionRole")
-            ]
+            ManagedPolicies = [ManagedPolicy.FromAwsManagedPolicyName("service-role/AWSLambdaBasicExecutionRole")]
         });
 
         // Add DynamoDB read permissions
@@ -456,15 +373,7 @@ public class IntegrationApiStack : Stack
                 "dynamodb:Scan",
                 "dynamodb:GetItem"
             ],
-            Resources = [
-                Fn.Join("", [
-                    "arn:aws:dynamodb:",
-                    Region,
-                    ":",
-                    Account,
-                    ":table/MusicRecommendations/index/EntityTypeVotesIndex"
-                ])
-            ]
+            Resources = [Fn.Join("", ["arn:aws:dynamodb:", Region, ":", Account, ":table/MusicRecommendations/index/EntityTypeVotesIndex"])]
         }));
 
         // Add CloudWatch permissions
@@ -487,23 +396,20 @@ public class IntegrationApiStack : Stack
         }));
 
         // Get Recommendations Lambda - To be implemented
-        getRecommendationsLambda = new Function(this, "GetRecommendationsFunction", new FunctionProps
+        var getRecommendationsLambdaConstruct = new NodejsLambdaFunction(this, "GetRecommendationsFunction", new NodejsLambdaFunctionProps
         {
-            Runtime = Runtime.NODEJS_22_X,
             Handler = "get-recommendations.handler",
             Code = Code.FromAsset("../app/backend/dist/handlers/api/integration"),
             Role = getRecommendationsLambdaRole,
-            MemorySize = 128,
-            Timeout = Duration.Seconds(29),
             Description = "Fetches music recommendations from DynamoDB",
             Environment = new Dictionary<string, string>
             {
                 ["AWS_NODEJS_CONNECTION_REUSE_ENABLED"] = "1",
                 ["DYNAMODB_TABLE_NAME_PARAMETER"] = "/Music/Recommendations/TableName",
                 ["DYNAMODB_TABLE_INDEX_NAME_PARAMETER"] = "/Music/Recommendations/EntityTypeVotesIndexName"
-            },
-            Tracing = Tracing.ACTIVE
+            }
         });
+        getRecommendationsLambda = getRecommendationsLambdaConstruct.Function;
 
         #endregion
 
@@ -514,10 +420,7 @@ public class IntegrationApiStack : Stack
         {
             AssumedBy = new ServicePrincipal("lambda.amazonaws.com"),
             Description = "Role for set-recommendations Lambda function",
-            ManagedPolicies =
-            [
-                ManagedPolicy.FromAwsManagedPolicyName("service-role/AWSLambdaBasicExecutionRole")
-            ]
+            ManagedPolicies = [ManagedPolicy.FromAwsManagedPolicyName("service-role/AWSLambdaBasicExecutionRole")]
         });
 
         // Add DynamoDB write permissions
@@ -530,15 +433,7 @@ public class IntegrationApiStack : Stack
                 "dynamodb:Query",
                 "dynamodb:Scan"
             ],
-            Resources = [
-                Fn.Join("", [
-                    "arn:aws:dynamodb:",
-                    Region,
-                    ":",
-                    Account,
-                    ":table/MusicRecommendations"
-                ]),
-            ]
+            Resources = [Fn.Join("", ["arn:aws:dynamodb:", Region, ":", Account, ":table/MusicRecommendations"])]
         }));
 
         // Add CloudWatch permissions
@@ -554,28 +449,23 @@ public class IntegrationApiStack : Stack
         {
             Effect = Effect.ALLOW,
             Actions = ["ssm:GetParameter"],
-            Resources = [
-                $"arn:aws:ssm:{Region}:{Account}:parameter/Music/Recommendations/TableName"
-            ]
+            Resources = [$"arn:aws:ssm:{Region}:{Account}:parameter/Music/Recommendations/TableName"]
         }));
 
         // Set Recommendations Lambda - To be implemented
-        setRecommendationsLambda = new Function(this, "SetRecommendationsFunction", new FunctionProps
+        var setRecommendationsLambdaConstruct = new NodejsLambdaFunction(this, "SetRecommendationsFunction", new NodejsLambdaFunctionProps
         {
-            Runtime = Runtime.NODEJS_22_X,
             Handler = "set-recommendations.handler",
             Code = Code.FromAsset("../app/backend/dist/handlers/api/integration"),
             Role = setRecommendationsLambdaRole,
-            MemorySize = 128,
-            Timeout = Duration.Seconds(29),
             Description = "Creates and stores music recommendations in DynamoDB",
             Environment = new Dictionary<string, string>
             {
                 ["AWS_NODEJS_CONNECTION_REUSE_ENABLED"] = "1",
                 ["DYNAMODB_TABLE_NAME_PARAMETER"] = "/Music/Recommendations/TableName"
-            },
-            Tracing = Tracing.ACTIVE
+            }
         });
+        setRecommendationsLambda = setRecommendationsLambdaConstruct.Function;
 
         #endregion
 
@@ -586,10 +476,7 @@ public class IntegrationApiStack : Stack
         {
             AssumedBy = new ServicePrincipal("lambda.amazonaws.com"),
             Description = "Role for get-recommendation-notes Lambda function",
-            ManagedPolicies =
-            [
-                ManagedPolicy.FromAwsManagedPolicyName("service-role/AWSLambdaBasicExecutionRole")
-            ]
+            ManagedPolicies = [ManagedPolicy.FromAwsManagedPolicyName("service-role/AWSLambdaBasicExecutionRole")]
         });
 
         // Add DynamoDB read permissions
@@ -601,15 +488,7 @@ public class IntegrationApiStack : Stack
                 "dynamodb:Scan",
                 "dynamodb:GetItem"
             ],
-            Resources = [
-                Fn.Join("", [
-                    "arn:aws:dynamodb:",
-                    Region,
-                    ":",
-                    Account,
-                    ":table/MusicRecommendationNotes"
-                ])
-            ]
+            Resources = [Fn.Join("", ["arn:aws:dynamodb:", Region, ":", Account, ":table/MusicRecommendationNotes"])]
         }));
 
         // Add CloudWatch permissions
@@ -632,23 +511,20 @@ public class IntegrationApiStack : Stack
         }));
 
         // Get Recommendations Lambda - To be implemented
-        getRecommendationNotesLambda = new Function(this, "GetRecommendationNotesFunction", new FunctionProps
+        var getRecommendationNotesLambdaConstruct = new NodejsLambdaFunction(this, "GetRecommendationNotesFunction", new NodejsLambdaFunctionProps
         {
-            Runtime = Runtime.NODEJS_22_X,
             Handler = "get-recommendation-notes.handler",
             Code = Code.FromAsset("../app/backend/dist/handlers/api/integration"),
             Role = getRecommendationNotesLambdaRole,
-            MemorySize = 128,
-            Timeout = Duration.Seconds(29),
             Description = "Fetches music recommendation notes from DynamoDB",
             Environment = new Dictionary<string, string>
             {
                 ["AWS_NODEJS_CONNECTION_REUSE_ENABLED"] = "1",
                 ["DYNAMODB_TABLE_NAME_PARAMETER"] = "/Music/Recommendations/NotesTableName",
                 ["DYNAMODB_TABLE_INDEX_NAME_PARAMETER"] = "/Music/Recommendations/NotesModerationStatusIndexName"
-            },
-            Tracing = Tracing.ACTIVE
+            }
         });
+        getRecommendationNotesLambda = getRecommendationNotesLambdaConstruct.Function;
 
         #endregion
 
@@ -659,10 +535,7 @@ public class IntegrationApiStack : Stack
         {
             AssumedBy = new ServicePrincipal("lambda.amazonaws.com"),
             Description = "Role for set-recommendation-notes Lambda function",
-            ManagedPolicies =
-            [
-                ManagedPolicy.FromAwsManagedPolicyName("service-role/AWSLambdaBasicExecutionRole")
-            ]
+            ManagedPolicies = [ManagedPolicy.FromAwsManagedPolicyName("service-role/AWSLambdaBasicExecutionRole")]
         });
 
         // Add DynamoDB write permissions
@@ -675,15 +548,7 @@ public class IntegrationApiStack : Stack
                 "dynamodb:Query",
                 "dynamodb:Scan"
             ],
-            Resources = [
-                Fn.Join("", [
-                    "arn:aws:dynamodb:",
-                    Region,
-                    ":",
-                    Account,
-                    ":table/MusicRecommendationNotes"
-                ]),
-            ]
+            Resources = [Fn.Join("", ["arn:aws:dynamodb:", Region, ":", Account, ":table/MusicRecommendationNotes"])]
         }));
 
         // Add CloudWatch permissions
@@ -707,14 +572,11 @@ public class IntegrationApiStack : Stack
         }));
 
         // Set Recommendations Lambda - To be implemented
-        setRecommendationNotesLambda = new Function(this, "SetRecommendationNotesFunction", new FunctionProps
+        var setRecommendationNotesLambdaConstruct = new NodejsLambdaFunction(this, "SetRecommendationNotesFunction", new NodejsLambdaFunctionProps
         {
-            Runtime = Runtime.NODEJS_22_X,
             Handler = "set-recommendation-notes.handler",
             Code = Code.FromAsset("../app/backend/dist/handlers/api/integration"),
             Role = setRecommendationNotesLambdaRole,
-            MemorySize = 128,
-            Timeout = Duration.Seconds(29),
             Description = "Creates and stores music recommendation notes in DynamoDB",
             Environment = new Dictionary<string, string>
             {
@@ -722,9 +584,9 @@ public class IntegrationApiStack : Stack
                 ["DYNAMODB_TABLE_NAME_PARAMETER"] = "/Music/RecommendationNotes/NotesTableName",
                 ["DYNAMODB_TABLE_INDEX_NAME_PARAMETER"] = "/Music/RecommendationNotes/NotesModerationStatusIndexName",
                 ["OPENAI_API_KEY_PARAMETER"] = "/Music/Moderation/OpenAIApiKey"
-            },
-            Tracing = Tracing.ACTIVE
+            }
         });
+        setRecommendationNotesLambda = setRecommendationNotesLambdaConstruct.Function;
 
         #endregion
 
@@ -735,10 +597,7 @@ public class IntegrationApiStack : Stack
         {
             AssumedBy = new ServicePrincipal("lambda.amazonaws.com"),
             Description = "Role for get-recommendation-reviews Lambda function",
-            ManagedPolicies =
-            [
-                ManagedPolicy.FromAwsManagedPolicyName("service-role/AWSLambdaBasicExecutionRole")
-            ]
+            ManagedPolicies = [ManagedPolicy.FromAwsManagedPolicyName("service-role/AWSLambdaBasicExecutionRole")]
         });
 
         // Add DynamoDB read permissions
@@ -750,15 +609,7 @@ public class IntegrationApiStack : Stack
                 "dynamodb:Scan",
                 "dynamodb:GetItem"
             ],
-            Resources = [
-                Fn.Join("", [
-                    "arn:aws:dynamodb:",
-                    Region,
-                    ":",
-                    Account,
-                    ":table/MusicRecommendationNotes"
-                ])
-            ]
+            Resources = [Fn.Join("", ["arn:aws:dynamodb:", Region, ":", Account, ":table/MusicRecommendationNotes"])]
         }));
 
         // Add CloudWatch permissions
@@ -781,23 +632,20 @@ public class IntegrationApiStack : Stack
         }));
 
         // Get Recommendation Reviews Lambda
-        getRecommendationReviewsLambda = new Function(this, "GetRecommendationReviewsFunction", new FunctionProps
+        var getRecommendationReviewsLambdaConstruct = new NodejsLambdaFunction(this, "GetRecommendationReviewsFunction", new NodejsLambdaFunctionProps
         {
-            Runtime = Runtime.NODEJS_22_X,
             Handler = "get-recommendation-reviews.handler",
             Code = Code.FromAsset("../app/backend/dist/handlers/api/integration"),
             Role = getRecommendationReviewsLambdaRole,
-            MemorySize = 128,
-            Timeout = Duration.Seconds(29),
             Description = "Fetches music recommendation reviews (user notes) from DynamoDB",
             Environment = new Dictionary<string, string>
             {
                 ["AWS_NODEJS_CONNECTION_REUSE_ENABLED"] = "1",
                 ["DYNAMODB_NOTES_TABLE_NAME_PARAMETER"] = "/Music/Recommendations/NotesTableName",
                 ["DYNAMODB_NOTES_USER_INDEX_NAME_PARAMETER"] = "/Music/Recommendations/NotesUserNotesIndexName"
-            },
-            Tracing = Tracing.ACTIVE
+            }
         });
+        getRecommendationReviewsLambda = getRecommendationReviewsLambdaConstruct.Function;
 
         #endregion
 
@@ -808,10 +656,7 @@ public class IntegrationApiStack : Stack
         {
             AssumedBy = new ServicePrincipal("lambda.amazonaws.com"),
             Description = "Role for set-recommendation-review Lambda function",
-            ManagedPolicies =
-            [
-                ManagedPolicy.FromAwsManagedPolicyName("service-role/AWSLambdaBasicExecutionRole")
-            ]
+            ManagedPolicies = [ManagedPolicy.FromAwsManagedPolicyName("service-role/AWSLambdaBasicExecutionRole")]
         });
 
         // Add DynamoDB write permissions
@@ -825,15 +670,7 @@ public class IntegrationApiStack : Stack
                 "dynamodb:Scan",
                 "dynamodb:GetItem"
             ],
-            Resources = [
-                Fn.Join("", [
-                    "arn:aws:dynamodb:",
-                    Region,
-                    ":",
-                    Account,
-                    ":table/MusicRecommendationNotes"
-                ]),
-            ]
+            Resources = [Fn.Join("", ["arn:aws:dynamodb:", Region, ":", Account, ":table/MusicRecommendationNotes"])]
         }));
 
         // Add CloudWatch permissions
@@ -856,23 +693,64 @@ public class IntegrationApiStack : Stack
         }));
 
         // Set Recommendation Review Lambda
-        setRecommendationReviewLambda = new Function(this, "SetRecommendationReviewFunction", new FunctionProps
+        var setRecommendationReviewLambdaConstruct = new NodejsLambdaFunction(this, "SetRecommendationReviewFunction", new NodejsLambdaFunctionProps
         {
-            Runtime = Runtime.NODEJS_22_X,
             Handler = "set-recommendation-review.handler",
             Code = Code.FromAsset("../app/backend/dist/handlers/api/integration"),
             Role = setRecommendationReviewLambdaRole,
-            MemorySize = 128,
-            Timeout = Duration.Seconds(29),
             Description = "Creates and stores music recommendation reviews (user notes) in DynamoDB",
             Environment = new Dictionary<string, string>
             {
                 ["AWS_NODEJS_CONNECTION_REUSE_ENABLED"] = "1",
                 ["DYNAMODB_NOTES_TABLE_NAME_PARAMETER"] = "/Music/Recommendations/NotesTableName",
                 ["OPENAI_API_KEY_PARAMETER"] = "/Music/Moderation/OpenAIApiKey"
-            },
-            Tracing = Tracing.ACTIVE
+            }
         });
+        setRecommendationReviewLambda = setRecommendationReviewLambdaConstruct.Function;
+
+        #endregion
+
+        #region Token Refresh Notification Lambda
+
+        // Role for the Token Refresh Notification Lambda
+        var tokenRefreshNotificationLambdaRole = new Role(this, "TokenRefreshNotificationLambdaRole", new RoleProps
+        {
+            AssumedBy = new ServicePrincipal("lambda.amazonaws.com"),
+            Description = "Role for Token Refresh Notification Lambda functions",
+            ManagedPolicies = [ManagedPolicy.FromAwsManagedPolicyName("service-role/AWSLambdaBasicExecutionRole")]
+        });
+
+        // Add permissions for SES
+        tokenRefreshNotificationLambdaRole.AddToPolicy(new PolicyStatement(new PolicyStatementProps
+        {
+            Effect = Effect.ALLOW,
+            Actions = ["ses:SendEmail"],
+            Resources = [$"arn:aws:ses:{Region}:{Account}:identity/*"]
+        }));
+
+        // Add CloudWatch permissions to Lambda role
+        tokenRefreshNotificationLambdaRole.AddToPolicy(new PolicyStatement(new PolicyStatementProps
+        {
+            Effect = Effect.ALLOW,
+            Actions = ["cloudwatch:PutMetricData"],
+            Resources = ["*"]
+        }));
+
+        // Token Refresh Notification Lambda
+        var tokenRefreshNotificationLambdaConstruct = new NodejsLambdaFunction(this, "AppleMusicApiTokenRefreshNotificationLambda", new NodejsLambdaFunctionProps
+        {
+            Handler = "token-refresh-notification.handler",
+            Code = Code.FromAsset("../app/backend/dist/handlers/event-handlers"),
+            Role = tokenRefreshNotificationLambdaRole,
+            Description = "Sends notifications when Apple Music API token needs to be refreshed",
+            Environment = new Dictionary<string, string>
+            {
+                ["AWS_NODEJS_CONNECTION_REUSE_ENABLED"] = "1",
+                ["ADMIN_EMAIL"] = configuration["AppleMusicApi:Email:AdminEmail"]!,
+                ["SOURCE_EMAIL"] = configuration["AppleMusicApi:Email:SourceEmail"]!
+            }
+        });
+        tokenRefreshNotificationLambda = tokenRefreshNotificationLambdaConstruct.Function;
 
         #endregion
 
@@ -883,10 +761,7 @@ public class IntegrationApiStack : Stack
         {
             AssumedBy = new ServicePrincipal("lambda.amazonaws.com"),
             Description = "Role for the check-pending-moderations Lambda function",
-            ManagedPolicies =
-            [
-                ManagedPolicy.FromAwsManagedPolicyName("service-role/AWSLambdaBasicExecutionRole")
-            ]
+            ManagedPolicies = [ManagedPolicy.FromAwsManagedPolicyName("service-role/AWSLambdaBasicExecutionRole")]
         });
 
         // Add DynamoDB permissions to the role
@@ -918,9 +793,7 @@ public class IntegrationApiStack : Stack
         {
             Effect = Effect.ALLOW,
             Actions = ["ses:SendEmail"],
-            Resources = [
-                $"arn:aws:ses:{Region}:{Account}:identity/*"
-            ]
+            Resources = [$"arn:aws:ses:{Region}:{Account}:identity/*"]
         }));
 
         // Add CloudWatch permissions
@@ -932,14 +805,11 @@ public class IntegrationApiStack : Stack
         }));
 
         // Create check-pending-moderations Lambda function
-        var checkPendingModerationsLambda = new Function(this, "CheckPendingModerationsFunction", new FunctionProps
+        var checkPendingModerationsLambda = new NodejsLambdaFunction(this, "CheckPendingModerationsFunction", new NodejsLambdaFunctionProps
         {
-            Runtime = Runtime.NODEJS_22_X,
             Handler = "check-pending-moderations.handler",
             Code = Code.FromAsset("../app/backend/dist/handlers/event-handlers"),
             Role = checkPendingModerationsLambdaRole,
-            MemorySize = 128,
-            Timeout = Duration.Seconds(60),
             Description = "Checks for pending moderations and sends notification emails",
             Environment = new Dictionary<string, string>
             {
@@ -947,9 +817,8 @@ public class IntegrationApiStack : Stack
                 ["DYNAMODB_TABLE_NAME_PARAMETER"] = "/Music/Recommendations/NotesTableName",
                 ["ADMIN_EMAIL"] = configuration["MusicAdminSettings:AdminEmail"] ?? "admin@example.com",
                 ["SOURCE_EMAIL"] = configuration["MusicAdminSettings:SourceEmail"] ?? "noreply@example.com"
-            },
-            Tracing = Tracing.ACTIVE
-        });
+            }
+        }).Function;
 
         #endregion
 
@@ -976,147 +845,257 @@ public class IntegrationApiStack : Stack
         #region API Gateway Integration
 
         // Create base nodejs resource
-        var nodejsResource = apiGateway.Root.AddResource("nodejs");
+        var nodejsResource = new ApiGatewayResource(this, "NodejsResource", new ApiGatewayResourceProps
+        {
+            ParentResource = apiGateway.Root,
+            PathPart = "nodejs"
+        }).Resource;
 
         // Auth endpoint
-        var authResource = nodejsResource.AddResource("auth");
-        var tokenResource = authResource.AddResource("token");
-        tokenResource.AddMethod(
-            "GET",
-            new LambdaIntegration(nodejsAuthHandlerFunction, new LambdaIntegrationOptions
-            {
-                Timeout = Duration.Seconds(29),
-                AllowTestInvoke = true
-            })
-        );
+        var authResource = new ApiGatewayResource(this, "AuthResource", new ApiGatewayResourceProps
+        {
+            ParentResource = nodejsResource,
+            PathPart = "auth"
+        }).Resource;
+
+        var tokenResource = new ApiGatewayResource(this, "TokenResource", new ApiGatewayResourceProps
+        {
+            ParentResource = authResource,
+            PathPart = "token"
+        }).Resource;
+
+        // Create integration for auth token
+        var authIntegration = new ApiGatewayIntegration(this, "AuthIntegration", new ApiGatewayIntegrationProps
+        {
+            Function = nodejsAuthHandlerFunction,
+            AllowTestInvoke = true
+        });
+
+        // Add method to token resource
+        var getTokenMethod = new ApiGatewayMethod(this, "GetTokenMethod", new ApiGatewayMethodProps
+        {
+            Resource = tokenResource,
+            HttpMethod = "GET",
+            Integration = authIntegration.Integration
+        });
 
         // Add history endpoints to API Gateway
-        var historyResource = nodejsResource.AddResource("history");
-        var musicHistoryResource = historyResource.AddResource("music");
-        musicHistoryResource.AddMethod(
-            "GET",
-            new LambdaIntegration(getSongHistoryLambda, new LambdaIntegrationOptions
-            {
-                Timeout = Duration.Seconds(29),
-                AllowTestInvoke = true
-            }), new MethodOptions
-            {
-                AuthorizationType = AuthorizationType.NONE
-            });
+        var historyResource = new ApiGatewayResource(this, "HistoryResource", new ApiGatewayResourceProps
+        {
+            ParentResource = nodejsResource,
+            PathPart = "history"
+        }).Resource;
+
+        var musicHistoryResource = new ApiGatewayResource(this, "MusicHistoryResource", new ApiGatewayResourceProps
+        {
+            ParentResource = historyResource,
+            PathPart = "music"
+        }).Resource;
+
+        // Create integration for music history
+        var musicHistoryIntegration = new ApiGatewayIntegration(this, "MusicHistoryIntegration", new ApiGatewayIntegrationProps
+        {
+            Function = getSongHistoryLambda,
+            Timeout = Duration.Seconds(29),
+            AllowTestInvoke = true
+        });
+
+        // Add method to music history resource
+        var getMusicHistoryMethod = new ApiGatewayMethod(this, "GetMusicHistoryMethod", new ApiGatewayMethodProps
+        {
+            Resource = musicHistoryResource,
+            HttpMethod = "GET",
+            Integration = musicHistoryIntegration.Integration,
+            AuthorizationType = AuthorizationType.NONE
+        });
 
         // Add POST method for creating (single) recommendation
-        var recommendationResource = nodejsResource.AddResource("recommendation");
-        recommendationResource.AddMethod(
-            "POST",
-            new LambdaIntegration(setRecommendationsLambda, new LambdaIntegrationOptions
-            {
-                Timeout = Duration.Seconds(29),
-                AllowTestInvoke = true
-            }), new MethodOptions
-            {
-                AuthorizationType = AuthorizationType.NONE
-            });
+        var recommendationResource = new ApiGatewayResource(this, "RecommendationResource", new ApiGatewayResourceProps
+        {
+            ParentResource = nodejsResource,
+            PathPart = "recommendation"
+        }).Resource;
+
+        // Create integration for set recommendations
+        var setRecommendationsIntegration = new ApiGatewayIntegration(this, "SetRecommendationsIntegration", new ApiGatewayIntegrationProps
+        {
+            Function = setRecommendationsLambda,
+        });
+
+        // Add method to recommendation resource
+        var postRecommendationMethod = new ApiGatewayMethod(this, "PostRecommendationMethod", new ApiGatewayMethodProps
+        {
+            Resource = recommendationResource,
+            HttpMethod = "POST",
+            Integration = setRecommendationsIntegration.Integration,
+            AuthorizationType = AuthorizationType.NONE
+        });
 
         // Add GET method for retrieving (multiple) recommendations
-        var recommendationsResource = nodejsResource.AddResource("recommendations");
-        recommendationsResource.AddMethod(
-            "GET",
-            new LambdaIntegration(getRecommendationsLambda, new LambdaIntegrationOptions
-            {
-                Timeout = Duration.Seconds(29),
-                AllowTestInvoke = true
-            }), new MethodOptions
-            {
-                AuthorizationType = AuthorizationType.NONE
-            });
+        var recommendationsResource = new ApiGatewayResource(this, "RecommendationsResource", new ApiGatewayResourceProps
+        {
+            ParentResource = nodejsResource,
+            PathPart = "recommendations"
+        }).Resource;
+
+        // Create integration for get recommendations
+        var getRecommendationsIntegration = new ApiGatewayIntegration(this, "GetRecommendationsIntegration", new ApiGatewayIntegrationProps
+        {
+            Function = getRecommendationsLambda,
+            Timeout = Duration.Seconds(29),
+            AllowTestInvoke = true
+        });
+
+        // Add method to recommendations resource
+        var getRecommendationsMethod = new ApiGatewayMethod(this, "GetRecommendationsMethod", new ApiGatewayMethodProps
+        {
+            Resource = recommendationsResource,
+            HttpMethod = "GET",
+            Integration = getRecommendationsIntegration.Integration,
+            AuthorizationType = AuthorizationType.NONE
+        });
 
         // Add GET method for retrieving a single recommendation by ID
-        var recommendationByIdResource = recommendationsResource.AddResource("{id}");
-        recommendationByIdResource.AddMethod(
-            "GET",
-            new LambdaIntegration(getRecommendationsLambda, new LambdaIntegrationOptions
-            {
-                Timeout = Duration.Seconds(29),
-                AllowTestInvoke = true
-            }), new MethodOptions
-            {
-                AuthorizationType = AuthorizationType.NONE
-            });
+        var recommendationByIdResource = new ApiGatewayResource(this, "RecommendationByIdResource", new ApiGatewayResourceProps
+        {
+            ParentResource = recommendationsResource,
+            PathPart = "{id}"
+        }).Resource;
+
+        // Add method to recommendation by id resource
+        var getRecommendationByIdMethod = new ApiGatewayMethod(this, "GetRecommendationByIdMethod", new ApiGatewayMethodProps
+        {
+            Resource = recommendationByIdResource,
+            HttpMethod = "GET",
+            Integration = getRecommendationsIntegration.Integration,
+            AuthorizationType = AuthorizationType.NONE
+        });
 
         // Add GET method for retrieving notes for a specific recommendation
-        var recommendationNotesResource = recommendationByIdResource.AddResource("notes");
-        recommendationNotesResource.AddMethod(
-            "GET",
-            new LambdaIntegration(getRecommendationNotesLambda, new LambdaIntegrationOptions
-            {
-                Timeout = Duration.Seconds(29),
-                AllowTestInvoke = true
-            }), new MethodOptions
-            {
-                AuthorizationType = AuthorizationType.NONE
-            });
+        var recommendationNotesResource = new ApiGatewayResource(this, "RecommendationNotesResource", new ApiGatewayResourceProps
+        {
+            ParentResource = recommendationByIdResource,
+            PathPart = "notes"
+        }).Resource;
 
-        // Add POST method for adding a note to a specific recommendation
-        recommendationNotesResource.AddMethod(
-            "POST",
-            new LambdaIntegration(setRecommendationNotesLambda, new LambdaIntegrationOptions
-            {
-                Timeout = Duration.Seconds(29),
-                AllowTestInvoke = true
-            }), new MethodOptions
-            {
-                AuthorizationType = AuthorizationType.NONE
-            });
+        // Create integration for get recommendation notes
+        var getRecommendationNotesIntegration = new ApiGatewayIntegration(this, "GetRecommendationNotesIntegration", new ApiGatewayIntegrationProps
+        {
+            Function = getRecommendationNotesLambda,
+            Timeout = Duration.Seconds(29),
+            AllowTestInvoke = true
+        });
+
+        // Add method to recommendation notes resource
+        var getRecommendationNotesMethod = new ApiGatewayMethod(this, "GetRecommendationNotesMethod", new ApiGatewayMethodProps
+        {
+            Resource = recommendationNotesResource,
+            HttpMethod = "GET",
+            Integration = getRecommendationNotesIntegration.Integration,
+            AuthorizationType = AuthorizationType.NONE
+        });
+
+        // Create integration for set recommendation notes
+        var setRecommendationNotesIntegration = new ApiGatewayIntegration(this, "SetRecommendationNotesIntegration", new ApiGatewayIntegrationProps
+        {
+            Function = setRecommendationNotesLambda,
+            Timeout = Duration.Seconds(29),
+            AllowTestInvoke = true
+        });
+
+        // Add method to recommendation notes resource
+        var postRecommendationNotesMethod = new ApiGatewayMethod(this, "PostRecommendationNotesMethod", new ApiGatewayMethodProps
+        {
+            Resource = recommendationNotesResource,
+            HttpMethod = "POST",
+            Integration = setRecommendationNotesIntegration.Integration,
+            AuthorizationType = AuthorizationType.NONE
+        });
 
         // Add GET method for retrieving reviews for a specific recommendation
-        var recommendationReviewsResource = recommendationByIdResource.AddResource("reviews");
-        recommendationReviewsResource.AddMethod(
-            "GET",
-            new LambdaIntegration(getRecommendationReviewsLambda, new LambdaIntegrationOptions
-            {
-                Timeout = Duration.Seconds(29),
-                AllowTestInvoke = true
-            }), new MethodOptions
-            {
-                AuthorizationType = AuthorizationType.NONE
-            });
+        var recommendationReviewsResource = new ApiGatewayResource(this, "RecommendationReviewsResource", new ApiGatewayResourceProps
+        {
+            ParentResource = recommendationByIdResource,
+            PathPart = "reviews"
+        }).Resource;
 
-        // Add POST method for adding a review to a specific recommendation
-        recommendationReviewsResource.AddMethod(
-            "POST",
-            new LambdaIntegration(setRecommendationReviewLambda, new LambdaIntegrationOptions
-            {
-                Timeout = Duration.Seconds(29),
-                AllowTestInvoke = true
-            }), new MethodOptions
-            {
-                AuthorizationType = AuthorizationType.NONE
-            });
+        // Create integration for get recommendation reviews
+        var getRecommendationReviewsIntegration = new ApiGatewayIntegration(this, "GetRecommendationReviewsIntegration", new ApiGatewayIntegrationProps
+        {
+            Function = getRecommendationReviewsLambda,
+            Timeout = Duration.Seconds(29),
+            AllowTestInvoke = true
+        });
+
+        // Add method to recommendation reviews resource
+        var getRecommendationReviewsMethod = new ApiGatewayMethod(this, "GetRecommendationReviewsMethod", new ApiGatewayMethodProps
+        {
+            Resource = recommendationReviewsResource,
+            HttpMethod = "GET",
+            Integration = getRecommendationReviewsIntegration.Integration,
+            AuthorizationType = AuthorizationType.NONE
+        });
+
+        // Create integration for set recommendation review
+        var setRecommendationReviewIntegration = new ApiGatewayIntegration(this, "SetRecommendationReviewIntegration", new ApiGatewayIntegrationProps
+        {
+            Function = setRecommendationReviewLambda,
+            Timeout = Duration.Seconds(29),
+            AllowTestInvoke = true
+        });
+
+        // Add method to recommendation reviews resource
+        var postRecommendationReviewMethod = new ApiGatewayMethod(this, "PostRecommendationReviewMethod", new ApiGatewayMethodProps
+        {
+            Resource = recommendationReviewsResource,
+            HttpMethod = "POST",
+            Integration = setRecommendationReviewIntegration.Integration,
+            AuthorizationType = AuthorizationType.NONE
+        });
 
         // Add GET method for retrieving all reviews
-        var allReviewsResource = nodejsResource.AddResource("reviews");
-        allReviewsResource.AddMethod(
-            "GET",
-            new LambdaIntegration(getRecommendationReviewsLambda, new LambdaIntegrationOptions
-            {
-                Timeout = Duration.Seconds(29),
-                AllowTestInvoke = true
-            }), new MethodOptions
-            {
-                AuthorizationType = AuthorizationType.NONE
-            });
+        var allReviewsResource = new ApiGatewayResource(this, "AllReviewsResource", new ApiGatewayResourceProps
+        {
+            ParentResource = nodejsResource,
+            PathPart = "reviews"
+        }).Resource;
+
+        // Add method to all reviews resource
+        var getAllReviewsMethod = new ApiGatewayMethod(this, "GetAllReviewsMethod", new ApiGatewayMethodProps
+        {
+            Resource = allReviewsResource,
+            HttpMethod = "GET",
+            Integration = getRecommendationReviewsIntegration.Integration,
+            AuthorizationType = AuthorizationType.NONE
+        });
 
         // Apple Music API endpoints
-        var appleMusicResource = nodejsResource.AddResource("apple-music");
-        var nodejsLambdaIntegration = new LambdaIntegration(dataFetchingLambda, new LambdaIntegrationOptions
+        var appleMusicResource = new ApiGatewayResource(this, "AppleMusicResource", new ApiGatewayResourceProps
         {
+            ParentResource = nodejsResource,
+            PathPart = "apple-music"
+        }).Resource;
+
+        // Create integration for Apple Music API
+        var appleMusicIntegration = new ApiGatewayIntegration(this, "AppleMusicIntegration", new ApiGatewayIntegrationProps
+        {
+            Function = dataFetchingLambda,
             Proxy = true,
             PassthroughBehavior = PassthroughBehavior.WHEN_NO_MATCH
         });
-        var nodejsProxyResource = appleMusicResource.AddResource("{proxy+}");
 
-        nodejsProxyResource.AddMethod("ANY", nodejsLambdaIntegration, new MethodOptions
+        // Create proxy resource for Apple Music API
+        var appleMusicProxyResource = new ApiGatewayProxyResource(this, "AppleMusicProxyResource", new ApiGatewayProxyResourceProps
         {
+            ParentResource = appleMusicResource
+        }).ProxyResource;
+
+        // Add method to Apple Music proxy resource
+        var appleMusicProxyMethod = new ApiGatewayMethod(this, "AppleMusicProxyMethod", new ApiGatewayMethodProps
+        {
+            Resource = appleMusicProxyResource,
+            HttpMethod = "ANY",
+            Integration = appleMusicIntegration.Integration,
             AuthorizationType = AuthorizationType.NONE,
             ApiKeyRequired = false,
             RequestParameters = new Dictionary<string, bool>
@@ -1126,22 +1105,42 @@ public class IntegrationApiStack : Stack
         });
 
         // MusicBrainz API endpoints
-        var musicBrainzResource = nodejsResource.AddResource("musicbrainz");
-        var musicBrainzLambdaIntegration = new LambdaIntegration(musicBrainzDataFetchingLambda, new LambdaIntegrationOptions
+        var musicBrainzResource = new ApiGatewayResource(this, "MusicBrainzResource", new ApiGatewayResourceProps
         {
+            ParentResource = nodejsResource,
+            PathPart = "musicbrainz"
+        }).Resource;
+
+        // Create integration for MusicBrainz API
+        var musicBrainzIntegration = new ApiGatewayIntegration(this, "MusicBrainzIntegration", new ApiGatewayIntegrationProps
+        {
+            Function = musicBrainzDataFetchingLambda,
             Proxy = true,
             PassthroughBehavior = PassthroughBehavior.WHEN_NO_MATCH
         });
-        var musicBrainzProxyResource = musicBrainzResource.AddResource("{proxy+}");
 
-        musicBrainzProxyResource.AddMethod("ANY", musicBrainzLambdaIntegration, new MethodOptions
+        // Create proxy resource for MusicBrainz API
+        var musicBrainzProxyResource = new ApiGatewayProxyResource(this, "MusicBrainzProxyResource", new ApiGatewayProxyResourceProps
         {
+            ParentResource = musicBrainzResource
+        }).ProxyResource;
+
+        // Add method to MusicBrainz proxy resource
+        var musicBrainzProxyMethod = new ApiGatewayMethod(this, "MusicBrainzProxyMethod", new ApiGatewayMethodProps
+        {
+            Resource = musicBrainzProxyResource,
+            HttpMethod = "ANY",
+            Integration = musicBrainzIntegration.Integration,
             AuthorizationType = AuthorizationType.NONE,
             ApiKeyRequired = false
         });
 
-        nodejsResource.AddMethod("ANY", nodejsLambdaIntegration, new MethodOptions
+        // Add method to nodejs resource
+        var nodejsProxyMethod = new ApiGatewayMethod(this, "NodejsProxyMethod", new ApiGatewayMethodProps
         {
+            Resource = nodejsResource,
+            HttpMethod = "ANY",
+            Integration = appleMusicIntegration.Integration,
             AuthorizationType = AuthorizationType.NONE,
             ApiKeyRequired = false
         });
