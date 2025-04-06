@@ -64,6 +64,38 @@ public static class Program
         // Add dependency on the API stack for integration
         recommendationStack.AddDependency(apiStack);
 
+        // Add CloudWatch Dashboards stack
+        var observabilityStack = new ObservabilityStack(app, "ObservabilityStack", new StackProps
+        {
+            Env = env,
+            StackName = "ObservabilityStack",
+            Description = "This stack contains CloudWatch dashboards for monitoring the Music application."
+        });
+
+        // Add dependency on the API stack as we need the Lambda functions for the dashboards
+        observabilityStack.AddDependency(apiStack);
+
+        // Add widgets to the Apple Music dashboard
+        observabilityStack.AddAppleMusicDashboardWidgets(
+            observabilityStack.AppleMusicDashboard,
+            apiStack.AppleMusicDataFetchingLambdaName,
+            apiStack.TokenRefreshNotificationLambdaName);
+
+        // Add widgets to the MusicBrainz dashboard
+        observabilityStack.AddMusicBrainzDashboardWidgets(
+            observabilityStack.MusicBrainzDashboard,
+            apiStack.MusicBrainzDataFetchingLambdaName);
+
+        // Add widgets to the Recommendations dashboard
+        observabilityStack.AddRecommendationsDashboardWidgets(
+            observabilityStack.RecommendationsDashboard,
+            apiStack.GetRecommendationsLambdaName,
+            apiStack.SetRecommendationsLambdaName,
+            apiStack.GetRecommendationNotesLambdaName,
+            apiStack.SetRecommendationNotesLambdaName,
+            apiStack.GetRecommendationReviewsLambdaName,
+            apiStack.SetRecommendationReviewLambdaName);
+
         app.Synth();
     }
 }

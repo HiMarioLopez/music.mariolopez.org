@@ -8,7 +8,6 @@ using Amazon.CDK.AWS.SecretsManager;
 using Amazon.CDK.AWS.SNS;
 using Amazon.CDK.AWS.SNS.Subscriptions;
 using Amazon.CDK.AWS.SSM;
-using Amazon.CDK.AWS.CloudWatch;
 using Constructs;
 using Microsoft.Extensions.Configuration;
 using Music.Infra.Models.Settings;
@@ -26,6 +25,62 @@ namespace Music.Infra.Stacks;
 /// </remarks>
 public class IntegrationApiStack : Stack
 {
+    // Private fields for Lambda functions
+    private readonly Function dataFetchingLambda;
+    private readonly Function tokenRefreshNotificationLambda;
+    private readonly Function musicBrainzDataFetchingLambda;
+    private readonly Function getRecommendationsLambda;
+    private readonly Function setRecommendationsLambda;
+    private readonly Function getRecommendationNotesLambda;
+    private readonly Function setRecommendationNotesLambda;
+    private readonly Function getRecommendationReviewsLambda;
+    private readonly Function setRecommendationReviewLambda;
+
+    /// <summary>
+    /// Gets the name of the Apple Music data fetching Lambda function
+    /// </summary>
+    public string AppleMusicDataFetchingLambdaName => dataFetchingLambda.FunctionName;
+
+    /// <summary>
+    /// Gets the name of the Apple Music token refresh notification Lambda function
+    /// </summary>
+    public string TokenRefreshNotificationLambdaName => tokenRefreshNotificationLambda.FunctionName;
+
+    /// <summary>
+    /// Gets the name of the MusicBrainz data fetching Lambda function
+    /// </summary>
+    public string MusicBrainzDataFetchingLambdaName => musicBrainzDataFetchingLambda.FunctionName;
+
+    /// <summary>
+    /// Gets the name of the Get Recommendations Lambda function
+    /// </summary>
+    public string GetRecommendationsLambdaName => getRecommendationsLambda.FunctionName;
+
+    /// <summary>
+    /// Gets the name of the Set Recommendations Lambda function
+    /// </summary>
+    public string SetRecommendationsLambdaName => setRecommendationsLambda.FunctionName;
+
+    /// <summary>
+    /// Gets the name of the Get Recommendation Notes Lambda function
+    /// </summary>
+    public string GetRecommendationNotesLambdaName => getRecommendationNotesLambda.FunctionName;
+
+    /// <summary>
+    /// Gets the name of the Set Recommendation Notes Lambda function
+    /// </summary>
+    public string SetRecommendationNotesLambdaName => setRecommendationNotesLambda.FunctionName;
+
+    /// <summary>
+    /// Gets the name of the Get Recommendation Reviews Lambda function
+    /// </summary>
+    public string GetRecommendationReviewsLambdaName => getRecommendationReviewsLambda.FunctionName;
+
+    /// <summary>
+    /// Gets the name of the Set Recommendation Review Lambda function
+    /// </summary>
+    public string SetRecommendationReviewLambdaName => setRecommendationReviewLambda.FunctionName;
+
     internal IntegrationApiStack(Construct scope, string id, IStackProps props = null, IConfiguration configuration = null)
         : base(scope, id, props)
     {
@@ -147,7 +202,7 @@ public class IntegrationApiStack : Stack
         }));
 
         // Apple Music API Data Fetching Lambda
-        var dataFetchingLambda = new Function(this, "AppleMusicApiDataFetchingLambda", new FunctionProps
+        dataFetchingLambda = new Function(this, "AppleMusicApiDataFetchingLambda", new FunctionProps
         {
             Runtime = Runtime.NODEJS_22_X,
             Handler = "apple-music-data-fetching.handler",
@@ -205,7 +260,7 @@ public class IntegrationApiStack : Stack
         }));
 
         // Token Refresh Notification Lambda
-        var tokenRefreshNotificationLambda = new Function(this, "AppleMusicApiTokenRefreshNotificationLambda", new FunctionProps
+        tokenRefreshNotificationLambda = new Function(this, "AppleMusicApiTokenRefreshNotificationLambda", new FunctionProps
         {
             Runtime = Runtime.NODEJS_22_X,
             Handler = "token-refresh-notification.handler",
@@ -290,7 +345,7 @@ public class IntegrationApiStack : Stack
             Resources = ["*"]
         }));
 
-        var musicBrainzDataFetchingLambda = new Function(this, "MusicBrainzApiDataFetchingLambda", new FunctionProps
+        musicBrainzDataFetchingLambda = new Function(this, "MusicBrainzApiDataFetchingLambda", new FunctionProps
         {
             Runtime = Runtime.NODEJS_22_X,
             Handler = "musicbrainz-data-fetching.handler",
@@ -432,7 +487,7 @@ public class IntegrationApiStack : Stack
         }));
 
         // Get Recommendations Lambda - To be implemented
-        var getRecommendationsLambda = new Function(this, "GetRecommendationsFunction", new FunctionProps
+        getRecommendationsLambda = new Function(this, "GetRecommendationsFunction", new FunctionProps
         {
             Runtime = Runtime.NODEJS_22_X,
             Handler = "get-recommendations.handler",
@@ -505,7 +560,7 @@ public class IntegrationApiStack : Stack
         }));
 
         // Set Recommendations Lambda - To be implemented
-        var setRecommendationsLambda = new Function(this, "SetRecommendationsFunction", new FunctionProps
+        setRecommendationsLambda = new Function(this, "SetRecommendationsFunction", new FunctionProps
         {
             Runtime = Runtime.NODEJS_22_X,
             Handler = "set-recommendations.handler",
@@ -577,7 +632,7 @@ public class IntegrationApiStack : Stack
         }));
 
         // Get Recommendations Lambda - To be implemented
-        var getRecommendationNotesLambda = new Function(this, "GetRecommendationNotesFunction", new FunctionProps
+        getRecommendationNotesLambda = new Function(this, "GetRecommendationNotesFunction", new FunctionProps
         {
             Runtime = Runtime.NODEJS_22_X,
             Handler = "get-recommendation-notes.handler",
@@ -652,7 +707,7 @@ public class IntegrationApiStack : Stack
         }));
 
         // Set Recommendations Lambda - To be implemented
-        var setRecommendationNotesLambda = new Function(this, "SetRecommendationNotesFunction", new FunctionProps
+        setRecommendationNotesLambda = new Function(this, "SetRecommendationNotesFunction", new FunctionProps
         {
             Runtime = Runtime.NODEJS_22_X,
             Handler = "set-recommendation-notes.handler",
@@ -666,6 +721,154 @@ public class IntegrationApiStack : Stack
                 ["AWS_NODEJS_CONNECTION_REUSE_ENABLED"] = "1",
                 ["DYNAMODB_TABLE_NAME_PARAMETER"] = "/Music/RecommendationNotes/NotesTableName",
                 ["DYNAMODB_TABLE_INDEX_NAME_PARAMETER"] = "/Music/RecommendationNotes/NotesModerationStatusIndexName",
+                ["OPENAI_API_KEY_PARAMETER"] = "/Music/Moderation/OpenAIApiKey"
+            },
+            Tracing = Tracing.ACTIVE
+        });
+
+        #endregion
+
+        #region Get Recommendation Reviews Lambda
+
+        // Role for the Get Recommendation Reviews Lambda
+        var getRecommendationReviewsLambdaRole = new Role(this, "GetRecommendationReviewsLambdaRole", new RoleProps
+        {
+            AssumedBy = new ServicePrincipal("lambda.amazonaws.com"),
+            Description = "Role for get-recommendation-reviews Lambda function",
+            ManagedPolicies =
+            [
+                ManagedPolicy.FromAwsManagedPolicyName("service-role/AWSLambdaBasicExecutionRole")
+            ]
+        });
+
+        // Add DynamoDB read permissions
+        getRecommendationReviewsLambdaRole.AddToPolicy(new PolicyStatement(new PolicyStatementProps
+        {
+            Effect = Effect.ALLOW,
+            Actions = [
+                "dynamodb:Query",
+                "dynamodb:Scan",
+                "dynamodb:GetItem"
+            ],
+            Resources = [
+                Fn.Join("", [
+                    "arn:aws:dynamodb:",
+                    Region,
+                    ":",
+                    Account,
+                    ":table/MusicRecommendationNotes"
+                ])
+            ]
+        }));
+
+        // Add CloudWatch permissions
+        getRecommendationReviewsLambdaRole.AddToPolicy(new PolicyStatement(new PolicyStatementProps
+        {
+            Effect = Effect.ALLOW,
+            Actions = ["cloudwatch:PutMetricData"],
+            Resources = ["*"]
+        }));
+
+        // Add SSM Parameter Store read permission
+        getRecommendationReviewsLambdaRole.AddToPolicy(new PolicyStatement(new PolicyStatementProps
+        {
+            Effect = Effect.ALLOW,
+            Actions = ["ssm:GetParameter"],
+            Resources = [
+                $"arn:aws:ssm:{Region}:{Account}:parameter/Music/Recommendations/NotesTableName",
+                $"arn:aws:ssm:{Region}:{Account}:parameter/Music/Recommendations/NotesUserNotesIndexName"
+            ]
+        }));
+
+        // Get Recommendation Reviews Lambda
+        getRecommendationReviewsLambda = new Function(this, "GetRecommendationReviewsFunction", new FunctionProps
+        {
+            Runtime = Runtime.NODEJS_22_X,
+            Handler = "get-recommendation-reviews.handler",
+            Code = Code.FromAsset("../app/backend/dist/handlers/api/integration"),
+            Role = getRecommendationReviewsLambdaRole,
+            MemorySize = 128,
+            Timeout = Duration.Seconds(29),
+            Description = "Fetches music recommendation reviews (user notes) from DynamoDB",
+            Environment = new Dictionary<string, string>
+            {
+                ["AWS_NODEJS_CONNECTION_REUSE_ENABLED"] = "1",
+                ["DYNAMODB_NOTES_TABLE_NAME_PARAMETER"] = "/Music/Recommendations/NotesTableName",
+                ["DYNAMODB_NOTES_USER_INDEX_NAME_PARAMETER"] = "/Music/Recommendations/NotesUserNotesIndexName"
+            },
+            Tracing = Tracing.ACTIVE
+        });
+
+        #endregion
+
+        #region Set Recommendation Review Lambda
+
+        // Role for the Set Recommendation Review Lambda
+        var setRecommendationReviewLambdaRole = new Role(this, "SetRecommendationReviewLambdaRole", new RoleProps
+        {
+            AssumedBy = new ServicePrincipal("lambda.amazonaws.com"),
+            Description = "Role for set-recommendation-review Lambda function",
+            ManagedPolicies =
+            [
+                ManagedPolicy.FromAwsManagedPolicyName("service-role/AWSLambdaBasicExecutionRole")
+            ]
+        });
+
+        // Add DynamoDB write permissions
+        setRecommendationReviewLambdaRole.AddToPolicy(new PolicyStatement(new PolicyStatementProps
+        {
+            Effect = Effect.ALLOW,
+            Actions = [
+                "dynamodb:PutItem",
+                "dynamodb:UpdateItem",
+                "dynamodb:Query",
+                "dynamodb:Scan",
+                "dynamodb:GetItem"
+            ],
+            Resources = [
+                Fn.Join("", [
+                    "arn:aws:dynamodb:",
+                    Region,
+                    ":",
+                    Account,
+                    ":table/MusicRecommendationNotes"
+                ]),
+            ]
+        }));
+
+        // Add CloudWatch permissions
+        setRecommendationReviewLambdaRole.AddToPolicy(new PolicyStatement(new PolicyStatementProps
+        {
+            Effect = Effect.ALLOW,
+            Actions = ["cloudwatch:PutMetricData"],
+            Resources = ["*"]
+        }));
+
+        // Add SSM Parameter Store read permission
+        setRecommendationReviewLambdaRole.AddToPolicy(new PolicyStatement(new PolicyStatementProps
+        {
+            Effect = Effect.ALLOW,
+            Actions = ["ssm:GetParameter"],
+            Resources = [
+                $"arn:aws:ssm:{Region}:{Account}:parameter/Music/Recommendations/NotesTableName",
+                $"arn:aws:ssm:{Region}:{Account}:parameter/Music/Moderation/OpenAIApiKey"
+            ]
+        }));
+
+        // Set Recommendation Review Lambda
+        setRecommendationReviewLambda = new Function(this, "SetRecommendationReviewFunction", new FunctionProps
+        {
+            Runtime = Runtime.NODEJS_22_X,
+            Handler = "set-recommendation-review.handler",
+            Code = Code.FromAsset("../app/backend/dist/handlers/api/integration"),
+            Role = setRecommendationReviewLambdaRole,
+            MemorySize = 128,
+            Timeout = Duration.Seconds(29),
+            Description = "Creates and stores music recommendation reviews (user notes) in DynamoDB",
+            Environment = new Dictionary<string, string>
+            {
+                ["AWS_NODEJS_CONNECTION_REUSE_ENABLED"] = "1",
+                ["DYNAMODB_NOTES_TABLE_NAME_PARAMETER"] = "/Music/Recommendations/NotesTableName",
                 ["OPENAI_API_KEY_PARAMETER"] = "/Music/Moderation/OpenAIApiKey"
             },
             Tracing = Tracing.ACTIVE
@@ -865,6 +1068,44 @@ public class IntegrationApiStack : Stack
                 AuthorizationType = AuthorizationType.NONE
             });
 
+        // Add GET method for retrieving reviews for a specific recommendation
+        var recommendationReviewsResource = recommendationByIdResource.AddResource("reviews");
+        recommendationReviewsResource.AddMethod(
+            "GET",
+            new LambdaIntegration(getRecommendationReviewsLambda, new LambdaIntegrationOptions
+            {
+                Timeout = Duration.Seconds(29),
+                AllowTestInvoke = true
+            }), new MethodOptions
+            {
+                AuthorizationType = AuthorizationType.NONE
+            });
+
+        // Add POST method for adding a review to a specific recommendation
+        recommendationReviewsResource.AddMethod(
+            "POST",
+            new LambdaIntegration(setRecommendationReviewLambda, new LambdaIntegrationOptions
+            {
+                Timeout = Duration.Seconds(29),
+                AllowTestInvoke = true
+            }), new MethodOptions
+            {
+                AuthorizationType = AuthorizationType.NONE
+            });
+
+        // Add GET method for retrieving all reviews
+        var allReviewsResource = nodejsResource.AddResource("reviews");
+        allReviewsResource.AddMethod(
+            "GET",
+            new LambdaIntegration(getRecommendationReviewsLambda, new LambdaIntegrationOptions
+            {
+                Timeout = Duration.Seconds(29),
+                AllowTestInvoke = true
+            }), new MethodOptions
+            {
+                AuthorizationType = AuthorizationType.NONE
+            });
+
         // Apple Music API endpoints
         var appleMusicResource = nodejsResource.AddResource("apple-music");
         var nodejsLambdaIntegration = new LambdaIntegration(dataFetchingLambda, new LambdaIntegrationOptions
@@ -904,248 +1145,6 @@ public class IntegrationApiStack : Stack
             AuthorizationType = AuthorizationType.NONE,
             ApiKeyRequired = false
         });
-
-        #endregion
-
-        #region CloudWatch Dashboard
-
-        var appleMusicDashboard = new Dashboard(this, "AppleMusicApiDashboard", new DashboardProps
-        {
-            DashboardName = "AppleMusicApiDashboard"
-        });
-
-        var musicBrainzDashboard = new Dashboard(this, "MusicBrainzApiDashboard", new DashboardProps
-        {
-            DashboardName = "MusicBrainzApiDashboard"
-        });
-
-        // Apple Music Dashboard widgets
-        appleMusicDashboard.AddWidgets(
-        [
-            new GraphWidget(new GraphWidgetProps
-            {
-                Title = "Data Fetching Lambda",
-                Width = 12,
-                Height = 6,
-                Left =
-                [
-                    new Metric(new MetricProps
-                    {
-                        Namespace = "AWS/Lambda",
-                        MetricName = "Invocations",
-                        DimensionsMap = new Dictionary<string, string>
-                        {
-                            { "FunctionName", dataFetchingLambda.FunctionName }
-                        }
-                    }),
-                    new Metric(new MetricProps
-                    {
-                        Namespace = "AWS/Lambda",
-                        MetricName = "Errors",
-                        DimensionsMap = new Dictionary<string, string>
-                        {
-                            { "FunctionName", dataFetchingLambda.FunctionName }
-                        }
-                    }),
-                    new Metric(new MetricProps
-                    {
-                        Namespace = "AWS/Lambda",
-                        MetricName = "Duration",
-                        DimensionsMap = new Dictionary<string, string>
-                        {
-                            { "FunctionName", dataFetchingLambda.FunctionName }
-                        }
-                    })
-                ]
-            }),
-            new GraphWidget(new GraphWidgetProps
-            {
-                Title = "Token Refresh Lambda",
-                Width = 12,
-                Height = 6,
-                Left =
-                [
-                    new Metric(new MetricProps
-                    {
-                        Namespace = "AWS/Lambda",
-                        MetricName = "Invocations",
-                        DimensionsMap = new Dictionary<string, string>
-                        {
-                            { "FunctionName", tokenRefreshNotificationLambda.FunctionName }
-                        }
-                    }),
-                    new Metric(new MetricProps
-                    {
-                        Namespace = "AWS/Lambda",
-                        MetricName = "Errors",
-                        DimensionsMap = new Dictionary<string, string>
-                        {
-                            { "FunctionName", tokenRefreshNotificationLambda.FunctionName }
-                        }
-                    }),
-                    new Metric(new MetricProps
-                    {
-                        Namespace = "AWS/Lambda",
-                        MetricName = "Duration",
-                        DimensionsMap = new Dictionary<string, string>
-                        {
-                            { "FunctionName", tokenRefreshNotificationLambda.FunctionName }
-                        }
-                    })
-                ]
-            }),
-            new LogQueryWidget(new LogQueryWidgetProps
-            {
-                Title = "Apple Music API Error Logs",
-                Width = 24,
-                Height = 6,
-                LogGroupNames =
-                [
-                    dataFetchingLambda.LogGroup.LogGroupName,
-                    tokenRefreshNotificationLambda.LogGroup.LogGroupName
-                ],
-                QueryString = "filter @message like /Error/\n| sort @timestamp desc\n| limit 20"
-            }),
-            new GraphWidget(new GraphWidgetProps
-            {
-                Title = "Apple Music Cache Performance",
-                Width = 24,
-                Height = 8,
-                Left =
-                [
-                    new Metric(new MetricProps
-                    {
-                        Namespace = "AppleMusicAPI",
-                        MetricName = "CacheHits",
-                        DimensionsMap = new Dictionary<string, string>
-                        {
-                            { "service", "AppleMusicDataFetching" },
-                            { "Source", "l1-cache" }
-                        },
-                        Label = "L1 Cache Hits",
-                        Statistic = "Sum",
-                        Period = Duration.Minutes(1)
-                    }),
-                    new Metric(new MetricProps
-                    {
-                        Namespace = "AppleMusicAPI",
-                        MetricName = "CacheHits",
-                        DimensionsMap = new Dictionary<string, string>
-                        {
-                            { "service", "AppleMusicDataFetching" },
-                            { "Source", "l2-cache" }
-                        },
-                        Label = "L2 Cache Hits",
-                        Statistic = "Sum",
-                        Period = Duration.Minutes(1)
-                    }),
-                    new Metric(new MetricProps
-                    {
-                        Namespace = "AppleMusicAPI",
-                        MetricName = "CacheHits",
-                        DimensionsMap = new Dictionary<string, string>
-                        {
-                            { "service", "AppleMusicDataFetching" },
-                            { "Source", "api" }
-                        },
-                        Label = "API Calls",
-                        Statistic = "Sum",
-                        Period = Duration.Minutes(1)
-                    })
-                ],
-                View = GraphWidgetView.TIME_SERIES,
-                Stacked = true
-            })
-        ]);
-
-        // MusicBrainz Dashboard widgets
-        musicBrainzDashboard.AddWidgets(
-        [
-            new GraphWidget(new GraphWidgetProps
-            {
-                Title = "MusicBrainz API Lambda",
-                Width = 24,
-                Height = 6,
-                Left =
-                [
-                    new Metric(new MetricProps
-                    {
-                        Namespace = "AWS/Lambda",
-                        MetricName = "Invocations",
-                        DimensionsMap = new Dictionary<string, string>
-                        {
-                            { "FunctionName", musicBrainzDataFetchingLambda.FunctionName }
-                        }
-                    }),
-                    new Metric(new MetricProps
-                    {
-                        Namespace = "AWS/Lambda",
-                        MetricName = "Errors",
-                        DimensionsMap = new Dictionary<string, string>
-                        {
-                            { "FunctionName", musicBrainzDataFetchingLambda.FunctionName }
-                        }
-                    }),
-                    new Metric(new MetricProps
-                    {
-                        Namespace = "AWS/Lambda",
-                        MetricName = "Duration",
-                        DimensionsMap = new Dictionary<string, string>
-                        {
-                            { "FunctionName", musicBrainzDataFetchingLambda.FunctionName }
-                        }
-                    })
-                ]
-            }),
-            new LogQueryWidget(new LogQueryWidgetProps
-            {
-                Title = "MusicBrainz API Error Logs",
-                Width = 24,
-                Height = 6,
-                LogGroupNames =
-                [
-                    musicBrainzDataFetchingLambda.LogGroup.LogGroupName
-                ],
-                QueryString = "filter @message like /Error/\n| sort @timestamp desc\n| limit 20"
-            }),
-            new GraphWidget(new GraphWidgetProps
-            {
-                Title = "MusicBrainz Cache Performance",
-                Width = 24,
-                Height = 8,
-                Left =
-                [
-                    new Metric(new MetricProps
-                    {
-                        Namespace = "MusicBrainzAPI",
-                        MetricName = "CacheHits",
-                        DimensionsMap = new Dictionary<string, string>
-                        {
-                            { "service", "MusicBrainzDataFetching" },
-                            { "Source", "cache" }
-                        },
-                        Label = "MB Cache Hits",
-                        Statistic = "Sum",
-                        Period = Duration.Minutes(1)
-                    }),
-                    new Metric(new MetricProps
-                    {
-                        Namespace = "MusicBrainzAPI",
-                        MetricName = "CacheHits",
-                        DimensionsMap = new Dictionary<string, string>
-                        {
-                            { "service", "MusicBrainzDataFetching" },
-                            { "Source", "api" }
-                        },
-                        Label = "MB API Calls",
-                        Statistic = "Sum",
-                        Period = Duration.Minutes(1)
-                    })
-                ],
-                View = GraphWidgetView.TIME_SERIES,
-                Stacked = true
-            })
-        ]);
 
         #endregion
 
