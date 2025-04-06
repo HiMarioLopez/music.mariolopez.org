@@ -96,13 +96,12 @@ export const handler = async (
       : DEFAULT_LIMIT;
 
     // Get filters if provided
-    const entityType = queryParams.entityType as
-      | EntityType
-      | undefined;
+    const entityType = queryParams.entityType as EntityType | undefined;
     const recommendationId = queryParams.recommendationId;
-    const reviewedByMario = queryParams.reviewedByMario !== undefined
-      ? queryParams.reviewedByMario === 'true'
-      : undefined;
+    const reviewedByUser =
+      queryParams.reviewedByUser !== undefined
+        ? queryParams.reviewedByUser === 'true'
+        : undefined;
 
     // Get starting key for pagination if provided
     const startKey = queryParams.startKey
@@ -168,40 +167,32 @@ export const handler = async (
         tableIndexName,
         entityType,
         limit,
-        startKey,
+        startKey
       );
       metrics.addMetric('EntityTypeVotesFilteredQuery', MetricUnit.Count, 1);
-    } else if (reviewedByMario !== undefined) {
-      // Filter by reviewedByMario status
-      logger.info('Fetching recommendations by reviewedByMario status', {
-        reviewedByMario,
+    } else if (reviewedByUser !== undefined) {
+      // Filter by reviewedByUser status
+      logger.info('Fetching recommendations by reviewedByUser status', {
+        reviewedByUser,
         limit,
       });
 
-      if (reviewedByMario) {
-        result = await getReviewedRecommendations(
-          tableName,
-          limit,
-          startKey,
-        );
+      if (reviewedByUser) {
+        result = await getReviewedRecommendations(tableName, limit, startKey);
         metrics.addMetric('ReviewedRecommendationsQuery', MetricUnit.Count, 1);
       } else {
-        result = await getUnreviewedRecommendations(
-          tableName,
-          limit,
-          startKey,
+        result = await getUnreviewedRecommendations(tableName, limit, startKey);
+        metrics.addMetric(
+          'UnreviewedRecommendationsQuery',
+          MetricUnit.Count,
+          1
         );
-        metrics.addMetric('UnreviewedRecommendationsQuery', MetricUnit.Count, 1);
       }
     } else {
       logger.info('Fetching all recommendations sorted by votes', {
         limit,
       });
-      result = await getAllRecommendations(
-        tableName,
-        limit,
-        startKey,
-      );
+      result = await getAllRecommendations(tableName, limit, startKey);
       metrics.addMetric('AllRecommendationsByVotesQuery', MetricUnit.Count, 1);
     }
 

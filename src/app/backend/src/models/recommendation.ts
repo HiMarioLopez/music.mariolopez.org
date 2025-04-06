@@ -3,8 +3,8 @@ export interface BaseRecommendation {
   entityType: EntityType; // Type of entity ('SONG', 'ALBUM', 'ARTIST')
   createdAt: string; // ISO timestamp
   votes: number;
-  reviewedByMario: boolean; // Whether the recommendation has been reviewed by Mario
-  userStatus?: UserInteractionStatus; // Whether the Mario has interacted with the recommendation
+  reviewedByUser: boolean; // Whether the recommendation has been reviewed by Mario
+  userInteractionStatus?: UserInteractionStatus; // Whether the Mario has interacted with the recommendation
 }
 
 export interface SongRecommendation extends BaseRecommendation {

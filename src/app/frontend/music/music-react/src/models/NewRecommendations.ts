@@ -3,8 +3,8 @@ export type Recommendation = {
   entityType: EntityType;
   createdAt: string;
   votes: number;
-  reviewedByMario: boolean;
-  userStatus?: UserInteractionStatus;
+  reviewedByUser: boolean;
+  userInteractionStatus?: UserInteractionStatus;
 };
 
 export type SongRecommendation = Recommendation & {

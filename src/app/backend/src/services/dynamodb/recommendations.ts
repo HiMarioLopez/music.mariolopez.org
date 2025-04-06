@@ -9,7 +9,14 @@ import {
   ScanCommandInput,
 } from '@aws-sdk/lib-dynamodb';
 import { PaginationResult } from '../../models/pagination-result';
-import { AlbumRecommendation, ArtistRecommendation, EntityType, Recommendation, SongRecommendation, UserInteractionStatus } from '../../models/recommendation';
+import {
+  AlbumRecommendation,
+  ArtistRecommendation,
+  EntityType,
+  Recommendation,
+  SongRecommendation,
+  UserInteractionStatus,
+} from '../../models/recommendation';
 import { generateUUID } from '../../utils/uuid';
 
 const logger = new Logger({ serviceName: 'dynamodb-recommendations' });
@@ -28,7 +35,7 @@ const MAX_LIMIT = 100;
 
 /**
  * Get all recommendations from DynamoDB sorted by votes (highest first) with pagination
- * 
+ *
  * @param tableName - DynamoDB table name
  * @param limit - Maximum number of items to return
  * @param startKey - Starting key for pagination
@@ -37,7 +44,7 @@ const MAX_LIMIT = 100;
 export async function getAllRecommendations(
   tableName: string,
   limit = DEFAULT_LIMIT,
-  startKey?: string,
+  startKey?: string
 ): Promise<PaginationResult> {
   // Cap the limit at maximum
   const cappedLimit = Math.min(limit, MAX_LIMIT);
@@ -78,9 +85,7 @@ export async function getAllRecommendations(
     });
 
     // Sort items by votes (descending) since DynamoDB Scan doesn't support sorting
-    const sortedItems = items.sort(
-      (a, b) => (b.votes || 0) - (a.votes || 0)
-    );
+    const sortedItems = items.sort((a, b) => (b.votes || 0) - (a.votes || 0));
 
     return {
       items: sortedItems,
@@ -94,7 +99,7 @@ export async function getAllRecommendations(
 
 /**
  * Get recommendations by type from DynamoDB with pagination
- * 
+ *
  * @param tableName - DynamoDB table name
  * @param tableIndexName - DynamoDB table index name
  * @param entityType - Type to filter by (SONG, ALBUM, or ARTIST)
@@ -107,7 +112,7 @@ export async function getRecommendationsByEntityType(
   tableIndexName: string,
   entityType: EntityType,
   limit = DEFAULT_LIMIT,
-  startKey?: string,
+  startKey?: string
 ): Promise<PaginationResult> {
   // Cap the limit at maximum
   const cappedLimit = Math.min(limit, MAX_LIMIT);
@@ -173,7 +178,10 @@ export async function getRecommendationsByEntityType(
  */
 export async function createRecommendation(
   tableName: string,
-  recommendation: Omit<Recommendation, 'createdAt' | 'votes' | 'recommendationId' | 'reviewedByMario'>
+  recommendation: Omit<
+    Recommendation,
+    'createdAt' | 'votes' | 'recommendationId' | 'reviewedByUser'
+  >
 ): Promise<Recommendation> {
   try {
     // Generate current timestamp
@@ -185,8 +193,8 @@ export async function createRecommendation(
     // Generate a UUID for the recommendation
     const recommendationId = generateUUID();
 
-    // Default reviewedByMario to false
-    const reviewedByMario = false;
+    // Default reviewedByUser to false
+    const reviewedByUser = false;
 
     // Log the input recommendation
     logger.info('Creating recommendation from input', {
@@ -199,33 +207,39 @@ export async function createRecommendation(
     // Create the appropriate recommendation type based on the 'type' property
     if (recommendation.entityType === 'SONG') {
       completeRecommendation = {
-        ...(recommendation as Omit<SongRecommendation, 'createdAt' | 'votes' | 'recommendationId' | 'reviewedByMario'>),
+        ...(recommendation as Omit<
+          SongRecommendation,
+          'createdAt' | 'votes' | 'recommendationId' | 'reviewedByUser'
+        >),
         entityType: 'SONG',
         createdAt,
         votes,
         recommendationId,
-        reviewedByMario,
+        reviewedByUser,
       } as SongRecommendation;
     } else if (recommendation.entityType === 'ALBUM') {
       completeRecommendation = {
-        ...(recommendation as Omit<AlbumRecommendation, 'createdAt' | 'votes' | 'recommendationId' | 'reviewedByMario'>),
+        ...(recommendation as Omit<
+          AlbumRecommendation,
+          'createdAt' | 'votes' | 'recommendationId' | 'reviewedByUser'
+        >),
         entityType: 'ALBUM',
         createdAt,
         votes,
         recommendationId,
-        reviewedByMario,
+        reviewedByUser,
       } as AlbumRecommendation;
     } else if (recommendation.entityType === 'ARTIST') {
       completeRecommendation = {
         ...(recommendation as Omit<
           ArtistRecommendation,
-          'createdAt' | 'votes' | 'recommendationId' | 'reviewedByMario'
+          'createdAt' | 'votes' | 'recommendationId' | 'reviewedByUser'
         >),
         entityType: 'ARTIST',
         createdAt,
         votes,
         recommendationId,
-        reviewedByMario,
+        reviewedByUser,
       } as ArtistRecommendation;
     } else {
       throw new Error(
@@ -297,7 +311,7 @@ export async function updateRecommendationVotes(
 
 /**
  * Get a specific recommendation by its identifying attributes
- * 
+ *
  * @param tableName - DynamoDB table name
  * @param entityType - Type of recommendation (SONG, ALBUM, or ARTIST)
  * @param attributes - Identifying attributes based on entity type
@@ -327,18 +341,28 @@ export async function getRecommendation(
     };
 
     if (entityType === 'SONG') {
-      if (!attributes.songTitle || !attributes.artistName || !attributes.albumName) {
-        throw new Error('songTitle, artistName, and albumName are required for SONG recommendations');
+      if (
+        !attributes.songTitle ||
+        !attributes.artistName ||
+        !attributes.albumName
+      ) {
+        throw new Error(
+          'songTitle, artistName, and albumName are required for SONG recommendations'
+        );
       }
-      filterExpression += ' AND songTitle = :songTitle AND artistName = :artistName AND albumName = :albumName';
+      filterExpression +=
+        ' AND songTitle = :songTitle AND artistName = :artistName AND albumName = :albumName';
       expressionAttributeValues[':songTitle'] = attributes.songTitle;
       expressionAttributeValues[':artistName'] = attributes.artistName;
       expressionAttributeValues[':albumName'] = attributes.albumName;
     } else if (entityType === 'ALBUM') {
       if (!attributes.albumTitle || !attributes.artistName) {
-        throw new Error('albumTitle and artistName are required for ALBUM recommendations');
+        throw new Error(
+          'albumTitle and artistName are required for ALBUM recommendations'
+        );
       }
-      filterExpression += ' AND albumTitle = :albumTitle AND artistName = :artistName';
+      filterExpression +=
+        ' AND albumTitle = :albumTitle AND artistName = :artistName';
       expressionAttributeValues[':albumTitle'] = attributes.albumTitle;
       expressionAttributeValues[':artistName'] = attributes.artistName;
     } else if (entityType === 'ARTIST') {
@@ -382,7 +406,7 @@ export async function getRecommendation(
 
 /**
  * Update an existing recommendation in DynamoDB
- * 
+ *
  * @param tableName - DynamoDB table name
  * @param existingRecommendation - The existing recommendation to update
  * @param updates - Updates to apply (new notes)
@@ -393,8 +417,8 @@ export async function updateRecommendation(
   existingRecommendation: Recommendation,
   updates: {
     voteChange?: number;
-    userStatus?: UserInteractionStatus;
-    reviewedByMario?: boolean;
+    userInteractionStatus?: UserInteractionStatus;
+    reviewedByUser?: boolean;
   }
 ): Promise<Recommendation> {
   try {
@@ -402,40 +426,44 @@ export async function updateRecommendation(
       tableName,
       entityType: existingRecommendation.entityType,
       voteChange: updates.voteChange,
-      userStatus: updates.userStatus,
-      reviewedByMario: updates.reviewedByMario,
+      userInteractionStatus: updates.userInteractionStatus,
+      reviewedByUser: updates.reviewedByUser,
     });
 
     // Create the updated recommendation
     const updatedRecommendation: Recommendation = {
-      ...existingRecommendation
+      ...existingRecommendation,
     };
 
     // Update votes if a vote change is provided
     if (updates.voteChange !== undefined) {
       const currentVotes = existingRecommendation.votes || 0;
-      updatedRecommendation.votes = Math.max(0, currentVotes + updates.voteChange);
+      updatedRecommendation.votes = Math.max(
+        0,
+        currentVotes + updates.voteChange
+      );
 
       logger.info('Updating vote count', {
         oldVotes: currentVotes,
         change: updates.voteChange,
-        newVotes: updatedRecommendation.votes
+        newVotes: updatedRecommendation.votes,
       });
     }
 
     // Update user status if provided
-    if (updates.userStatus !== undefined) {
-      updatedRecommendation.userStatus = updates.userStatus;
+    if (updates.userInteractionStatus !== undefined) {
+      updatedRecommendation.userInteractionStatus =
+        updates.userInteractionStatus;
       logger.info('Updating user status', {
-        newStatus: updates.userStatus
+        newStatus: updates.userInteractionStatus,
       });
     }
 
-    // Update reviewedByMario if provided
-    if (updates.reviewedByMario !== undefined) {
-      updatedRecommendation.reviewedByMario = updates.reviewedByMario;
-      logger.info('Updating reviewedByMario', {
-        newValue: updates.reviewedByMario
+    // Update reviewedByUser if provided
+    if (updates.reviewedByUser !== undefined) {
+      updatedRecommendation.reviewedByUser = updates.reviewedByUser;
+      logger.info('Updating reviewedByUser', {
+        newValue: updates.reviewedByUser,
       });
     }
 
@@ -461,7 +489,7 @@ export async function updateRecommendation(
 
 /**
  * Get a recommendation by its ID
- * 
+ *
  * @param tableName - DynamoDB table name
  * @param recommendationId - The unique ID of the recommendation
  * @returns Promise resolving to the recommendation if found, null otherwise
@@ -505,7 +533,7 @@ export async function getRecommendationById(
 
 /**
  * Get recommendations that have been reviewed by Mario
- * 
+ *
  * @param tableName - DynamoDB table name
  * @param limit - Maximum number of items to return
  * @param startKey - Starting key for pagination
@@ -514,7 +542,7 @@ export async function getRecommendationById(
 export async function getReviewedRecommendations(
   tableName: string,
   limit = DEFAULT_LIMIT,
-  startKey?: string,
+  startKey?: string
 ): Promise<PaginationResult> {
   // Cap the limit at maximum
   const cappedLimit = Math.min(limit, MAX_LIMIT);
@@ -522,9 +550,9 @@ export async function getReviewedRecommendations(
   // Create the scan parameters
   const params: ScanCommandInput = {
     TableName: tableName,
-    FilterExpression: 'reviewedByMario = :reviewedByMario',
+    FilterExpression: 'reviewedByUser = :reviewedByUser',
     ExpressionAttributeValues: {
-      ':reviewedByMario': true,
+      ':reviewedByUser': true,
     },
     Limit: cappedLimit,
   };
@@ -570,7 +598,7 @@ export async function getReviewedRecommendations(
 
 /**
  * Get recommendations that have not been reviewed by Mario
- * 
+ *
  * @param tableName - DynamoDB table name
  * @param limit - Maximum number of items to return
  * @param startKey - Starting key for pagination
@@ -579,7 +607,7 @@ export async function getReviewedRecommendations(
 export async function getUnreviewedRecommendations(
   tableName: string,
   limit = DEFAULT_LIMIT,
-  startKey?: string,
+  startKey?: string
 ): Promise<PaginationResult> {
   // Cap the limit at maximum
   const cappedLimit = Math.min(limit, MAX_LIMIT);
@@ -587,9 +615,9 @@ export async function getUnreviewedRecommendations(
   // Create the scan parameters
   const params: ScanCommandInput = {
     TableName: tableName,
-    FilterExpression: 'reviewedByMario = :reviewedByMario',
+    FilterExpression: 'reviewedByUser = :reviewedByUser',
     ExpressionAttributeValues: {
-      ':reviewedByMario': false,
+      ':reviewedByUser': false,
     },
     Limit: cappedLimit,
   };

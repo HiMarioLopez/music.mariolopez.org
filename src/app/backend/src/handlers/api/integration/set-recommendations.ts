@@ -106,8 +106,8 @@ export const handler = async (
       // Prepare updates
       const updates: {
         voteChange?: number;
-        userStatus?: UserInteractionStatus;
-        reviewedByMario?: boolean;
+        userInteractionStatus?: UserInteractionStatus;
+        reviewedByUser?: boolean;
       } = {};
 
       // Handle vote change
@@ -116,25 +116,28 @@ export const handler = async (
       }
 
       // Handle user status
-      if (requestBody.userStatus) {
+      if (requestBody.userInteractionStatus) {
         if (
-          !['LIKED', 'DISLIKED', 'DISMISSED'].includes(requestBody.userStatus)
+          !['LIKED', 'DISLIKED', 'DISMISSED'].includes(
+            requestBody.userInteractionStatus
+          )
         ) {
           return {
             statusCode: 400,
             headers: getCorsHeaders(event.headers?.origin, 'POST,OPTIONS'),
             body: JSON.stringify({
               message:
-                'userStatus must be one of: LIKED, DISLIKED, or DISMISSED',
+                'userInteractionStatus must be one of: LIKED, DISLIKED, or DISMISSED',
             }),
           };
         }
-        updates.userStatus = requestBody.userStatus as UserInteractionStatus;
+        updates.userInteractionStatus =
+          requestBody.userInteractionStatus as UserInteractionStatus;
       }
 
-      // Handle reviewedByMario
-      if (requestBody.reviewedByMario !== undefined) {
-        updates.reviewedByMario = Boolean(requestBody.reviewedByMario);
+      // Handle reviewedByUser
+      if (requestBody.reviewedByUser !== undefined) {
+        updates.reviewedByUser = Boolean(requestBody.reviewedByUser);
       }
 
       // Update the recommendation
@@ -266,8 +269,8 @@ export const handler = async (
       // Prepare updates
       const updates: {
         voteChange?: number;
-        userStatus?: UserInteractionStatus;
-        reviewedByMario?: boolean;
+        userInteractionStatus?: UserInteractionStatus;
+        reviewedByUser?: boolean;
       } = {};
 
       // Handle vote change
@@ -277,25 +280,28 @@ export const handler = async (
       }
 
       // Handle user status if provided
-      if (requestBody.userStatus) {
+      if (requestBody.userInteractionStatus) {
         if (
-          !['LIKED', 'DISLIKED', 'DISMISSED'].includes(requestBody.userStatus)
+          !['LIKED', 'DISLIKED', 'DISMISSED'].includes(
+            requestBody.userInteractionStatus
+          )
         ) {
           return {
             statusCode: 400,
             headers: getCorsHeaders(event.headers?.origin, 'POST,OPTIONS'),
             body: JSON.stringify({
               message:
-                'userStatus must be one of: LIKED, DISLIKED, or DISMISSED',
+                'userInteractionStatus must be one of: LIKED, DISLIKED, or DISMISSED',
             }),
           };
         }
-        updates.userStatus = requestBody.userStatus as UserInteractionStatus;
+        updates.userInteractionStatus =
+          requestBody.userInteractionStatus as UserInteractionStatus;
       }
 
-      // Handle reviewedByMario if provided
-      if (requestBody.reviewedByMario !== undefined) {
-        updates.reviewedByMario = Boolean(requestBody.reviewedByMario);
+      // Handle reviewedByUser if provided
+      if (requestBody.reviewedByUser !== undefined) {
+        updates.reviewedByUser = Boolean(requestBody.reviewedByUser);
       }
 
       // Update the recommendation
@@ -319,7 +325,7 @@ export const handler = async (
       // Map the request body to the corresponding recommendation type
       let newRecommendation: Omit<
         Recommendation,
-        'createdAt' | 'votes' | 'recommendationId' | 'reviewedByMario'
+        'createdAt' | 'votes' | 'recommendationId' | 'reviewedByUser'
       >;
 
       if (requestBody.entityType === 'SONG') {
@@ -331,7 +337,7 @@ export const handler = async (
           albumCoverUrl: requestBody.albumCoverUrl || '',
         } as Omit<
           SongRecommendation,
-          'createdAt' | 'votes' | 'recommendationId' | 'reviewedByMario'
+          'createdAt' | 'votes' | 'recommendationId' | 'reviewedByUser'
         >;
       } else if (requestBody.entityType === 'ALBUM') {
         newRecommendation = {
@@ -343,7 +349,7 @@ export const handler = async (
           releaseDate: requestBody.releaseDate,
         } as Omit<
           AlbumRecommendation,
-          'createdAt' | 'votes' | 'recommendationId' | 'reviewedByMario'
+          'createdAt' | 'votes' | 'recommendationId' | 'reviewedByUser'
         >;
       } else {
         newRecommendation = {
@@ -353,7 +359,7 @@ export const handler = async (
           genres: requestBody.genres,
         } as Omit<
           ArtistRecommendation,
-          'createdAt' | 'votes' | 'recommendationId' | 'reviewedByMario'
+          'createdAt' | 'votes' | 'recommendationId' | 'reviewedByUser'
         >;
       }
 
