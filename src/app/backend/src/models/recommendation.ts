@@ -31,10 +31,7 @@ export interface ArtistRecommendation extends BaseRecommendation {
   genres?: string[];
 }
 
-export type EntityType =
-  | 'SONG'
-  | 'ALBUM'
-  | 'ARTIST';
+export type EntityType = 'SONG' | 'ALBUM' | 'ARTIST';
 
 export type UserInteractionStatus =
   | 'LIKED' // Mario explicitly liked it

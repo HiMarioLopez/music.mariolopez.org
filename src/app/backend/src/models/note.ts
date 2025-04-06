@@ -14,4 +14,8 @@ export interface RecommendationNote {
   };
 }
 
-export type ModerationStatus = 'APPROVED' | 'PENDING_REVIEW' | 'REJECTED';
+export type ModerationStatus =
+  | 'APPROVED'
+  | 'PENDING_REVIEW'
+  | 'REJECTED'
+  | 'FLAGGED';

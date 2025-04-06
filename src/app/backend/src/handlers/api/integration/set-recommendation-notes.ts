@@ -17,6 +17,7 @@ import {
   UpdateCommand,
 } from '@aws-sdk/lib-dynamodb';
 import { generateUUID } from '../../../utils/uuid';
+import { checkModeration } from '../../../services/openai/moderation';
 
 const logger = new Logger({ serviceName: 'set-recommendation-notes' });
 const tracer = new Tracer({ serviceName: 'set-recommendation-notes' });
@@ -131,6 +132,37 @@ export const handler = async (
       // Handle note content update
       if (requestBody.note) {
         updates.note = requestBody.note;
+
+        // Check content moderation for updated note
+        logger.info('Checking content moderation for updated note', {
+          recommendationId: requestBody.recommendationId,
+          noteId: requestBody.noteId,
+        });
+
+        const moderationResult = await checkModeration(requestBody.note);
+
+        if (moderationResult.flagged) {
+          // If content is flagged, update moderation status and details
+          updates.moderationStatus = 'PENDING_REVIEW';
+          updates.moderationDetails = {
+            ...existingNote.moderationDetails,
+            flaggedCategories: moderationResult.flags,
+            flaggedTimestamp: new Date().toISOString(),
+          };
+
+          logger.info('Updated content flagged by moderation', {
+            recommendationId: requestBody.recommendationId,
+            noteId: requestBody.noteId,
+            flags: moderationResult.flags,
+          });
+        } else if (!requestBody.moderationStatus) {
+          // If not flagged and no explicit moderation status provided, auto-approve
+          updates.moderationStatus = 'APPROVED';
+          logger.info('Updated content passed moderation check', {
+            recommendationId: requestBody.recommendationId,
+            noteId: requestBody.noteId,
+          });
+        }
       }
 
       // Handle moderation status update
@@ -194,6 +226,39 @@ export const handler = async (
     // Generate a new note ID
     const noteId = generateUUID();
 
+    // Check content moderation
+    logger.info('Checking content moderation', {
+      recommendationId: requestBody.recommendationId,
+      noteId,
+    });
+
+    const moderationResult = await checkModeration(requestBody.note);
+
+    // Determine moderation status based on the check result
+    let moderationStatus: ModerationStatus = 'PENDING_REVIEW';
+    let moderationDetails: RecommendationNote['moderationDetails'] = {};
+
+    if (moderationResult.flagged) {
+      moderationStatus = 'PENDING_REVIEW';
+      moderationDetails = {
+        flaggedCategories: moderationResult.flags,
+        flaggedTimestamp: new Date().toISOString(),
+      };
+
+      logger.info('Content flagged by moderation', {
+        recommendationId: requestBody.recommendationId,
+        noteId,
+        flags: moderationResult.flags,
+      });
+    } else {
+      // If not flagged, we can auto-approve if that's the desired behavior
+      moderationStatus = 'APPROVED';
+      logger.info('Content passed moderation check', {
+        recommendationId: requestBody.recommendationId,
+        noteId,
+      });
+    }
+
     // Create the note object
     const newNote: RecommendationNote = {
       recommendationId: requestBody.recommendationId,
@@ -202,8 +267,8 @@ export const handler = async (
       note: requestBody.note,
       isFromMario: requestBody.isFromMario || false,
       noteTimestamp: new Date().toISOString(),
-      moderationStatus: requestBody.moderationStatus || 'PENDING_REVIEW',
-      moderationDetails: requestBody.moderationDetails || {},
+      moderationStatus: requestBody.moderationStatus || moderationStatus,
+      moderationDetails: requestBody.moderationDetails || moderationDetails,
     };
 
     // Store in DynamoDB
