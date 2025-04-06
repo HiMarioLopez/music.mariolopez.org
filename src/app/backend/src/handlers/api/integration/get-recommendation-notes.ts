@@ -63,10 +63,10 @@ export const handler = async (
     }
 
     const userNotesIndexNameParameter =
-      process.env.DYNAMODB_NOTES_MARIO_INDEX_NAME_PARAMETER;
+      process.env.DYNAMODB_NOTES_USER_INDEX_NAME_PARAMETER;
     if (!userNotesIndexNameParameter) {
       throw new Error(
-        'Missing required environment variable: DYNAMODB_NOTES_MARIO_INDEX_NAME_PARAMETER'
+        'Missing required environment variable: DYNAMODB_NOTES_USER_INDEX_NAME_PARAMETER'
       );
     }
 
