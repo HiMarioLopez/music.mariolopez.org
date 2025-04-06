@@ -1,5 +1,4 @@
 import { useState, useRef, useEffect } from "react";
-import { simulateNetworkDelay } from "../../../utils/network";
 
 type RecommendationType = "songs" | "albums" | "artists";
 
@@ -68,6 +67,5 @@ export const useRecommendationSelector = (
     selectorContainerRef,
     labelRefs,
     handleTypeChange,
-    simulateNetworkDelay,
   };
 };

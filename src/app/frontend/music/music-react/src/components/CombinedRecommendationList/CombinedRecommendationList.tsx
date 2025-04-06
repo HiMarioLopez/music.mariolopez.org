@@ -10,7 +10,6 @@ import SkeletonLoader from "./components/SkeletonLoader";
 import SongRecommendationList from "./components/SongRecommendationList";
 import "./styles/index.css";
 import { useRecommendationSelector } from "./hooks/useRecommendationSelector";
-import { simulateNetworkDelay } from "../../utils/network";
 
 const CombinedRecommendationList: React.FC = () => {
   const {
@@ -45,7 +44,6 @@ const CombinedRecommendationList: React.FC = () => {
   >({});
 
   const [announcement, setAnnouncement] = useState("");
-  const [artificialLoading, setArtificialLoading] = useState(false);
 
   useEffect(() => {
     const type =
@@ -58,10 +56,7 @@ const CombinedRecommendationList: React.FC = () => {
     // Only run this effect when the selected type changes or loading state changes
     if (!state[type].loaded && !state[type].loading) {
       const loadRecommendations = async () => {
-        setArtificialLoading(true);
-        await simulateNetworkDelay(500);
         fetchRecommendations(type);
-        setArtificialLoading(false);
       };
 
       loadRecommendations();
@@ -293,7 +288,7 @@ const CombinedRecommendationList: React.FC = () => {
         : selectedType === "albums"
           ? "albums"
           : "artists"
-    ].loading || artificialLoading;
+    ].loading;
 
   // Get loading and error states from context
   const error =
