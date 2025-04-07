@@ -1,7 +1,11 @@
 import { Logger } from '@aws-lambda-powertools/logger';
 import { Metrics, MetricUnit } from '@aws-lambda-powertools/metrics';
 import { Tracer } from '@aws-lambda-powertools/tracer';
-import { APIGatewayProxyEvent, APIGatewayProxyResult, Context } from 'aws-lambda';
+import {
+  APIGatewayProxyEvent,
+  APIGatewayProxyResult,
+  Context,
+} from 'aws-lambda';
 import { generateDeveloperToken } from '../../../services/developer-token';
 import { getCorsHeaders } from '../../../utils/cors';
 
@@ -36,7 +40,7 @@ export const handler = async (
     const env: Environment = {
       APPLE_AUTH_KEY_SECRET_NAME: process.env.APPLE_AUTH_KEY_SECRET_NAME ?? '',
       APPLE_TEAM_ID: process.env.APPLE_TEAM_ID ?? '',
-      APPLE_KEY_ID: process.env.APPLE_KEY_ID ?? ''
+      APPLE_KEY_ID: process.env.APPLE_KEY_ID ?? '',
     };
 
     // Validate environment variables
@@ -45,7 +49,9 @@ export const handler = async (
       .map(([key]) => key);
 
     if (missingVars.length > 0) {
-      throw new Error(`Missing required environment variables: ${missingVars.join(', ')}`);
+      throw new Error(
+        `Missing required environment variables: ${missingVars.join(', ')}`
+      );
     }
 
     const token = await generateDeveloperToken(env);
@@ -56,7 +62,7 @@ export const handler = async (
     return {
       statusCode: 200,
       headers: getCorsHeaders(event.headers.origin, 'GET'),
-      body: JSON.stringify({ token })
+      body: JSON.stringify({ token }),
     };
   } catch (error) {
     logger.error('Error generating developer token', { error });
@@ -67,8 +73,8 @@ export const handler = async (
       headers: getCorsHeaders(event.headers.origin, 'GET'),
       body: JSON.stringify({
         error: 'Error processing your request',
-        message: error instanceof Error ? error.message : 'Unknown error'
-      })
+        message: error instanceof Error ? error.message : 'Unknown error',
+      }),
     };
   }
 };

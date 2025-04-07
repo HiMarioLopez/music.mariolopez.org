@@ -1,9 +1,24 @@
 import { Logger } from '@aws-lambda-powertools/logger';
 import { Metrics, MetricUnit } from '@aws-lambda-powertools/metrics';
 import { Tracer } from '@aws-lambda-powertools/tracer';
-import { APIGatewayProxyEvent, APIGatewayProxyResult, Context } from 'aws-lambda';
-import { fetchFromApi, getMusicUserToken, isTokenExpirationError } from '../../../services/apple-music/api';
-import { createCacheKey, getFromMemory, getFromRedis, incrementCounter, setInMemory, setInRedis } from '../../../services/cache';
+import {
+  APIGatewayProxyEvent,
+  APIGatewayProxyResult,
+  Context,
+} from 'aws-lambda';
+import {
+  fetchFromApi,
+  getMusicUserToken,
+  isTokenExpirationError,
+} from '../../../services/apple-music/api';
+import {
+  createCacheKey,
+  getFromMemory,
+  getFromRedis,
+  incrementCounter,
+  setInMemory,
+  setInRedis,
+} from '../../../services/cache';
 import { sendTokenRefreshNotification } from '../../../services/notification';
 import { getCorsHeaders } from '../../../utils/cors';
 
@@ -39,7 +54,10 @@ export const handler = async (
     const rateLimitKey = `ratelimit:${clientIp}`;
 
     // Check if this IP is making too many requests
-    const requestCount = await incrementCounter(rateLimitKey, RATE_LIMIT_WINDOW);
+    const requestCount = await incrementCounter(
+      rateLimitKey,
+      RATE_LIMIT_WINDOW
+    );
     if (requestCount > RATE_LIMIT_THRESHOLD) {
       logger.warn('Rate limit exceeded', { clientIp, requestCount });
       metrics.addMetric('RateLimitExceeded', MetricUnit.Count, 1);
@@ -48,12 +66,12 @@ export const handler = async (
         statusCode: 429,
         headers: {
           ...getCorsHeaders(event.headers.origin, 'GET'),
-          'Retry-After': RATE_LIMIT_WINDOW.toString()
+          'Retry-After': RATE_LIMIT_WINDOW.toString(),
         },
         body: JSON.stringify({
           error: 'Too Many Requests',
-          message: 'Please try again later'
-        })
+          message: 'Please try again later',
+        }),
       };
     }
 
@@ -61,11 +79,12 @@ export const handler = async (
     const requestKey = createCacheKey(event, {
       stripPrefix: '/api',
       includeMethod: true,
-      includeQuery: true
+      includeQuery: true,
     });
 
     // Check authorization
-    const developerToken = event.headers['Authorization']?.replace('Bearer ', '') ||
+    const developerToken =
+      event.headers['Authorization']?.replace('Bearer ', '') ||
       event.headers['authorization']?.replace('Bearer ', '');
 
     if (!developerToken) {
@@ -77,8 +96,8 @@ export const handler = async (
         headers: getCorsHeaders(event.headers.origin, 'GET'),
         body: JSON.stringify({
           error: 'Unauthorized',
-          message: 'Developer token is required'
-        })
+          message: 'Developer token is required',
+        }),
       };
     }
 
@@ -96,8 +115,8 @@ export const handler = async (
         },
         body: JSON.stringify({
           data: cachedData.data,
-          source: 'memory-cache'
-        })
+          source: 'memory-cache',
+        }),
       };
     }
 
@@ -118,8 +137,8 @@ export const handler = async (
         },
         body: JSON.stringify({
           data: redisData,
-          source: 'redis-cache'
-        })
+          source: 'redis-cache',
+        }),
       };
     }
 
@@ -131,12 +150,13 @@ export const handler = async (
     const musicUserToken = await getMusicUserToken();
 
     // Process query parameters
-    const queryParams = event.queryStringParameters ?
-      Object.fromEntries(
-        Object.entries(event.queryStringParameters)
-          .filter(([_, v]) => v !== undefined)
-          .map(([k, v]) => [k, v as string])
-      ) : null;
+    const queryParams = event.queryStringParameters
+      ? Object.fromEntries(
+          Object.entries(event.queryStringParameters)
+            .filter(([_, v]) => v !== undefined)
+            .map(([k, v]) => [k, v as string])
+        )
+      : null;
 
     // Fetch data from Apple Music API
     const apiData = await fetchFromApi(
@@ -160,8 +180,8 @@ export const handler = async (
       },
       body: JSON.stringify({
         data: apiData,
-        source: 'api'
-      })
+        source: 'api',
+      }),
     };
   } catch (error: any) {
     logger.error('Error processing request', { error });
@@ -178,9 +198,10 @@ export const handler = async (
         statusCode: 401,
         headers: getCorsHeaders(event.headers.origin, 'GET'),
         body: JSON.stringify({
-          error: 'One or more authentication tokens have expired. An admin has been notified to refresh them.',
-          message: 'Please try again in a few minutes.'
-        })
+          error:
+            'One or more authentication tokens have expired. An admin has been notified to refresh them.',
+          message: 'Please try again in a few minutes.',
+        }),
       };
     }
 
@@ -189,8 +210,8 @@ export const handler = async (
       headers: getCorsHeaders(event.headers.origin, 'GET'),
       body: JSON.stringify({
         error: 'Internal server error',
-        message: error.message || 'An unexpected error occurred'
-      })
+        message: error.message || 'An unexpected error occurred',
+      }),
     };
   }
 };

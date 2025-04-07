@@ -3,18 +3,18 @@
  */
 
 // MusicBrainz entity types
-export type MusicBrainzEntity = 
-  | 'artist' 
-  | 'release' 
-  | 'release-group' 
-  | 'recording' 
-  | 'work' 
-  | 'label' 
-  | 'area' 
-  | 'place' 
-  | 'event' 
-  | 'url' 
-  | 'tag' 
+export type MusicBrainzEntity =
+  | 'artist'
+  | 'release'
+  | 'release-group'
+  | 'recording'
+  | 'work'
+  | 'label'
+  | 'area'
+  | 'place'
+  | 'event'
+  | 'url'
+  | 'tag'
   | 'genre';
 
 // Search options interface

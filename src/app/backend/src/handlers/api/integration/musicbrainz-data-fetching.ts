@@ -1,10 +1,24 @@
 import { Logger } from '@aws-lambda-powertools/logger';
 import { Metrics, MetricUnit } from '@aws-lambda-powertools/metrics';
 import { Tracer } from '@aws-lambda-powertools/tracer';
-import { APIGatewayProxyEvent, APIGatewayProxyResult, Context } from 'aws-lambda';
-import { createCacheKey, getFromMemory, getFromRedis, incrementCounter, setInMemory, setInRedis } from '../../../services/cache';
+import {
+  APIGatewayProxyEvent,
+  APIGatewayProxyResult,
+  Context,
+} from 'aws-lambda';
+import {
+  createCacheKey,
+  getFromMemory,
+  getFromRedis,
+  incrementCounter,
+  setInMemory,
+  setInRedis,
+} from '../../../services/cache';
 import { browse, callApi, lookup, search } from '../../../services/musicbrainz';
-import { MusicBrainzEntityOptions, SearchOptions } from '../../../services/musicbrainz/types';
+import {
+  MusicBrainzEntityOptions,
+  SearchOptions,
+} from '../../../services/musicbrainz/types';
 import { getCorsHeaders } from '../../../utils/cors';
 
 const logger = new Logger({ serviceName: 'musicbrainz-data-fetching' });
@@ -18,9 +32,15 @@ const RATE_LIMIT_WINDOW = 60; // 60 seconds window
 /**
  * Parse API Gateway path to MusicBrainz entity options
  */
-const parsePath = (path: string, queryParams: Record<string, string> = {}): MusicBrainzEntityOptions => {
+const parsePath = (
+  path: string,
+  queryParams: Record<string, string> = {}
+): MusicBrainzEntityOptions => {
   // Clean the path
-  const cleanPath = path.replace(/^\/(?:api\/)?(?:nodejs\/)?(?:musicbrainz\/)?/, '');
+  const cleanPath = path.replace(
+    /^\/(?:api\/)?(?:nodejs\/)?(?:musicbrainz\/)?/,
+    ''
+  );
   const pathParts = cleanPath.split('/').filter(Boolean);
 
   if (pathParts.length === 0) {
@@ -28,12 +48,16 @@ const parsePath = (path: string, queryParams: Record<string, string> = {}): Musi
   }
 
   const options: MusicBrainzEntityOptions = {
-    entity: pathParts[0] as any
+    entity: pathParts[0] as any,
   };
 
   if (pathParts.length >= 2) {
     // If it's a lookup request (entity/mbid)
-    if (pathParts[1].match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)) {
+    if (
+      pathParts[1].match(
+        /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+      )
+    ) {
       options.mbid = pathParts[1];
 
       // Handle includes
@@ -52,7 +76,7 @@ const parsePath = (path: string, queryParams: Record<string, string> = {}): Musi
 
     // Handle additional search parameters
     options.searchOptions = {
-      query: queryParams.query
+      query: queryParams.query,
     } as SearchOptions;
 
     // Add limit and offset
@@ -77,7 +101,17 @@ const parsePath = (path: string, queryParams: Record<string, string> = {}): Musi
     // Add any query filters that use Lucene syntax (field:value)
     // For example: type:group, country:US, etc.
     Object.entries(queryParams).forEach(([key, value]) => {
-      if (!['query', 'limit', 'offset', 'dismax', 'version', 'fmt', 'inc'].includes(key)) {
+      if (
+        ![
+          'query',
+          'limit',
+          'offset',
+          'dismax',
+          'version',
+          'fmt',
+          'inc',
+        ].includes(key)
+      ) {
         if (options.searchOptions) {
           options.searchOptions[key] = value;
         }
@@ -98,9 +132,19 @@ const parsePath = (path: string, queryParams: Record<string, string> = {}): Musi
   options.params = {
     ...options.params,
     ...Object.fromEntries(
-      Object.entries(queryParams).filter(([key]) =>
-        !['query', 'limit', 'offset', 'inc', 'fmt', 'dismax', 'version'].includes(key))
-    )
+      Object.entries(queryParams).filter(
+        ([key]) =>
+          ![
+            'query',
+            'limit',
+            'offset',
+            'inc',
+            'fmt',
+            'dismax',
+            'version',
+          ].includes(key)
+      )
+    ),
   };
 
   return options;
@@ -130,7 +174,7 @@ export const handler = async (
       return {
         statusCode: 200,
         headers: getCorsHeaders(event.headers.origin, 'GET,OPTIONS'),
-        body: ''
+        body: '',
       };
     }
 
@@ -139,7 +183,10 @@ export const handler = async (
     const rateLimitKey = `ratelimit:mb:${clientIp}`;
 
     // Check if this IP is making too many requests
-    const requestCount = await incrementCounter(rateLimitKey, RATE_LIMIT_WINDOW);
+    const requestCount = await incrementCounter(
+      rateLimitKey,
+      RATE_LIMIT_WINDOW
+    );
     if (requestCount > RATE_LIMIT_THRESHOLD) {
       logger.warn('Rate limit exceeded', { clientIp, requestCount });
       metrics.addMetric('RateLimitExceeded', MetricUnit.Count, 1);
@@ -148,12 +195,12 @@ export const handler = async (
         statusCode: 429,
         headers: {
           ...getCorsHeaders(event.headers.origin, 'GET,OPTIONS'),
-          'Retry-After': RATE_LIMIT_WINDOW.toString()
+          'Retry-After': RATE_LIMIT_WINDOW.toString(),
         },
         body: JSON.stringify({
           error: 'Too Many Requests',
-          message: 'Please try again later'
-        })
+          message: 'Please try again later',
+        }),
       };
     }
 
@@ -161,7 +208,7 @@ export const handler = async (
     const requestKey = createCacheKey(event, {
       stripPrefix: '/api',
       includeMethod: true,
-      includeQuery: true
+      includeQuery: true,
     });
 
     // Check in-memory (L1) cache
@@ -178,8 +225,8 @@ export const handler = async (
         },
         body: JSON.stringify({
           data: cachedData.data,
-          source: 'memory-cache'
-        })
+          source: 'memory-cache',
+        }),
       };
     }
 
@@ -200,8 +247,8 @@ export const handler = async (
         },
         body: JSON.stringify({
           data: redisData,
-          source: 'redis-cache'
-        })
+          source: 'redis-cache',
+        }),
       };
     }
 
@@ -246,10 +293,7 @@ export const handler = async (
       metrics.addMetric('BrowseRequest', MetricUnit.Count, 1);
     } else {
       // Direct API call
-      response = await callApi(
-        options.entity,
-        options.params || {}
-      );
+      response = await callApi(options.entity, options.params || {});
       metrics.addMetric('DirectApiCall', MetricUnit.Count, 1);
     }
 
@@ -265,14 +309,14 @@ export const handler = async (
       },
       body: JSON.stringify({
         data: response,
-        source: 'api'
-      })
+        source: 'api',
+      }),
     };
   } catch (error: any) {
     logger.error('Error processing MusicBrainz request', {
       error: error.message,
       status: error.status || error.response?.status,
-      stack: error.stack
+      stack: error.stack,
     });
     metrics.addMetric('ErrorCount', MetricUnit.Count, 1);
 
@@ -282,8 +326,8 @@ export const handler = async (
       body: JSON.stringify({
         error: error.status ? 'MusicBrainz API Error' : 'Internal server error',
         message: error.message,
-        code: error.status || error.response?.status
-      })
+        code: error.status || error.response?.status,
+      }),
     };
   }
 };
