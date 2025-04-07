@@ -1,0 +1,25 @@
+meta {
+  name: Store MUT (Raw)
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{ADMIN_API_GATEWAY_URL}}/prod/nodejs/mut/store
+  body: json
+  auth: bearer
+}
+
+headers {
+  Content-Type: application/json
+}
+
+auth:bearer {
+  token: {{COGNITO_AUTH_TOKEN}}
+}
+
+body:json {
+  {
+    "musicUserToken": "As3OkncP+PDMkxp6E8aQRXVTZCPpYiPBUHgZHqDV0iy68bUZAifDMqJjexgJYA69I4LSljvl5hxdUKE+areiw9nn0hgB66UNFsQs3+K9kKsORMQo3+aItNvXWuJzni7eyT/STzYaS3WjI1fY5bGFThNC5Dw0tSfJksJ68b7UW44mc7oALMvwZYsFr696TkTdhScNxzd0OFsXYnb9baAxsjBbFMn90AoRK7TGC1QQyBCaC5wUjQ=="
+  }
+}

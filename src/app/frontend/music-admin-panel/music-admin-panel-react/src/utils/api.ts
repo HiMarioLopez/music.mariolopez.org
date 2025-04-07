@@ -30,7 +30,7 @@ async function apiRequest<T>({
   baseUrl,
   requiresAuth = true,
 }: ApiOptions): Promise<T> {
-  const url = `${baseUrl || import.meta.env.VITE_ADMIN_API_BASE_URL}/api/nodejs/${path}`;
+  const url = `${baseUrl || import.meta.env.VITE_ADMIN_API_BASE_URL}/api/nodejs/v1/${path}`;
   console.log("Making request to:", url);
 
   const headers: Record<string, string> = {};
@@ -77,7 +77,7 @@ async function apiRequest<T>({
 export async function updateMusicUserToken(musicUserToken: string) {
   return apiRequest({
     method: "POST",
-    path: "mut/update",
+    path: "mut",
     body: { musicUserToken },
   });
 }
@@ -100,7 +100,7 @@ export async function fetchDeveloperToken() {
 export async function updateScheduleRate(rate: string) {
   return apiRequest({
     method: "POST",
-    path: "schedule/update",
+    path: "schedule",
     body: { rate },
   });
 }
@@ -108,14 +108,14 @@ export async function updateScheduleRate(rate: string) {
 export async function getScheduleRate() {
   return apiRequest<{ rate: string }>({
     method: "GET",
-    path: "schedule/get",
+    path: "schedule",
   });
 }
 
 export async function updateSongLimit(songLimit: number) {
   return apiRequest({
     method: "POST",
-    path: "song-limit/update",
+    path: "song-limit",
     body: { songLimit },
   });
 }
@@ -123,6 +123,6 @@ export async function updateSongLimit(songLimit: number) {
 export async function getSongLimit() {
   return apiRequest<{ songLimit: number }>({
     method: "GET",
-    path: "song-limit/get",
+    path: "song-limit",
   });
 }

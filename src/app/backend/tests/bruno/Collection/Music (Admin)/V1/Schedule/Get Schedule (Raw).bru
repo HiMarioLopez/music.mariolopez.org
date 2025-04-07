@@ -1,0 +1,15 @@
+meta {
+  name: Get Schedule (Raw)
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{ADMIN_API_GATEWAY_URL}}/prod/nodejs/v1/schedule
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{COGNITO_AUTH_TOKEN}}
+}

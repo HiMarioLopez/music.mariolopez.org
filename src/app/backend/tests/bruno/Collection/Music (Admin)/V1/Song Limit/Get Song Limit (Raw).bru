@@ -1,0 +1,15 @@
+meta {
+  name: Get Song Limit (Raw)
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{ADMIN_API_GATEWAY_URL}}/prod/nodejs/v1/song-limit
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{COGNITO_AUTH_TOKEN}}
+}

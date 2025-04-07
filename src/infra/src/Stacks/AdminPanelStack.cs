@@ -84,7 +84,7 @@ public class AdminPanelStack : Stack
         });
 
         // Create the Cognito authorizer
-        var authorizer = new CognitoUserPoolsAuthorizer(this, "AdminAuthorizer", new CognitoUserPoolsAuthorizerProps
+        var authorizer = new CognitoUserPoolsAuthorizer(this, "Music-AdminAuthorizer", new CognitoUserPoolsAuthorizerProps
         {
             CognitoUserPools = [userPool]
         });
@@ -108,79 +108,79 @@ public class AdminPanelStack : Stack
         #region Set MUT Lambda
 
         // Create Lambda function to update MUT
-        var updateMutFunctionConstruct = new NodejsLambdaFunction(this, "Music-UpdateMutFunction", new NodejsLambdaFunctionProps
+        var setMutV1FunctionConstruct = new NodejsLambdaFunction(this, "Music-SetMutFunctionV1", new NodejsLambdaFunctionProps
         {
-            Handler = "update-mut.handler",
-            Code = Code.FromAsset("../app/backend/dist/handlers/api/admin"),
+            Handler = "set-mut.handler",
+            Code = Code.FromAsset("../app/backend/dist/handlers/api/v1/admin"),
             Environment = new Dictionary<string, string>
             {
                 ["AWS_NODEJS_CONNECTION_REUSE_ENABLED"] = "1",
                 ["PARAMETER_NAME"] = mutParameter.ParameterName
             },
-            Description = "Lambda function to update Music User Token",
-            Role = new Role(this, "Music-UpdateMutFunctionRole", new RoleProps
+            Description = "Lambda function to update Music User Token (Version 1)",
+            Role = new Role(this, "Music-SetMutFunctionV1Role", new RoleProps
             {
                 AssumedBy = new ServicePrincipal("lambda.amazonaws.com")
             })
         });
-        var updateMutFunction = updateMutFunctionConstruct.Function;
+        var setMutV1Function = setMutV1FunctionConstruct.Function;
 
         // Grant Lambda permission to write to Parameter Store
-        mutParameter.GrantWrite(updateMutFunction);
+        mutParameter.GrantWrite(setMutV1Function);
 
         #endregion
 
         #region Get MUT Lambda
 
         // Create Lambda function to read MUT
-        var getMutFunctionConstruct = new NodejsLambdaFunction(this, "Music-GetMutFunction", new NodejsLambdaFunctionProps
+        var getMutV1FunctionConstruct = new NodejsLambdaFunction(this, "Music-GetMutFunction", new NodejsLambdaFunctionProps
         {
             Handler = "get-mut.handler",
-            Code = Code.FromAsset("../app/backend/dist/handlers/api/admin"),
+            Code = Code.FromAsset("../app/backend/dist/handlers/api/v1/admin"),
             Environment = new Dictionary<string, string>
             {
                 ["AWS_NODEJS_CONNECTION_REUSE_ENABLED"] = "1",
                 ["PARAMETER_NAME"] = mutParameter.ParameterName
             },
-            Description = "Lambda function to retrieve Music User Token from Parameter Store",
-            Role = new Role(this, "Music-GetMutFunctionRole", new RoleProps
+            Description = "Lambda function to retrieve Music User Token from Parameter Store (Version 1)",
+            Role = new Role(this, "Music-GetMutFunctionV1Role", new RoleProps
             {
                 AssumedBy = new ServicePrincipal("lambda.amazonaws.com")
             })
         });
-        var getMutFunction = getMutFunctionConstruct.Function;
+        var getMutV1Function = getMutV1FunctionConstruct.Function;
 
         // Grant Lambda permission to read from Parameter Store
-        mutParameter.GrantRead(getMutFunction);
+        mutParameter.GrantRead(getMutV1Function);
 
         #endregion
 
         #region Set Schedule Rate Lambda
 
         // Create Lambda function to update schedule rate
-        var updateScheduleRateFunctionConstruct = new NodejsLambdaFunction(this, "Music-UpdateScheduleRateFunction", new NodejsLambdaFunctionProps
+        var setScheduleRateV1FunctionConstruct = new NodejsLambdaFunction(this, "Music-SetScheduleRateFunction", new NodejsLambdaFunctionProps
         {
-            Handler = "update-schedule-rate.handler",
-            Code = Code.FromAsset("../app/backend/dist/handlers/api/admin"),
+            Handler = "set-schedule-rate.handler",
+            Code = Code.FromAsset("../app/backend/dist/handlers/api/v1/admin"),
             Environment = new Dictionary<string, string>
             {
                 ["AWS_NODEJS_CONNECTION_REUSE_ENABLED"] = "1",
                 ["PARAMETER_NAME"] = "/Music/AppleMusicHistory/ScheduleRate"
             },
-            Description = "Lambda function to update the Apple Music history job schedule rate",
-            Role = new Role(this, "Music-UpdateScheduleRateFunctionRole", new RoleProps
+            Description = "Lambda function to update the Apple Music history job schedule rate (Version 1)",
+            Role = new Role(this, "Music-SetScheduleRateFunctionV1Role", new RoleProps
             {
                 AssumedBy = new ServicePrincipal("lambda.amazonaws.com")
             })
         });
-        var updateScheduleRateFunction = updateScheduleRateFunctionConstruct.Function;
+        var setScheduleRateV1Function = setScheduleRateV1FunctionConstruct.Function;
 
         #endregion
 
         #region Get Schedule Rate Lambda
 
         // Grant Lambda permission to write to Parameter Store
-        updateScheduleRateFunction.AddToRolePolicy(new PolicyStatement(new PolicyStatementProps
+        setScheduleRateV1Function.AddToRolePolicy(new PolicyStatement(new PolicyStatementProps
         {
             Effect = Effect.ALLOW,
             Actions = ["ssm:PutParameter"],
@@ -188,25 +188,25 @@ public class AdminPanelStack : Stack
         }));
 
         // Create Lambda function to get schedule rate
-        var getScheduleRateFunctionConstruct = new NodejsLambdaFunction(this, "Music-GetScheduleRateFunction", new NodejsLambdaFunctionProps
+        var getScheduleRateV1FunctionConstruct = new NodejsLambdaFunction(this, "Music-GetScheduleRateFunction_V1", new NodejsLambdaFunctionProps
         {
             Handler = "get-schedule-rate.handler",
-            Code = Code.FromAsset("../app/backend/dist/handlers/api/admin"),
+            Code = Code.FromAsset("../app/backend/dist/handlers/api/v1/admin"),
             Environment = new Dictionary<string, string>
             {
                 ["AWS_NODEJS_CONNECTION_REUSE_ENABLED"] = "1",
                 ["PARAMETER_NAME"] = "/Music/AppleMusicHistory/ScheduleRate"
             },
-            Description = "Lambda function to get the Apple Music history job schedule rate",
-            Role = new Role(this, "Music-GetScheduleRateFunctionRole", new RoleProps
+            Description = "Lambda function to get the Apple Music history job schedule rate (Version 1)",
+            Role = new Role(this, "GetScheduleRateFunctionV1Role", new RoleProps
             {
                 AssumedBy = new ServicePrincipal("lambda.amazonaws.com")
             })
         });
-        var getScheduleRateFunction = getScheduleRateFunctionConstruct.Function;
+        var getScheduleRateV1Function = getScheduleRateV1FunctionConstruct.Function;
 
         // Grant Lambda permission to read from Parameter Store
-        getScheduleRateFunction.AddToRolePolicy(new PolicyStatement(new PolicyStatementProps
+        getScheduleRateV1Function.AddToRolePolicy(new PolicyStatement(new PolicyStatementProps
         {
             Effect = Effect.ALLOW,
             Actions = ["ssm:GetParameter"],
@@ -218,25 +218,25 @@ public class AdminPanelStack : Stack
         #region Set Song Limit Lambda
 
         // Create Lambda function to update song limit
-        var updateSongLimitFunctionConstruct = new NodejsLambdaFunction(this, "Music-UpdateSongLimitFunction", new NodejsLambdaFunctionProps
+        var setSongLimitV1FunctionConstruct = new NodejsLambdaFunction(this, "Music-SetSongLimitFunction_V1", new NodejsLambdaFunctionProps
         {
-            Handler = "update-song-limit.handler",
-            Code = Code.FromAsset("../app/backend/dist/handlers/api/admin"),
+            Handler = "set-song-limit.handler",
+            Code = Code.FromAsset("../app/backend/dist/handlers/api/v1/admin"),
             Environment = new Dictionary<string, string>
             {
                 ["AWS_NODEJS_CONNECTION_REUSE_ENABLED"] = "1",
                 ["PARAMETER_NAME"] = "/Music/AppleMusicHistory/SongLimit"
             },
-            Description = "Lambda function to update the Apple Music history song limit",
-            Role = new Role(this, "Music-UpdateSongLimitFunctionRole", new RoleProps
+            Description = "Lambda function to update the Apple Music history song limit (Version 1)",
+            Role = new Role(this, "Music-SetSongLimitFunctionV1Role", new RoleProps
             {
                 AssumedBy = new ServicePrincipal("lambda.amazonaws.com")
             })
         });
-        var updateSongLimitFunction = updateSongLimitFunctionConstruct.Function;
+        var setSongLimitV1Function = setSongLimitV1FunctionConstruct.Function;
 
         // Grant Lambda permissions
-        updateSongLimitFunction.AddToRolePolicy(new PolicyStatement(new PolicyStatementProps
+        setSongLimitV1Function.AddToRolePolicy(new PolicyStatement(new PolicyStatementProps
         {
             Effect = Effect.ALLOW,
             Actions = ["ssm:PutParameter"],
@@ -248,24 +248,24 @@ public class AdminPanelStack : Stack
         #region Get Song Limit Lambda
 
         // Create Lambda function to get song limit
-        var getSongLimitFunctionConstruct = new NodejsLambdaFunction(this, "Music-GetSongLimitFunction", new NodejsLambdaFunctionProps
+        var getSongLimitV1FunctionConstruct = new NodejsLambdaFunction(this, "Music-GetSongLimitFunction_V1", new NodejsLambdaFunctionProps
         {
             Handler = "get-song-limit.handler",
-            Code = Code.FromAsset("../app/backend/dist/handlers/api/admin"),
+            Code = Code.FromAsset("../app/backend/dist/handlers/api/v1/admin"),
             Environment = new Dictionary<string, string>
             {
                 ["AWS_NODEJS_CONNECTION_REUSE_ENABLED"] = "1",
                 ["PARAMETER_NAME"] = "/Music/AppleMusicHistory/SongLimit"
             },
-            Description = "Lambda function to get the Apple Music history song limit",
-            Role = new Role(this, "Music-GetSongLimitFunctionRole", new RoleProps
+            Description = "Lambda function to get the Apple Music history song limit (Version 1)",
+            Role = new Role(this, "Music-GetSongLimitFunctionV1Role", new RoleProps
             {
                 AssumedBy = new ServicePrincipal("lambda.amazonaws.com")
             })
         });
-        var getSongLimitFunction = getSongLimitFunctionConstruct.Function;
+        var getSongLimitV1Function = getSongLimitV1FunctionConstruct.Function;
 
-        getSongLimitFunction.AddToRolePolicy(new PolicyStatement(new PolicyStatementProps
+        getSongLimitV1Function.AddToRolePolicy(new PolicyStatement(new PolicyStatementProps
         {
             Effect = Effect.ALLOW,
             Actions = ["ssm:GetParameter"],
@@ -350,7 +350,7 @@ public class AdminPanelStack : Stack
         var api = new RestApi(this, "Music-AdminApi", new RestApiProps
         {
             RestApiName = "Music Admin API Gateway",
-            Description = "API for managing Music User Token",
+            Description = "API for managing various settings for `music.mariolopez.org`",
             DomainName = new DomainNameOptions
             {
                 DomainName = "admin.music.mariolopez.org",
@@ -375,166 +375,124 @@ public class AdminPanelStack : Stack
 
         #region API Gateway Resources
 
-        var nodejsResource = new ApiGatewayResource(this, "NodejsResource", new ApiGatewayResourceProps
+        var nodejsResource = new ApiGatewayResource(this, "Music-NodejsResource", new ApiGatewayResourceProps
         {
             ParentResource = api.Root,
             PathPart = "nodejs"
         }).Resource;
 
-        var mutResource = new ApiGatewayResource(this, "MutResource", new ApiGatewayResourceProps
+        var v1Resource = new ApiGatewayResource(this, "Music-V1Resource", new ApiGatewayResourceProps
         {
             ParentResource = nodejsResource,
+            PathPart = "v1"
+        }).Resource;
+
+        var mutV1Resource = new ApiGatewayResource(this, "Music-MutV1Resource", new ApiGatewayResourceProps
+        {
+            ParentResource = v1Resource,
             PathPart = "mut"
         }).Resource;
 
-        var updateMutResource = new ApiGatewayResource(this, "UpdateMutResource", new ApiGatewayResourceProps
+        var scheduleV1Resource = new ApiGatewayResource(this, "Music-ScheduleV1Resource", new ApiGatewayResourceProps
         {
-            ParentResource = mutResource,
-            PathPart = "update"
-        }).Resource;
-
-        var getMutResource = new ApiGatewayResource(this, "GetMutResource", new ApiGatewayResourceProps
-        {
-            ParentResource = mutResource,
-            PathPart = "get"
-        }).Resource;
-
-        var scheduleResource = new ApiGatewayResource(this, "ScheduleResource", new ApiGatewayResourceProps
-        {
-            ParentResource = nodejsResource,
+            ParentResource = v1Resource,
             PathPart = "schedule"
         }).Resource;
 
-        var updateScheduleResource = new ApiGatewayResource(this, "UpdateScheduleResource", new ApiGatewayResourceProps
+        var songLimitV1Resource = new ApiGatewayResource(this, "Music-SongLimitV1Resource", new ApiGatewayResourceProps
         {
-            ParentResource = scheduleResource,
-            PathPart = "update"
-        }).Resource;
-
-        var getScheduleResource = new ApiGatewayResource(this, "GetScheduleResource", new ApiGatewayResourceProps
-        {
-            ParentResource = scheduleResource,
-            PathPart = "get"
-        }).Resource;
-
-        var songLimitResource = new ApiGatewayResource(this, "SongLimitResource", new ApiGatewayResourceProps
-        {
-            ParentResource = nodejsResource,
+            ParentResource = v1Resource,
             PathPart = "song-limit"
-        }).Resource;
-
-        var updateSongLimitResource = new ApiGatewayResource(this, "UpdateSongLimitResource", new ApiGatewayResourceProps
-        {
-            ParentResource = songLimitResource,
-            PathPart = "update"
-        }).Resource;
-
-        var getSongLimitResource = new ApiGatewayResource(this, "GetSongLimitResource", new ApiGatewayResourceProps
-        {
-            ParentResource = songLimitResource,
-            PathPart = "get"
         }).Resource;
 
         #endregion
 
         #region API Gateway Integrations
 
-        var updateMutIntegration = new ApiGatewayIntegration(this, "UpdateMutIntegration", new ApiGatewayIntegrationProps
+        var getMutV1Integration = new ApiGatewayIntegration(this, "Music-GetMutV1Integration", new ApiGatewayIntegrationProps
         {
-            Function = updateMutFunction,
-            Timeout = Duration.Seconds(29),
-            AllowTestInvoke = true
+            Function = getMutV1Function
         });
 
-        var getMutIntegration = new ApiGatewayIntegration(this, "GetMutIntegration", new ApiGatewayIntegrationProps
+        var updateMutV1Integration = new ApiGatewayIntegration(this, "Music-UpdateMutV1Integration", new ApiGatewayIntegrationProps
         {
-            Function = getMutFunction,
-            Timeout = Duration.Seconds(29),
-            AllowTestInvoke = true
+            Function = setMutV1Function
         });
 
-        var updateScheduleRateIntegration = new ApiGatewayIntegration(this, "UpdateScheduleRateIntegration", new ApiGatewayIntegrationProps
+        var getScheduleRateV1Integration = new ApiGatewayIntegration(this, "Music-GetScheduleRateV1Integration", new ApiGatewayIntegrationProps
         {
-            Function = updateScheduleRateFunction,
-            Timeout = Duration.Seconds(29),
-            AllowTestInvoke = true
+            Function = getScheduleRateV1Function
         });
 
-        var getScheduleRateIntegration = new ApiGatewayIntegration(this, "GetScheduleRateIntegration", new ApiGatewayIntegrationProps
+        var updateScheduleRateV1Integration = new ApiGatewayIntegration(this, "Music-UpdateScheduleRateV1Integration", new ApiGatewayIntegrationProps
         {
-            Function = getScheduleRateFunction,
-            Timeout = Duration.Seconds(29),
-            AllowTestInvoke = true
+            Function = setScheduleRateV1Function
         });
 
-        var updateSongLimitIntegration = new ApiGatewayIntegration(this, "UpdateSongLimitIntegration", new ApiGatewayIntegrationProps
+        var getSongLimitV1Integration = new ApiGatewayIntegration(this, "Music-GetSongLimitV1Integration", new ApiGatewayIntegrationProps
         {
-            Function = updateSongLimitFunction,
-            Timeout = Duration.Seconds(29),
-            AllowTestInvoke = true
+            Function = getSongLimitV1Function
         });
 
-        var getSongLimitIntegration = new ApiGatewayIntegration(this, "GetSongLimitIntegration", new ApiGatewayIntegrationProps
+        var updateSongLimitV1Integration = new ApiGatewayIntegration(this, "Music-UpdateSongLimitV1Integration", new ApiGatewayIntegrationProps
         {
-            Function = getSongLimitFunction,
-            Timeout = Duration.Seconds(29),
-            AllowTestInvoke = true
+            Function = setSongLimitV1Function
         });
 
         #endregion
 
         #region API Gateway Methods
 
-        var updateMutMethod = new ApiGatewayMethod(this, "UpdateMutMethod", new ApiGatewayMethodProps
+        var getMutV1Method = new ApiGatewayMethod(this, "Music-GetMutV1Method", new ApiGatewayMethodProps
         {
-            Resource = updateMutResource,
-            HttpMethod = "POST",
-            Integration = updateMutIntegration.Integration,
-            AuthorizationType = AuthorizationType.COGNITO,
-            Authorizer = authorizer
-        });
-
-        var getMutMethod = new ApiGatewayMethod(this, "GetMutMethod", new ApiGatewayMethodProps
-        {
-            Resource = getMutResource,
+            Resource = mutV1Resource,
             HttpMethod = "GET",
-            Integration = getMutIntegration.Integration,
+            Integration = getMutV1Integration.Integration,
             AuthorizationType = AuthorizationType.COGNITO,
             Authorizer = authorizer
         });
 
-        var getScheduleMethod = new ApiGatewayMethod(this, "GetScheduleMethod", new ApiGatewayMethodProps
+        var updateMutV1Method = new ApiGatewayMethod(this, "Music-UpdateMutV1Method", new ApiGatewayMethodProps
         {
-            Resource = getScheduleResource,
-            HttpMethod = "GET",
-            Integration = getScheduleRateIntegration.Integration,
-            AuthorizationType = AuthorizationType.COGNITO,
-            Authorizer = authorizer
-        });
-
-        var updateScheduleMethod = new ApiGatewayMethod(this, "UpdateScheduleMethod", new ApiGatewayMethodProps
-        {
-            Resource = updateScheduleResource,
+            Resource = mutV1Resource,
             HttpMethod = "POST",
-            Integration = updateScheduleRateIntegration.Integration,
+            Integration = updateMutV1Integration.Integration,
             AuthorizationType = AuthorizationType.COGNITO,
             Authorizer = authorizer
         });
 
-        var updateSongLimitMethod = new ApiGatewayMethod(this, "UpdateSongLimitMethod", new ApiGatewayMethodProps
+        var getScheduleV1Method = new ApiGatewayMethod(this, "Music-GetScheduleV1Method", new ApiGatewayMethodProps
         {
-            Resource = updateSongLimitResource,
-            HttpMethod = "POST",
-            Integration = updateSongLimitIntegration.Integration,
-            AuthorizationType = AuthorizationType.COGNITO,
-            Authorizer = authorizer
-        });
-
-        var getSongLimitMethod = new ApiGatewayMethod(this, "GetSongLimitMethod", new ApiGatewayMethodProps
-        {
-            Resource = getSongLimitResource,
+            Resource = scheduleV1Resource,
             HttpMethod = "GET",
-            Integration = getSongLimitIntegration.Integration,
+            Integration = getScheduleRateV1Integration.Integration,
+            AuthorizationType = AuthorizationType.COGNITO,
+            Authorizer = authorizer
+        });
+
+        var updateScheduleV1Method = new ApiGatewayMethod(this, "Music-UpdateScheduleV1Method", new ApiGatewayMethodProps
+        {
+            Resource = scheduleV1Resource,
+            HttpMethod = "POST",
+            Integration = updateScheduleRateV1Integration.Integration,
+            AuthorizationType = AuthorizationType.COGNITO,
+            Authorizer = authorizer
+        });
+
+        var getSongLimitV1Method = new ApiGatewayMethod(this, "Music-GetSongLimitV1Method", new ApiGatewayMethodProps
+        {
+            Resource = songLimitV1Resource,
+            HttpMethod = "GET",
+            Integration = getSongLimitV1Integration.Integration,
+            AuthorizationType = AuthorizationType.COGNITO,
+            Authorizer = authorizer
+        });
+
+        var updateSongLimitV1Method = new ApiGatewayMethod(this, "Music-UpdateSongLimitV1Method", new ApiGatewayMethodProps
+        {
+            Resource = songLimitV1Resource,
+            HttpMethod = "POST",
+            Integration = updateSongLimitV1Integration.Integration,
             AuthorizationType = AuthorizationType.COGNITO,
             Authorizer = authorizer
         });
@@ -546,19 +504,19 @@ public class AdminPanelStack : Stack
         #region Outputs
 
         // Output Cognito configuration for frontend
-        var userPoolIdOutput = new CfnOutput(this, "UserPoolId", new CfnOutputProps
+        var userPoolIdOutput = new CfnOutput(this, "Music-UserPoolId", new CfnOutputProps
         {
             Value = userPool.UserPoolId,
             Description = "Cognito User Pool ID"
         });
 
-        var userPoolClientIdOutput = new CfnOutput(this, "UserPoolClientId", new CfnOutputProps
+        var userPoolClientIdOutput = new CfnOutput(this, "Music-UserPoolClientId", new CfnOutputProps
         {
             Value = userPoolClient.UserPoolClientId,
             Description = "Cognito User Pool Client ID"
         });
 
-        var userPoolDomainOutput = new CfnOutput(this, "UserPoolDomain", new CfnOutputProps
+        var userPoolDomainOutput = new CfnOutput(this, "Music-UserPoolDomain", new CfnOutputProps
         {
             Value = $"admin-{Account}.auth.{Region}.amazoncognito.com",
             Description = "Cognito User Pool Domain"

@@ -1,0 +1,15 @@
+meta {
+  name: Get Schedule
+  type: http
+  seq: 3
+}
+
+get {
+  url: https://admin.music.mariolopez.org/api/nodejs/v1/schedule
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{COGNITO_AUTH_TOKEN}}
+}

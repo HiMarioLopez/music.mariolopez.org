@@ -1,0 +1,25 @@
+meta {
+  name: Set Schedule (Raw)
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{ADMIN_API_GATEWAY_URL}}/prod/nodejs/v1/schedule
+  body: json
+  auth: bearer
+}
+
+headers {
+  Content-Type: application/json
+}
+
+auth:bearer {
+  token: {{COGNITO_AUTH_TOKEN}}
+}
+
+body:json {
+  {
+    "rate": "rate(5 minutes)"
+  }
+}

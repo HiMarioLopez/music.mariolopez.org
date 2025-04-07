@@ -1,6 +1,11 @@
 import axios from 'axios';
 import { Logger } from '@aws-lambda-powertools/logger';
-import { MusicBrainzEntity, SearchOptions, MusicBrainzResponse } from './types';
+import {
+  MusicBrainzEntity,
+  SearchOptions,
+  MusicBrainzResponse,
+  MusicBrainzEntityOptions,
+} from './types';
 
 const logger = new Logger({ serviceName: 'musicbrainz-service' });
 
@@ -31,6 +36,127 @@ const respectRateLimits = async (): Promise<void> => {
   }
 
   lastRequestTime = Date.now();
+};
+
+/**
+ * Parse API Gateway path to MusicBrainz entity options
+ */
+export const parsePath = (
+  path: string,
+  queryParams: Record<string, string> = {}
+): MusicBrainzEntityOptions => {
+  // Clean the path
+  const cleanPath = path.replace(
+    /^\/(?:api\/)?(?:nodejs\/)?(?:musicbrainz\/)?/,
+    ''
+  );
+  const pathParts = cleanPath.split('/').filter(Boolean);
+
+  if (pathParts.length === 0) {
+    throw new Error('No entity specified');
+  }
+
+  const options: MusicBrainzEntityOptions = {
+    entity: pathParts[0] as any,
+  };
+
+  if (pathParts.length >= 2) {
+    // If it's a lookup request (entity/mbid)
+    if (
+      pathParts[1].match(
+        /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+      )
+    ) {
+      options.mbid = pathParts[1];
+
+      // Handle includes
+      if (queryParams.inc) {
+        options.includes = queryParams.inc.split('+').filter(Boolean);
+      }
+    } else {
+      // It's probably a sub-resource or other command
+      options.params = { [pathParts[1]]: pathParts[2] || '' };
+    }
+  }
+
+  // Handle search query
+  if (queryParams.query) {
+    options.query = queryParams.query;
+
+    // Handle additional search parameters
+    options.searchOptions = {
+      query: queryParams.query,
+    } as SearchOptions;
+
+    // Add limit and offset
+    if (queryParams.limit) {
+      options.searchOptions.limit = parseInt(queryParams.limit, 10);
+    }
+
+    if (queryParams.offset) {
+      options.searchOptions.offset = parseInt(queryParams.offset, 10);
+    }
+
+    // Add dismax parameter (convert string to boolean)
+    if ('dismax' in queryParams) {
+      options.searchOptions.dismax = queryParams.dismax === 'true';
+    }
+
+    // Add version parameter
+    if (queryParams.version) {
+      options.searchOptions.version = parseInt(queryParams.version, 10);
+    }
+
+    // Add any query filters that use Lucene syntax (field:value)
+    // For example: type:group, country:US, etc.
+    Object.entries(queryParams).forEach(([key, value]) => {
+      if (
+        ![
+          'query',
+          'limit',
+          'offset',
+          'dismax',
+          'version',
+          'fmt',
+          'inc',
+        ].includes(key)
+      ) {
+        if (options.searchOptions) {
+          options.searchOptions[key] = value;
+        }
+      }
+    });
+  }
+
+  // Handle pagination (for other request types)
+  if (queryParams.limit && !options.searchOptions) {
+    options.limit = parseInt(queryParams.limit, 10) || 25;
+  }
+
+  if (queryParams.offset && !options.searchOptions) {
+    options.offset = parseInt(queryParams.offset, 10) || 0;
+  }
+
+  // Add all other query params (for browse requests)
+  options.params = {
+    ...options.params,
+    ...Object.fromEntries(
+      Object.entries(queryParams).filter(
+        ([key]) =>
+          ![
+            'query',
+            'limit',
+            'offset',
+            'inc',
+            'fmt',
+            'dismax',
+            'version',
+          ].includes(key)
+      )
+    ),
+  };
+
+  return options;
 };
 
 /**
@@ -193,4 +319,63 @@ export const browse = async (
     });
     throw error;
   }
+};
+
+/**
+ * Process a MusicBrainz API request based on entity options
+ * Determines which API method to call based on the options
+ */
+export const processMusicBrainzRequest = async (
+  options: MusicBrainzEntityOptions
+): Promise<MusicBrainzResponse> => {
+  logger.debug('Processing MusicBrainz request', { options });
+
+  let response;
+
+  if (options.query) {
+    // Search request with enhanced options
+    logger.info('Performing MusicBrainz search', {
+      entity: options.entity,
+      query: options.query,
+    });
+
+    response = await search(
+      options.entity,
+      options.searchOptions || options.query
+    );
+  } else if (options.mbid) {
+    // Lookup request
+    logger.info('Performing MusicBrainz lookup', {
+      entity: options.entity,
+      mbid: options.mbid,
+    });
+
+    response = await lookup(
+      options.entity,
+      options.mbid,
+      options.includes || []
+    );
+  } else if (Object.keys(options.params || {}).length > 0) {
+    // Browse request
+    logger.info('Performing MusicBrainz browse', {
+      entity: options.entity,
+      params: options.params,
+    });
+
+    response = await browse(
+      options.entity,
+      options.params || {},
+      options.limit,
+      options.offset
+    );
+  } else {
+    // Direct API call
+    logger.info('Performing direct MusicBrainz API call', {
+      entity: options.entity,
+    });
+
+    response = await callApi(options.entity, options.params || {});
+  }
+
+  return response;
 };

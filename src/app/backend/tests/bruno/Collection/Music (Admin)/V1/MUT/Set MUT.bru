@@ -1,0 +1,25 @@
+meta {
+  name: Set MUT
+  type: http
+  seq: 1
+}
+
+post {
+  url: https://admin.music.mariolopez.org/api/nodejs/v1/mut
+  body: json
+  auth: bearer
+}
+
+headers {
+  Content-Type: application/json
+}
+
+auth:bearer {
+  token: {{COGNITO_AUTH_TOKEN}}
+}
+
+body:json {
+  {
+    "musicUserToken": "As3OkncP+PDMkxp6E8aQRXVTZCPpYiPBUHgZHqDV0iy68bUZAifDMqJjexgJYA69I4LSljvl5hxdUKE+areiw9nn0hgB66UNFsQs3+K9kKsORMQo3+aItNvXWuJzni7eyT/STzYaS3WjI1fY5bGFThNC5Dw0tSfJksJ68b7UW44mc7oALMvwZYsFr696TkTdhScNxzd0OFsXYnb9baAxsjBbFMn90AoRK7TGC1QQyBCaC5wUjQ=="
+  }
+}

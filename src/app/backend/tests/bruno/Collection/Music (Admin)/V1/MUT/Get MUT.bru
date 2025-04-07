@@ -1,0 +1,15 @@
+meta {
+  name: Get MUT
+  type: http
+  seq: 2
+}
+
+get {
+  url: https://admin.music.mariolopez.org/api/nodejs/v1/mut
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{COGNITO_AUTH_TOKEN}}
+}

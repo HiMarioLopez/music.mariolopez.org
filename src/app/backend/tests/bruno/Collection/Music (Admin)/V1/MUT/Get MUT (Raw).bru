@@ -1,0 +1,15 @@
+meta {
+  name: Get MUT (Raw)
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{ADMIN_API_GATEWAY_URL}}/prod/nodejs/v1/mut
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{COGNITO_AUTH_TOKEN}}
+}

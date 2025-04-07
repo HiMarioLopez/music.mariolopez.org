@@ -19,7 +19,17 @@
     "strictPropertyInitialization": false,
     "outDir": "./dist",
     "rootDir": "./src",
-    "esModuleInterop": true
+    "esModuleInterop": true,
+    "baseUrl": "./src",
+    "paths": {
+      "@services/*": ["services/*"],
+      "@config/*": ["config/*"],
+      "@utils/*": ["utils/*"],
+      "@models/*": ["models/*"],
+      "@handlers/*": ["handlers/*"],
+      "@middleware/*": ["middleware/*"],
+      "@types/*": ["types/*"]
+    }
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "**/*.test.ts"]

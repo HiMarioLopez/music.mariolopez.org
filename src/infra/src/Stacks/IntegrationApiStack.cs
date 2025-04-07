@@ -176,7 +176,7 @@ public class IntegrationApiStack : Stack
 
         #region Lambda Functions and Roles
 
-        #region Get Developer Auth Token Lambda
+        #region Get Developer Auth Token Lambda (Version 1)
 
         // Auth Handler Lambda Role
         var nodejsAuthLambdaRole = new Role(this, "Music-NodejsAuthHandlerExecutionRole", new RoleProps
@@ -197,7 +197,7 @@ public class IntegrationApiStack : Stack
         var nodejsAuthHandlerFunction = new NodejsLambdaFunction(this, "Music-NodejsAuthHandlerLambda", new NodejsLambdaFunctionProps
         {
             Handler = "get-developer-token.handler",
-            Code = Code.FromAsset("../app/backend/dist/handlers/api/integration"),
+            Code = Code.FromAsset("../app/backend/dist/handlers/api/v1/integration"),
             Role = nodejsAuthLambdaRole,
             Description = "Generates a token for use with Apple's Music API. Built with Node.js.",
             Environment = new Dictionary<string, string>
@@ -211,7 +211,7 @@ public class IntegrationApiStack : Stack
 
         #endregion
 
-        #region Get Data from Apple Music Lambda
+        #region Get Data from Apple Music Lambda (Version 1)
 
         // Role for the Apple Music API Lambda functions
         var appleMusicLambdaRole = new Role(this, "AppleMusicApiLambdaRole", new RoleProps
@@ -245,7 +245,7 @@ public class IntegrationApiStack : Stack
         var dataFetchingLambdaConstruct = new NodejsLambdaFunction(this, "AppleMusicApiDataFetchingLambda", new NodejsLambdaFunctionProps
         {
             Handler = "apple-music-data-fetching.handler",
-            Code = Code.FromAsset("../app/backend/dist/handlers/api/integration"),
+            Code = Code.FromAsset("../app/backend/dist/handlers/api/v1/integration"),
             Role = appleMusicLambdaRole,
             MemorySize = 256,
             Description = "Fetches data from Apple Music API and handles caching strategies",
@@ -262,7 +262,7 @@ public class IntegrationApiStack : Stack
 
         #endregion
 
-        #region Get Data from MusicBrainz Lambda
+        #region Get Data from MusicBrainz Lambda (Version 1)
 
         // MusicBrainz API Data Fetching Lambda
         var musicBrainzLambdaRole = new Role(this, "MusicBrainzApiLambdaRole", new RoleProps
@@ -286,7 +286,7 @@ public class IntegrationApiStack : Stack
         var musicBrainzDataFetchingLambdaConstruct = new NodejsLambdaFunction(this, "MusicBrainzApiDataFetchingLambda", new NodejsLambdaFunctionProps
         {
             Handler = "musicbrainz-data-fetching.handler",
-            Code = Code.FromAsset("../app/backend/dist/handlers/api/integration"),
+            Code = Code.FromAsset("../app/backend/dist/handlers/api/v1/integration"),
             Role = musicBrainzLambdaRole,
             Description = "Fetches data from MusicBrainz API for music recommendations",
             Environment = new Dictionary<string, string>
@@ -300,7 +300,7 @@ public class IntegrationApiStack : Stack
 
         #endregion
 
-        #region Get Song History Lambda
+        #region Get Song History Lambda (Version 1)
 
         var getSongHistoryLambdaRole = new Role(this, "GetSongHistoryLambdaRole", new RoleProps
         {
@@ -340,7 +340,7 @@ public class IntegrationApiStack : Stack
         var getSongHistoryLambda = new NodejsLambdaFunction(this, "GetSongHistoryFunction", new NodejsLambdaFunctionProps
         {
             Handler = "get-song-history.handler",
-            Code = Code.FromAsset("../app/backend/dist/handlers/api/integration"),
+            Code = Code.FromAsset("../app/backend/dist/handlers/api/v1/integration"),
             Role = getSongHistoryLambdaRole,
             Description = "Fetches song history from DynamoDB",
             Environment = new Dictionary<string, string>
@@ -354,7 +354,7 @@ public class IntegrationApiStack : Stack
 
         #endregion
 
-        #region Get Recommendations Lambda
+        #region Get Recommendations Lambda (Version 1)
 
         // Role for the Get Recommendations Lambda
         var getRecommendationsLambdaRole = new Role(this, "GetRecommendationsLambdaRole", new RoleProps
@@ -399,7 +399,7 @@ public class IntegrationApiStack : Stack
         var getRecommendationsLambdaConstruct = new NodejsLambdaFunction(this, "GetRecommendationsFunction", new NodejsLambdaFunctionProps
         {
             Handler = "get-recommendations.handler",
-            Code = Code.FromAsset("../app/backend/dist/handlers/api/integration"),
+            Code = Code.FromAsset("../app/backend/dist/handlers/api/v1/integration"),
             Role = getRecommendationsLambdaRole,
             Description = "Fetches music recommendations from DynamoDB",
             Environment = new Dictionary<string, string>
@@ -413,7 +413,7 @@ public class IntegrationApiStack : Stack
 
         #endregion
 
-        #region Set Recommendations Lambda
+        #region Set Recommendations Lambda (Version 1)
 
         // Role for the Set Recommendations Lambda
         var setRecommendationsLambdaRole = new Role(this, "SetRecommendationsLambdaRole", new RoleProps
@@ -456,7 +456,7 @@ public class IntegrationApiStack : Stack
         var setRecommendationsLambdaConstruct = new NodejsLambdaFunction(this, "SetRecommendationsFunction", new NodejsLambdaFunctionProps
         {
             Handler = "set-recommendations.handler",
-            Code = Code.FromAsset("../app/backend/dist/handlers/api/integration"),
+            Code = Code.FromAsset("../app/backend/dist/handlers/api/v1/integration"),
             Role = setRecommendationsLambdaRole,
             Description = "Creates and stores music recommendations in DynamoDB",
             Environment = new Dictionary<string, string>
@@ -469,7 +469,7 @@ public class IntegrationApiStack : Stack
 
         #endregion
 
-        #region Get Recommendation Notes Lambda
+        #region Get Recommendation Notes Lambda (Version 1)
 
         // Role for the Get Recommendation Notes Lambda
         var getRecommendationNotesLambdaRole = new Role(this, "GetRecommendationNotesLambdaRole", new RoleProps
@@ -514,7 +514,7 @@ public class IntegrationApiStack : Stack
         var getRecommendationNotesLambdaConstruct = new NodejsLambdaFunction(this, "GetRecommendationNotesFunction", new NodejsLambdaFunctionProps
         {
             Handler = "get-recommendation-notes.handler",
-            Code = Code.FromAsset("../app/backend/dist/handlers/api/integration"),
+            Code = Code.FromAsset("../app/backend/dist/handlers/api/v1/integration"),
             Role = getRecommendationNotesLambdaRole,
             Description = "Fetches music recommendation notes from DynamoDB",
             Environment = new Dictionary<string, string>
@@ -528,7 +528,7 @@ public class IntegrationApiStack : Stack
 
         #endregion
 
-        #region Set Recommendation Notes Lambda
+        #region Set Recommendation Notes Lambda (Version 1)
 
         // Role for the Set Recommendation Notes Lambda
         var setRecommendationNotesLambdaRole = new Role(this, "SetRecommendationNotesLambdaRole", new RoleProps
@@ -575,7 +575,7 @@ public class IntegrationApiStack : Stack
         var setRecommendationNotesLambdaConstruct = new NodejsLambdaFunction(this, "SetRecommendationNotesFunction", new NodejsLambdaFunctionProps
         {
             Handler = "set-recommendation-notes.handler",
-            Code = Code.FromAsset("../app/backend/dist/handlers/api/integration"),
+            Code = Code.FromAsset("../app/backend/dist/handlers/api/v1/integration"),
             Role = setRecommendationNotesLambdaRole,
             Description = "Creates and stores music recommendation notes in DynamoDB",
             Environment = new Dictionary<string, string>
@@ -590,7 +590,7 @@ public class IntegrationApiStack : Stack
 
         #endregion
 
-        #region Get Recommendation Reviews Lambda
+        #region Get Recommendation Reviews Lambda (Version 1)
 
         // Role for the Get Recommendation Reviews Lambda
         var getRecommendationReviewsLambdaRole = new Role(this, "GetRecommendationReviewsLambdaRole", new RoleProps
@@ -635,7 +635,7 @@ public class IntegrationApiStack : Stack
         var getRecommendationReviewsLambdaConstruct = new NodejsLambdaFunction(this, "GetRecommendationReviewsFunction", new NodejsLambdaFunctionProps
         {
             Handler = "get-recommendation-reviews.handler",
-            Code = Code.FromAsset("../app/backend/dist/handlers/api/integration"),
+            Code = Code.FromAsset("../app/backend/dist/handlers/api/v1/integration"),
             Role = getRecommendationReviewsLambdaRole,
             Description = "Fetches music recommendation reviews (user notes) from DynamoDB",
             Environment = new Dictionary<string, string>
@@ -649,7 +649,7 @@ public class IntegrationApiStack : Stack
 
         #endregion
 
-        #region Set Recommendation Review Lambda
+        #region Set Recommendation Review Lambda (Version 1)
 
         // Role for the Set Recommendation Review Lambda
         var setRecommendationReviewLambdaRole = new Role(this, "SetRecommendationReviewLambdaRole", new RoleProps
@@ -696,7 +696,7 @@ public class IntegrationApiStack : Stack
         var setRecommendationReviewLambdaConstruct = new NodejsLambdaFunction(this, "SetRecommendationReviewFunction", new NodejsLambdaFunctionProps
         {
             Handler = "set-recommendation-review.handler",
-            Code = Code.FromAsset("../app/backend/dist/handlers/api/integration"),
+            Code = Code.FromAsset("../app/backend/dist/handlers/api/v1/integration"),
             Role = setRecommendationReviewLambdaRole,
             Description = "Creates and stores music recommendation reviews (user notes) in DynamoDB",
             Environment = new Dictionary<string, string>

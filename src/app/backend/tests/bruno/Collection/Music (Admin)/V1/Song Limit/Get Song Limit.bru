@@ -1,0 +1,15 @@
+meta {
+  name: Get Song Limit
+  type: http
+  seq: 1
+}
+
+get {
+  url: https://admin.music.mariolopez.org/api/nodejs/v1/song-limit
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{COGNITO_AUTH_TOKEN}}
+}
