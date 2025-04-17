@@ -1,14 +1,14 @@
 import { Logger } from '@aws-lambda-powertools/logger';
 import { Metrics, MetricUnit } from '@aws-lambda-powertools/metrics';
-import { ApiGatewayEvent, getHttpMethod, getOrigin, getPath } from './types';
 import {
-  createCacheKey as originalCreateCacheKey,
   getFromMemory,
   getFromRedis,
   setInMemory,
   setInRedis,
 } from '../services/cache';
 import { getCorsHeaders } from './cors';
+import { APIGatewayProxyEvent } from 'aws-lambda';
+import { getHttpMethod, getOrigin, getPath } from './api-gateway-event';
 
 interface CacheOptions {
   stripPrefix?: string;
@@ -32,32 +32,50 @@ const defaultOptions: CacheOptions = {
 };
 
 /**
- * Creates a cache key for API Gateway V2 event
+ * Creates a cache key for API Gateway V1 event
  */
-function createCacheKeyV2(
-  event: ApiGatewayEvent,
+function createCacheKey(
+  event: APIGatewayProxyEvent,
   options: {
     stripPrefix?: string;
     includeMethod?: boolean;
     includeQuery?: boolean;
   }
 ): string {
-  // Convert V2 event format to match what createCacheKey expects
-  const adaptedEvent = {
-    path: getPath(event),
-    httpMethod: getHttpMethod(event),
-    queryStringParameters: event.queryStringParameters || {},
-  };
+  let path = getPath(event);
 
-  // Use original cache key function with adapted event
-  return originalCreateCacheKey(adaptedEvent as any, options);
+  // Strip prefix if provided
+  if (options.stripPrefix && path.startsWith(options.stripPrefix)) {
+    path = path.substring(options.stripPrefix.length);
+  }
+
+  let key = path;
+
+  // Add HTTP method if requested
+  if (options.includeMethod) {
+    key = `${getHttpMethod(event)}:${key}`;
+  }
+
+  // Add query parameters if requested
+  if (options.includeQuery && event.queryStringParameters) {
+    const queryString = Object.entries(event.queryStringParameters)
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([k, v]) => `${k}=${v}`)
+      .join('&');
+
+    if (queryString) {
+      key = `${key}?${queryString}`;
+    }
+  }
+
+  return key;
 }
 
 /**
  * Helper function for multi-level caching (memory + Redis) with handler wrapping
  */
 export async function withCaching<T>(
-  event: ApiGatewayEvent,
+  event: APIGatewayProxyEvent,
   fetchData: () => Promise<T>,
   options: CacheOptions = {}
 ): Promise<{
@@ -76,8 +94,8 @@ export async function withCaching<T>(
     metrics,
   } = config;
 
-  // Create a cache key for this request using our V2 function
-  const requestKey = createCacheKeyV2(event, {
+  // Create a cache key for this request
+  const requestKey = createCacheKey(event, {
     stripPrefix,
     includeMethod,
     includeQuery,

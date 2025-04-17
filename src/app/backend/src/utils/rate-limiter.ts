@@ -1,13 +1,9 @@
 import { Logger } from '@aws-lambda-powertools/logger';
 import { Metrics, MetricUnit } from '@aws-lambda-powertools/metrics';
+import { APIGatewayProxyEvent } from 'aws-lambda';
 import { incrementCounter } from '../services/cache';
+import { getClientIp, getHttpMethod, getOrigin } from './api-gateway-event';
 import { getCorsHeaders } from './cors';
-import {
-  ApiGatewayEvent,
-  getHttpMethod,
-  getOrigin,
-  getClientIp,
-} from './types';
 
 interface RateLimiterOptions {
   threshold: number;
@@ -31,13 +27,13 @@ const defaultOptions: RateLimiterOptions = {
  * Returns null if the request is within limits, or an error response if limits are exceeded
  */
 export async function checkRateLimit(
-  event: ApiGatewayEvent,
+  event: APIGatewayProxyEvent,
   options: Partial<RateLimiterOptions> = {}
 ) {
   const config = { ...defaultOptions, ...options };
   const { threshold, windowSeconds, logger, metrics } = config;
 
-  // Extract client IP from event - using V2 API Gateway event format
+  // Extract client IP from event - using V1 API Gateway event format
   const clientIp = getClientIp(event);
   const rateLimitKey = `ratelimit:${clientIp}`;
 

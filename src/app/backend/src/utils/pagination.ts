@@ -1,21 +1,22 @@
-import { ApiGatewayEvent, DynamoQueryResult, PaginatedResponse } from './types';
+import { APIGatewayProxyEvent } from 'aws-lambda';
+import { DynamoQueryResult, PaginatedResponse } from './types';
 
 /**
  * Utility functions for handling pagination in API responses
  */
 
 /**
- * Parses common pagination parameters from API Gateway V2 event
+ * Parses common pagination parameters from API Gateway V1 event
  */
 export function parsePaginationParams(
-  event: ApiGatewayEvent,
+  event: APIGatewayProxyEvent,
   defaultLimit = 50
 ): {
   limit: number;
   startKey?: string;
   queryParams: Record<string, string | undefined>;
 } {
-  // Get query parameters from API Gateway V2 event
+  // Get query parameters from API Gateway V1 event
   const queryParams = event.queryStringParameters || {};
 
   const limit = queryParams.limit

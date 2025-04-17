@@ -1,11 +1,11 @@
 meta {
   name: Recently Played Tracks (Limit 5)
   type: http
-  seq: 2
+  seq: 1
 }
 
 get {
-  url: https://music.mariolopez.org/api/nodejs/apple-music/me/recent/played/tracks?limit=5
+  url: https://music.mariolopez.org/api/nodejs/v1/apple-music/me/recent/played/tracks?limit=5
   body: none
   auth: bearer
 }

@@ -1,11 +1,11 @@
 meta {
-  name: Search Hints
+  name: Search Hints (Raw)
   type: http
-  seq: 1
+  seq: 2
 }
 
 get {
-  url: https://music.mariolopez.org/api/nodejs/v1/apple-music/catalog/us/search/hints?term=beach+bunny
+  url: {{MUSIC_API_GATEWAY_URL}}/prod/nodejs/v1/apple-music/catalog/us/search/hints?term=beach+bunny
   body: none
   auth: bearer
 }

@@ -51,7 +51,7 @@
     "------------Frontend (Admin Panel)------------": "--------------------------------",
     "update-build-deploy:admin": "pnpm run-s update-and-build:admin deploy:admin",
     "update-and-build:admin": "pnpm run-s update:admin build:admin",
-    "deploy:admin": "cd src/infra && cdk deploy AdminPanelStack",
+    "deploy:admin": "cd src/infra && cdk deploy AdminPanelFrontendStack",
     "update:admin": "cd src/app/frontend/music-admin-panel/music-admin-panel-react && pnpm install",
     "build:admin": "cd src/app/frontend/music-admin-panel/music-admin-panel-react && pnpm build",
     "------------Backend------------": "--------------------------------",

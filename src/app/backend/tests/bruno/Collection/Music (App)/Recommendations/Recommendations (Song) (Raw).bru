@@ -1,11 +1,11 @@
 meta {
-  name: Recommendations (Song)
+  name: Recommendations (Song) (Raw)
   type: http
-  seq: 1
+  seq: 2
 }
 
 get {
-  url: https://music.mariolopez.org/api/nodejs/v1/recommendations?entityType=SONG&limit=5
+  url: {{MUSIC_API_GATEWAY_URL}}/prod/nodejs/v1/recommendations?entityType=SONG&limit=5
   body: none
   auth: bearer
 }

@@ -1,18 +1,16 @@
 import { Logger } from '@aws-lambda-powertools/logger';
 import { Metrics, MetricUnit } from '@aws-lambda-powertools/metrics';
 import { Tracer } from '@aws-lambda-powertools/tracer';
-import { Context } from 'aws-lambda';
+import {
+  APIGatewayProxyEvent,
+  APIGatewayProxyResult,
+  Context,
+} from 'aws-lambda';
+import { getHttpMethod, getOrigin, getPath } from './api-gateway-event';
 import { getCorsHeaders } from './cors';
 import { getRequiredEnvVar } from './env';
-import { parsePaginationParams, formatPaginatedResponse } from './pagination';
+import { formatPaginatedResponse, parsePaginationParams } from './pagination';
 import { getRequiredParameter } from './parameter-store';
-import {
-  ApiGatewayEvent,
-  ApiGatewayResult,
-  getHttpMethod,
-  getOrigin,
-  getPath,
-} from './types';
 
 /**
  * Options for creating Lambda utilities
@@ -56,11 +54,11 @@ export function createLambdaUtils(options: LambdaUtilsOptions) {
    * Generates success response with proper CORS headers
    */
   const createSuccessResponse = (
-    event: ApiGatewayEvent,
+    event: APIGatewayProxyEvent,
     body: Record<string, any>,
     statusCode = 200,
     additionalHeaders = {}
-  ): ApiGatewayResult => {
+  ): APIGatewayProxyResult => {
     const method = getHttpMethod(event);
     const origin = getOrigin(event);
 
@@ -79,11 +77,11 @@ export function createLambdaUtils(options: LambdaUtilsOptions) {
    * Generates error response with proper CORS headers
    */
   const createErrorResponse = (
-    event: ApiGatewayEvent,
+    event: APIGatewayProxyEvent,
     error: unknown,
     statusCode = 500,
     message = 'Internal server error'
-  ): ApiGatewayResult => {
+  ): APIGatewayProxyResult => {
     const method = getHttpMethod(event);
     const origin = getOrigin(event);
 
@@ -114,7 +112,7 @@ export function createLambdaUtils(options: LambdaUtilsOptions) {
     getRequiredParameter: (paramName: string, fallback?: string) =>
       getRequiredParameter(paramName, { fallback, logger }),
     formatPaginatedResponse,
-    parseQueryParams: (event: ApiGatewayEvent, defaultLimit = 50) =>
+    parseQueryParams: (event: APIGatewayProxyEvent, defaultLimit = 50) =>
       parsePaginationParams(event, defaultLimit),
   };
 }
@@ -123,16 +121,16 @@ export function createLambdaUtils(options: LambdaUtilsOptions) {
  * Type definition for a Lambda handler
  */
 export type LambdaHandler<
-  TEvent extends ApiGatewayEvent,
-  TResult extends ApiGatewayResult,
+  TEvent extends APIGatewayProxyEvent,
+  TResult extends APIGatewayProxyResult,
 > = (event: TEvent, context: Context) => Promise<TResult>;
 
 /**
  * Wraps a Lambda handler with error handling and request logging
  */
 export function wrapHandler<
-  TEvent extends ApiGatewayEvent,
-  TResult extends ApiGatewayResult,
+  TEvent extends APIGatewayProxyEvent,
+  TResult extends APIGatewayProxyResult,
 >(
   options: LambdaUtilsOptions,
   handler: (
@@ -145,7 +143,7 @@ export function wrapHandler<
 
   return async (event: TEvent, context: Context): Promise<TResult> => {
     utils.initializeLogger(context);
-    // Get the path from the API Gateway V2 event
+    // Get the path from the API Gateway V1 event
     const path = getPath(event);
     utils.logger.info(`${options.serviceName} Lambda invoked`, { path });
     utils.trackInvocation();

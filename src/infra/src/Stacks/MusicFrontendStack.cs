@@ -164,6 +164,16 @@ public class MusicFrontendStack : Stack
         // Keep your Certificate and Distribution setup as before
         var distribution = new Distribution(this, "Music-SiteDistribution", new DistributionProps
         {
+            Certificate = rootCertificate,
+            DomainNames = ["music.mariolopez.org"],
+            // Default Behavior: Redirect to the static site assets S3 bucket
+            DefaultBehavior = new BehaviorOptions
+            {
+                Origin = new S3StaticWebsiteOrigin(siteBucket),
+                ViewerProtocolPolicy = ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
+                // TODO: Once frontend development is 'complete', enable caching
+                CachePolicy = CachePolicy.CACHING_DISABLED
+            },
             // Define additional behaviors, including one for the root path
             AdditionalBehaviors = new Dictionary<string, IBehaviorOptions>
             {
@@ -196,17 +206,7 @@ public class MusicFrontendStack : Stack
                     OriginRequestPolicy = OriginRequestPolicy.ALL_VIEWER,
                     ResponseHeadersPolicy = ResponseHeadersPolicy.CORS_ALLOW_ALL_ORIGINS,
                 }
-            },
-            // Default Behavior: Redirect to the static site assets S3 bucket
-            DefaultBehavior = new BehaviorOptions
-            {
-                Origin = new S3StaticWebsiteOrigin(siteBucket),
-                ViewerProtocolPolicy = ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
-                // TODO: Once frontend development is 'complete', enable caching
-                CachePolicy = CachePolicy.CACHING_DISABLED
-            },
-            Certificate = rootCertificate,
-            DomainNames = ["music.mariolopez.org"]
+            }
         });
 
         // Note: You will need to manually update the DNS records for `music.mariolopez.org` to point to the CloudFront distribution.

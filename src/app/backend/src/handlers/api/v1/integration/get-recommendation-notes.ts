@@ -8,7 +8,7 @@ import {
 import { ModerationStatus, RecommendationNote } from '@models/note';
 import { wrapHandler } from '@utils/lambda-handler';
 import { HttpStatus } from '@utils/types';
-import { APIGatewayProxyEventV2, APIGatewayProxyResultV2 } from 'aws-lambda';
+import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 
 // Default limit for note queries
 const DEFAULT_LIMIT = 50;
@@ -16,10 +16,7 @@ const DEFAULT_LIMIT = 50;
 /**
  * API Gateway handler function to fetch recommendation notes
  */
-export const handler = wrapHandler<
-  APIGatewayProxyEventV2,
-  APIGatewayProxyResultV2
->(
+export const handler = wrapHandler<APIGatewayProxyEvent, APIGatewayProxyResult>(
   { serviceName: 'get-recommendation-notes' },
   async (event, context, utils) => {
     try {

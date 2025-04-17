@@ -95,7 +95,7 @@ public class IntegrationApiStack : Stack
     internal IntegrationApiStack(Construct scope, string id, IStackProps? props = null, IConfiguration? configuration = null)
         : base(scope, id, props)
     {
-        var corsSettings = configuration?.GetSection("MusicApiSettings").Get<MusicApiSettings>();
+        // var corsSettings = configuration?.GetSection("MusicApiSettings").Get<MusicApiSettings>();
 
         #region API Gateway
 
@@ -137,7 +137,7 @@ public class IntegrationApiStack : Stack
                     "X-Amz-Security-Token",
                     "Music-User-Token"
                 ],
-                AllowOrigins = corsSettings?.AllowedOrigins!,
+                AllowOrigins = Cors.ALL_ORIGINS,
                 AllowMethods = Cors.ALL_METHODS
             },
         });
@@ -244,7 +244,7 @@ public class IntegrationApiStack : Stack
         // Apple Music API Data Fetching Lambda
         var dataFetchingLambdaConstruct = new NodejsLambdaFunction(this, "AppleMusicApiDataFetchingLambda", new NodejsLambdaFunctionProps
         {
-            Handler = "apple-music-data-fetching.handler",
+            Handler = "get-data-from-apple-music.handler",
             Code = Code.FromAsset("../app/backend/dist/handlers/api/v1/integration"),
             Role = appleMusicLambdaRole,
             MemorySize = 256,
@@ -285,7 +285,7 @@ public class IntegrationApiStack : Stack
 
         var musicBrainzDataFetchingLambdaConstruct = new NodejsLambdaFunction(this, "MusicBrainzApiDataFetchingLambda", new NodejsLambdaFunctionProps
         {
-            Handler = "musicbrainz-data-fetching.handler",
+            Handler = "get-data-from-musicbrainz.handler",
             Code = Code.FromAsset("../app/backend/dist/handlers/api/v1/integration"),
             Role = musicBrainzLambdaRole,
             Description = "Fetches data from MusicBrainz API for music recommendations",
@@ -851,10 +851,17 @@ public class IntegrationApiStack : Stack
             PathPart = "nodejs"
         }).Resource;
 
+        // Version 1 resource
+        var version1Resource = new ApiGatewayResource(this, "Version1Resource", new ApiGatewayResourceProps
+        {
+            ParentResource = nodejsResource,
+            PathPart = "v1"
+        }).Resource;
+
         // Auth endpoint
         var authResource = new ApiGatewayResource(this, "AuthResource", new ApiGatewayResourceProps
         {
-            ParentResource = nodejsResource,
+            ParentResource = version1Resource,
             PathPart = "auth"
         }).Resource;
 
@@ -867,8 +874,7 @@ public class IntegrationApiStack : Stack
         // Create integration for auth token
         var authIntegration = new ApiGatewayIntegration(this, "AuthIntegration", new ApiGatewayIntegrationProps
         {
-            Function = nodejsAuthHandlerFunction,
-            AllowTestInvoke = true
+            Function = nodejsAuthHandlerFunction
         });
 
         // Add method to token resource
@@ -882,7 +888,7 @@ public class IntegrationApiStack : Stack
         // Add history endpoints to API Gateway
         var historyResource = new ApiGatewayResource(this, "HistoryResource", new ApiGatewayResourceProps
         {
-            ParentResource = nodejsResource,
+            ParentResource = version1Resource,
             PathPart = "history"
         }).Resource;
 
@@ -895,9 +901,7 @@ public class IntegrationApiStack : Stack
         // Create integration for music history
         var musicHistoryIntegration = new ApiGatewayIntegration(this, "MusicHistoryIntegration", new ApiGatewayIntegrationProps
         {
-            Function = getSongHistoryLambda,
-            Timeout = Duration.Seconds(29),
-            AllowTestInvoke = true
+            Function = getSongHistoryLambda
         });
 
         // Add method to music history resource
@@ -912,7 +916,7 @@ public class IntegrationApiStack : Stack
         // Add POST method for creating (single) recommendation
         var recommendationResource = new ApiGatewayResource(this, "RecommendationResource", new ApiGatewayResourceProps
         {
-            ParentResource = nodejsResource,
+            ParentResource = version1Resource,
             PathPart = "recommendation"
         }).Resource;
 
@@ -934,16 +938,14 @@ public class IntegrationApiStack : Stack
         // Add GET method for retrieving (multiple) recommendations
         var recommendationsResource = new ApiGatewayResource(this, "RecommendationsResource", new ApiGatewayResourceProps
         {
-            ParentResource = nodejsResource,
+            ParentResource = version1Resource,
             PathPart = "recommendations"
         }).Resource;
 
         // Create integration for get recommendations
         var getRecommendationsIntegration = new ApiGatewayIntegration(this, "GetRecommendationsIntegration", new ApiGatewayIntegrationProps
         {
-            Function = getRecommendationsLambda,
-            Timeout = Duration.Seconds(29),
-            AllowTestInvoke = true
+            Function = getRecommendationsLambda
         });
 
         // Add method to recommendations resource
@@ -981,9 +983,7 @@ public class IntegrationApiStack : Stack
         // Create integration for get recommendation notes
         var getRecommendationNotesIntegration = new ApiGatewayIntegration(this, "GetRecommendationNotesIntegration", new ApiGatewayIntegrationProps
         {
-            Function = getRecommendationNotesLambda,
-            Timeout = Duration.Seconds(29),
-            AllowTestInvoke = true
+            Function = getRecommendationNotesLambda
         });
 
         // Add method to recommendation notes resource
@@ -998,9 +998,7 @@ public class IntegrationApiStack : Stack
         // Create integration for set recommendation notes
         var setRecommendationNotesIntegration = new ApiGatewayIntegration(this, "SetRecommendationNotesIntegration", new ApiGatewayIntegrationProps
         {
-            Function = setRecommendationNotesLambda,
-            Timeout = Duration.Seconds(29),
-            AllowTestInvoke = true
+            Function = setRecommendationNotesLambda
         });
 
         // Add method to recommendation notes resource
@@ -1022,9 +1020,7 @@ public class IntegrationApiStack : Stack
         // Create integration for get recommendation reviews
         var getRecommendationReviewsIntegration = new ApiGatewayIntegration(this, "GetRecommendationReviewsIntegration", new ApiGatewayIntegrationProps
         {
-            Function = getRecommendationReviewsLambda,
-            Timeout = Duration.Seconds(29),
-            AllowTestInvoke = true
+            Function = getRecommendationReviewsLambda
         });
 
         // Add method to recommendation reviews resource
@@ -1039,9 +1035,7 @@ public class IntegrationApiStack : Stack
         // Create integration for set recommendation review
         var setRecommendationReviewIntegration = new ApiGatewayIntegration(this, "SetRecommendationReviewIntegration", new ApiGatewayIntegrationProps
         {
-            Function = setRecommendationReviewLambda,
-            Timeout = Duration.Seconds(29),
-            AllowTestInvoke = true
+            Function = setRecommendationReviewLambda
         });
 
         // Add method to recommendation reviews resource
@@ -1056,7 +1050,7 @@ public class IntegrationApiStack : Stack
         // Add GET method for retrieving all reviews
         var allReviewsResource = new ApiGatewayResource(this, "AllReviewsResource", new ApiGatewayResourceProps
         {
-            ParentResource = nodejsResource,
+            ParentResource = version1Resource,
             PathPart = "reviews"
         }).Resource;
 
@@ -1072,7 +1066,7 @@ public class IntegrationApiStack : Stack
         // Apple Music API endpoints
         var appleMusicResource = new ApiGatewayResource(this, "AppleMusicResource", new ApiGatewayResourceProps
         {
-            ParentResource = nodejsResource,
+            ParentResource = version1Resource,
             PathPart = "apple-music"
         }).Resource;
 
@@ -1107,7 +1101,7 @@ public class IntegrationApiStack : Stack
         // MusicBrainz API endpoints
         var musicBrainzResource = new ApiGatewayResource(this, "MusicBrainzResource", new ApiGatewayResourceProps
         {
-            ParentResource = nodejsResource,
+            ParentResource = version1Resource,
             PathPart = "musicbrainz"
         }).Resource;
 
@@ -1153,38 +1147,6 @@ public class IntegrationApiStack : Stack
         {
             Value = apiGateway.DomainName!.DomainNameAliasDomainName,
             ExportName = "Music-ApiGatewayCustomDomainName"
-        });
-
-        var apiGatewayId = new CfnOutput(this, "ApiGatewayId", new CfnOutputProps
-        {
-            Value = apiGateway.RestApiId,
-            ExportName = "Music-IntegrationApiGateway-Id"
-        });
-
-        var apiGatewayRootResourceId = new CfnOutput(this, "ApiGatewayRootResourceId", new CfnOutputProps
-        {
-            Value = apiGateway.RestApiRootResourceId,
-            ExportName = "Music-IntegrationApiGateway-RootResourceId"
-        });
-
-        var apiGatewayUrl = new CfnOutput(this, "ApiGatewayUrl", new CfnOutputProps
-        {
-            Value = apiGateway.Url,
-            ExportName = "Music-IntegrationApiGateway-Url"
-        });
-
-        var appleMusicApiEndpoint = new CfnOutput(this, "AppleMusicApiEndpoint", new CfnOutputProps
-        {
-            Value = $"{apiGateway.Url}apple-music",
-            Description = "Endpoint URL for the Apple Music API integration layer",
-            ExportName = "AppleMusicApiEndpoint"
-        });
-
-        var musicBrainzApiEndpoint = new CfnOutput(this, "MusicBrainzApiEndpoint", new CfnOutputProps
-        {
-            Value = $"{apiGateway.Url}musicbrainz",
-            Description = "Endpoint URL for the MusicBrainz API integration layer",
-            ExportName = "MusicBrainzApiEndpoint"
         });
 
         #endregion

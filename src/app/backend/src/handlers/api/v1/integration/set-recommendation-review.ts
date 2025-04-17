@@ -11,16 +11,13 @@ import { checkModeration } from '@services/openai/moderation';
 import { wrapHandler } from '@utils/lambda-handler';
 import { HttpStatus } from '@utils/types';
 import { generateUUID } from '@utils/uuid';
-import { APIGatewayProxyEventV2, APIGatewayProxyResultV2 } from 'aws-lambda';
+import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 
 /**
  * API Gateway handler function to create or update a recommendation review
  * Reviews are notes with isFromUser=true
  */
-export const handler = wrapHandler<
-  APIGatewayProxyEventV2,
-  APIGatewayProxyResultV2
->(
+export const handler = wrapHandler<APIGatewayProxyEvent, APIGatewayProxyResult>(
   { serviceName: 'set-recommendation-review' },
   async (event, context, utils) => {
     try {

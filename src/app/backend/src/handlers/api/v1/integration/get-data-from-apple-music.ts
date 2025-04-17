@@ -9,102 +9,104 @@ import { sendTokenRefreshNotification } from '@services/notification';
 import { withCaching } from '@utils/cache';
 import { wrapHandler } from '@utils/lambda-handler';
 import { checkRateLimit } from '@utils/rate-limiter';
-import { getClientIp, HttpStatus } from '@utils/types';
-import { APIGatewayProxyEventV2, APIGatewayProxyResultV2 } from 'aws-lambda';
+import { HttpStatus } from '@utils/types';
+import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 
 /**
  * Lambda handler for fetching data from Apple Music API
- * Implements caching and rate limiting
  */
-export const handler = wrapHandler<
-  APIGatewayProxyEventV2,
-  APIGatewayProxyResultV2
->(
-  { serviceName: 'apple-music-data-fetching' },
+export const handler = wrapHandler<APIGatewayProxyEvent, APIGatewayProxyResult>(
+  { serviceName: 'get-data-from-apple-music' },
   async (event, context, utils) => {
-    // Implement rate limiting
-    const clientIp = getClientIp(event);
     const rateLimitResponse = await checkRateLimit(event, {
       ...RATE_LIMITS.EXTERNAL_API,
       logger: utils.logger,
       metrics: utils.metrics,
     });
-
     if (rateLimitResponse) {
-      return rateLimitResponse as APIGatewayProxyResultV2;
+      return rateLimitResponse as APIGatewayProxyResult;
     }
 
-    // Check authorization
-    const developerToken =
-      event.headers?.['Authorization']?.replace('Bearer ', '') ||
-      event.headers?.['authorization']?.replace('Bearer ', '');
-
-    if (!developerToken) {
-      utils.logger.warn('Missing developer token');
-      utils.metrics.addMetric('AuthError', MetricUnit.Count, 1);
-
-      return utils.createErrorResponse(
-        event,
-        new Error('Developer token is required'),
-        HttpStatus.UNAUTHORIZED,
-        'Developer token is required'
-      );
-    }
-
-    // Use our caching utility to handle memory/Redis caching
     try {
-      const cachedResponse = await withCaching(
+      // Check for required developer token in headers
+      const developerToken =
+        event.headers['Authorization']?.replace('Bearer ', '') ||
+        event.headers['authorization']?.replace('Bearer ', '');
+      if (!developerToken) {
+        utils.logger.warn('Missing developer token');
+        utils.metrics.addMetric('AuthError', MetricUnit.Count, 1);
+        return utils.createErrorResponse(
+          event,
+          new Error('Developer token is required'),
+          HttpStatus.UNAUTHORIZED,
+          'Developer token is required'
+        );
+      }
+
+      // Use withCaching to check cache and fetch if needed
+      const result = await withCaching(
         event,
         async () => {
           // Get the music user token
           const musicUserToken = await getMusicUserToken();
-
-          // Process query parameters
-          const queryParams = event.queryStringParameters || {};
-
-          // Fetch data from Apple Music API
-          const apiData = await fetchFromApi(
-            event.rawPath,
+          // Clean query params
+          const queryParams = event.queryStringParameters
+            ? Object.fromEntries(
+                Object.entries(event.queryStringParameters)
+                  .filter(([_, v]) => v !== undefined)
+                  .map(([k, v]) => [k, v as string])
+              )
+            : null;
+          // Fetch from Apple Music API
+          return await fetchFromApi(
+            event.path,
             queryParams,
             developerToken,
             musicUserToken
           );
-
-          utils.metrics.addMetric('ApiFetchSuccess', MetricUnit.Count, 1);
-          return apiData;
         },
         {
           stripPrefix: '/api',
           includeMethod: true,
           includeQuery: true,
-          ttlSeconds: 60,
           logger: utils.logger,
           metrics: utils.metrics,
         }
       );
 
-      return cachedResponse;
+      utils.metrics.addMetric('ApiFetchSuccess', MetricUnit.Count, 1);
+      return utils.createSuccessResponse(
+        event,
+        { data: result.data, source: result.source },
+        result.statusCode,
+        result.headers
+      );
     } catch (error: any) {
-      // We only need to handle token expiration specially, other errors can be handled by the wrapper
+      utils.logger.error('Error processing Apple Music data request', {
+        error,
+      });
+      utils.metrics.addMetric('ErrorCount', MetricUnit.Count, 1);
+
       if (isTokenExpirationError(error)) {
         utils.logger.info(
           'Token expiration detected, triggering refresh notification'
         );
-
-        // Send notification to refresh token
         await sendTokenRefreshNotification();
         utils.metrics.addMetric('TokenExpirationDetected', MetricUnit.Count, 1);
-
         return utils.createErrorResponse(
           event,
           error,
           HttpStatus.UNAUTHORIZED,
-          'One or more authentication tokens have expired. An admin has been notified to refresh them. Please try again in a few minutes.'
+          'One or more authentication tokens have expired. An admin has been notified to refresh them.'
         );
       }
 
-      // Re-throw for the wrapper to handle
-      throw error;
+      return utils.createErrorResponse(
+        event,
+        error,
+        HttpStatus.INTERNAL_SERVER_ERROR,
+        error.message || 'An unexpected error occurred'
+      );
     }
   }
 );

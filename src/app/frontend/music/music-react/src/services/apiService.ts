@@ -4,7 +4,7 @@ import {
 } from "../components/RecommendationForm/types/RecommendationForm.types";
 import { MusicHistoryResponse } from "../models/MusicHistoryResponse";
 
-const API_BASE_URL = "/api/nodejs";
+const API_BASE_URL = "/api/nodejs/v1";
 
 // Type for authentication response
 interface AuthResponse {

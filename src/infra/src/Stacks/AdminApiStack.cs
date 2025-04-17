@@ -1,19 +1,15 @@
 using Amazon.CDK;
 using Amazon.CDK.AWS.CertificateManager;
-using Amazon.CDK.AWS.CloudFront.Origins;
-using Amazon.CDK.AWS.S3;
-using Amazon.CDK.AWS.S3.Deployment;
 using Amazon.CDK.AWS.SSM;
 using Constructs;
 using System.Collections.Generic;
 using Amazon.CDK.AWS.Lambda;
-using Amazon.CDK.AWS.CloudFront;
-using Amazon.CDK.AWS.APIGateway;
 using Amazon.CDK.AWS.Cognito;
 using Microsoft.Extensions.Configuration;
 using Music.Infra.Models.Settings;
 using Music.Infra.Constructs;
 using Amazon.CDK.AWS.IAM;
+using Amazon.CDK.AWS.APIGateway;
 
 namespace Music.Infra.Stacks;
 
@@ -21,11 +17,23 @@ namespace Music.Infra.Stacks;
 /// Defines the stack for the admin.music.mariolopez.org website.
 /// This stack hosts the admin panel that allows managing Apple Music history data.
 /// </summary>
-public class AdminPanelStack : Stack
+public class AdminApiStack : Stack
 {
-    internal AdminPanelStack(Construct scope, string id, IStackProps? props = null, IConfiguration? configuration = null)
+    internal AdminApiStack(Construct scope, string id, IStackProps? props = null, IConfiguration? configuration = null)
         : base(scope, id, props)
     {
+        #region SSM Parameter
+
+        // Create SSM Parameter for storing MUT
+        var mutParameter = new StringParameter(this, "Music-MutParameter", new StringParameterProps
+        {
+            ParameterName = "/Music/AdminPanel/MUT",
+            Description = "Music User Token for accessing Apple Music data",
+            StringValue = "placeholder", // Initial 'placeholder' value
+        });
+
+        #endregion
+
         #region Cognito
 
         // Create Cognito User Pool
@@ -91,18 +99,6 @@ public class AdminPanelStack : Stack
 
         #endregion
 
-        #region SSM Parameter
-
-        // Create SSM Parameter for storing MUT
-        var mutParameter = new StringParameter(this, "Music-MutParameter", new StringParameterProps
-        {
-            ParameterName = "/Music/AdminPanel/MUT",
-            Description = "Music User Token for accessing Apple Music data",
-            StringValue = "placeholder", // Initial 'placeholder' value
-        });
-
-        #endregion
-
         #region Lambda Functions
 
         #region Set MUT Lambda
@@ -115,7 +111,7 @@ public class AdminPanelStack : Stack
             Environment = new Dictionary<string, string>
             {
                 ["AWS_NODEJS_CONNECTION_REUSE_ENABLED"] = "1",
-                ["PARAMETER_NAME"] = mutParameter.ParameterName
+                ["PARAMETER_NAME"] = "/Music/AdminPanel/MUT"
             },
             Description = "Lambda function to update Music User Token (Version 1)",
             Role = new Role(this, "Music-SetMutFunctionV1Role", new RoleProps
@@ -140,7 +136,7 @@ public class AdminPanelStack : Stack
             Environment = new Dictionary<string, string>
             {
                 ["AWS_NODEJS_CONNECTION_REUSE_ENABLED"] = "1",
-                ["PARAMETER_NAME"] = mutParameter.ParameterName
+                ["PARAMETER_NAME"] = "/Music/AdminPanel/MUT"
             },
             Description = "Lambda function to retrieve Music User Token from Parameter Store (Version 1)",
             Role = new Role(this, "Music-GetMutFunctionV1Role", new RoleProps
@@ -175,10 +171,6 @@ public class AdminPanelStack : Stack
         });
         var setScheduleRateV1Function = setScheduleRateV1FunctionConstruct.Function;
 
-        #endregion
-
-        #region Get Schedule Rate Lambda
-
         // Grant Lambda permission to write to Parameter Store
         setScheduleRateV1Function.AddToRolePolicy(new PolicyStatement(new PolicyStatementProps
         {
@@ -186,6 +178,10 @@ public class AdminPanelStack : Stack
             Actions = ["ssm:PutParameter"],
             Resources = [$"arn:aws:ssm:{Region}:{Account}:parameter/Music/AppleMusicHistory/ScheduleRate"]
         }));
+
+        #endregion
+
+        #region Get Schedule Rate Lambda
 
         // Create Lambda function to get schedule rate
         var getScheduleRateV1FunctionConstruct = new NodejsLambdaFunction(this, "Music-GetScheduleRateFunction_V1", new NodejsLambdaFunctionProps
@@ -276,78 +272,16 @@ public class AdminPanelStack : Stack
 
         #endregion
 
-        #region Bucket
+        #region API Gateway
 
-        // Create an S3 bucket configured for website hosting
-        var adminBucket = new Bucket(this, "Music-AdminAssets", new BucketProps
-        {
-            WebsiteIndexDocument = "index.html",
-            WebsiteErrorDocument = "error.html",
-            PublicReadAccess = true,
-            RemovalPolicy = RemovalPolicy.DESTROY,
-            BlockPublicAccess = new BlockPublicAccess(new BlockPublicAccessOptions { BlockPublicPolicy = false })
-        });
-
-        #endregion
-
-        #region Site Deployment
-
-        // Deploy admin panel static site assets
-        var deployAdminSite = new BucketDeployment(this, "Music-DeployAdminSite", new BucketDeploymentProps
-        {
-            Sources = [Source.Asset("../app/frontend/music-admin-panel/music-admin-panel-react/dist")],
-            DestinationBucket = adminBucket
-        });
-
-        #endregion
-
-        #region Distribution
+        // var corsSettings = configuration?.GetSection("AdminApiSettings").Get<AdminApiSettings>();
 
         // Certificate for `*.music.mariolopez.org`
         var awsSettings = configuration?.GetSection("AWS").Get<AwsSettings>();
         var rootCertificateArn = awsSettings?.CertificateArn;
         var rootCertificate = Certificate.FromCertificateArn(this, "Music-AdminSiteCertificate", rootCertificateArn!);
 
-        // Import the API Gateway's custom domain name
-        var importedApiDomainName = Fn.ImportValue("Music-ApiGatewayCustomDomainName");
-
-        // Create CloudFront distribution for the admin panel
-        var distribution = new Distribution(this, "Music-AdminSiteDistribution", new DistributionProps
-        {
-            // Distribution serving the admin panel frontend for music.mariolopez.org
-            DefaultBehavior = new BehaviorOptions
-            {
-                Origin = new S3StaticWebsiteOrigin(adminBucket),
-                ViewerProtocolPolicy = ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
-                // Disable caching during development
-                CachePolicy = CachePolicy.CACHING_DISABLED
-            },
-            AdditionalBehaviors = new Dictionary<string, IBehaviorOptions>
-            {
-                // API Path: Proxy to the API Gateway
-                ["/api/*"] = new BehaviorOptions
-                {
-                    Origin = new HttpOrigin(importedApiDomainName, new HttpOriginProps
-                    {
-                        ProtocolPolicy = OriginProtocolPolicy.HTTPS_ONLY
-                    }),
-                    ViewerProtocolPolicy = ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
-                    CachePolicy = CachePolicy.CACHING_DISABLED,
-                    OriginRequestPolicy = OriginRequestPolicy.ALL_VIEWER,
-                    AllowedMethods = AllowedMethods.ALLOW_ALL,
-                }
-            },
-            Certificate = rootCertificate,
-            DomainNames = ["admin.music.mariolopez.org"]
-        });
-
-        #endregion
-
-        #region API Gateway
-
-        var corsSettings = configuration?.GetSection("AdminApiSettings").Get<AdminApiSettings>();
-
-        var api = new RestApi(this, "Music-AdminApi", new RestApiProps
+        var apiGateway = new RestApi(this, "Music-AdminApi", new RestApiProps
         {
             RestApiName = "Music Admin API Gateway",
             Description = "API for managing various settings for `music.mariolopez.org`",
@@ -368,8 +302,8 @@ public class AdminPanelStack : Stack
                     "X-Api-Key",
                     "X-Amz-Security-Token"
                 ],
-                AllowMethods = ["GET", "POST", "OPTIONS"],
-                AllowOrigins = corsSettings?.AllowedOrigins!
+                AllowMethods = Cors.ALL_METHODS,
+                AllowOrigins = Cors.ALL_ORIGINS
             }
         });
 
@@ -377,7 +311,7 @@ public class AdminPanelStack : Stack
 
         var nodejsResource = new ApiGatewayResource(this, "Music-NodejsResource", new ApiGatewayResourceProps
         {
-            ParentResource = api.Root,
+            ParentResource = apiGateway.Root,
             PathPart = "nodejs"
         }).Resource;
 
@@ -503,23 +437,10 @@ public class AdminPanelStack : Stack
 
         #region Outputs
 
-        // Output Cognito configuration for frontend
-        var userPoolIdOutput = new CfnOutput(this, "Music-UserPoolId", new CfnOutputProps
+        var apiDomainName = new CfnOutput(this, "Music-AdminApiGatewayCustomDomainName", new CfnOutputProps
         {
-            Value = userPool.UserPoolId,
-            Description = "Cognito User Pool ID"
-        });
-
-        var userPoolClientIdOutput = new CfnOutput(this, "Music-UserPoolClientId", new CfnOutputProps
-        {
-            Value = userPoolClient.UserPoolClientId,
-            Description = "Cognito User Pool Client ID"
-        });
-
-        var userPoolDomainOutput = new CfnOutput(this, "Music-UserPoolDomain", new CfnOutputProps
-        {
-            Value = $"admin-{Account}.auth.{Region}.amazoncognito.com",
-            Description = "Cognito User Pool Domain"
+            Value = apiGateway.DomainName!.DomainNameAliasDomainName,
+            ExportName = "Music-AdminApiGatewayCustomDomainName"
         });
 
         #endregion

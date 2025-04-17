@@ -16,7 +16,7 @@ public static class Program
 
         var env = new Environment { Account = accountId, Region = defaultRegion };
 
-        var apiStack = new IntegrationApiStack(app, "IntegrationApiStack", new StackProps
+        var integrationApiStack = new IntegrationApiStack(app, "IntegrationApiStack", new StackProps
         {
             Env = env,
             StackName = "IntegrationApiStack",
@@ -30,17 +30,23 @@ public static class Program
             Description = "This stack contains the S3 bucket and CloudFront distribution for the primary Music application."
         }, configuration);
 
-        frontendStack.AddDependency(apiStack);
+        frontendStack.AddDependency(integrationApiStack);
 
-        var adminPanelStack = new AdminPanelStack(app, "AdminPanelStack", new StackProps
+        var adminApiStack = new AdminApiStack(app, "AdminApiStack", new StackProps
         {
             Env = env,
-            StackName = "AdminPanelStack",
+            StackName = "AdminApiStack",
+            Description = "This stack contains the API Gateway and Lambda function(s) for the admin panel for the Music application."
+        }, configuration);
+
+        var adminPanelFrontendStack = new AdminPanelFrontendStack(app, "AdminPanelFrontendStack", new StackProps
+        {
+            Env = env,
+            StackName = "AdminPanelFrontendStack",
             Description = "This stack contains resources for the admin panel for the Music application."
         }, configuration);
 
-        adminPanelStack.AddDependency(apiStack);
-        adminPanelStack.AddDependency(frontendStack);
+        adminPanelFrontendStack.AddDependency(adminApiStack);
 
         var historyStack = new AppleMusicHistoryStack(app, "AppleMusicHistoryStack", new StackProps
         {
@@ -49,7 +55,7 @@ public static class Program
             Description = "This stack contains resources for recording and displaying Apple Music listening history."
         }, configuration);
 
-        historyStack.AddDependency(apiStack);
+        historyStack.AddDependency(integrationApiStack);
 
         var recommendationStack = new RecommendationStack(app, "RecommendationStack", new StackProps
         {
@@ -58,7 +64,7 @@ public static class Program
             Description = "This stack contains resources for storing and retrieving music recommendations."
         }, configuration);
 
-        recommendationStack.AddDependency(apiStack);
+        recommendationStack.AddDependency(integrationApiStack);
 
         var observabilityStack = new ObservabilityStack(app, "ObservabilityStack", new StackProps
         {
@@ -67,29 +73,29 @@ public static class Program
             Description = "This stack contains CloudWatch dashboards for monitoring the Music application."
         });
 
-        observabilityStack.AddDependency(apiStack);
+        observabilityStack.AddDependency(integrationApiStack);
         observabilityStack.AddDependency(historyStack);
 
         // Add widgets to the Apple Music dashboard
         observabilityStack.AddAppleMusicDashboardWidgets(
             observabilityStack.AppleMusicDashboard,
-            apiStack.AppleMusicDataFetchingLambdaName,
-            apiStack.TokenRefreshNotificationLambdaName);
+            integrationApiStack.AppleMusicDataFetchingLambdaName,
+            integrationApiStack.TokenRefreshNotificationLambdaName);
 
         // Add widgets to the MusicBrainz dashboard
         observabilityStack.AddMusicBrainzDashboardWidgets(
             observabilityStack.MusicBrainzDashboard,
-            apiStack.MusicBrainzDataFetchingLambdaName);
+            integrationApiStack.MusicBrainzDataFetchingLambdaName);
 
         // Add widgets to the Recommendations dashboard
         observabilityStack.AddRecommendationsDashboardWidgets(
             observabilityStack.RecommendationsDashboard,
-            apiStack.GetRecommendationsLambdaName,
-            apiStack.SetRecommendationsLambdaName,
-            apiStack.GetRecommendationNotesLambdaName,
-            apiStack.SetRecommendationNotesLambdaName,
-            apiStack.GetRecommendationReviewsLambdaName,
-            apiStack.SetRecommendationReviewLambdaName);
+            integrationApiStack.GetRecommendationsLambdaName,
+            integrationApiStack.SetRecommendationsLambdaName,
+            integrationApiStack.GetRecommendationNotesLambdaName,
+            integrationApiStack.SetRecommendationNotesLambdaName,
+            integrationApiStack.GetRecommendationReviewsLambdaName,
+            integrationApiStack.SetRecommendationReviewLambdaName);
 
         // Add widgets to the Apple Music History dashboard
         observabilityStack.AddAppleMusicHistoryDashboardWidgets(

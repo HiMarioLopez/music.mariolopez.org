@@ -2,11 +2,12 @@ import { Logger } from '@aws-lambda-powertools/logger';
 import axios from 'axios';
 import { Song } from '../../models/song';
 import { getParameter } from '../parameter';
+import { extractAppleMusicEndpoint } from '../../utils/path-utils';
 
 const logger = new Logger({ serviceName: 'apple-music-api-service' });
 
 const APPLE_MUSIC_API_BASE_URL = 'https://api.music.apple.com/v1';
-const AUTH_ENDPOINT = 'https://music.mariolopez.org/api/nodejs/auth/token';
+const AUTH_ENDPOINT = 'https://music.mariolopez.org/api/nodejs/v1/auth/token';
 
 /**
  * Checks if an error is due to an expired token
@@ -115,39 +116,44 @@ export const fetchFromApi = async (
     musicUserToken = musicUserToken || tokens.musicUserToken;
   }
 
-  // Clean up the path using regex to handle both API Gateway and custom domain patterns
-  let cleanPath = path;
+  // Extract the Apple Music endpoint path using our utility function
+  const cleanPath = extractAppleMusicEndpoint(path);
 
-  // This regex will match and remove any of these patterns:
-  // 1. /api/nodejs/apple-music/
-  // 2. /api/v1/nodejs/apple-music/
-  // 3. /prod/nodejs/apple-music/
-  // 4. /nodejs/apple-music/
-  // 5. /api/ at the beginning of the path
-  const pathCleaningRegex =
-    /^(?:\/api(?:\/v1)?|\/prod)?(?:\/nodejs\/apple-music)?/;
-
-  // Apply the regex to clean the path
-  cleanPath = cleanPath.replace(pathCleaningRegex, '');
-
-  // Ensure path starts with a slash
-  if (!cleanPath.startsWith('/')) {
-    cleanPath = '/' + cleanPath;
+  // If we somehow ended up with just a slash or empty path, that's an error condition
+  if (cleanPath === '/' || !cleanPath) {
+    logger.error('Path extraction failed - ended with empty or root path', {
+      originalPath: path,
+      cleanPath,
+    });
+    throw new Error(
+      'Invalid path: Could not extract a valid Apple Music API endpoint'
+    );
   }
 
   const url = `${APPLE_MUSIC_API_BASE_URL}${cleanPath}`;
 
-  logger.info('Processing Apple Music API request', {
+  logger.info('Final Apple Music API request details', {
     originalPath: path,
     cleanedPath: cleanPath,
     fullUrl: url,
   });
 
   try {
-    logger.info('Fetching data from Apple Music API', {
+    const startTime = Date.now();
+
+    // Log detailed request configuration
+    logger.info('Apple Music API request configuration', {
+      method: 'GET',
       url,
-      hasQueryParams: !!queryParams,
-      queryParamCount: queryParams ? Object.keys(queryParams).length : 0,
+      queryParams: queryParams || {},
+      headers: {
+        Authorization: developerToken
+          ? `Bearer ${developerToken.substring(0, 5)}...`
+          : 'Not provided',
+        'Music-User-Token': musicUserToken
+          ? `${musicUserToken.substring(0, 5)}...`
+          : 'Not provided',
+      },
     });
 
     const response = await axios.get(url, {
@@ -159,10 +165,47 @@ export const fetchFromApi = async (
       timeout: 10000,
     });
 
-    logger.info('Successfully fetched data from Apple Music API', {
+    const requestDuration = Date.now() - startTime;
+
+    // Log response details with timing information
+    logger.info('Apple Music API response received', {
       status: response.status,
+      statusText: response.statusText,
       url,
+      duration: `${requestDuration}ms`,
+      contentType: response.headers['content-type'],
+      contentLength: response.headers['content-length'],
+      responseHeaders: {
+        ...response.headers,
+        // Filter out any sensitive headers if needed
+      },
+      // Include a summary of the response data without logging everything
+      dataStructure: {
+        hasData: !!response.data,
+        dataKeys: response.data ? Object.keys(response.data) : [],
+        dataType: response.data ? typeof response.data : 'none',
+        isArray: Array.isArray(response.data),
+        itemCount: Array.isArray(response.data)
+          ? response.data.length
+          : response.data &&
+              typeof response.data === 'object' &&
+              response.data.data
+            ? Array.isArray(response.data.data)
+              ? response.data.data.length
+              : 'not array'
+            : 'no data property',
+      },
     });
+
+    // For debugging, optionally log more details about specific data structures
+    // This can be enabled/disabled as needed
+    if (process.env.DEBUG_APPLE_MUSIC === 'true') {
+      logger.debug('Apple Music API detailed response data', {
+        data:
+          JSON.stringify(response.data).substring(0, 2000) +
+          (JSON.stringify(response.data).length > 2000 ? '...[truncated]' : ''),
+      });
+    }
 
     return response.data;
   } catch (error: any) {
@@ -171,6 +214,17 @@ export const fetchFromApi = async (
       error: error.message,
       status: error.response?.status,
       data: error.response?.data,
+      // Additional error information
+      code: error.code,
+      isAxiosError: axios.isAxiosError(error),
+      requestConfig: error.config
+        ? {
+            url: error.config.url,
+            method: error.config.method,
+            timeout: error.config.timeout,
+            params: error.config.params,
+          }
+        : 'No request config available',
     });
 
     // Check if token expiration error to handle it appropriately

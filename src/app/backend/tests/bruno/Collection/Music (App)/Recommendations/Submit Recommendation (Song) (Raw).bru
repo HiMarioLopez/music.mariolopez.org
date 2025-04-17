@@ -1,11 +1,11 @@
 meta {
   name: Submit Recommendation (Song) (Raw)
   type: http
-  seq: 3
+  seq: 4
 }
 
 post {
-  url: {{MUSIC_API_GATEWAY_URL}}/prod/nodejs/recommendation
+  url: {{MUSIC_API_GATEWAY_URL}}/prod/nodejs/v1/recommendation
   body: json
   auth: bearer
 }
