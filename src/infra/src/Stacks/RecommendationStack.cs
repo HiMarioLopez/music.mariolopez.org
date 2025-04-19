@@ -7,21 +7,22 @@ using Microsoft.Extensions.Configuration;
 namespace Music.Infra.Stacks;
 
 /// <summary>
-/// Defines the stack for the Music Recommendations feature.
+///     Defines the stack for the Music Recommendations feature.
 /// </summary>
 /// <remarks>
-/// This stack contains resources for storing and retrieving music recommendations:
-/// - DynamoDB table for recommendation storage
-/// - Lambda functions for getting and setting recommendations
-/// - SSM Parameters for configuration
-/// - OpenAI API key storage for moderation
+///     This stack contains resources for storing and retrieving music recommendations:
+///     - DynamoDB table for recommendation storage
+///     - Lambda functions for getting and setting recommendations
+///     - SSM Parameters for configuration
+///     - OpenAI API key storage for moderation
 /// </remarks>
-public class RecommendationStack : Stack
+public sealed class RecommendationStack : Stack
 {
-    internal RecommendationStack(Construct scope, string id, IStackProps? props = null, IConfiguration? configuration = null)
+    internal RecommendationStack(Construct scope, string id, IStackProps? props = null,
+        IConfiguration? configuration = null)
         : base(scope, id, props)
     {
-        #region Recommendations Table (metadata, votes, etc.)
+        #region Recommendations DynamoDB Table
 
         var recommendationTable = new Table(this, "MusicRecommendations", new TableProps
         {
@@ -32,6 +33,10 @@ public class RecommendationStack : Stack
                 Type = AttributeType.STRING
             },
             BillingMode = BillingMode.PAY_PER_REQUEST,
+            PointInTimeRecoverySpecification = new PointInTimeRecoverySpecification
+            {
+                PointInTimeRecoveryEnabled = true
+            }
         });
 
         // GSI for sorting by votes (for Recommendation Leaderboards)
@@ -45,7 +50,7 @@ public class RecommendationStack : Stack
 
         #endregion
 
-        #region Notes Table (individual notes with moderation status)
+        #region Notes DynamoDB Table
 
         var notesTable = new Table(this, "MusicRecommendationNotes", new TableProps
         {
@@ -61,6 +66,10 @@ public class RecommendationStack : Stack
                 Type = AttributeType.STRING
             },
             BillingMode = BillingMode.PAY_PER_REQUEST,
+            PointInTimeRecoverySpecification = new PointInTimeRecoverySpecification
+            {
+                PointInTimeRecoveryEnabled = true
+            }
         });
 
         // GSI to find all notes pending moderation (for moderation queue)
@@ -79,7 +88,8 @@ public class RecommendationStack : Stack
             PartitionKey = new Attribute
             {
                 Name = "isFromUser",
-                Type = AttributeType.NUMBER // This is a bit of a hack to get around the fact that DynamoDB doesn't support boolean types
+                Type = AttributeType
+                    .NUMBER // This is a bit of a hack to get around the fact that DynamoDB doesn't support boolean types
             },
             SortKey = new Attribute
             {
@@ -93,19 +103,21 @@ public class RecommendationStack : Stack
 
         #region Secrets and SSM Parameters
 
-        var recommendationTableNameParameter = new StringParameter(this, "RecommendationTableNameParameter", new StringParameterProps
-        {
-            ParameterName = "/Music/Recommendations/TableName",
-            StringValue = recommendationTable.TableName,
-            Description = "DynamoDB table for music recommendations"
-        });
+        var recommendationTableNameParameter = new StringParameter(this, "RecommendationTableNameParameter",
+            new StringParameterProps
+            {
+                ParameterName = "/Music/Recommendations/TableName",
+                StringValue = recommendationTable.TableName,
+                Description = "DynamoDB table for music recommendations"
+            });
 
-        var recommendationTableIndexNameParameter = new StringParameter(this, "RecommendationTableIndexNameParameter", new StringParameterProps
-        {
-            ParameterName = "/Music/Recommendations/EntityTypeVotesIndexName",
-            StringValue = "EntityTypeVotesIndex",
-            Description = "GSI for sorting by votes (for Recommendation Leaderboards)"
-        });
+        var recommendationTableIndexNameParameter = new StringParameter(this, "RecommendationTableIndexNameParameter",
+            new StringParameterProps
+            {
+                ParameterName = "/Music/Recommendations/EntityTypeVotesIndexName",
+                StringValue = "EntityTypeVotesIndex",
+                Description = "GSI for sorting by votes (for Recommendation Leaderboards)"
+            });
 
         var notesTableNameParameter = new StringParameter(this, "NotesTableNameParameter", new StringParameterProps
         {
@@ -114,19 +126,21 @@ public class RecommendationStack : Stack
             Description = "DynamoDB table for recommendation notes"
         });
 
-        var notesModerationIndexNameParameter = new StringParameter(this, "NotesModerationIndexNameParameter", new StringParameterProps
-        {
-            ParameterName = "/Music/Recommendations/NotesModerationStatusIndexName",
-            StringValue = "NoteModerationStatusIndex",
-            Description = "GSI for filtering notes by moderation status (for moderation queue)"
-        });
+        var notesModerationIndexNameParameter = new StringParameter(this, "NotesModerationIndexNameParameter",
+            new StringParameterProps
+            {
+                ParameterName = "/Music/Recommendations/NotesModerationStatusIndexName",
+                StringValue = "NoteModerationStatusIndex",
+                Description = "GSI for filtering notes by moderation status (for moderation queue)"
+            });
 
-        var userNotesIndexNameParameter = new StringParameter(this, "UserNotesIndexNameParameter", new StringParameterProps
-        {
-            ParameterName = "/Music/Recommendations/UserNotesIndexName",
-            StringValue = "UserNotesIndex",
-            Description = "GSI for querying Mario's reviews"
-        });
+        var userNotesIndexNameParameter = new StringParameter(this, "UserNotesIndexNameParameter",
+            new StringParameterProps
+            {
+                ParameterName = "/Music/Recommendations/UserNotesIndexName",
+                StringValue = "UserNotesIndex",
+                Description = "GSI for querying Mario's reviews"
+            });
 
 
         var openAiApiKeyParameter = new StringParameter(this, "OpenAIApiKeyParameter", new StringParameterProps

@@ -1,6 +1,7 @@
 using Amazon.CDK;
-using Music.Infra.Stacks;
+using Cdklabs.CdkNag;
 using Music.Infra.Config;
+using Music.Infra.Stacks;
 
 namespace Music.Infra;
 
@@ -9,6 +10,9 @@ public static class Program
     public static void Main()
     {
         var app = new App();
+
+        Aspects.Of(app).Add(new AwsSolutionsChecks());
+
         var configuration = ConfigurationHelper.BuildConfiguration();
 
         var accountId = configuration["AWS:AccountId"];
@@ -27,7 +31,8 @@ public static class Program
         {
             Env = env,
             StackName = "MusicFrontendStack",
-            Description = "This stack contains the S3 bucket and CloudFront distribution for the primary Music application."
+            Description =
+                "This stack contains the S3 bucket and CloudFront distribution for the primary Music application."
         }, configuration);
 
         frontendStack.AddDependency(integrationApiStack);
@@ -36,7 +41,8 @@ public static class Program
         {
             Env = env,
             StackName = "AdminApiStack",
-            Description = "This stack contains the API Gateway and Lambda function(s) for the admin panel for the Music application."
+            Description =
+                "This stack contains the API Gateway and Lambda function(s) for the admin panel for the Music application."
         }, configuration);
 
         var adminPanelFrontendStack = new AdminPanelFrontendStack(app, "AdminPanelFrontendStack", new StackProps

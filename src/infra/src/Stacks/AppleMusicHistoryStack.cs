@@ -1,11 +1,12 @@
 using System.Collections.Generic;
 using Amazon.CDK;
 using Amazon.CDK.AWS.DynamoDB;
-using Amazon.CDK.AWS.IAM;
-using Amazon.CDK.AWS.Lambda;
 using Amazon.CDK.AWS.Events;
 using Amazon.CDK.AWS.Events.Targets;
+using Amazon.CDK.AWS.IAM;
+using Amazon.CDK.AWS.Lambda;
 using Amazon.CDK.AWS.SSM;
+using Cdklabs.CdkNag;
 using Constructs;
 using Microsoft.Extensions.Configuration;
 using Music.Infra.Constructs;
@@ -13,31 +14,22 @@ using Music.Infra.Constructs;
 namespace Music.Infra.Stacks;
 
 /// <summary>
-/// Defines the stack for the Apple Music History Stack.
+///     Defines the stack for the Apple Music History Stack.
 /// </summary>
 /// <remarks>
-/// This stack contains resources for recording Apple Music listening history:
-/// - Lambda function for fetching and storing song history
-/// - DynamoDB table for persistent storage
-/// - CloudWatch Event Rule for scheduled execution
-/// - SSM Parameter for storing the last processed song ID
+///     This stack contains resources for recording Apple Music listening history:
+///     - Lambda function for fetching and storing song history
+///     - DynamoDB table for persistent storage
+///     - CloudWatch Event Rule for scheduled execution
+///     - SSM Parameter for storing the last processed song ID
 /// </remarks>
-public class AppleMusicHistoryStack : Stack
+public sealed class AppleMusicHistoryStack : Stack
 {
-    /// <summary>
-    /// Gets the name of the Lambda function that updates the Apple Music history
-    /// </summary>
-    public string UpdateHistoryJobLambdaName => updateHistoryJobLambda.FunctionName;
-
-    /// <summary>
-    /// Gets the name of the DynamoDB table that stores the Apple Music history
-    /// </summary>
-    public string HistoryTableName => historyTable.TableName;
-
-    private readonly Function updateHistoryJobLambda;
     private readonly Table historyTable;
+    private readonly Function updateHistoryJobLambda;
 
-    internal AppleMusicHistoryStack(Construct scope, string id, IStackProps? props = null, IConfiguration? configuration = null)
+    internal AppleMusicHistoryStack(Construct scope, string id, IStackProps? props = null,
+        IConfiguration? configuration = null)
         : base(scope, id, props)
     {
         #region DynamoDB Table
@@ -48,6 +40,10 @@ public class AppleMusicHistoryStack : Stack
             PartitionKey = new Attribute { Name = "entityType", Type = AttributeType.STRING },
             SortKey = new Attribute { Name = "processedTimestamp", Type = AttributeType.STRING },
             BillingMode = BillingMode.PAY_PER_REQUEST,
+            PointInTimeRecoverySpecification = new PointInTimeRecoverySpecification
+            {
+                PointInTimeRecoveryEnabled = true
+            }
         });
 
         #endregion
@@ -58,21 +54,21 @@ public class AppleMusicHistoryStack : Stack
         {
             ParameterName = "/Music/AppleMusicHistory/LastProcessedSongId",
             StringValue = "placeholder", // Initial placeholder value
-            Description = "Stores the ID of the last processed song to enable deduplication",
+            Description = "Stores the ID of the last processed song to enable deduplication"
         });
 
         var scheduleRateParameter = new StringParameter(this, "HistoryScheduleRate", new StringParameterProps
         {
             ParameterName = "/Music/AppleMusicHistory/ScheduleRate",
             StringValue = "rate(5 minutes)", // Default value
-            Description = "Schedule rate for Apple Music History Lambda (using Schedule expression syntax)",
+            Description = "Schedule rate for Apple Music History Lambda (using Schedule expression syntax)"
         });
 
         var songLimitParameter = new StringParameter(this, "SongLimit", new StringParameterProps
         {
             ParameterName = "/Music/AppleMusicHistory/SongLimit",
             StringValue = "25", // Default value
-            Description = "Number of songs to fetch from Apple Music API",
+            Description = "Number of songs to fetch from Apple Music API"
         });
 
         // Store the table name in SSM Parameter Store instead of using CloudFormation exports
@@ -128,20 +124,21 @@ public class AppleMusicHistoryStack : Stack
         }));
 
         // Use the NodejsLambdaFunction construct instead of directly creating a Function
-        var updateHistoryJobLambdaConstruct = new NodejsLambdaFunction(this, "UpdateAppleMusicHistoryJobLambda", new NodejsLambdaFunctionProps
-        {
-            Handler = "update-song-history.handler",
-            Code = Code.FromAsset("../app/backend/dist/handlers/jobs"),
-            Role = updateHistoryJobLambdaRole,
-            Description = "Fetches and stores Apple Music listening history",
-            Environment = new Dictionary<string, string>
+        var updateHistoryJobLambdaConstruct = new NodejsLambdaFunction(this, "UpdateAppleMusicHistoryJobLambda",
+            new NodejsLambdaFunctionProps
             {
-                ["DYNAMODB_TABLE_NAME"] = historyTable.TableName,
-                ["LAST_PROCESSED_SONG_PARAMETER"] = lastProcessedSongIdParameter.ParameterName,
-                ["MUSIC_USER_TOKEN_PARAMETER"] = "/Music/AdminPanel/MUT",
-                ["SONG_LIMIT_PARAMETER"] = songLimitParameter.ParameterName
-            }
-        });
+                Handler = "update-song-history.handler",
+                Code = Code.FromAsset("../app/backend/dist/handlers/jobs"),
+                Role = updateHistoryJobLambdaRole,
+                Description = "Fetches and stores Apple Music listening history",
+                Environment = new Dictionary<string, string>
+                {
+                    ["DYNAMODB_TABLE_NAME"] = historyTable.TableName,
+                    ["LAST_PROCESSED_SONG_PARAMETER"] = lastProcessedSongIdParameter.ParameterName,
+                    ["MUSIC_USER_TOKEN_PARAMETER"] = "/Music/AdminPanel/MUT",
+                    ["SONG_LIMIT_PARAMETER"] = songLimitParameter.ParameterName
+                }
+            });
 
         // Get the Function from the construct
         updateHistoryJobLambda = updateHistoryJobLambdaConstruct.Function;
@@ -162,7 +159,7 @@ public class AppleMusicHistoryStack : Stack
             AssumedBy = new ServicePrincipal("lambda.amazonaws.com"),
             Description = "Role for Apple Music History Schedule Update Lambda function",
             ManagedPolicies =
-            [ManagedPolicy.FromAwsManagedPolicyName("service-role/AWSLambdaBasicExecutionRole")]
+                [ManagedPolicy.FromAwsManagedPolicyName("service-role/AWSLambdaBasicExecutionRole")]
         });
 
         // Grant permissions to the Lambda to modify the rule and read SSM parameter
@@ -181,17 +178,18 @@ public class AppleMusicHistoryStack : Stack
             Resources = [$"arn:aws:ssm:{Region}:{Account}:parameter/Music/AppleMusicHistory/ScheduleRate"]
         }));
 
-        var updateScheduleLambdaConstruct = new NodejsLambdaFunction(this, "UpdateScheduleLambda", new NodejsLambdaFunctionProps
-        {
-            Handler = "update-schedule.handler",
-            Code = Code.FromAsset("../app/backend/dist/handlers/event-handlers"),
-            Role = updateScheduleLambdaRole,
-            Description = "Updates EventBridge rule schedule when SSM parameter changes",
-            Environment = new Dictionary<string, string>
+        var updateScheduleLambdaConstruct = new NodejsLambdaFunction(this, "UpdateScheduleLambda",
+            new NodejsLambdaFunctionProps
             {
-                ["RULE_NAME"] = rule.RuleName
-            }
-        });
+                Handler = "update-schedule.handler",
+                Code = Code.FromAsset("../app/backend/dist/handlers/event-handlers"),
+                Role = updateScheduleLambdaRole,
+                Description = "Updates EventBridge rule schedule when SSM parameter changes",
+                Environment = new Dictionary<string, string>
+                {
+                    ["RULE_NAME"] = rule.RuleName
+                }
+            });
 
         var updateScheduleLambda = updateScheduleLambdaConstruct.Function;
 
@@ -228,5 +226,32 @@ public class AppleMusicHistoryStack : Stack
         });
 
         #endregion
+
+        #region CDK Nag Suppressions
+
+        NagSuppressions.AddStackSuppressions(this, [
+            new NagPackSuppression
+            {
+                Id = "AwsSolutions-IAM4",
+                Reason = "Permissions are implicitly defined with managed policies."
+            },
+            new NagPackSuppression
+            {
+                Id = "AwsSolutions-IAM5",
+                Reason = "Permissions are implicitly defined with wildcards."
+            }
+        ]);
+
+        #endregion
     }
+
+    /// <summary>
+    ///     Gets the name of the Lambda function that updates the Apple Music history
+    /// </summary>
+    public string UpdateHistoryJobLambdaName => updateHistoryJobLambda.FunctionName;
+
+    /// <summary>
+    ///     Gets the name of the DynamoDB table that stores the Apple Music history
+    /// </summary>
+    public string HistoryTableName => historyTable.TableName;
 }

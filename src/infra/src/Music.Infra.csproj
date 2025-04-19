@@ -8,11 +8,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Amazon.CDK.Lib" Version="2.188.0" />
+    <PackageReference Include="Amazon.CDK.Lib" Version="2.190.0" />
+    <PackageReference Include="Cdklabs.CdkNag" Version="2.35.73" />
     <PackageReference Include="Constructs" Version="10.4.2" />
-    <PackageReference Include="Amazon.Jsii.Analyzers" Version="*" PrivateAssets="all" />
-    <PackageReference Include="System.Text.Json" Version="9.0.3" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="9.0.3" />
+    <PackageReference Include="Amazon.Jsii.Analyzers" Version="1.111.0" PrivateAssets="all" />
+    <PackageReference Include="System.Text.Json" Version="9.0.4" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="9.0.4" />
   </ItemGroup>
 
 </Project>

@@ -6,30 +6,10 @@ using Constructs;
 namespace Music.Infra.Stacks;
 
 /// <summary>
-/// Stack for CloudWatch dashboards and monitoring resources
+///     Stack for CloudWatch dashboards and monitoring resources
 /// </summary>
-public class ObservabilityStack : Stack
+public sealed class ObservabilityStack : Stack
 {
-    /// <summary>
-    /// Dashboard for Apple Music API metrics
-    /// </summary>
-    public Dashboard AppleMusicDashboard { get; }
-
-    /// <summary>
-    /// Dashboard for MusicBrainz API metrics
-    /// </summary>
-    public Dashboard MusicBrainzDashboard { get; }
-
-    /// <summary>
-    /// Dashboard for Recommendations API metrics
-    /// </summary>
-    public Dashboard RecommendationsDashboard { get; }
-
-    /// <summary>
-    /// Dashboard for Apple Music History metrics
-    /// </summary>
-    public Dashboard AppleMusicHistoryDashboard { get; }
-
     internal ObservabilityStack(Construct scope, string id, IStackProps? props = null)
         : base(scope, id, props)
     {
@@ -59,16 +39,38 @@ public class ObservabilityStack : Stack
     }
 
     /// <summary>
-    /// Adds widgets to the Apple Music API dashboard
+    ///     Dashboard for Apple Music API metrics
     /// </summary>
-    public void AddAppleMusicDashboardWidgets(Dashboard dashboard, string dataFetchingLambdaName, string tokenRefreshNotificationLambdaName)
+    public Dashboard AppleMusicDashboard { get; }
+
+    /// <summary>
+    ///     Dashboard for MusicBrainz API metrics
+    /// </summary>
+    public Dashboard MusicBrainzDashboard { get; }
+
+    /// <summary>
+    ///     Dashboard for Recommendations API metrics
+    /// </summary>
+    public Dashboard RecommendationsDashboard { get; }
+
+    /// <summary>
+    ///     Dashboard for Apple Music History metrics
+    /// </summary>
+    public Dashboard AppleMusicHistoryDashboard { get; }
+
+    /// <summary>
+    ///     Adds widgets to the Apple Music API dashboard
+    /// </summary>
+    public void AddAppleMusicDashboardWidgets(Dashboard dashboard, string dataFetchingLambdaName,
+        string tokenRefreshNotificationLambdaName)
     {
         // Add standard Lambda metrics for data fetching Lambda
         dashboard.AddWidgets(
             new GraphWidget(new GraphWidgetProps
             {
                 Title = "Apple Music Data Fetching Lambda - Invocations",
-                Left = [
+                Left =
+                [
                     new Metric(new MetricProps
                     {
                         Namespace = "AWS/Lambda",
@@ -87,7 +89,8 @@ public class ObservabilityStack : Stack
             new GraphWidget(new GraphWidgetProps
             {
                 Title = "Apple Music Data Fetching Lambda - Errors",
-                Left = [
+                Left =
+                [
                     new Metric(new MetricProps
                     {
                         Namespace = "AWS/Lambda",
@@ -106,7 +109,8 @@ public class ObservabilityStack : Stack
             new GraphWidget(new GraphWidgetProps
             {
                 Title = "Apple Music Data Fetching Lambda - Duration",
-                Left = [
+                Left =
+                [
                     new Metric(new MetricProps
                     {
                         Namespace = "AWS/Lambda",
@@ -129,7 +133,8 @@ public class ObservabilityStack : Stack
             new GraphWidget(new GraphWidgetProps
             {
                 Title = "Apple Music Data Fetching - Custom Metrics",
-                Left = [
+                Left =
+                [
                     new Metric(new MetricProps
                     {
                         Namespace = "Music/AppleMusicApi",
@@ -185,7 +190,8 @@ public class ObservabilityStack : Stack
             new GraphWidget(new GraphWidgetProps
             {
                 Title = "Token Refresh Notification Lambda - Invocations",
-                Left = [
+                Left =
+                [
                     new Metric(new MetricProps
                     {
                         Namespace = "AWS/Lambda",
@@ -204,7 +210,8 @@ public class ObservabilityStack : Stack
             new GraphWidget(new GraphWidgetProps
             {
                 Title = "Token Refresh Notification Lambda - Errors",
-                Left = [
+                Left =
+                [
                     new Metric(new MetricProps
                     {
                         Namespace = "AWS/Lambda",
@@ -223,7 +230,8 @@ public class ObservabilityStack : Stack
             new GraphWidget(new GraphWidgetProps
             {
                 Title = "Token Refresh Notification Lambda - Duration",
-                Left = [
+                Left =
+                [
                     new Metric(new MetricProps
                     {
                         Namespace = "AWS/Lambda",
@@ -246,7 +254,8 @@ public class ObservabilityStack : Stack
             new GraphWidget(new GraphWidgetProps
             {
                 Title = "Token Refresh Notification - Custom Metrics",
-                Left = [
+                Left =
+                [
                     new Metric(new MetricProps
                     {
                         Namespace = "Music/AppleMusicApi",
@@ -291,11 +300,13 @@ public class ObservabilityStack : Stack
             new LogQueryWidget(new LogQueryWidgetProps
             {
                 Title = "Apple Music API Error Logs",
-                LogGroupNames = [
+                LogGroupNames =
+                [
                     $"/aws/lambda/{dataFetchingLambdaName}",
                     $"/aws/lambda/{tokenRefreshNotificationLambdaName}"
                 ],
-                QueryLines = [
+                QueryLines =
+                [
                     "fields @timestamp, @message",
                     "filter level = 'ERROR'",
                     "sort @timestamp desc",
@@ -308,7 +319,7 @@ public class ObservabilityStack : Stack
     }
 
     /// <summary>
-    /// Adds widgets to the MusicBrainz API dashboard
+    ///     Adds widgets to the MusicBrainz API dashboard
     /// </summary>
     public void AddMusicBrainzDashboardWidgets(Dashboard dashboard, string dataFetchingLambdaName)
     {
@@ -317,7 +328,8 @@ public class ObservabilityStack : Stack
             new GraphWidget(new GraphWidgetProps
             {
                 Title = "MusicBrainz Data Fetching Lambda - Invocations",
-                Left = [
+                Left =
+                [
                     new Metric(new MetricProps
                     {
                         Namespace = "AWS/Lambda",
@@ -336,7 +348,8 @@ public class ObservabilityStack : Stack
             new GraphWidget(new GraphWidgetProps
             {
                 Title = "MusicBrainz Data Fetching Lambda - Errors",
-                Left = [
+                Left =
+                [
                     new Metric(new MetricProps
                     {
                         Namespace = "AWS/Lambda",
@@ -355,7 +368,8 @@ public class ObservabilityStack : Stack
             new GraphWidget(new GraphWidgetProps
             {
                 Title = "MusicBrainz Data Fetching Lambda - Duration",
-                Left = [
+                Left =
+                [
                     new Metric(new MetricProps
                     {
                         Namespace = "AWS/Lambda",
@@ -378,7 +392,8 @@ public class ObservabilityStack : Stack
             new GraphWidget(new GraphWidgetProps
             {
                 Title = "MusicBrainz Data Fetching - Custom Metrics",
-                Left = [
+                Left =
+                [
                     new Metric(new MetricProps
                     {
                         Namespace = "Music/MusicBrainzApi",
@@ -434,10 +449,12 @@ public class ObservabilityStack : Stack
             new LogQueryWidget(new LogQueryWidgetProps
             {
                 Title = "MusicBrainz API Error Logs",
-                LogGroupNames = [
+                LogGroupNames =
+                [
                     $"/aws/lambda/{dataFetchingLambdaName}"
                 ],
-                QueryLines = [
+                QueryLines =
+                [
                     "fields @timestamp, @message",
                     "filter level = 'ERROR'",
                     "sort @timestamp desc",
@@ -450,7 +467,7 @@ public class ObservabilityStack : Stack
     }
 
     /// <summary>
-    /// Adds widgets to the Recommendations API dashboard
+    ///     Adds widgets to the Recommendations API dashboard
     /// </summary>
     public void AddRecommendationsDashboardWidgets(
         Dashboard dashboard,
@@ -466,7 +483,8 @@ public class ObservabilityStack : Stack
             new GraphWidget(new GraphWidgetProps
             {
                 Title = "Get Recommendations Lambda - Invocations",
-                Left = [
+                Left =
+                [
                     new Metric(new MetricProps
                     {
                         Namespace = "AWS/Lambda",
@@ -485,7 +503,8 @@ public class ObservabilityStack : Stack
             new GraphWidget(new GraphWidgetProps
             {
                 Title = "Get Recommendations Lambda - Errors",
-                Left = [
+                Left =
+                [
                     new Metric(new MetricProps
                     {
                         Namespace = "AWS/Lambda",
@@ -504,7 +523,8 @@ public class ObservabilityStack : Stack
             new GraphWidget(new GraphWidgetProps
             {
                 Title = "Get Recommendations Lambda - Duration",
-                Left = [
+                Left =
+                [
                     new Metric(new MetricProps
                     {
                         Namespace = "AWS/Lambda",
@@ -527,7 +547,8 @@ public class ObservabilityStack : Stack
             new GraphWidget(new GraphWidgetProps
             {
                 Title = "Get Recommendations - Custom Metrics",
-                Left = [
+                Left =
+                [
                     new Metric(new MetricProps
                     {
                         Namespace = "Music/RecommendationsApi",
@@ -572,7 +593,8 @@ public class ObservabilityStack : Stack
             new GraphWidget(new GraphWidgetProps
             {
                 Title = "Set Recommendations Lambda - Invocations",
-                Left = [
+                Left =
+                [
                     new Metric(new MetricProps
                     {
                         Namespace = "AWS/Lambda",
@@ -591,7 +613,8 @@ public class ObservabilityStack : Stack
             new GraphWidget(new GraphWidgetProps
             {
                 Title = "Set Recommendations Lambda - Errors",
-                Left = [
+                Left =
+                [
                     new Metric(new MetricProps
                     {
                         Namespace = "AWS/Lambda",
@@ -610,7 +633,8 @@ public class ObservabilityStack : Stack
             new GraphWidget(new GraphWidgetProps
             {
                 Title = "Set Recommendations Lambda - Duration",
-                Left = [
+                Left =
+                [
                     new Metric(new MetricProps
                     {
                         Namespace = "AWS/Lambda",
@@ -633,7 +657,8 @@ public class ObservabilityStack : Stack
             new GraphWidget(new GraphWidgetProps
             {
                 Title = "Set Recommendations - Custom Metrics",
-                Left = [
+                Left =
+                [
                     new Metric(new MetricProps
                     {
                         Namespace = "Music/RecommendationsApi",
@@ -689,7 +714,8 @@ public class ObservabilityStack : Stack
             new GraphWidget(new GraphWidgetProps
             {
                 Title = "Get Recommendation Notes Lambda - Invocations",
-                Left = [
+                Left =
+                [
                     new Metric(new MetricProps
                     {
                         Namespace = "AWS/Lambda",
@@ -708,7 +734,8 @@ public class ObservabilityStack : Stack
             new GraphWidget(new GraphWidgetProps
             {
                 Title = "Get Recommendation Notes Lambda - Errors",
-                Left = [
+                Left =
+                [
                     new Metric(new MetricProps
                     {
                         Namespace = "AWS/Lambda",
@@ -727,7 +754,8 @@ public class ObservabilityStack : Stack
             new GraphWidget(new GraphWidgetProps
             {
                 Title = "Get Recommendation Notes Lambda - Duration",
-                Left = [
+                Left =
+                [
                     new Metric(new MetricProps
                     {
                         Namespace = "AWS/Lambda",
@@ -750,7 +778,8 @@ public class ObservabilityStack : Stack
             new GraphWidget(new GraphWidgetProps
             {
                 Title = "Get Recommendation Notes - Custom Metrics",
-                Left = [
+                Left =
+                [
                     new Metric(new MetricProps
                     {
                         Namespace = "Music/RecommendationsApi",
@@ -795,7 +824,8 @@ public class ObservabilityStack : Stack
             new GraphWidget(new GraphWidgetProps
             {
                 Title = "Set Recommendation Notes Lambda - Invocations",
-                Left = [
+                Left =
+                [
                     new Metric(new MetricProps
                     {
                         Namespace = "AWS/Lambda",
@@ -814,7 +844,8 @@ public class ObservabilityStack : Stack
             new GraphWidget(new GraphWidgetProps
             {
                 Title = "Set Recommendation Notes Lambda - Errors",
-                Left = [
+                Left =
+                [
                     new Metric(new MetricProps
                     {
                         Namespace = "AWS/Lambda",
@@ -833,7 +864,8 @@ public class ObservabilityStack : Stack
             new GraphWidget(new GraphWidgetProps
             {
                 Title = "Set Recommendation Notes Lambda - Duration",
-                Left = [
+                Left =
+                [
                     new Metric(new MetricProps
                     {
                         Namespace = "AWS/Lambda",
@@ -856,7 +888,8 @@ public class ObservabilityStack : Stack
             new GraphWidget(new GraphWidgetProps
             {
                 Title = "Set Recommendation Notes - Custom Metrics",
-                Left = [
+                Left =
+                [
                     new Metric(new MetricProps
                     {
                         Namespace = "Music/RecommendationsApi",
@@ -912,7 +945,8 @@ public class ObservabilityStack : Stack
             new GraphWidget(new GraphWidgetProps
             {
                 Title = "Get Recommendation Reviews Lambda - Invocations",
-                Left = [
+                Left =
+                [
                     new Metric(new MetricProps
                     {
                         Namespace = "AWS/Lambda",
@@ -931,7 +965,8 @@ public class ObservabilityStack : Stack
             new GraphWidget(new GraphWidgetProps
             {
                 Title = "Get Recommendation Reviews Lambda - Errors",
-                Left = [
+                Left =
+                [
                     new Metric(new MetricProps
                     {
                         Namespace = "AWS/Lambda",
@@ -950,7 +985,8 @@ public class ObservabilityStack : Stack
             new GraphWidget(new GraphWidgetProps
             {
                 Title = "Get Recommendation Reviews Lambda - Duration",
-                Left = [
+                Left =
+                [
                     new Metric(new MetricProps
                     {
                         Namespace = "AWS/Lambda",
@@ -973,7 +1009,8 @@ public class ObservabilityStack : Stack
             new GraphWidget(new GraphWidgetProps
             {
                 Title = "Get Recommendation Reviews - Custom Metrics",
-                Left = [
+                Left =
+                [
                     new Metric(new MetricProps
                     {
                         Namespace = "Music/RecommendationsApi",
@@ -1018,7 +1055,8 @@ public class ObservabilityStack : Stack
             new GraphWidget(new GraphWidgetProps
             {
                 Title = "Set Recommendation Review Lambda - Invocations",
-                Left = [
+                Left =
+                [
                     new Metric(new MetricProps
                     {
                         Namespace = "AWS/Lambda",
@@ -1037,7 +1075,8 @@ public class ObservabilityStack : Stack
             new GraphWidget(new GraphWidgetProps
             {
                 Title = "Set Recommendation Review Lambda - Errors",
-                Left = [
+                Left =
+                [
                     new Metric(new MetricProps
                     {
                         Namespace = "AWS/Lambda",
@@ -1056,7 +1095,8 @@ public class ObservabilityStack : Stack
             new GraphWidget(new GraphWidgetProps
             {
                 Title = "Set Recommendation Review Lambda - Duration",
-                Left = [
+                Left =
+                [
                     new Metric(new MetricProps
                     {
                         Namespace = "AWS/Lambda",
@@ -1079,7 +1119,8 @@ public class ObservabilityStack : Stack
             new GraphWidget(new GraphWidgetProps
             {
                 Title = "Set Recommendation Review - Custom Metrics",
-                Left = [
+                Left =
+                [
                     new Metric(new MetricProps
                     {
                         Namespace = "Music/RecommendationsApi",
@@ -1135,7 +1176,8 @@ public class ObservabilityStack : Stack
             new LogQueryWidget(new LogQueryWidgetProps
             {
                 Title = "Recommendations API Error Logs",
-                LogGroupNames = [
+                LogGroupNames =
+                [
                     $"/aws/lambda/{getRecommendationsLambdaName}",
                     $"/aws/lambda/{setRecommendationsLambdaName}",
                     $"/aws/lambda/{getRecommendationNotesLambdaName}",
@@ -1143,7 +1185,8 @@ public class ObservabilityStack : Stack
                     $"/aws/lambda/{getRecommendationReviewsLambdaName}",
                     $"/aws/lambda/{setRecommendationReviewLambdaName}"
                 ],
-                QueryLines = [
+                QueryLines =
+                [
                     "fields @timestamp, @message",
                     "filter level = 'ERROR'",
                     "sort @timestamp desc",
@@ -1156,113 +1199,107 @@ public class ObservabilityStack : Stack
     }
 
     /// <summary>
-    /// Adds widgets to the Apple Music History dashboard
+    ///     Adds widgets to the Apple Music History dashboard
     /// </summary>
     public void AddAppleMusicHistoryDashboardWidgets(
         Dashboard dashboard,
         string updateHistoryJobLambdaName,
         string historyTableName)
     {
-        dashboard.AddWidgets(
-        [
-            new GraphWidget(new GraphWidgetProps
-            {
-                Title = "Update Apple Music History Job",
-                Width = 12,
-                Height = 6,
-                Left =
-                [
-                    new Metric(new MetricProps
+        dashboard.AddWidgets(new GraphWidget(new GraphWidgetProps
+        {
+            Title = "Update Apple Music History Job",
+            Width = 12,
+            Height = 6,
+            Left =
+            [
+                new Metric(new MetricProps
+                {
+                    Namespace = "AWS/Lambda",
+                    MetricName = "Invocations",
+                    DimensionsMap = new Dictionary<string, string>
                     {
-                        Namespace = "AWS/Lambda",
-                        MetricName = "Invocations",
-                        DimensionsMap = new Dictionary<string, string>
-                        {
-                            { "FunctionName", updateHistoryJobLambdaName }
-                        }
-                    }),
-                    new Metric(new MetricProps
+                        { "FunctionName", updateHistoryJobLambdaName }
+                    }
+                }),
+                new Metric(new MetricProps
+                {
+                    Namespace = "AWS/Lambda",
+                    MetricName = "Errors",
+                    DimensionsMap = new Dictionary<string, string>
                     {
-                        Namespace = "AWS/Lambda",
-                        MetricName = "Errors",
-                        DimensionsMap = new Dictionary<string, string>
-                        {
-                            { "FunctionName", updateHistoryJobLambdaName }
-                        }
-                    }),
-                    new Metric(new MetricProps
+                        { "FunctionName", updateHistoryJobLambdaName }
+                    }
+                }),
+                new Metric(new MetricProps
+                {
+                    Namespace = "AWS/Lambda",
+                    MetricName = "Duration",
+                    DimensionsMap = new Dictionary<string, string>
                     {
-                        Namespace = "AWS/Lambda",
-                        MetricName = "Duration",
-                        DimensionsMap = new Dictionary<string, string>
-                        {
-                            { "FunctionName", updateHistoryJobLambdaName }
-                        }
-                    })
-                ]
-            }),
-            new GraphWidget(new GraphWidgetProps
-            {
-                Title = "DynamoDB Table",
-                Width = 12,
-                Height = 6,
-                Left =
-                [
-                    new Metric(new MetricProps
+                        { "FunctionName", updateHistoryJobLambdaName }
+                    }
+                })
+            ]
+        }), new GraphWidget(new GraphWidgetProps
+        {
+            Title = "DynamoDB Table",
+            Width = 12,
+            Height = 6,
+            Left =
+            [
+                new Metric(new MetricProps
+                {
+                    Namespace = "AWS/DynamoDB",
+                    MetricName = "ConsumedReadCapacityUnits",
+                    DimensionsMap = new Dictionary<string, string>
                     {
-                        Namespace = "AWS/DynamoDB",
-                        MetricName = "ConsumedReadCapacityUnits",
-                        DimensionsMap = new Dictionary<string, string>
-                        {
-                            { "TableName", historyTableName }
-                        }
-                    }),
-                    new Metric(new MetricProps
+                        { "TableName", historyTableName }
+                    }
+                }),
+                new Metric(new MetricProps
+                {
+                    Namespace = "AWS/DynamoDB",
+                    MetricName = "ConsumedWriteCapacityUnits",
+                    DimensionsMap = new Dictionary<string, string>
                     {
-                        Namespace = "AWS/DynamoDB",
-                        MetricName = "ConsumedWriteCapacityUnits",
-                        DimensionsMap = new Dictionary<string, string>
-                        {
-                            { "TableName", historyTableName }
-                        }
-                    })
-                ]
-            }),
-            new LogQueryWidget(new LogQueryWidgetProps
-            {
-                Title = "Error Logs",
-                Width = 24,
-                Height = 6,
-                LogGroupNames =
-                [
-                    $"/aws/lambda/{updateHistoryJobLambdaName}"
-                ],
-                QueryString = "filter @message like /Error/\n| sort @timestamp desc\n| limit 20"
-            }),
-            new GraphWidget(new GraphWidgetProps
-            {
-                Title = "Songs Processed",
-                Width = 24,
-                Height = 8,
-                Left =
-                [
-                    new Metric(new MetricProps
-                    {
-                        Namespace = "AppleMusicHistory",
-                        MetricName = "SongsProcessed",
-                        Statistic = "Sum",
-                        Period = Duration.Minutes(5)
-                    }),
-                    new Metric(new MetricProps
-                    {
-                        Namespace = "AppleMusicHistory",
-                        MetricName = "NewSongsStored",
-                        Statistic = "Sum",
-                        Period = Duration.Minutes(5)
-                    })
-                ],
-                View = GraphWidgetView.TIME_SERIES
-            })
-        ]);
+                        { "TableName", historyTableName }
+                    }
+                })
+            ]
+        }), new LogQueryWidget(new LogQueryWidgetProps
+        {
+            Title = "Error Logs",
+            Width = 24,
+            Height = 6,
+            LogGroupNames =
+            [
+                $"/aws/lambda/{updateHistoryJobLambdaName}"
+            ],
+            QueryString = "filter @message like /Error/\n| sort @timestamp desc\n| limit 20"
+        }), new GraphWidget(new GraphWidgetProps
+        {
+            Title = "Songs Processed",
+            Width = 24,
+            Height = 8,
+            Left =
+            [
+                new Metric(new MetricProps
+                {
+                    Namespace = "AppleMusicHistory",
+                    MetricName = "SongsProcessed",
+                    Statistic = "Sum",
+                    Period = Duration.Minutes(5)
+                }),
+                new Metric(new MetricProps
+                {
+                    Namespace = "AppleMusicHistory",
+                    MetricName = "NewSongsStored",
+                    Statistic = "Sum",
+                    Period = Duration.Minutes(5)
+                })
+            ],
+            View = GraphWidgetView.TIME_SERIES
+        }));
     }
 }

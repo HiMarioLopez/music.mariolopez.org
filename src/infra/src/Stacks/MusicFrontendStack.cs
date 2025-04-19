@@ -1,4 +1,5 @@
-﻿using Amazon.CDK;
+﻿using System.Collections.Generic;
+using Amazon.CDK;
 using Amazon.CDK.AWS.CertificateManager;
 using Amazon.CDK.AWS.CloudFront;
 using Amazon.CDK.AWS.CloudFront.Experimental;
@@ -6,36 +7,50 @@ using Amazon.CDK.AWS.CloudFront.Origins;
 using Amazon.CDK.AWS.Lambda;
 using Amazon.CDK.AWS.S3;
 using Amazon.CDK.AWS.S3.Deployment;
+using Cdklabs.CdkNag;
 using Constructs;
-using System.Collections.Generic;
 using Microsoft.Extensions.Configuration;
 using Music.Infra.Models.Settings;
 
 namespace Music.Infra.Stacks;
 
 /// <summary>
-/// Defines the stack for the music.mariolopez.org website(s).
+///     Defines the stack for the music.mariolopez.org website(s).
 /// </summary>
 /// <remarks>
-/// Pricing Information:
+///     Pricing Information:
 ///     - https://aws.amazon.com/lambda/pricing/
 ///     - https://aws.amazon.com/cloudfront/pricing/
 ///     - https://aws.amazon.com/s3/pricing/
 /// </remarks>
-public class MusicFrontendStack : Stack
+public sealed class MusicFrontendStack : Stack
 {
-    public MusicFrontendStack(Construct scope, string id, IStackProps? props = null, IConfiguration? configuration = null) : base(scope, id, props)
+    public MusicFrontendStack(Construct scope, string id, IStackProps? props = null,
+        IConfiguration? configuration = null) : base(scope, id, props)
     {
         #region Bucket
 
-        // Create an S3 bucket configured for website hosting
+        var logBucket = new Bucket(this, "Music-SiteLogBucket", new BucketProps
+        {
+            RemovalPolicy = RemovalPolicy.DESTROY,
+            BlockPublicAccess = new BlockPublicAccess(new BlockPublicAccessOptions
+            {
+                BlockPublicPolicy = true,
+                RestrictPublicBuckets = true,
+                BlockPublicAcls = false,
+                IgnorePublicAcls = false
+            }),
+            EnforceSSL = true,
+            ObjectOwnership = ObjectOwnership.BUCKET_OWNER_PREFERRED
+        });
+
         var siteBucket = new Bucket(this, "Music-SiteAssets", new BucketProps
         {
-            WebsiteIndexDocument = "index.html",
-            WebsiteErrorDocument = "error.html",
-            PublicReadAccess = true,
             RemovalPolicy = RemovalPolicy.DESTROY,
-            BlockPublicAccess = new BlockPublicAccess(new BlockPublicAccessOptions { BlockPublicPolicy = false })
+            BlockPublicAccess = BlockPublicAccess.BLOCK_ALL,
+            EnforceSSL = true,
+            ServerAccessLogsBucket = logBucket,
+            ServerAccessLogsPrefix = "site-logs/"
         });
 
         #endregion
@@ -144,22 +159,26 @@ public class MusicFrontendStack : Stack
             Description = "Randomizes the frontend to be served on `music.mariolopez.org`.",
             CurrentVersionOptions = new VersionOptions
             {
-                RemovalPolicy = RemovalPolicy.DESTROY,
+                RemovalPolicy = RemovalPolicy.DESTROY
             },
             Tracing = Tracing.ACTIVE
         });
 
         #endregion
 
-        #region Distribution
+        #region CloudFront Distribution (CDN)
 
         // Certificate for `music.mariolopez.org`
         var awsSettings = configuration?.GetSection("AWS").Get<AwsSettings>();
         var rootCertificateArn = awsSettings?.CertificateArn;
         var rootCertificate = Certificate.FromCertificateArn(this, "Music-SiteCertificate", rootCertificateArn!);
 
-        // Import the API Gateway's custom domain name
         var importedApiDomainName = Fn.ImportValue("Music-ApiGatewayCustomDomainName");
+
+        var siteOrigin = S3BucketOrigin.WithOriginAccessControl(siteBucket, new S3BucketOriginWithOACProps
+        {
+            OriginAccessLevels = [AccessLevel.READ]
+        });
 
         // Keep your Certificate and Distribution setup as before
         var distribution = new Distribution(this, "Music-SiteDistribution", new DistributionProps
@@ -169,10 +188,17 @@ public class MusicFrontendStack : Stack
             // Default Behavior: Redirect to the static site assets S3 bucket
             DefaultBehavior = new BehaviorOptions
             {
-                Origin = new S3StaticWebsiteOrigin(siteBucket),
+                Origin = siteOrigin,
                 ViewerProtocolPolicy = ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
-                // TODO: Once frontend development is 'complete', enable caching
-                CachePolicy = CachePolicy.CACHING_DISABLED
+                CachePolicy = CachePolicy.CACHING_DISABLED,
+                EdgeLambdas =
+                [
+                    new EdgeLambda
+                    {
+                        FunctionVersion = edgeFunction.CurrentVersion,
+                        EventType = LambdaEdgeEventType.ORIGIN_REQUEST
+                    }
+                ]
             },
             // Define additional behaviors, including one for the root path
             AdditionalBehaviors = new Dictionary<string, IBehaviorOptions>
@@ -180,7 +206,7 @@ public class MusicFrontendStack : Stack
                 // Root Path: Randomize the frontend
                 ["/"] = new BehaviorOptions
                 {
-                    Origin = new S3StaticWebsiteOrigin(siteBucket),
+                    Origin = siteOrigin,
                     ViewerProtocolPolicy = ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
                     EdgeLambdas =
                     [
@@ -204,13 +230,54 @@ public class MusicFrontendStack : Stack
                     CachePolicy = CachePolicy.CACHING_DISABLED,
                     AllowedMethods = AllowedMethods.ALLOW_ALL,
                     OriginRequestPolicy = OriginRequestPolicy.ALL_VIEWER,
-                    ResponseHeadersPolicy = ResponseHeadersPolicy.CORS_ALLOW_ALL_ORIGINS,
+                    ResponseHeadersPolicy = ResponseHeadersPolicy.CORS_ALLOW_ALL_ORIGINS
                 }
-            }
+            },
+            EnableLogging = true,
+            LogBucket = logBucket,
+            LogFilePrefix = "cloudfront-logs/"
         });
 
         // Note: You will need to manually update the DNS records for `music.mariolopez.org` to point to the CloudFront distribution.
-        // I tried doing this in CDK but it's buggy as hell. Would not recommend (for now).
+        // I tried doing this in CDK, but it's buggy as hell. Would not recommend (for now).
+
+        #endregion
+
+        #region CDK Nag Suppressions
+
+        NagSuppressions.AddStackSuppressions(this, [
+            new NagPackSuppression
+            {
+                Id = "AwsSolutions-IAM4",
+                Reason = "Permissions are implicitly defined with managed policies."
+            },
+            new NagPackSuppression
+            {
+                Id = "AwsSolutions-IAM5",
+                Reason = "Permissions are implicitly defined with wildcards."
+            },
+            new NagPackSuppression
+            {
+                Id = "AwsSolutions-L1",
+                Reason = "Latest Node.js version is not always supported by Lambda@Edge; " +
+                         "We don't manage the Node.js version for BucketDeployments' backing Lambda."
+            },
+            new NagPackSuppression
+            {
+                Id = "AwsSolutions-CFR1",
+                Reason = "We don't want to restrict our CDN to any regions."
+            },
+            new NagPackSuppression
+            {
+                Id = "AwsSolutions-CFR2",
+                Reason = "Default protections are fine; Extra fees associated with WAF."
+            },
+            new NagPackSuppression
+            {
+                Id = "AwsSolutions-S2",
+                Reason = "Public bucket access is blocked, only allowing Public ACLs for CloudFront logging bucket."
+            }
+        ]);
 
         #endregion
     }
