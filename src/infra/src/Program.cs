@@ -20,12 +20,23 @@ public static class Program
 
         var env = new Environment { Account = accountId, Region = defaultRegion };
 
-        var integrationApiStack = new IntegrationApiStack(app, "IntegrationApiStack", new StackProps
+        var tokenRefreshNotificationStack = new TokenRefreshNotificationStack(app, "TokenRefreshNotificationStack", new StackProps
         {
             Env = env,
-            StackName = "IntegrationApiStack",
-            Description = "This stack contains the API Gateway and Lambda function(s) for the Music application."
+            StackName = "TokenRefreshNotificationStack",
+            Description = "This stack contains resources for automated (usually chron) jobs."
         }, configuration);
+
+        var integrationApiStack = new IntegrationApiStack(app, "IntegrationApiStack",
+            tokenRefreshNotificationStack.TokenRefreshTopic,
+            new StackProps
+            {
+                Env = env,
+                StackName = "IntegrationApiStack",
+                Description = "This stack contains the API Gateway and Lambda function(s) for the Music application."
+            }, configuration);
+
+        integrationApiStack.AddDependency(tokenRefreshNotificationStack);
 
         var frontendStack = new MusicFrontendStack(app, "MusicFrontendStack", new StackProps
         {
@@ -72,12 +83,12 @@ public static class Program
 
         recommendationStack.AddDependency(integrationApiStack);
 
-        var tokenRefreshJobStack = new TokenRefreshJobStack(app, "TokenRefreshJobStack", new StackProps
+        var moderationJobStack = new ModerationJobStack(app, "ModerationJobStack", new StackProps
         {
             Env = env,
-            StackName = "TokenRefreshJobStack",
-            Description = "This stack contains resources related to notifying when the MUT has expired."
-        });
+            StackName = "ModerationJobStack",
+            Description = "This stack contains resources for the moderation (chron) job."
+        }, configuration);
 
         var observabilityStack = new ObservabilityStack(app, "ObservabilityStack", new StackProps
         {
@@ -88,7 +99,7 @@ public static class Program
 
         observabilityStack.AddDependency(integrationApiStack);
         observabilityStack.AddDependency(historyStack);
-        observabilityStack.AddDependency(tokenRefreshJobStack);
+        observabilityStack.AddDependency(tokenRefreshNotificationStack);
 
         // Add widgets to the Apple Music dashboard
         observabilityStack.AddAppleMusicDashboardWidgets(
@@ -116,9 +127,10 @@ public static class Program
             historyStack.UpdateHistoryJobLambdaName,
             historyStack.HistoryTableName);
 
+        // Add widgets to the Token Refresh Job dashboard
         observabilityStack.AddTokenRefreshJobWidgets(
             observabilityStack.TokenRefreshJobDashboard,
-            tokenRefreshJobStack.TokenRefreshNotificationLambdaName);
+            tokenRefreshNotificationStack.TokenRefreshNotificationLambdaName);
 
         app.Synth();
     }

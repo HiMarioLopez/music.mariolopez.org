@@ -14,77 +14,18 @@ using Music.Infra.Constructs;
 namespace Music.Infra.Stacks;
 
 /// <summary>
-///     Defines the stack for the Token Refresh Job.
+///     Defines the stack for the Moderation Job Stack.
 /// </summary>
-public sealed class TokenRefreshJobStack : Stack
+public sealed class ModerationJobStack : Stack
 {
-    private readonly Function tokenRefreshNotificationLambda;
-
     /// <summary>
-    ///     Initializes a new instance of the TokenRefreshJobStack class.
+    ///     Initializes a new instance of the ModerationJobStack class.
     /// </summary>
-    internal TokenRefreshJobStack(Construct scope, string id, IStackProps? props = null,
+    internal ModerationJobStack(Construct scope, string id, IStackProps? props = null,
         IConfiguration? configuration = null)
         : base(scope, id, props)
     {
-        #region SNS Topic for Token Refresh Notifications
-
-        // Create an SNS topic for token refresh notifications
-        var tokenRefreshTopic = new Topic(this, "AppleMusicApiTokenRefreshTopic", new TopicProps
-        {
-            TopicName = "AppleMusicApiTokenRefreshTopic",
-            DisplayName = "Apple Music API Token Refresh",
-            EnforceSSL = true
-        });
-
-        #endregion
-
         #region Lambda Functions and Roles
-
-        #region Token Refresh Notification Lambda
-
-        // Role for the Token Refresh Notification Lambda
-        var tokenRefreshNotificationLambdaRole = new Role(this, "TokenRefreshNotificationLambdaRole", new RoleProps
-        {
-            AssumedBy = new ServicePrincipal("lambda.amazonaws.com"),
-            Description = "Role for Token Refresh Notification Lambda functions",
-            ManagedPolicies = [ManagedPolicy.FromAwsManagedPolicyName("service-role/AWSLambdaBasicExecutionRole")]
-        });
-
-        // Add permissions for SES
-        tokenRefreshNotificationLambdaRole.AddToPolicy(new PolicyStatement(new PolicyStatementProps
-        {
-            Effect = Effect.ALLOW,
-            Actions = ["ses:SendEmail"],
-            Resources = [$"arn:aws:ses:{Region}:{Account}:identity/*"]
-        }));
-
-        // Add CloudWatch permissions to Lambda role
-        tokenRefreshNotificationLambdaRole.AddToPolicy(new PolicyStatement(new PolicyStatementProps
-        {
-            Effect = Effect.ALLOW,
-            Actions = ["cloudwatch:PutMetricData"],
-            Resources = ["*"]
-        }));
-
-        // Token Refresh Notification Lambda
-        var tokenRefreshNotificationLambdaConstruct = new NodejsLambdaFunction(this,
-            "AppleMusicApiTokenRefreshNotificationLambda", new NodejsLambdaFunctionProps
-            {
-                Handler = "token-refresh-notification.handler",
-                Code = Code.FromAsset("../app/backend/dist/handlers/event-handlers"),
-                Role = tokenRefreshNotificationLambdaRole,
-                Description = "Sends notifications when Apple Music API token needs to be refreshed",
-                Environment = new Dictionary<string, string>
-                {
-                    ["AWS_NODEJS_CONNECTION_REUSE_ENABLED"] = "1",
-                    ["ADMIN_EMAIL"] = configuration!["AppleMusicApi:Email:AdminEmail"]!,
-                    ["SOURCE_EMAIL"] = configuration["AppleMusicApi:Email:SourceEmail"]!
-                }
-            });
-        tokenRefreshNotificationLambda = tokenRefreshNotificationLambdaConstruct.Function;
-
-        #endregion
 
         #region Moderation Checking Lambda
 
@@ -151,8 +92,8 @@ public sealed class TokenRefreshJobStack : Stack
                 {
                     ["AWS_NODEJS_CONNECTION_REUSE_ENABLED"] = "1",
                     ["DYNAMODB_TABLE_NAME_PARAMETER"] = "/Music/Recommendations/NotesTableName",
-                    ["ADMIN_EMAIL"] = configuration["MusicAdminSettings:AdminEmail"] ?? "admin@example.com",
-                    ["SOURCE_EMAIL"] = configuration["MusicAdminSettings:SourceEmail"] ?? "noreply@example.com"
+                    ["ADMIN_EMAIL"] = configuration!["AppleMusicApi:Email:AdminEmail"]!,
+                    ["SOURCE_EMAIL"] = configuration["AppleMusicApi:Email:SourceEmail"]!
                 }
             }).Function;
 
@@ -161,9 +102,6 @@ public sealed class TokenRefreshJobStack : Stack
         #endregion
 
         #region Event Sources and Subscriptions
-
-        // Connect SNS topic to Token Refresh Notification Lambda
-        tokenRefreshTopic.AddSubscription(new LambdaSubscription(tokenRefreshNotificationLambda));
 
         // Create EventBridge rule to run check-pending-moderations on a schedule
         var checkPendingModerationsRule = new Rule(this, "CheckPendingModerationsRule", new RuleProps
@@ -190,31 +128,9 @@ public sealed class TokenRefreshJobStack : Stack
             {
                 Id = "AwsSolutions-IAM5",
                 Reason = "Permissions are implicitly defined with wildcards."
-            },
-            new NagPackSuppression
-            {
-                Id = "AwsSolutions-APIG3",
-                Reason = "Default protections are fine; Extra fees associated with WAF."
-            },
-            new NagPackSuppression
-            {
-                Id = "AwsSolutions-APIG4",
-                Reason = "This is a public API."
-            },
-            new NagPackSuppression
-            {
-                Id = "AwsSolutions-COG4",
-                Reason = "This is a public API."
-            },
-            new NagPackSuppression
-            {
-                Id = "AwsSolutions-SMG4",
-                Reason = "This secret will soon be an SSM Parameter."
             }
         ]);
 
         #endregion
     }
-
-    public string TokenRefreshNotificationLambdaName => tokenRefreshNotificationLambda.FunctionName;
 }
