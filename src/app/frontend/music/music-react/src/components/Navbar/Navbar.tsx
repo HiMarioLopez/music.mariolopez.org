@@ -26,6 +26,7 @@ const Navbar: React.FC = () => {
         href="https://music.mariolopez.org/react"
         target="_self"
         rel="alternate"
+        title="React implementation of the Music site"
       >
         <img src={reactLogo} alt="React" className={styles.focusedIcon} />
       </a>
@@ -34,7 +35,8 @@ const Navbar: React.FC = () => {
         target="_self"
         rel="alternate"
         className={styles.underConstruction}
-        title="The TypeScript version is under construction. Check back soon!"
+        tabIndex={-1}
+        aria-disabled="true"
       >
         <img src={tsLogo} alt="TypeScript" />
       </a>
@@ -43,7 +45,8 @@ const Navbar: React.FC = () => {
         target="_self"
         rel="alternate"
         className={styles.underConstruction}
-        title="The Lit version is under construction. Check back soon!"
+        tabIndex={-1}
+        aria-disabled="true"
       >
         <img src={litLogo} alt="Lit" />
       </a>
@@ -52,7 +55,8 @@ const Navbar: React.FC = () => {
         target="_self"
         rel="alternate"
         className={styles.underConstruction}
-        title="The Qwik version is under construction. Check back soon!"
+        tabIndex={-1}
+        aria-disabled="true"
       >
         <img src={qwikLogo} alt="Qwik" />
       </a>
@@ -61,7 +65,8 @@ const Navbar: React.FC = () => {
         target="_self"
         rel="alternate"
         className={styles.underConstruction}
-        title="The Solid version is under construction. Check back soon!"
+        tabIndex={-1}
+        aria-disabled="true"
       >
         <img src={solidLogo} alt="Solid" />
       </a>
@@ -70,7 +75,8 @@ const Navbar: React.FC = () => {
         target="_self"
         rel="alternate"
         className={styles.underConstruction}
-        title="The Svelte version is under construction. Check back soon!"
+        tabIndex={-1}
+        aria-disabled="true"
       >
         <img src={svelteLogo} alt="Svelte" />
       </a>
@@ -79,7 +85,8 @@ const Navbar: React.FC = () => {
         target="_self"
         rel="alternate"
         className={styles.underConstruction}
-        title="The Vue version is under construction. Check back soon!"
+        tabIndex={-1}
+        aria-disabled="true"
       >
         <img src={vueLogo} alt="Vue" />
       </a>
@@ -88,7 +95,8 @@ const Navbar: React.FC = () => {
         target="_self"
         rel="alternate"
         className={styles.underConstruction}
-        title="The Preact version is under construction. Check back soon!"
+        tabIndex={-1}
+        aria-disabled="true"
       >
         <img src={preactLogo} alt="Preact" />
       </a>
@@ -97,7 +105,8 @@ const Navbar: React.FC = () => {
         target="_self"
         rel="alternate"
         className={styles.underConstruction}
-        title="The Angular version is under construction. Check back soon!"
+        tabIndex={-1}
+        aria-disabled="true"
       >
         <img src={angularLogo} alt="Angular" />
       </a>
@@ -106,7 +115,8 @@ const Navbar: React.FC = () => {
         target="_self"
         rel="alternate"
         className={styles.underConstruction}
-        title="The Next.js version is under construction. Check back soon!"
+        tabIndex={-1}
+        aria-disabled="true"
       >
         <img src={nextLogo} alt="Next" />
       </a>

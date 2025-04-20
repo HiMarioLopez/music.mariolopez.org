@@ -1,105 +1,94 @@
 nav {
-    display: flex;
-    justify-content: center;
-    padding: var(--padding-medium);
-    background: var(--navbar-bg-color);
-    color: white;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: var(--navbar-height-desktop);
-    /* Simplify the shadow */
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
-    z-index: 1000;
+  display: flex;
+  justify-content: center;
+  padding: var(--padding-medium);
+  background: var(--navbar-bg-color);
+  color: white;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: var(--navbar-height-desktop);
+  /* Simplify the shadow */
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+  z-index: 1000;
 
-    /* make navbar scrollable */
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
+  /* make navbar scrollable */
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
 }
 
 /* Remove any helper shadows */
 nav:after {
-    display: none;
+  display: none;
 }
 
 /* Simplify the image styling */
 nav img {
-    width: var(--navbar-height-desktop);
-    height: var(--navbar-height-desktop);
-    margin: 0 var(--margin-medium);
-    /* Use opacity for hover effects instead of filter */
-    transition: opacity 0.3s ease;
+  width: var(--navbar-height-desktop);
+  height: var(--navbar-height-desktop);
+  margin: 0 var(--margin-medium);
+  /* Use opacity for hover effects instead of filter */
+  transition: opacity 0.3s ease;
 }
 
 /* Keep focused icon visible */
 .focusedIcon {
-    opacity: 1;
+  opacity: 1;
 }
 
 nav img:not(.focusedIcon) {
-    opacity: 0.25;
+  opacity: 0.25;
 }
 
 /* Simple hover effect without filters */
 nav img:hover {
-    opacity: 1;
+  opacity: 1;
 }
 
 /* Under construction indicator */
 .underConstruction {
-    position: relative;
-    display: inline-block;
-    cursor: not-allowed;
+  position: relative;
+  display: inline-block;
+  cursor: not-allowed;
+  pointer-events: none;
 }
 
 .underConstruction img {
-    filter: grayscale(100%);
-    opacity: 0.4;
-}
-
-.underConstruction::before {
-    content: '🚧';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    z-index: 10;
-    font-size: 1.25rem;
-    text-shadow: 0 0 3px rgba(0, 0, 0, 0.7);
-    pointer-events: none;
+  filter: grayscale(100%);
+  opacity: 0.4;
 }
 
 /* Use title attribute for tooltip instead of custom spans */
 .underConstruction:hover img {
-    filter: grayscale(70%);
-    opacity: 0.6;
+  filter: grayscale(70%);
+  opacity: 0.6;
 }
 
 @media (max-width: 680px) {
-    nav {
-        height: var(--navbar-height-mobile);
-    }
+  nav {
+    height: var(--navbar-height-mobile);
+  }
 
-    nav img {
-        width: var(--navbar-height-mobile);
-        height: var(--navbar-height-mobile);
-        margin: 0 7px;
-    }
+  nav img {
+    width: var(--navbar-height-mobile);
+    height: var(--navbar-height-mobile);
+    margin: 0 7px;
+  }
 
-    nav a:last-child img {
-        margin-right: var(--margin-large);
-    }
+  nav a:last-child img {
+    margin-right: var(--margin-large);
+  }
 
-    .underConstruction::before {
-        font-size: 1.2rem;
-    }
+  .underConstruction::before {
+    font-size: 1.2rem;
+  }
 }
 
 @media (max-width: 510px) {
-    nav {
-        justify-content: flex-start;
-    }
+  nav {
+    justify-content: flex-start;
+  }
 }
