@@ -3,7 +3,6 @@ import React from "react";
 import CombinedRecommendationList from "./components/CombinedRecommendationList/CombinedRecommendationList";
 import Footer from "./components/Footer/Footer";
 import NowPlaying from "./components/NowPlaying/NowPlaying";
-import QueuedSongsList from "./components/QueuedSongsList";
 import RecentlyPlayedList from "./components/RecentlyPlayedList/RecentlyPlayedList";
 import RecommendationForm from "./components/RecommendationForm/RecommendationForm";
 import { MusicProvider } from "./providers/MusicProvider";
@@ -36,7 +35,7 @@ const App: React.FC = () => {
               </div>
             </RecommendationsProvider>
           </div>
-          <div className={styles.middleColumn}>
+          <div className={styles.rightColumn}>
             <MusicProvider>
               <div
                 className={cx(
@@ -55,16 +54,6 @@ const App: React.FC = () => {
                 <RecentlyPlayedList />
               </div>
             </MusicProvider>
-          </div>
-          <div className={styles.rightColumn}>
-            <div
-              className={cx(
-                styles.queuedSongsContainer,
-                styles.styledContainer,
-              )}
-            >
-              <QueuedSongsList />
-            </div>
           </div>
         </div>
         <Footer />

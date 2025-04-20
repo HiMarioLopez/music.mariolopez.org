@@ -148,10 +148,12 @@ export const fetchFromApi = async (
       queryParams: queryParams || {},
       headers: {
         Authorization: developerToken
-          ? `Bearer ${developerToken.substring(0, 5)}...`
+          ? // ? `Bearer ${developerToken.substring(0, 5)}...`
+            developerToken
           : 'Not provided',
         'Music-User-Token': musicUserToken
-          ? `${musicUserToken.substring(0, 5)}...`
+          ? // ? `${musicUserToken.substring(0, 5)}...`
+            musicUserToken
           : 'Not provided',
       },
     });

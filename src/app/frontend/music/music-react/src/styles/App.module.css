@@ -1,220 +1,212 @@
 .app {
-    position: relative;
-    width: 100%;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    overflow-y: auto;
-    align-items: center;
+  position: relative;
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  align-items: center;
 }
 
 @keyframes gradient {
-    0% {
-        background-position: 0% 50%;
-    }
+  0% {
+    background-position: 0% 50%;
+  }
 
-    50% {
-        background-position: 100% 50%;
-    }
+  50% {
+    background-position: 100% 50%;
+  }
 
-    100% {
-        background-position: 0% 50%;
-    }
+  100% {
+    background-position: 0% 50%;
+  }
 }
 
 .appBg {
-    position: fixed;
-    animation: gradient 5s ease infinite;
-    background: linear-gradient(-45deg, #FA573C, #61DAFB, #60A4F4, #FA573C, #1f2378);
-    background-attachment: fixed;
-    background-repeat: no-repeat;
-    background-position: center;
-    background-size: 400% 400%;
-    height: 100vh;
-    width: 100vw;
-    z-index: -1;
+  position: fixed;
+  animation: gradient 5s ease infinite;
+  background: linear-gradient(
+    -45deg,
+    #fa573c,
+    #61dafb,
+    #60a4f4,
+    #fa573c,
+    #1f2378
+  );
+  background-attachment: fixed;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 400% 400%;
+  height: 100vh;
+  width: 100vw;
+  z-index: -1;
 }
 
 .mainContent {
-    flex: 1;
-    display: flex;
-    justify-content: center;
-    padding-top: 10rem;
-    width: 100%;
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  padding-top: 10rem;
+  width: 100%;
 }
 
 /* Remove padding from recently played container for cool 'overflow' effect on lists  */
 .recentlyPlayedContainer {
-    padding-left: 0 !important;
-    padding-right: 0 !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
 }
 
-/* Three-column layout for larger screens */
-@media (min-width: 1600px) {
-    .mainContent {
-        max-width: 1500px;
-        display: flex;
-    }
+/* Two-column layout for larger screens */
+@media (min-width: 1300px) {
+  .mainContent {
+    max-width: 1200px;
+    display: flex;
+  }
 
-    .leftColumn {
-        width: 35%;
-        margin-right: var(--margin-large);
-    }
+  .leftColumn {
+    width: 35%;
+    margin-right: var(--margin-large);
+  }
 
-    .middleColumn {
-        width: 45%;
-        margin-right: var(--margin-large);
-    }
+  .rightColumn {
+    width: 55%;
+  }
 
-    .rightColumn {
-        width: 20%;
-    }
+  /* .rightColumn styles removed as the right column is not in use */
+  .recommendationsListContainer {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    margin-bottom: var(--margin-large);
+  }
 
-    .recommendationsListContainer {
-        flex: 1;
-        min-height: 0;
-        overflow-y: auto;
-        margin-bottom: var(--margin-large);
-    }
-
-    .nowPlayingContainer,
-    .recommendationFormContainer,
-    .recentlyPlayedContainer,
-    .queuedSongsContainer {
-        margin-bottom: var(--margin-large);
-    }
+  .nowPlayingContainer,
+  .recommendationFormContainer,
+  .recentlyPlayedContainer {
+    margin-bottom: var(--margin-large);
+  }
 }
 
-/* Medium desktop - still 3 columns but narrower */
-@media (min-width: 1300px) and (max-width: 1599px) {
-    .mainContent {
-        max-width: 1200px;
-        display: flex;
-    }
+/* Medium desktop - still 2 columns but narrower */
+@media (min-width: 1000px) and (max-width: 1299px) {
+  .mainContent {
+    max-width: 900px;
+    display: flex;
+  }
 
-    .leftColumn {
-        width: 30%;
-        margin-right: var(--margin-medium);
-    }
+  .leftColumn {
+    width: 35%;
+    margin-right: var(--margin-medium);
+  }
 
-    .middleColumn {
-        width: 40%;
-        margin-right: var(--margin-medium);
-    }
+  .rightColumn {
+    width: 45%;
+  }
 
-    .rightColumn {
-        width: 30%;
-    }
+  /* .rightColumn styles removed as the right column is not in use */
+  .recommendationsListContainer {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    margin-bottom: var(--margin-medium);
+  }
 
-    .recommendationsListContainer {
-        flex: 1;
-        min-height: 0;
-        overflow-y: auto;
-        margin-bottom: var(--margin-medium);
-    }
-
-    .nowPlayingContainer,
-    .recommendationFormContainer,
-    .recommendationsListContainer,
-    .recentlyPlayedContainer,
-    .queuedSongsContainer {
-        margin-bottom: var(--margin-medium);
-    }
+  .nowPlayingContainer,
+  .recommendationFormContainer,
+  .recommendationsListContainer,
+  .recentlyPlayedContainer {
+    margin-bottom: var(--margin-medium);
+  }
 }
 
 /* Stack all columns for tablets and smaller screens */
-@media (max-width: 1299px) {
-    .app {
-        flex-direction: column;
-    }
+@media (max-width: 999px) {
+  .app {
+    flex-direction: column;
+  }
 
-    .mainContent {
-        padding-top: calc(var(--navbar-height-desktop) + var(--padding-large));
-        padding-bottom: 0;
-        width: 560px;
-        max-width: calc(90% - var(--padding-large) * 2);
-        margin: 0 auto;
-        display: flex;
-        flex-direction: column;
-    }
+  .mainContent {
+    padding-top: calc(var(--navbar-height-desktop) + var(--padding-large));
+    padding-bottom: 0;
+    width: 560px;
+    max-width: calc(90% - var(--padding-large) * 2);
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+  }
 
-    /* Reordering elements for the single column layout */
-    .leftColumn {
-        order: 2;
-    }
+  /* Reordering elements for the single column layout */
+  .leftColumn {
+    order: 2;
+  }
 
-    .leftColumn {
-        display: flex;
-        flex-direction: column;
-        height: 100%;
-        width: 100%;
-    }
+  .leftColumn {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    width: 100%;
+  }
 
-    .middleColumn {
-        order: 1;
-    }
+  .rightColumn {
+    order: 1;
+  }
 
-    .rightColumn {
-        order: 3;
-    }
+  /* .rightColumn styles removed as the right column is not in use */
+  .leftColumn,
+  .rightColumn {
+    width: 100%;
+  }
 
-    .leftColumn,
-    .middleColumn,
-    .rightColumn {
-        width: 100%;
-    }
+  .recommendationsListContainer {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    margin-bottom: var(--margin-large) 0;
+  }
 
-    .recommendationsListContainer {
-        flex: 1;
-        min-height: 0;
-        overflow-y: auto;
-        margin-bottom: var(--margin-large) 0;
-    }
+  .nowPlayingContainer,
+  .recentlyPlayedContainer,
+  .realtimeUpdatesContainer {
+    width: 100%;
+    margin: var(--margin-large) 0;
+  }
 
-    .nowPlayingContainer,
-    .recentlyPlayedContainer,
-    .realtimeUpdatesContainer {
-        width: 100%;
-        margin: var(--margin-large) 0;
-    }
-
-    .queuedSongsContainer,
-    .recommendationsListContainer,
-    .recommendationFormContainer {
-        width: 100%;
-        margin: 0 0 var(--margin-large) 0;
-    }
+  .recommendationsListContainer,
+  .recommendationFormContainer {
+    width: 100%;
+    margin: 0 0 var(--margin-large) 0;
+  }
 }
 
 @media (max-height: 1000px) {
-    .app {
-        flex-direction: column;
-        align-items: center;
-        justify-content: flex-start;
-    }
+  .app {
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+  }
 }
 
 @media (min-width: 700px) and (max-height: 1000px) {
-    .mainContent {
-        padding-top: calc(var(--navbar-height-desktop) + 40px);
-        padding-bottom: 0;
-    }
+  .mainContent {
+    padding-top: calc(var(--navbar-height-desktop) + 40px);
+    padding-bottom: 0;
+  }
 }
 
 /* Smaller mobile adjustments */
 @media (max-width: 699px) {
-    .mainContent {
-        padding-top: calc(var(--navbar-height-mobile) + var(--padding-large));
-        max-width: 90%;
-    }
+  .mainContent {
+    padding-top: calc(var(--navbar-height-mobile) + var(--padding-large));
+    max-width: 90%;
+  }
 }
 
 /* Shared component styles */
 .styledContainer {
-    background: var(--component-bg-color);
-    color: var(--font-color);
-    padding: var(--padding-large);
-    border-radius: var(--border-radius-large);
-    box-shadow: inset 0 4px 8px rgba(0, 0, 0, 0.1);
-    box-sizing: border-box;
+  background: var(--component-bg-color);
+  color: var(--font-color);
+  padding: var(--padding-large);
+  border-radius: var(--border-radius-large);
+  box-shadow: inset 0 4px 8px rgba(0, 0, 0, 0.1);
+  box-sizing: border-box;
 }
