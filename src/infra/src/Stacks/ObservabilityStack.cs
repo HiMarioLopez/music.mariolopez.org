@@ -36,6 +36,11 @@ public sealed class ObservabilityStack : Stack
         {
             DashboardName = "AppleMusicHistoryDashboard"
         });
+
+        TokenRefreshJobDashboard = new Dashboard(this, "TokenRefreshJobDashboard", new DashboardProps
+        {
+            DashboardName = "TokenRefreshJobDashboard"
+        });
     }
 
     /// <summary>
@@ -59,10 +64,14 @@ public sealed class ObservabilityStack : Stack
     public Dashboard AppleMusicHistoryDashboard { get; }
 
     /// <summary>
+    ///     Dashboard for Token Refresh Job
+    /// </summary>
+    public Dashboard TokenRefreshJobDashboard { get; }
+
+    /// <summary>
     ///     Adds widgets to the Apple Music API dashboard
     /// </summary>
-    public void AddAppleMusicDashboardWidgets(Dashboard dashboard, string dataFetchingLambdaName,
-        string tokenRefreshNotificationLambdaName)
+    public void AddAppleMusicDashboardWidgets(Dashboard dashboard, string dataFetchingLambdaName)
     {
         // Add standard Lambda metrics for data fetching Lambda
         dashboard.AddWidgets(
@@ -185,116 +194,6 @@ public sealed class ObservabilityStack : Stack
             })
         );
 
-        // Add standard Lambda metrics for token refresh notification Lambda
-        dashboard.AddWidgets(
-            new GraphWidget(new GraphWidgetProps
-            {
-                Title = "Token Refresh Notification Lambda - Invocations",
-                Left =
-                [
-                    new Metric(new MetricProps
-                    {
-                        Namespace = "AWS/Lambda",
-                        MetricName = "Invocations",
-                        DimensionsMap = new Dictionary<string, string>
-                        {
-                            ["FunctionName"] = tokenRefreshNotificationLambdaName
-                        },
-                        Statistic = "Sum",
-                        Period = Duration.Minutes(1)
-                    })
-                ],
-                Width = 12,
-                Height = 6
-            }),
-            new GraphWidget(new GraphWidgetProps
-            {
-                Title = "Token Refresh Notification Lambda - Errors",
-                Left =
-                [
-                    new Metric(new MetricProps
-                    {
-                        Namespace = "AWS/Lambda",
-                        MetricName = "Errors",
-                        DimensionsMap = new Dictionary<string, string>
-                        {
-                            ["FunctionName"] = tokenRefreshNotificationLambdaName
-                        },
-                        Statistic = "Sum",
-                        Period = Duration.Minutes(1)
-                    })
-                ],
-                Width = 12,
-                Height = 6
-            }),
-            new GraphWidget(new GraphWidgetProps
-            {
-                Title = "Token Refresh Notification Lambda - Duration",
-                Left =
-                [
-                    new Metric(new MetricProps
-                    {
-                        Namespace = "AWS/Lambda",
-                        MetricName = "Duration",
-                        DimensionsMap = new Dictionary<string, string>
-                        {
-                            ["FunctionName"] = tokenRefreshNotificationLambdaName
-                        },
-                        Statistic = "Average",
-                        Period = Duration.Minutes(1)
-                    })
-                ],
-                Width = 12,
-                Height = 6
-            })
-        );
-
-        // Add custom metrics for token refresh notification Lambda
-        dashboard.AddWidgets(
-            new GraphWidget(new GraphWidgetProps
-            {
-                Title = "Token Refresh Notification - Custom Metrics",
-                Left =
-                [
-                    new Metric(new MetricProps
-                    {
-                        Namespace = "Music/AppleMusicApi",
-                        MetricName = "InvocationCount",
-                        DimensionsMap = new Dictionary<string, string>
-                        {
-                            ["FunctionName"] = tokenRefreshNotificationLambdaName
-                        },
-                        Statistic = "Sum",
-                        Period = Duration.Minutes(1)
-                    }),
-                    new Metric(new MetricProps
-                    {
-                        Namespace = "Music/AppleMusicApi",
-                        MetricName = "ErrorCount",
-                        DimensionsMap = new Dictionary<string, string>
-                        {
-                            ["FunctionName"] = tokenRefreshNotificationLambdaName
-                        },
-                        Statistic = "Sum",
-                        Period = Duration.Minutes(1)
-                    }),
-                    new Metric(new MetricProps
-                    {
-                        Namespace = "Music/AppleMusicApi",
-                        MetricName = "EmailSentCount",
-                        DimensionsMap = new Dictionary<string, string>
-                        {
-                            ["FunctionName"] = tokenRefreshNotificationLambdaName
-                        },
-                        Statistic = "Sum",
-                        Period = Duration.Minutes(1)
-                    })
-                ],
-                Width = 24,
-                Height = 8
-            })
-        );
-
         // Add error log widget
         dashboard.AddWidgets(
             new LogQueryWidget(new LogQueryWidgetProps
@@ -302,8 +201,7 @@ public sealed class ObservabilityStack : Stack
                 Title = "Apple Music API Error Logs",
                 LogGroupNames =
                 [
-                    $"/aws/lambda/{dataFetchingLambdaName}",
-                    $"/aws/lambda/{tokenRefreshNotificationLambdaName}"
+                    $"/aws/lambda/{dataFetchingLambdaName}"
                 ],
                 QueryLines =
                 [
@@ -1301,5 +1199,142 @@ public sealed class ObservabilityStack : Stack
             ],
             View = GraphWidgetView.TIME_SERIES
         }));
+    }
+
+    /// <summary>
+    ///     Adds widgets to the Token Refresh Job dashboard
+    /// </summary>
+    public void AddTokenRefreshJobWidgets(Dashboard dashboard, string tokenRefreshNotificationLambdaName)
+    {
+        // Add standard Lambda metrics for token refresh notification Lambda
+        dashboard.AddWidgets(
+            new GraphWidget(new GraphWidgetProps
+            {
+                Title = "Token Refresh Notification Lambda - Invocations",
+                Left =
+                [
+                    new Metric(new MetricProps
+                    {
+                        Namespace = "AWS/Lambda",
+                        MetricName = "Invocations",
+                        DimensionsMap = new Dictionary<string, string>
+                        {
+                            ["FunctionName"] = tokenRefreshNotificationLambdaName
+                        },
+                        Statistic = "Sum",
+                        Period = Duration.Minutes(1)
+                    })
+                ],
+                Width = 12,
+                Height = 6
+            }),
+            new GraphWidget(new GraphWidgetProps
+            {
+                Title = "Token Refresh Notification Lambda - Errors",
+                Left =
+                [
+                    new Metric(new MetricProps
+                    {
+                        Namespace = "AWS/Lambda",
+                        MetricName = "Errors",
+                        DimensionsMap = new Dictionary<string, string>
+                        {
+                            ["FunctionName"] = tokenRefreshNotificationLambdaName
+                        },
+                        Statistic = "Sum",
+                        Period = Duration.Minutes(1)
+                    })
+                ],
+                Width = 12,
+                Height = 6
+            }),
+            new GraphWidget(new GraphWidgetProps
+            {
+                Title = "Token Refresh Notification Lambda - Duration",
+                Left =
+                [
+                    new Metric(new MetricProps
+                    {
+                        Namespace = "AWS/Lambda",
+                        MetricName = "Duration",
+                        DimensionsMap = new Dictionary<string, string>
+                        {
+                            ["FunctionName"] = tokenRefreshNotificationLambdaName
+                        },
+                        Statistic = "Average",
+                        Period = Duration.Minutes(1)
+                    })
+                ],
+                Width = 12,
+                Height = 6
+            })
+        );
+
+        // Add custom metrics for token refresh notification Lambda
+        dashboard.AddWidgets(
+            new GraphWidget(new GraphWidgetProps
+            {
+                Title = "Token Refresh Notification - Custom Metrics",
+                Left =
+                [
+                    new Metric(new MetricProps
+                    {
+                        Namespace = "Music/AppleMusicApi",
+                        MetricName = "InvocationCount",
+                        DimensionsMap = new Dictionary<string, string>
+                        {
+                            ["FunctionName"] = tokenRefreshNotificationLambdaName
+                        },
+                        Statistic = "Sum",
+                        Period = Duration.Minutes(1)
+                    }),
+                    new Metric(new MetricProps
+                    {
+                        Namespace = "Music/AppleMusicApi",
+                        MetricName = "ErrorCount",
+                        DimensionsMap = new Dictionary<string, string>
+                        {
+                            ["FunctionName"] = tokenRefreshNotificationLambdaName
+                        },
+                        Statistic = "Sum",
+                        Period = Duration.Minutes(1)
+                    }),
+                    new Metric(new MetricProps
+                    {
+                        Namespace = "Music/AppleMusicApi",
+                        MetricName = "EmailSentCount",
+                        DimensionsMap = new Dictionary<string, string>
+                        {
+                            ["FunctionName"] = tokenRefreshNotificationLambdaName
+                        },
+                        Statistic = "Sum",
+                        Period = Duration.Minutes(1)
+                    })
+                ],
+                Width = 24,
+                Height = 8
+            })
+        );
+
+        // Add error log widget
+        dashboard.AddWidgets(
+            new LogQueryWidget(new LogQueryWidgetProps
+            {
+                Title = "Apple Music API Error Logs",
+                LogGroupNames =
+                [
+                    $"/aws/lambda/{tokenRefreshNotificationLambdaName}"
+                ],
+                QueryLines =
+                [
+                    "fields @timestamp, @message",
+                    "filter level = 'ERROR'",
+                    "sort @timestamp desc",
+                    "limit 20"
+                ],
+                Width = 24,
+                Height = 8
+            })
+        );
     }
 }

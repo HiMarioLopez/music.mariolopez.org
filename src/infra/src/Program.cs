@@ -72,6 +72,13 @@ public static class Program
 
         recommendationStack.AddDependency(integrationApiStack);
 
+        var tokenRefreshJobStack = new TokenRefreshJobStack(app, "TokenRefreshJobStack", new StackProps
+        {
+            Env = env,
+            StackName = "TokenRefreshJobStack",
+            Description = "This stack contains resources related to notifying when the MUT has expired."
+        });
+
         var observabilityStack = new ObservabilityStack(app, "ObservabilityStack", new StackProps
         {
             Env = env,
@@ -81,12 +88,12 @@ public static class Program
 
         observabilityStack.AddDependency(integrationApiStack);
         observabilityStack.AddDependency(historyStack);
+        observabilityStack.AddDependency(tokenRefreshJobStack);
 
         // Add widgets to the Apple Music dashboard
         observabilityStack.AddAppleMusicDashboardWidgets(
             observabilityStack.AppleMusicDashboard,
-            integrationApiStack.AppleMusicDataFetchingLambdaName,
-            integrationApiStack.TokenRefreshNotificationLambdaName);
+            integrationApiStack.AppleMusicDataFetchingLambdaName);
 
         // Add widgets to the MusicBrainz dashboard
         observabilityStack.AddMusicBrainzDashboardWidgets(
@@ -108,6 +115,10 @@ public static class Program
             observabilityStack.AppleMusicHistoryDashboard,
             historyStack.UpdateHistoryJobLambdaName,
             historyStack.HistoryTableName);
+
+        observabilityStack.AddTokenRefreshJobWidgets(
+            observabilityStack.TokenRefreshJobDashboard,
+            tokenRefreshJobStack.TokenRefreshNotificationLambdaName);
 
         app.Synth();
     }
