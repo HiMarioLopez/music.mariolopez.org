@@ -17,7 +17,7 @@ import {
   SongRecommendation,
   UserInteractionStatus,
 } from '../../models/recommendation';
-import { generateUUID } from '../../utils/uuid';
+import { generateRecommendationId } from '../../utils/uuid';
 
 const logger = new Logger({ serviceName: 'dynamodb-recommendations' });
 const tracer = new Tracer({ serviceName: 'dynamodb-recommendations' });
@@ -190,8 +190,13 @@ export async function createRecommendation(
     // Default votes to 1 for new recommendations
     const votes = 1;
 
-    // Generate a UUID for the recommendation
-    const recommendationId = generateUUID();
+    // Generate an ID for the recommendation
+    const recommendationId = generateRecommendationId(
+      recommendation.entityType,
+      recommendation.artistName,
+      (recommendation as any).songTitle,
+      (recommendation as any).albumTitle
+    );
 
     // Default reviewedByUser to false
     const reviewedByUser = false;

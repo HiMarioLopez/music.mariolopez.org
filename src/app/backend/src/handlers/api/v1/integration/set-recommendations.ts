@@ -3,6 +3,7 @@ import { RATE_LIMITS } from '@config/rate-limits';
 import {
   AlbumRecommendation,
   ArtistRecommendation,
+  EntityType,
   Recommendation,
   SongRecommendation,
   UserInteractionStatus,
@@ -15,15 +16,17 @@ import {
 import { wrapHandler } from '@utils/lambda-handler';
 import { checkRateLimit } from '@utils/rate-limiter';
 import { HttpStatus } from '@utils/types';
-import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
+import { generateRecommendationId } from '@utils/uuid';
+import { APIGatewayProxyResult } from 'aws-lambda';
 
 /**
  * API Gateway handler function to create or update a recommendation
  */
-export const handler = wrapHandler<APIGatewayProxyEvent, APIGatewayProxyResult>(
-  { serviceName: 'set-recommendations' },
-  async (event, context, utils) => {
-    // Implement rate limiting for write operations
+export const handler = wrapHandler(
+  {
+    serviceName: 'set-recommendations',
+  },
+  async (event, context, utils): Promise<APIGatewayProxyResult> => {
     const rateLimitResponse = await checkRateLimit(event, {
       ...RATE_LIMITS.WRITE,
       logger: utils.logger,
@@ -34,16 +37,10 @@ export const handler = wrapHandler<APIGatewayProxyEvent, APIGatewayProxyResult>(
       return rateLimitResponse as APIGatewayProxyResult;
     }
 
-    // Get DynamoDB table name from Parameter Store
-    const tableNameParameter = utils.getRequiredEnvVar(
-      'DYNAMODB_TABLE_NAME_PARAMETER'
+    const tableName = await utils.getRequiredParameter(
+      utils.getRequiredEnvVar('DYNAMODB_TABLE_NAME_PARAMETER')
     );
-    utils.logger.info('Retrieving table name from parameter', {
-      tableNameParameter,
-    });
-    const tableName = await utils.getRequiredParameter(tableNameParameter);
 
-    // Parse the request body
     if (!event.body) {
       return utils.createErrorResponse(
         event,
@@ -55,151 +52,134 @@ export const handler = wrapHandler<APIGatewayProxyEvent, APIGatewayProxyResult>(
 
     const requestBody = JSON.parse(event.body);
 
-    // Log the full request body for debugging
     utils.logger.info('Request body parsed', {
       requestBody: JSON.stringify(requestBody),
     });
 
-    let result;
-    let existingRecommendation;
-
-    // Check if we're updating an existing recommendation by ID
-    if (requestBody.recommendationId) {
-      utils.logger.info('Updating recommendation by ID', {
-        recommendationId: requestBody.recommendationId,
-      });
-
-      // Get the existing recommendation
-      existingRecommendation = await getRecommendationById(
-        tableName,
-        requestBody.recommendationId
+    if (!requestBody.entityType) {
+      return utils.createErrorResponse(
+        event,
+        new Error('entityType is required'),
+        HttpStatus.BAD_REQUEST,
+        'entityType is required in request body'
       );
+    }
+    if (!['SONG', 'ALBUM', 'ARTIST'].includes(requestBody.entityType)) {
+      return utils.createErrorResponse(
+        event,
+        new Error('Invalid entityType'),
+        HttpStatus.BAD_REQUEST,
+        'entityType must be one of: SONG, ALBUM, or ARTIST'
+      );
+    }
 
-      if (!existingRecommendation) {
+    let idFields: {
+      entityType: EntityType;
+      artistName: string;
+      songTitle?: string;
+      albumTitle?: string;
+    } = {
+      entityType: requestBody.entityType,
+      artistName: '',
+    };
+
+    if (requestBody.entityType === 'SONG') {
+      if (
+        !requestBody.songTitle ||
+        !requestBody.artistName ||
+        !requestBody.albumName
+      ) {
         return utils.createErrorResponse(
           event,
-          new Error(
-            `Recommendation with ID ${requestBody.recommendationId} not found`
-          ),
-          HttpStatus.NOT_FOUND,
-          `Recommendation with ID ${requestBody.recommendationId} not found`
+          new Error('Missing required fields for song recommendation'),
+          HttpStatus.BAD_REQUEST,
+          'songTitle, artistName, and albumName are required for song recommendations'
         );
       }
+      idFields.artistName = requestBody.artistName;
+      idFields.songTitle = requestBody.songTitle;
+    } else if (requestBody.entityType === 'ALBUM') {
+      if (!requestBody.albumTitle || !requestBody.artistName) {
+        return utils.createErrorResponse(
+          event,
+          new Error('Missing required fields for album recommendation'),
+          HttpStatus.BAD_REQUEST,
+          'albumTitle and artistName are required for album recommendations'
+        );
+      }
+      idFields.artistName = requestBody.artistName;
+      idFields.albumTitle = requestBody.albumTitle;
+    } else if (requestBody.entityType === 'ARTIST') {
+      if (!requestBody.artistName) {
+        return utils.createErrorResponse(
+          event,
+          new Error('Missing required fields for artist recommendation'),
+          HttpStatus.BAD_REQUEST,
+          'artistName is required for artist recommendations'
+        );
+      }
+      idFields.artistName = requestBody.artistName;
+    }
 
-      // Prepare updates
+    const recommendationId = generateRecommendationId(
+      idFields.entityType,
+      idFields.artistName,
+      idFields.songTitle,
+      idFields.albumTitle
+    );
+    utils.logger.info('Generated deterministic recommendation ID', {
+      recommendationId,
+    });
+
+    const existingRecommendation = await getRecommendationById(
+      tableName,
+      recommendationId
+    );
+
+    let result: Recommendation;
+    let operation: 'created' | 'updated' | 'merged';
+
+    if (existingRecommendation) {
+      utils.logger.info('Found existing recommendation, updating votes...', {
+        recommendationId,
+      });
+
       const updates: {
         voteChange?: number;
         userInteractionStatus?: UserInteractionStatus;
         reviewedByUser?: boolean;
       } = {};
 
-      // Handle vote change
-      if (requestBody.voteChange !== undefined) {
-        updates.voteChange = Number(requestBody.voteChange);
-      }
+      updates.voteChange = 1;
 
-      // Handle user status
-      if (requestBody.userInteractionStatus) {
-        if (
-          !['LIKED', 'DISLIKED', 'DISMISSED'].includes(
-            requestBody.userInteractionStatus
-          )
-        ) {
-          return utils.createErrorResponse(
-            event,
-            new Error('Invalid userInteractionStatus'),
-            HttpStatus.BAD_REQUEST,
-            'userInteractionStatus must be one of: LIKED, DISLIKED, or DISMISSED'
-          );
-        }
-        updates.userInteractionStatus =
-          requestBody.userInteractionStatus as UserInteractionStatus;
-      }
-
-      // Handle reviewedByUser if provided
-      if (requestBody.reviewedByUser !== undefined) {
-        updates.reviewedByUser = Boolean(requestBody.reviewedByUser);
-      }
-
-      // Update the recommendation
       result = await updateRecommendation(
         tableName,
         existingRecommendation,
         updates
       );
+      operation = 'merged';
 
       utils.metrics.addMetric(
-        `${requestBody.entityType}RecommendationUpdateCount`,
+        `${result.entityType}RecommendationUpdateCount`,
         MetricUnit.Count,
         1
       );
     } else {
-      // Validate required fields for new recommendations
-      if (!requestBody.entityType) {
-        return utils.createErrorResponse(
-          event,
-          new Error('entityType is required'),
-          HttpStatus.BAD_REQUEST,
-          'entityType is required in request body'
-        );
-      }
-
-      if (!['SONG', 'ALBUM', 'ARTIST'].includes(requestBody.entityType)) {
-        return utils.createErrorResponse(
-          event,
-          new Error('Invalid entityType'),
-          HttpStatus.BAD_REQUEST,
-          'entityType must be one of: SONG, ALBUM, or ARTIST'
-        );
-      }
-
-      // Create a new recommendation
-      utils.logger.info('Creating new recommendation', {
-        entityType: requestBody.entityType,
-      });
-
-      // Validate entity-specific required fields
-      if (requestBody.entityType === 'SONG') {
-        if (
-          !requestBody.songTitle ||
-          !requestBody.artistName ||
-          !requestBody.albumName
-        ) {
-          return utils.createErrorResponse(
-            event,
-            new Error('Missing required fields for song recommendation'),
-            HttpStatus.BAD_REQUEST,
-            'songTitle, artistName, and albumName are required for song recommendations'
-          );
+      utils.logger.info(
+        'No existing recommendation found, creating new one...',
+        {
+          recommendationId,
+          entityType: requestBody.entityType,
         }
-      } else if (requestBody.entityType === 'ALBUM') {
-        if (!requestBody.albumTitle || !requestBody.artistName) {
-          return utils.createErrorResponse(
-            event,
-            new Error('Missing required fields for album recommendation'),
-            HttpStatus.BAD_REQUEST,
-            'albumTitle and artistName are required for album recommendations'
-          );
-        }
-      } else if (requestBody.entityType === 'ARTIST') {
-        if (!requestBody.artistName) {
-          return utils.createErrorResponse(
-            event,
-            new Error('Missing required fields for artist recommendation'),
-            HttpStatus.BAD_REQUEST,
-            'artistName is required for artist recommendations'
-          );
-        }
-      }
+      );
 
-      // Map the request body to the corresponding recommendation type
-      let newRecommendation: Omit<
+      let newRecommendationData: Omit<
         Recommendation,
         'createdAt' | 'votes' | 'recommendationId' | 'reviewedByUser'
       >;
 
       if (requestBody.entityType === 'SONG') {
-        newRecommendation = {
+        newRecommendationData = {
           entityType: 'SONG',
           songTitle: requestBody.songTitle,
           artistName: requestBody.artistName,
@@ -210,7 +190,7 @@ export const handler = wrapHandler<APIGatewayProxyEvent, APIGatewayProxyResult>(
           'createdAt' | 'votes' | 'recommendationId' | 'reviewedByUser'
         >;
       } else if (requestBody.entityType === 'ALBUM') {
-        newRecommendation = {
+        newRecommendationData = {
           entityType: 'ALBUM',
           albumTitle: requestBody.albumTitle,
           artistName: requestBody.artistName,
@@ -222,7 +202,7 @@ export const handler = wrapHandler<APIGatewayProxyEvent, APIGatewayProxyResult>(
           'createdAt' | 'votes' | 'recommendationId' | 'reviewedByUser'
         >;
       } else {
-        newRecommendation = {
+        newRecommendationData = {
           entityType: 'ARTIST',
           artistName: requestBody.artistName,
           artistImageUrl: requestBody.artistImageUrl || '',
@@ -233,32 +213,27 @@ export const handler = wrapHandler<APIGatewayProxyEvent, APIGatewayProxyResult>(
         >;
       }
 
-      // Store in DynamoDB
-      result = await createRecommendation(tableName, newRecommendation);
+      result = await createRecommendation(tableName, newRecommendationData);
+      operation = 'created';
 
       utils.metrics.addMetric(
-        `${requestBody.entityType}RecommendationCreateCount`,
+        `${result.entityType}RecommendationCreateCount`,
         MetricUnit.Count,
         1
       );
     }
 
     utils.logger.info('Successfully processed recommendation', {
-      entityType: requestBody.entityType,
+      entityType: result.entityType,
       recommendationId: result.recommendationId,
-      isNewRecord: !existingRecommendation,
-    });
-
-    // Return success response with the created or updated recommendation
-    const operation = existingRecommendation ? 'updated' : 'created';
-
-    utils.logger.info('Returning response', {
       operation,
+      finalVotes: result.votes,
     });
 
     return utils.createSuccessResponse(event, {
       message: `Recommendation ${operation} successfully.`,
       recommendation: result,
+      operation,
     });
   }
 );
