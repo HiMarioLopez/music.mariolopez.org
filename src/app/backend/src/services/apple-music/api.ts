@@ -148,12 +148,10 @@ export const fetchFromApi = async (
       queryParams: queryParams || {},
       headers: {
         Authorization: developerToken
-          ? // ? `Bearer ${developerToken.substring(0, 5)}...`
-            developerToken
+          ? `Bearer ${developerToken.substring(0, 5)}...`
           : 'Not provided',
         'Music-User-Token': musicUserToken
-          ? // ? `${musicUserToken.substring(0, 5)}...`
-            musicUserToken
+          ? `${musicUserToken.substring(0, 5)}...`
           : 'Not provided',
       },
     });
@@ -179,7 +177,8 @@ export const fetchFromApi = async (
       contentLength: response.headers['content-length'],
       responseHeaders: {
         ...response.headers,
-        // Filter out any sensitive headers if needed
+        Authorization: undefined,
+        'Music-User-Token': undefined,
       },
       // Include a summary of the response data without logging everything
       dataStructure: {
