@@ -5,7 +5,6 @@ using Amazon.CDK.AWS.CertificateManager;
 using Amazon.CDK.AWS.Cognito;
 using Amazon.CDK.AWS.IAM;
 using Amazon.CDK.AWS.Lambda;
-using Amazon.CDK.AWS.Logs;
 using Amazon.CDK.AWS.SSM;
 using Cdklabs.CdkNag;
 using Constructs;
