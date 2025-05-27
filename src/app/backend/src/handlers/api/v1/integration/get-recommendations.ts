@@ -5,6 +5,7 @@ import {
   getAllRecommendations,
   getRecommendationById,
   getRecommendationsByEntityType,
+  getRecommendationsByEntityTypeConsistent,
   getReviewedRecommendations,
   getUnreviewedRecommendations,
 } from '@services/dynamodb/recommendations';
@@ -122,18 +123,35 @@ export const handler = wrapHandler<APIGatewayProxyEvent, APIGatewayProxyResult>(
           limit,
         }
       );
-      result = await getRecommendationsByEntityType(
-        tableName,
-        tableIndexName,
-        entityType,
-        limit,
-        startKey
-      );
-      utils.metrics.addMetric(
-        'EntityTypeVotesFilteredQuery',
-        MetricUnit.Count,
-        1
-      );
+      // choose scan-based vs. index-based based on 'consistent' param
+      const useConsistent = queryParams.consistent === 'true';
+      if (useConsistent) {
+        result = await getRecommendationsByEntityTypeConsistent(
+          tableName,
+          tableIndexName,
+          entityType,
+          limit,
+          startKey
+        );
+        utils.metrics.addMetric(
+          'EntityTypeVotesFilteredConsistentQuery',
+          MetricUnit.Count,
+          1
+        );
+      } else {
+        result = await getRecommendationsByEntityType(
+          tableName,
+          tableIndexName,
+          entityType,
+          limit,
+          startKey
+        );
+        utils.metrics.addMetric(
+          'EntityTypeVotesFilteredQuery',
+          MetricUnit.Count,
+          1
+        );
+      }
     } else if (reviewedByUser !== undefined) {
       // Filter by reviewedByUser status
       utils.logger.info('Fetching recommendations by reviewedByUser status', {
