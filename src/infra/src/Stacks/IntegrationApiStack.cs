@@ -319,10 +319,8 @@ public sealed class IntegrationApiStack : Stack
             ],
             Resources =
             [
-                Fn.Join("",
-                [
-                    "arn:aws:dynamodb:", Region, ":", Account, ":table/MusicRecommendations/index/EntityTypeVotesIndex"
-                ])
+                $"arn:aws:dynamodb:{Region}:{Account}:table/MusicRecommendations",
+                $"arn:aws:dynamodb:{Region}:{Account}:table/MusicRecommendations/index/EntityTypeVotesIndex"
             ]
         }));
 
