@@ -4,7 +4,6 @@ using Amazon.CDK.AWS.APIGateway;
 using Amazon.CDK.AWS.CertificateManager;
 using Amazon.CDK.AWS.IAM;
 using Amazon.CDK.AWS.Lambda;
-using Amazon.CDK.AWS.Logs;
 using Amazon.CDK.AWS.SecretsManager;
 using Amazon.CDK.AWS.SNS;
 using Amazon.CDK.AWS.SSM;
@@ -13,7 +12,6 @@ using Constructs;
 using Microsoft.Extensions.Configuration;
 using Music.Infra.Constructs;
 using Music.Infra.Models.Settings;
-using LogGroupProps = Amazon.CDK.AWS.Logs.LogGroupProps;
 
 namespace Music.Infra.Stacks;
 
@@ -36,12 +34,6 @@ public sealed class IntegrationApiStack : Stack
         : base(scope, id, props)
     {
         #region API Gateway
-
-        var apiAccessLogGroup = new LogGroup(this, "Music-ApiAccessLogs", new LogGroupProps
-        {
-            Retention = RetentionDays.ONE_MONTH,
-            RemovalPolicy = RemovalPolicy.DESTROY
-        });
 
         // TODO: Add this back at some point... (?)
         // var corsSettings = configuration?.GetSection("MusicApiSettings").Get<MusicApiSettings>();
@@ -77,15 +69,6 @@ public sealed class IntegrationApiStack : Stack
                 ],
                 AllowOrigins = Cors.ALL_ORIGINS,
                 AllowMethods = Cors.ALL_METHODS
-            },
-            DeployOptions = new StageOptions
-            {
-                StageName = "prod",
-                AccessLogDestination = new LogGroupLogDestination(apiAccessLogGroup),
-                AccessLogFormat = AccessLogFormat.JsonWithStandardFields(),
-                LoggingLevel = MethodLoggingLevel.INFO,
-                DataTraceEnabled = true,
-                MetricsEnabled = true
             },
             CloudWatchRole = true
         });
@@ -1012,6 +995,11 @@ public sealed class IntegrationApiStack : Stack
             },
             new NagPackSuppression
             {
+                Id = "AwsSolutions-APIG1",
+                Reason = "Logging is relatively expensive. Will enable when needed for debugging."
+            },
+            new NagPackSuppression
+            {
                 Id = "AwsSolutions-APIG3",
                 Reason = "Default protections are fine; Extra fees associated with WAF."
             },
@@ -1019,6 +1007,11 @@ public sealed class IntegrationApiStack : Stack
             {
                 Id = "AwsSolutions-APIG4",
                 Reason = "This is a public API."
+            },
+            new NagPackSuppression
+            {
+                Id = "AwsSolutions-APIG6",
+                Reason = "Logging is relatively expensive. Will enable when needed for debugging."
             },
             new NagPackSuppression
             {

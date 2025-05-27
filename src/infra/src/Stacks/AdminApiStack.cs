@@ -292,12 +292,6 @@ public sealed class AdminApiStack : Stack
 
         #region API Gateway
 
-        var apiAccessLogGroup = new LogGroup(this, "Music-AdminApiAccessLogs", new LogGroupProps
-        {
-            Retention = RetentionDays.ONE_MONTH,
-            RemovalPolicy = RemovalPolicy.DESTROY
-        });
-
         // TODO: Add this back at some point... (?)
         // var corsSettings = configuration?.GetSection("AdminApiSettings").Get<AdminApiSettings>();
 
@@ -330,15 +324,6 @@ public sealed class AdminApiStack : Stack
                 ],
                 AllowMethods = Cors.ALL_METHODS,
                 AllowOrigins = Cors.ALL_ORIGINS
-            },
-            DeployOptions = new StageOptions
-            {
-                StageName = "prod",
-                AccessLogDestination = new LogGroupLogDestination(apiAccessLogGroup),
-                AccessLogFormat = AccessLogFormat.JsonWithStandardFields(),
-                LoggingLevel = MethodLoggingLevel.INFO,
-                DataTraceEnabled = true,
-                MetricsEnabled = true
             },
             CloudWatchRole = true
         });
@@ -517,8 +502,18 @@ public sealed class AdminApiStack : Stack
             },
             new NagPackSuppression
             {
+                Id = "AwsSolutions-APIG1",
+                Reason = "Logging is relatively expensive. Will enable when needed for debugging."
+            },
+            new NagPackSuppression
+            {
                 Id = "AwsSolutions-APIG3",
                 Reason = "Default protections are fine; Extra fees associated with WAF."
+            },
+            new NagPackSuppression
+            {
+                Id = "AwsSolutions-APIG6",
+                Reason = "Logging is relatively expensive. Will enable when needed for debugging."
             }
         ]);
 
