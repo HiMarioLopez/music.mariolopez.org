@@ -170,6 +170,40 @@ export async function getRecommendationsByEntityType(
 }
 
 /**
+ * Scan-based strongly-consistent recommendation fetch.
+ */
+export async function getRecommendationsByEntityTypeConsistent(
+  tableName: string,
+  tableIndexName: string, // unused, for signature compatibility
+  entityType: EntityType,
+  limit = DEFAULT_LIMIT,
+  startKey?: string
+): Promise<PaginationResult> {
+  try {
+    const params: ScanCommandInput = {
+      TableName: tableName,
+      FilterExpression: 'entityType = :entityType',
+      ExpressionAttributeValues: { ':entityType': entityType },
+      ConsistentRead: true,
+    };
+    logger.info('Consistent scan for recommendations by entityType', {
+      tableName,
+      entityType,
+    });
+    const result = await docClient.send(new ScanCommand(params));
+    const items = result.Items || [];
+    const sorted = items.sort((a, b) => (b.votes || 0) - (a.votes || 0));
+    const limited = sorted.slice(0, limit);
+    return { items: limited, lastEvaluatedKey: undefined };
+  } catch (error) {
+    logger.error('Error in consistent scan recommendations by entityType', {
+      error,
+    });
+    throw error;
+  }
+}
+
+/**
  * Create a new recommendation in DynamoDB
  *
  * @param tableName - DynamoDB table name

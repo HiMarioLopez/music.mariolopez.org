@@ -28,7 +28,10 @@ export type RecommendationsState = {
 
 export type RecommendationsContextType = {
   state: RecommendationsState;
-  fetchRecommendations: (type: "songs" | "albums" | "artists") => void;
+  fetchRecommendations: (
+    type: "songs" | "albums" | "artists",
+    consistent?: boolean,
+  ) => void;
   addRecommendation: (
     type: "songs" | "albums" | "artists",
     item: RecommendedSong | RecommendedAlbum | RecommendedArtist,

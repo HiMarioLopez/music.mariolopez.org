@@ -3,6 +3,7 @@ import {
   Result,
 } from "../components/RecommendationForm/types/RecommendationForm.types";
 import { MusicHistoryResponse } from "../models/MusicHistoryResponse";
+import { EntityType } from "../models/Recommendations";
 
 const API_BASE_URL = "/api/nodejs/v1";
 
@@ -271,10 +272,11 @@ export const apiService = {
   },
   // Recommendations API methods
   async getRecommendations(
-    type?: "SONG" | "ALBUM" | "ARTIST",
+    type?: EntityType,
     from?: string,
     limit: number = 50,
     startKey?: string,
+    consistent = false,
   ): Promise<{
     items: Array<{
       entityType: string;
@@ -308,12 +310,15 @@ export const apiService = {
       params.append("startKey", startKey);
     }
 
+    if (consistent) {
+      params.append("consistent", "true");
+    }
+
     const queryString = params.toString();
     const url = `${API_BASE_URL}/recommendations${queryString ? `?${queryString}` : ""}`;
 
     return fetchWithAuthRetry(url);
   },
-
   async createRecommendation(
     type: "SONG" | "ALBUM" | "ARTIST",
     data: Record<string, any>,

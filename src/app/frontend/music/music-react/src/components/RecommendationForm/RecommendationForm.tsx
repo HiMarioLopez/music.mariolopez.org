@@ -88,7 +88,7 @@ const RecommendationForm: React.FC = () => {
   } = useRecommendationSearch();
 
   // Use the recommendations context
-  const { addRecommendation } = useRecommendations();
+  const { addRecommendation, fetchRecommendations } = useRecommendations();
 
   // Modified to set the selected item rather than submitting directly
   const handleItemSelect = useCallback(
@@ -166,7 +166,8 @@ const RecommendationForm: React.FC = () => {
                   ]
                 : [],
           };
-          await addRecommendation("songs", songRecommendation);
+          addRecommendation("songs", songRecommendation);
+          fetchRecommendations("songs", true);
         } else if (selectedItem.type === "albums") {
           // Create an Album recommendation with notes array
           const albumRecommendation: RecommendedAlbum = {
@@ -185,7 +186,8 @@ const RecommendationForm: React.FC = () => {
                   ]
                 : [],
           };
-          await addRecommendation("albums", albumRecommendation);
+          addRecommendation("albums", albumRecommendation);
+          fetchRecommendations("albums", true);
         } else if (selectedItem.type === "artists") {
           // Create an Artist recommendation with notes array
           const artistRecommendation: RecommendedArtist = {
@@ -203,7 +205,8 @@ const RecommendationForm: React.FC = () => {
                   ]
                 : [],
           };
-          await addRecommendation("artists", artistRecommendation);
+          addRecommendation("artists", artistRecommendation);
+          fetchRecommendations("artists", true);
         }
 
         // Show success message
