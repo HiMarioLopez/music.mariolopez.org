@@ -1,37 +1,64 @@
-using System.Collections.Generic;
 using Amazon.CDK;
 using Amazon.CDK.AWS.CloudWatch;
 using Constructs;
+using System.Collections.Generic;
 
 namespace Music.Infra.Stacks;
 
 /// <summary>
 ///     Stack for CloudWatch dashboards and monitoring resources
+///
+///     <para><b>Cost Estimation (for `us-east-1` region as of 06-07-2025):</b></para>
+///     <para>
+///     This stack provisions resources that incur monthly costs. The estimated baseline cost for the resources
+///     defined in this stack is approximately <b>$16.20/month</b>, plus charges for CloudWatch Logs Insights queries.
+///     </para>
+///     <para><b>Cost Breakdown:</b></para>
+///     <list type="bullet">
+///         <item>
+///             <b>CloudWatch Dashboards:</b> This stack provisions 5 dashboards. With the first 3 per account being free,
+///             this results in 2 billable dashboards.
+///             <br/><i>Cost: 2 dashboards * $3.00/dashboard = $6.00/month.</i>
+///         </item>
+///         <item>
+///             <b>Custom Metrics:</b> This stack defines approximately 34 unique custom metrics across various namespaces
+///             (e.g., `Music/AppleMusicApi`, `Music/RecommendationsApi`).
+///             <br/><i>Cost: 34 metrics * $0.30/metric = $10.20/month.</i>
+///         </item>
+///         <item>
+///             <b>Standard Metrics:</b> Standard metrics from AWS services (like AWS/Lambda, AWS/DynamoDB) are used
+///             and are included in the AWS Free Tier.
+///         </item>
+///         <item>
+///             <b>CloudWatch Logs Insights:</b> Widgets are provisioned to query logs. Cost is based on usage.
+///             <br/><i>Cost: $0.005 per GB of data scanned per query.</i>
+///         </item>
+///     </list>
+///     <para>
+///     <i>Note: This is an estimate. Actual costs may vary based on usage and potential changes in AWS pricing.</i>
+///     <br/>For up-to-date pricing, see the official <see href="https://aws.amazon.com/cloudwatch/pricing/">AWS CloudWatch Pricing</see> page.
+///     </para>
 /// </summary>
 public sealed class ObservabilityStack : Stack
 {
     internal ObservabilityStack(Construct scope, string id, IStackProps? props = null)
         : base(scope, id, props)
     {
-        // Create the Apple Music API dashboard
         AppleMusicDashboard = new Dashboard(this, "AppleMusicApiDashboard", new DashboardProps
         {
             DashboardName = "AppleMusicApiDashboard"
         });
 
-        // Create the MusicBrainz API dashboard
         MusicBrainzDashboard = new Dashboard(this, "MusicBrainzApiDashboard", new DashboardProps
         {
             DashboardName = "MusicBrainzApiDashboard"
         });
 
-        // Create the Recommendations API dashboard
         RecommendationsDashboard = new Dashboard(this, "RecommendationsApiDashboard", new DashboardProps
         {
             DashboardName = "RecommendationsApiDashboard"
         });
 
-        // Create the Apple Music History dashboard
         AppleMusicHistoryDashboard = new Dashboard(this, "AppleMusicHistoryDashboard", new DashboardProps
         {
             DashboardName = "AppleMusicHistoryDashboard"
@@ -43,35 +70,17 @@ public sealed class ObservabilityStack : Stack
         });
     }
 
-    /// <summary>
-    ///     Dashboard for Apple Music API metrics
-    /// </summary>
     public Dashboard AppleMusicDashboard { get; }
 
-    /// <summary>
-    ///     Dashboard for MusicBrainz API metrics
-    /// </summary>
     public Dashboard MusicBrainzDashboard { get; }
 
-    /// <summary>
-    ///     Dashboard for Recommendations API metrics
-    /// </summary>
     public Dashboard RecommendationsDashboard { get; }
 
-    /// <summary>
-    ///     Dashboard for Apple Music History metrics
-    /// </summary>
     public Dashboard AppleMusicHistoryDashboard { get; }
 
-    /// <summary>
-    ///     Dashboard for Token Refresh Job
-    /// </summary>
     public Dashboard TokenRefreshJobDashboard { get; }
 
-    /// <summary>
-    ///     Adds widgets to the Apple Music API dashboard
-    /// </summary>
-    public void AddAppleMusicDashboardWidgets(Dashboard dashboard, string dataFetchingLambdaName)
+    public static void AddAppleMusicDashboardWidgets(Dashboard dashboard, string dataFetchingLambdaName)
     {
         // Add standard Lambda metrics for data fetching Lambda
         dashboard.AddWidgets(
@@ -216,10 +225,7 @@ public sealed class ObservabilityStack : Stack
         );
     }
 
-    /// <summary>
-    ///     Adds widgets to the MusicBrainz API dashboard
-    /// </summary>
-    public void AddMusicBrainzDashboardWidgets(Dashboard dashboard, string dataFetchingLambdaName)
+    public static void AddMusicBrainzDashboardWidgets(Dashboard dashboard, string dataFetchingLambdaName)
     {
         // Add standard Lambda metrics
         dashboard.AddWidgets(
@@ -364,10 +370,7 @@ public sealed class ObservabilityStack : Stack
         );
     }
 
-    /// <summary>
-    ///     Adds widgets to the Recommendations API dashboard
-    /// </summary>
-    public void AddRecommendationsDashboardWidgets(
+    public static void AddRecommendationsDashboardWidgets(
         Dashboard dashboard,
         string getRecommendationsLambdaName,
         string setRecommendationsLambdaName,
@@ -1096,14 +1099,12 @@ public sealed class ObservabilityStack : Stack
         );
     }
 
-    /// <summary>
-    ///     Adds widgets to the Apple Music History dashboard
-    /// </summary>
-    public void AddAppleMusicHistoryDashboardWidgets(
+    public static void AddAppleMusicHistoryDashboardWidgets(
         Dashboard dashboard,
         string updateHistoryJobLambdaName,
         string historyTableName)
     {
+        // Add standard Lambda metrics for Update Apple Music History Job Lambda
         dashboard.AddWidgets(new GraphWidget(new GraphWidgetProps
         {
             Title = "Update Apple Music History Job",
@@ -1201,10 +1202,7 @@ public sealed class ObservabilityStack : Stack
         }));
     }
 
-    /// <summary>
-    ///     Adds widgets to the Token Refresh Job dashboard
-    /// </summary>
-    public void AddTokenRefreshJobWidgets(Dashboard dashboard, string tokenRefreshNotificationLambdaName)
+    public static void AddTokenRefreshJobWidgets(Dashboard dashboard, string tokenRefreshNotificationLambdaName)
     {
         // Add standard Lambda metrics for token refresh notification Lambda
         dashboard.AddWidgets(
