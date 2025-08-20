@@ -90,47 +90,51 @@ public static class Program
             Description = "This stack contains resources for the moderation (chron) job."
         }, configuration);
 
-        var observabilityStack = new ObservabilityStack(app, "ObservabilityStack", new StackProps
-        {
-            Env = env,
-            StackName = "ObservabilityStack",
-            Description = "This stack contains CloudWatch dashboards for monitoring the Music application."
-        });
+        #region Observability Stack (Disabled for cost reasons)
 
-        observabilityStack.AddDependency(integrationApiStack);
-        observabilityStack.AddDependency(historyStack);
-        observabilityStack.AddDependency(tokenRefreshNotificationStack);
+        // var observabilityStack = new ObservabilityStack(app, "ObservabilityStack", new StackProps
+        // {
+        //     Env = env,
+        //     StackName = "ObservabilityStack",
+        //     Description = "This stack contains CloudWatch dashboards for monitoring the Music application."
+        // });
 
-        // Add widgets to the Apple Music dashboard
-        observabilityStack.AddAppleMusicDashboardWidgets(
-            observabilityStack.AppleMusicDashboard,
-            integrationApiStack.AppleMusicDataFetchingLambdaName);
+        // observabilityStack.AddDependency(integrationApiStack);
+        // observabilityStack.AddDependency(historyStack);
+        // observabilityStack.AddDependency(tokenRefreshNotificationStack);
 
-        // Add widgets to the MusicBrainz dashboard
-        observabilityStack.AddMusicBrainzDashboardWidgets(
-            observabilityStack.MusicBrainzDashboard,
-            integrationApiStack.MusicBrainzDataFetchingLambdaName);
+        // // Add widgets to the Apple Music dashboard
+        // observabilityStack.AddAppleMusicDashboardWidgets(
+        //     observabilityStack.AppleMusicDashboard,
+        //     integrationApiStack.AppleMusicDataFetchingLambdaName);
 
-        // Add widgets to the Recommendations dashboard
-        observabilityStack.AddRecommendationsDashboardWidgets(
-            observabilityStack.RecommendationsDashboard,
-            integrationApiStack.GetRecommendationsLambdaName,
-            integrationApiStack.SetRecommendationsLambdaName,
-            integrationApiStack.GetRecommendationNotesLambdaName,
-            integrationApiStack.SetRecommendationNotesLambdaName,
-            integrationApiStack.GetRecommendationReviewsLambdaName,
-            integrationApiStack.SetRecommendationReviewLambdaName);
+        // // Add widgets to the MusicBrainz dashboard
+        // observabilityStack.AddMusicBrainzDashboardWidgets(
+        //     observabilityStack.MusicBrainzDashboard,
+        //     integrationApiStack.MusicBrainzDataFetchingLambdaName);
 
-        // Add widgets to the Apple Music History dashboard
-        observabilityStack.AddAppleMusicHistoryDashboardWidgets(
-            observabilityStack.AppleMusicHistoryDashboard,
-            historyStack.UpdateHistoryJobLambdaName,
-            historyStack.HistoryTableName);
+        // // Add widgets to the Recommendations dashboard
+        // observabilityStack.AddRecommendationsDashboardWidgets(
+        //     observabilityStack.RecommendationsDashboard,
+        //     integrationApiStack.GetRecommendationsLambdaName,
+        //     integrationApiStack.SetRecommendationsLambdaName,
+        //     integrationApiStack.GetRecommendationNotesLambdaName,
+        //     integrationApiStack.SetRecommendationNotesLambdaName,
+        //     integrationApiStack.GetRecommendationReviewsLambdaName,
+        //     integrationApiStack.SetRecommendationReviewLambdaName);
 
-        // Add widgets to the Token Refresh Job dashboard
-        observabilityStack.AddTokenRefreshJobWidgets(
-            observabilityStack.TokenRefreshJobDashboard,
-            tokenRefreshNotificationStack.TokenRefreshNotificationLambdaName);
+        // // Add widgets to the Apple Music History dashboard
+        // observabilityStack.AddAppleMusicHistoryDashboardWidgets(
+        //     observabilityStack.AppleMusicHistoryDashboard,
+        //     historyStack.UpdateHistoryJobLambdaName,
+        //     historyStack.HistoryTableName);
+
+        // // Add widgets to the Token Refresh Job dashboard
+        // observabilityStack.AddTokenRefreshJobWidgets(
+        //     observabilityStack.TokenRefreshJobDashboard,
+        //     tokenRefreshNotificationStack.TokenRefreshNotificationLambdaName);
+
+        #endregion
 
         app.Synth();
     }
