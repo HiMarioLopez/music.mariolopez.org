@@ -1,9 +1,4 @@
-import {
-  Hint,
-  Result,
-} from "../components/RecommendationForm/types/RecommendationForm.types";
 import { MusicHistoryResponse } from "../models/MusicHistoryResponse";
-import { EntityType } from "../models/Recommendations";
 
 const API_BASE_URL = "/api/nodejs/v1";
 
@@ -11,15 +6,6 @@ const API_BASE_URL = "/api/nodejs/v1";
 interface AuthResponse {
   token: string;
   expiresAt?: number;
-}
-
-// Type for search suggestions response
-interface SearchSuggestionsResponse {
-  data: {
-    results: {
-      suggestions: Hint[];
-    };
-  };
 }
 
 // Error handling class
@@ -206,145 +192,10 @@ const fetchWithAuthRetry = async <T>(
 
 // Export a unified API service
 export const apiService = {
-  // All API methods will trigger auth only when called
-  async searchSuggestions(
-    term: string,
-    limit: number = 3,
-    types: string[] = ["songs", "albums", "artists"],
-    kinds: string[] = ["terms", "topResults"],
-  ): Promise<{
-    termSuggestions: Result[];
-    contentResults: Result[];
-  }> {
-    const queryParams = new URLSearchParams({
-      term: term,
-      limit: limit.toString(),
-      types: types.join(","),
-      kinds: kinds.join(","),
-    });
-
-    // Using the new fetchWithAuthRetry which handles auth token internally
-    const data = await fetchWithAuthRetry<SearchSuggestionsResponse>(
-      `${API_BASE_URL}/apple-music/catalog/us/search/suggestions?${queryParams}`,
-    );
-
-    // Parse term suggestions
-    const termSuggestions =
-      data.data.results.suggestions
-        .filter((suggestion: Hint) => suggestion.kind === "terms")
-        .map((suggestion: Hint) => ({
-          id: suggestion.searchTerm || suggestion.displayTerm || "",
-          name: suggestion.displayTerm || suggestion.searchTerm || "",
-          type: "hint" as const,
-        })) || [];
-
-    // Parse content results
-    const contentResults =
-      data.data.results.suggestions
-        .filter(
-          (suggestion: Hint) =>
-            suggestion.kind === "topResults" && suggestion.content,
-        )
-        .map((suggestion: Hint) => {
-          const content = suggestion.content!;
-          return {
-            id: content.id,
-            name: content.attributes.name,
-            artist: content.attributes.artistName,
-            album: content.attributes.albumName,
-            artworkUrl: content.attributes.artwork?.url
-              ?.replace("{w}", "40")
-              .replace("{h}", "40"),
-            type: content.type,
-            trackCount: content.attributes.trackCount,
-            releaseDate: content.attributes.releaseDate,
-            genres: content.attributes.genreNames,
-          };
-        }) || [];
-
-    return { termSuggestions, contentResults };
-  },
   // Music history API methods
   async getMusicHistory(limit: number = 5): Promise<MusicHistoryResponse> {
     return fetchWithErrorHandling<MusicHistoryResponse>(
       `${API_BASE_URL}/history/music?limit=${limit}`,
     );
-  },
-  // Recommendations API methods
-  async getRecommendations(
-    type?: EntityType,
-    from?: string,
-    limit: number = 50,
-    startKey?: string,
-    consistent = false,
-  ): Promise<{
-    items: Array<{
-      entityType: string;
-      timestamp: string;
-      id?: string;
-      votes?: number;
-      [key: string]: any;
-    }>;
-    pagination: {
-      count: number;
-      hasMore: boolean;
-      nextToken?: string;
-    };
-  }> {
-    // Build query parameters
-    const params = new URLSearchParams();
-
-    if (type) {
-      params.append("entityType", type);
-    }
-
-    if (from) {
-      params.append("from", from);
-    }
-
-    if (limit !== 50) {
-      params.append("limit", limit.toString());
-    }
-
-    if (startKey) {
-      params.append("startKey", startKey);
-    }
-
-    if (consistent) {
-      params.append("consistent", "true");
-    }
-
-    const queryString = params.toString();
-    const url = `${API_BASE_URL}/recommendations${queryString ? `?${queryString}` : ""}`;
-
-    return fetchWithAuthRetry(url);
-  },
-  async createRecommendation(
-    type: "SONG" | "ALBUM" | "ARTIST",
-    data: Record<string, any>,
-  ): Promise<{
-    message: string;
-    recommendation: {
-      entityType: string;
-      timestamp: string;
-      id?: string;
-      votes?: number;
-      [key: string]: any;
-    };
-  }> {
-    const payload = {
-      entityType: type,
-      ...data,
-    };
-
-    const url = `${API_BASE_URL}/recommendation`;
-
-    return fetchWithAuthRetry(url, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(payload),
-    });
   },
 };
