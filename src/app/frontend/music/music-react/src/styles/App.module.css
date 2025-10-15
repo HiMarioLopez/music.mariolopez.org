@@ -25,14 +25,12 @@
 .appBg {
   position: fixed;
   animation: gradient 5s ease infinite;
-  background: linear-gradient(
-    -45deg,
-    #fa573c,
-    #61dafb,
-    #60a4f4,
-    #fa573c,
-    #1f2378
-  );
+  background: linear-gradient(-45deg,
+      #fa573c,
+      #61dafb,
+      #60a4f4,
+      #fa573c,
+      #1f2378);
   background-attachment: fixed;
   background-repeat: no-repeat;
   background-position: center;
@@ -56,23 +54,19 @@
   padding-right: 0 !important;
 }
 
-/* Two-column layout for larger screens */
+/* Single centered column layout for larger screens */
 @media (min-width: 1300px) {
   .mainContent {
-    max-width: 1200px;
+    max-width: 800px;
     display: flex;
+    justify-content: center;
   }
 
-  .leftColumn {
-    width: 45%;
-    margin-right: var(--margin-large);
+  .centerColumn {
+    width: 100%;
+    max-width: 600px;
   }
 
-  .rightColumn {
-    width: 55%;
-  }
-
-  /* .rightColumn styles removed as the right column is not in use */
   .recommendationsListContainer {
     flex: 1;
     min-height: 0;
@@ -87,23 +81,19 @@
   }
 }
 
-/* Medium desktop - still 2 columns but narrower */
+/* Medium desktop - single centered column */
 @media (min-width: 1000px) and (max-width: 1299px) {
   .mainContent {
-    max-width: 900px;
+    max-width: 700px;
     display: flex;
+    justify-content: center;
   }
 
-  .leftColumn {
-    width: 35%;
-    margin-right: var(--margin-medium);
+  .centerColumn {
+    width: 100%;
+    max-width: 600px;
   }
 
-  .rightColumn {
-    width: 45%;
-  }
-
-  /* .rightColumn styles removed as the right column is not in use */
   .recommendationsListContainer {
     flex: 1;
     min-height: 0;
@@ -133,27 +123,11 @@
     margin: 0 auto;
     display: flex;
     flex-direction: column;
+    justify-content: center;
   }
 
-  /* Reordering elements for the single column layout */
-  .leftColumn {
-    order: 2;
-  }
-
-  .leftColumn {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-    width: 100%;
-  }
-
-  .rightColumn {
+  .centerColumn {
     order: 1;
-  }
-
-  /* .rightColumn styles removed as the right column is not in use */
-  .leftColumn,
-  .rightColumn {
     width: 100%;
   }
 

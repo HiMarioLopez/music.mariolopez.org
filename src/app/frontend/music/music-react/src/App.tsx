@@ -14,9 +14,7 @@ const App: React.FC = () => {
       <div className={styles.app}>
         <Navbar />
         <div className={styles.mainContent}>
-          <div className={styles.leftColumn}>
-          </div>
-          <div className={styles.rightColumn}>
+          <div className={styles.centerColumn}>
             <MusicProvider>
               <div
                 className={cx(
