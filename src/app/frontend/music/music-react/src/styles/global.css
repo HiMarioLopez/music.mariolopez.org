@@ -15,7 +15,7 @@ body,
     --font-color: aliceblue;
 
     /* Colors */
-    --navbar-bg-color: rgba(35, 35, 35, 0.9);
+    --navbar-bg-color: rgb(26, 26, 26);
     --component-bg-color: rgba(50, 50, 50, 0.6);
     --input-bg-color: rgba(32, 35, 42, 0.7);
     --track-bg-color: rgba(60, 60, 60, 0.6);
