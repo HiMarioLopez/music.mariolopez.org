@@ -2,6 +2,19 @@ import React from "react";
 import styles from "./Footer.module.css";
 
 const Footer: React.FC = () => {
+  // Format build time for display
+  const formatBuildTime = (isoString: string) => {
+    const date = new Date(isoString);
+    return date.toLocaleString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      timeZoneName: "short",
+    });
+  };
+
   return (
     <footer>
       <div className={styles.footerComponentLinkContainer}>
@@ -31,6 +44,9 @@ const Footer: React.FC = () => {
         >
           © {new Date().getFullYear()} Mario Lopez
         </a>
+      </div>
+      <div className={styles.footerBuildInfo}>
+        Build: {formatBuildTime(__BUILD_TIME__)}
       </div>
     </footer>
   );

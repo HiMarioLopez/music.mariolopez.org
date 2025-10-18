@@ -52,3 +52,17 @@ footer a:hover {
 footer .footerComponentCopyrightContainer {
     margin: 0 var(--margin-medium);
 }
+
+footer .footerBuildInfo {
+    margin: 0 var(--margin-medium);
+    font-size: 0.7em;
+    opacity: 0.5;
+    color: var(--font-color);
+}
+
+/* Hide build info on smaller mobile screens to save space */
+@media (max-width: 680px) {
+    footer .footerBuildInfo {
+        margin: var(--margin-small) 0 0 0;
+    }
+}

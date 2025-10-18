@@ -5,6 +5,9 @@ import react from "@vitejs/plugin-react-swc";
 export default defineConfig({
   plugins: [react()],
   base: "https://music.mariolopez.org/react",
+  define: {
+    __BUILD_TIME__: JSON.stringify(new Date().toISOString()),
+  },
   build: {
     minify: "esbuild",
     reportCompressedSize: true,
