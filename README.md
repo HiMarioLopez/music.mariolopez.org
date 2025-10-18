@@ -21,7 +21,21 @@ This is meant to be a _very_ long-term project that will grow in many aspects, w
 
 ## (WIP) Solution Architecture
 
-![Draft Solution Architecture](./docs/Solution%20Architecture%20(March%202025).png)
+### Current State
+
+#### Frontend
+
+![Frontend Solution Architecture](./docs/[October%202025]%20Frontend%20Architecture.png)
+
+#### Backend
+
+![Backend Solution Architecture](./docs/[October%202025]%20Backend%20Architecture.png)
+
+### Deprecated Components
+
+#### Backend (Recommendation System)
+
+![Deprecated Recommendation System Backend](<./docs/[October%202025]%20Backend%20Architecture%20(Deprecated%20Components).png>)
 
 ## References
 
