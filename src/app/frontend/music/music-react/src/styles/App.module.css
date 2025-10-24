@@ -13,8 +13,32 @@
     background-position: 0% 50%;
   }
 
+  12.5% {
+    background-position: 50% 0%;
+  }
+
+  25% {
+    background-position: 100% 25%;
+  }
+
+  37.5% {
+    background-position: 75% 100%;
+  }
+
   50% {
+    background-position: 25% 75%;
+  }
+
+  62.5% {
+    background-position: 50% 25%;
+  }
+
+  75% {
     background-position: 100% 50%;
+  }
+
+  87.5% {
+    background-position: 0% 100%;
   }
 
   100% {
@@ -24,13 +48,15 @@
 
 .appBg {
   position: fixed;
-  animation: gradient 5s ease infinite;
-  background: linear-gradient(-45deg,
-      #fa573c,
-      #61dafb,
-      #60a4f4,
-      #fa573c,
-      #1f2378);
+  animation: gradient 8s ease-in-out infinite;
+  background: linear-gradient(
+    -45deg,
+    var(--gradient-color-1, #fa573c),
+    var(--gradient-color-2, #61dafb),
+    var(--gradient-color-3, #60a4f4),
+    var(--gradient-color-4, #fa573c),
+    var(--gradient-color-5, #1f2378)
+  );
   background-repeat: no-repeat;
   background-position: center;
   background-size: 400% 400%;

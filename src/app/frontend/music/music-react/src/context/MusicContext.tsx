@@ -7,6 +7,13 @@ interface MusicContextType {
   loading: boolean;
   error: string | null;
   refreshMusicHistory: () => Promise<void>;
+  gradientColors: {
+    color1: string;
+    color2: string;
+    color3: string;
+    color4: string;
+    color5: string;
+  };
 }
 
 export const MusicContext = createContext<MusicContextType | undefined>(

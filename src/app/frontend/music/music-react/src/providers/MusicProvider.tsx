@@ -1,7 +1,7 @@
 import { ReactNode, useEffect, useState } from "react";
 import { MusicContext } from "../context/MusicContext";
-import { apiService } from "../services/apiService";
 import { AppleMusicSong } from "../models/AppleMusicSong";
+import { apiService } from "../services/apiService";
 import { MusicSource } from "../types/MusicSource";
 
 interface MusicProviderProps {
@@ -20,6 +20,36 @@ export const MusicProvider: React.FC<MusicProviderProps> = ({ children }) => {
   const [recentlyPlayed, setRecentlyPlayed] = useState<AppleMusicSong[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Function to generate gradient colors from Apple Music artwork colors
+  const generateGradientColors = (song: AppleMusicSong | null) => {
+    if (!song?.artworkColors) {
+      // Default gradient colors
+      return {
+        color1: '#fa573c',
+        color2: '#61dafb',
+        color3: '#60a4f4',
+        color4: '#fa573c',
+        color5: '#1f2378',
+      };
+    }
+
+    const { backgroundColor, textColor1, textColor2, textColor3, textColor4 } = song.artworkColors;
+
+    // Create a gradient using the background color and text colors
+    // Mix background color with text colors for variety
+    return {
+      color1: backgroundColor,
+      color2: textColor1 || backgroundColor,
+      color3: textColor2 || backgroundColor,
+      color4: textColor3 || backgroundColor,
+      color5: textColor4 || backgroundColor,
+    };
+  };
+
+  const [gradientColors, setGradientColors] = useState(() =>
+    generateGradientColors(null)
+  );
 
   const fetchMusicHistory = async () => {
     try {
@@ -44,6 +74,9 @@ export const MusicProvider: React.FC<MusicProviderProps> = ({ children }) => {
 
         // Set the first item as now playing
         setNowPlaying(processedItems[0]);
+
+        // Update gradient colors based on the now playing song
+        setGradientColors(generateGradientColors(processedItems[0]));
 
         // Set the rest as recently played
         setRecentlyPlayed(processedItems.slice(1));
@@ -73,6 +106,11 @@ export const MusicProvider: React.FC<MusicProviderProps> = ({ children }) => {
     return () => clearInterval(intervalId);
   }, []);
 
+  // Update gradient colors when nowPlaying changes
+  useEffect(() => {
+    setGradientColors(generateGradientColors(nowPlaying));
+  }, [nowPlaying]);
+
   const refreshMusicHistory = async () => {
     await fetchMusicHistory();
   };
@@ -83,6 +121,7 @@ export const MusicProvider: React.FC<MusicProviderProps> = ({ children }) => {
     loading,
     error,
     refreshMusicHistory,
+    gradientColors,
   };
 
   return (
