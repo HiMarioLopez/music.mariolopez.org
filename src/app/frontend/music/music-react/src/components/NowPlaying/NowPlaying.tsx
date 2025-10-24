@@ -87,12 +87,21 @@ const NowPlaying: React.FC = () => {
     ? formatRelativeTime(nowPlaying.processedTimestamp)
     : "";
 
+  const handleAlbumArtClick = () => {
+    if (nowPlaying?.url) {
+      window.open(nowPlaying.url, '_blank', 'noopener,noreferrer');
+    }
+  };
+
   return (
     <div className={styles.nowPlayingComponent}>
       <div className={styles.albumArtContainer}>
         <img
           src={getProcessedArtworkUrl(nowPlaying?.artworkUrl)}
           alt={`${nowPlaying?.albumName || "Album"} Art`}
+          onClick={handleAlbumArtClick}
+          style={{ cursor: nowPlaying?.url ? 'pointer' : 'default' }}
+          title={nowPlaying?.url ? `Click to open ${nowPlaying.name} in Apple Music` : ''}
         />
       </div>
       <div className={styles.nowPlayingComponentTextContainer}>
@@ -101,7 +110,7 @@ const NowPlaying: React.FC = () => {
         </div>
         <div className={styles.nowPlayingComponentText}>
           <div className={styles.songTitleContainer}>
-            <SourceIndicator source={nowPlaying?.source} size="small" />
+            <SourceIndicator source={nowPlaying?.source} size="small" url={nowPlaying?.url} />
             <h2 title={nowPlaying?.name || "No song playing"}>
               {nowPlaying?.name || "No song playing"}
             </h2>

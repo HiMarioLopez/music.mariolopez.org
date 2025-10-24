@@ -29,6 +29,12 @@ const SongItem: React.FC<SongItemProps> = ({ song, index, rowName }) => {
     setImageError(true);
   };
 
+  const handleAlbumArtClick = () => {
+    if (song.url) {
+      window.open(song.url, '_blank', 'noopener,noreferrer');
+    }
+  };
+
   return (
     <div key={`${rowName}-${song.id}-${index}`}>
       <div className={styles.song}>
@@ -36,13 +42,15 @@ const SongItem: React.FC<SongItemProps> = ({ song, index, rowName }) => {
           <img
             src={imageError ? albumPlaceholder : artworkUrl}
             alt={`${song.name} Album Cover`}
-            title={`${song.name} by ${song.artistName}`}
+            title={song.url ? `Click to open ${song.name} in Apple Music` : `${song.name} by ${song.artistName}`}
             onError={handleImageError}
+            onClick={handleAlbumArtClick}
+            style={{ cursor: song.url ? 'pointer' : 'default' }}
           />
         </div>
         <div className={styles.songTextContainer}>
           <div className={styles.songTitleContainer}>
-            <SourceIndicator source={song.source} size="small" />
+            <SourceIndicator source={song.source} size="small" url={song.url} />
             <h3 title={song.name}>{song.name}</h3>
           </div>
           <p title={`${song.artistName} - ${song.albumName}`}>
