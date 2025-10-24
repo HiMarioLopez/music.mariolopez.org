@@ -1,0 +1,68 @@
+/* Base indicator styles */
+.indicator {
+  position: relative;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  z-index: 10;
+  flex-shrink: 0;
+}
+
+.indicator:hover {
+  transform: scale(1.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
+/* Size variants */
+.small {
+  width: 14px;
+  height: 14px;
+  padding: 2px;
+}
+
+.large {
+  width: 26px;
+  height: 26px;
+  padding: 4px;
+}
+
+/* Apple Music styling - gradient from light pink to red */
+.apple {
+  background: linear-gradient(135deg, #fc3c44 0%, #ff375f 100%);
+}
+
+.apple svg {
+  color: white;
+  width: 100%;
+  height: 100%;
+}
+
+/* Spotify styling - green */
+.spotify {
+  background: #1DB954;
+}
+
+.spotify svg {
+  color: white;
+  width: 100%;
+  height: 100%;
+}
+
+/* Responsive adjustments */
+@media (max-width: 680px) {
+  .small {
+    width: 12px;
+    height: 12px;
+    padding: 1.5px;
+  }
+
+  .large {
+    width: 22px;
+    height: 22px;
+    padding: 3.5px;
+  }
+}

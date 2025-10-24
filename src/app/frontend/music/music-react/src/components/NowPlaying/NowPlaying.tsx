@@ -3,6 +3,7 @@ import React from "react";
 import placeholderAlbumArt from "../../assets/300.png";
 import { useMusicContext } from "../../context/MusicContext";
 import { formatRelativeTime } from "../../utils/formatters";
+import { SourceIndicator } from "../SourceIndicator/SourceIndicator";
 import styles from "./NowPlaying.module.css";
 
 const NowPlaying: React.FC = () => {
@@ -24,12 +25,23 @@ const NowPlaying: React.FC = () => {
         <div className={styles.nowPlayingComponentTextContainer}>
           <h1>Mario's Now Playing</h1>
           <div className={styles.nowPlayingComponentText}>
-            <div
-              className={cx(
-                styles.nowPlayingSkeletonTitle,
-                styles.skeletonLoader,
-              )}
-            ></div>
+            <div className={styles.songTitleContainer}>
+              <div
+                className={cx(styles.skeletonLoader)}
+                style={{
+                  width: "14px",
+                  height: "14px",
+                  borderRadius: "50%",
+                  flexShrink: 0,
+                }}
+              ></div>
+              <div
+                className={cx(
+                  styles.nowPlayingSkeletonTitle,
+                  styles.skeletonLoader,
+                )}
+              ></div>
+            </div>
             <div
               className={cx(
                 styles.nowPlayingSkeletonArtist,
@@ -39,6 +51,12 @@ const NowPlaying: React.FC = () => {
             <div
               className={cx(
                 styles.nowPlayingSkeletonAlbum,
+                styles.skeletonLoader,
+              )}
+            ></div>
+            <div
+              className={cx(
+                styles.nowPlayingSkeletonTimestamp,
                 styles.skeletonLoader,
               )}
             ></div>
@@ -71,18 +89,23 @@ const NowPlaying: React.FC = () => {
 
   return (
     <div className={styles.nowPlayingComponent}>
-      <img
-        src={getProcessedArtworkUrl(nowPlaying?.artworkUrl)}
-        alt={`${nowPlaying?.albumName || "Album"} Art`}
-      />
+      <div className={styles.albumArtContainer}>
+        <img
+          src={getProcessedArtworkUrl(nowPlaying?.artworkUrl)}
+          alt={`${nowPlaying?.albumName || "Album"} Art`}
+        />
+      </div>
       <div className={styles.nowPlayingComponentTextContainer}>
         <div className={styles.nowPlayingHeader}>
           <h1>Mario's Now Playing</h1>
         </div>
         <div className={styles.nowPlayingComponentText}>
-          <h2 title={nowPlaying?.name || "No song playing"}>
-            {nowPlaying?.name || "No song playing"}
-          </h2>
+          <div className={styles.songTitleContainer}>
+            <SourceIndicator source={nowPlaying?.source} size="small" />
+            <h2 title={nowPlaying?.name || "No song playing"}>
+              {nowPlaying?.name || "No song playing"}
+            </h2>
+          </div>
           <p title={nowPlaying?.artistName || "Unknown Artist"}>
             {nowPlaying?.artistName || "Unknown Artist"}
           </p>

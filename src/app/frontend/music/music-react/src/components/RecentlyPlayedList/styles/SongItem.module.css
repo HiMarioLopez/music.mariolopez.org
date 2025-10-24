@@ -16,14 +16,21 @@
   transform: translateY(-2px); /* Slight lift effect on hover */
 }
 
-/* Style for the images to ensure consistent sizing */
-.song img {
+/* Album art container */
+.albumArtContainer {
   width: 50px;
   height: 50px;
+  margin-right: var(--margin-small);
+  flex-shrink: 0; /* Prevent container from shrinking */
+}
+
+/* Style for the images to ensure consistent sizing */
+.song img {
+  width: 100%;
+  height: 100%;
   border-radius: 5px;
   object-fit: cover;
-  margin-right: var(--margin-small);
-  flex-shrink: 0; /* Prevent image from shrinking */
+  display: block;
 }
 
 /* Text container styling */
@@ -34,6 +41,13 @@
   overflow: hidden;
   max-width: calc(100% - 60px); /* Account for image width and margin */
   width: 100%; /* Take up available space */
+}
+
+.songTitleContainer {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 2px;
 }
 
 .songTextContainer h3,
@@ -54,5 +68,9 @@
 @media (max-width: 680px) {
   .song {
       width: 220px !important; /* Smaller width on mobile */
+  }
+
+  .songTitleContainer {
+    gap: 4px; /* Smaller gap on mobile */
   }
 }

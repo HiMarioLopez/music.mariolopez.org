@@ -1,3 +1,5 @@
+import { MusicSource } from '../types/MusicSource';
+
 // Apple Music Song API response
 export interface AppleMusicSong {
   processedTimestamp: string;
@@ -23,4 +25,5 @@ export interface AppleMusicSong {
   id: string;
   artworkUrl: string;
   artistName: string;
+  source?: MusicSource; // Optional field for music platform source
 }

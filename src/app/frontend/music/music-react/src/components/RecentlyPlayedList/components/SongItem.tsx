@@ -2,6 +2,7 @@ import React, { memo, useMemo, useState } from "react";
 import albumPlaceholder from "../../../assets/album-placeholder.svg";
 import { AppleMusicSong } from "../../../models/AppleMusicSong";
 import { getProcessedArtworkUrl } from "../../../utils/imageProcessing";
+import { SourceIndicator } from "../../SourceIndicator/SourceIndicator";
 import styles from "../styles/SongItem.module.css";
 
 interface SongItemProps {
@@ -31,14 +32,19 @@ const SongItem: React.FC<SongItemProps> = ({ song, index, rowName }) => {
   return (
     <div key={`${rowName}-${song.id}-${index}`}>
       <div className={styles.song}>
-        <img
-          src={imageError ? albumPlaceholder : artworkUrl}
-          alt={`${song.name} Album Cover`}
-          title={`${song.name} by ${song.artistName}`}
-          onError={handleImageError}
-        />
+        <div className={styles.albumArtContainer}>
+          <img
+            src={imageError ? albumPlaceholder : artworkUrl}
+            alt={`${song.name} Album Cover`}
+            title={`${song.name} by ${song.artistName}`}
+            onError={handleImageError}
+          />
+        </div>
         <div className={styles.songTextContainer}>
-          <h3 title={song.name}>{song.name}</h3>
+          <div className={styles.songTitleContainer}>
+            <SourceIndicator source={song.source} size="small" />
+            <h3 title={song.name}>{song.name}</h3>
+          </div>
           <p title={`${song.artistName} - ${song.albumName}`}>
             {song.artistName} - {song.albumName}
           </p>
