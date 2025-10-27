@@ -1,0 +1,20 @@
+meta {
+  name: Token
+  type: http
+  seq: 1
+}
+
+post {
+  url: https://accounts.spotify.com/api/token
+  body: none
+  auth: inherit
+}
+
+headers {
+  Content-Type: application/x-www-form-urlencoded
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

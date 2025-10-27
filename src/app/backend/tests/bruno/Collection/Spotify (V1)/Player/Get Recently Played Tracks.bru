@@ -1,0 +1,20 @@
+meta {
+  name: Get Recently Played Tracks
+  type: http
+  seq: 1
+}
+
+get {
+  url: https://api.spotify.com/v1/me/player/recently-played
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{SPOTIFY_API_TOKEN}}
+}
+
+settings {
+  encodeUrl: false
+  timeout: 0
+}
