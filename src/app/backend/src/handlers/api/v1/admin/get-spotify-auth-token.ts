@@ -9,7 +9,6 @@ import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import axios from 'axios';
 
 const SPOTIFY_TOKEN_URL = 'https://accounts.spotify.com/api/token';
-const SPOTIFY_API_BASE_URL = 'https://api.spotify.com/v1';
 const SPOTIFY_SECRET_NAME = 'SpotifyClientSecret';
 
 interface SpotifyTokenResponse {
@@ -18,22 +17,10 @@ interface SpotifyTokenResponse {
   expires_in: number;
 }
 
-/**
- * Test if a Spotify token is still valid by making a simple API call
- */
-async function isTokenValid(token: string): Promise<boolean> {
-  try {
-    // Make a simple API call that doesn't require user authentication but tests the token
-    await axios.get(`${SPOTIFY_API_BASE_URL}/markets`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-      timeout: 5000,
-    });
-    return true;
-  } catch (error) {
-    return false;
-  }
+interface StoredTokenData {
+  access_token: string;
+  token_type: string;
+  expires_at: string; // ISO string
 }
 
 /**
@@ -89,29 +76,56 @@ export const handler = wrapHandler<APIGatewayProxyEvent, APIGatewayProxyResult>(
       utils.logger.info(
         'Checking for existing Spotify token in parameter store'
       );
-      let existingToken = await getParameter(parameterName);
+      const existingTokenData = await getParameter(parameterName);
 
-      if (existingToken) {
-        utils.logger.info('Existing token found, validating token');
-        // Test if the existing token is still valid
-        const tokenValid = await isTokenValid(existingToken);
-        utils.logger.info('Token validation result', { isValid: tokenValid });
-
-        if (tokenValid) {
-          utils.logger.info('Using existing valid Spotify access token');
-          utils.metrics.addMetric('SpotifyTokenCacheHit', MetricUnit.Count, 1);
-
-          // Return the existing token with token response format
-          return utils.createSuccessResponse(event, {
-            access_token: existingToken,
-            token_type: 'Bearer',
-            expires_in: 3600, // Spotify tokens last 1 hour, but we don't track exact expiry
+      if (existingTokenData) {
+        utils.logger.info('Existing token data found, validating token');
+        try {
+          const storedData: StoredTokenData = JSON.parse(existingTokenData);
+          utils.logger.info('Parsed stored token data', {
+            hasAccessToken: !!storedData.access_token,
+            expiresAt: storedData.expires_at,
           });
-        } else {
-          utils.logger.info(
-            'Existing Spotify token is invalid, fetching new one'
-          );
-          utils.metrics.addMetric('SpotifyTokenExpired', MetricUnit.Count, 1);
+
+          const now = new Date();
+          const expiresAtDate = new Date(storedData.expires_at);
+
+          if (now < expiresAtDate) {
+            utils.logger.info('Using existing valid Spotify access token');
+            utils.metrics.addMetric(
+              'SpotifyTokenCacheHit',
+              MetricUnit.Count,
+              1
+            );
+
+            // Calculate remaining seconds until expiry
+            const remainingSeconds = Math.floor(
+              (expiresAtDate.getTime() - now.getTime()) / 1000
+            );
+
+            return utils.createSuccessResponse(event, {
+              access_token: storedData.access_token,
+              token_type: storedData.token_type,
+              expires_in: remainingSeconds,
+            });
+          } else {
+            utils.logger.info(
+              'Stored Spotify token has expired, fetching new one'
+            );
+            utils.metrics.addMetric('SpotifyTokenExpired', MetricUnit.Count, 1);
+          }
+        } catch (error) {
+          if (existingTokenData === 'placeholder') {
+            utils.logger.info(
+              'Token parameter has placeholder value, treating as no existing token'
+            );
+          } else {
+            utils.logger.error('Failed to parse existing token data', {
+              existingTokenData,
+              error,
+            });
+            throw error;
+          }
         }
       } else {
         utils.logger.info('No existing token found, fetching new one');
@@ -184,7 +198,25 @@ export const handler = wrapHandler<APIGatewayProxyEvent, APIGatewayProxyResult>(
       utils.logger.info('Storing new access token in Parameter Store', {
         parameterName,
       });
-      await updateParameter(parameterName, tokenData.access_token);
+
+      const now = new Date();
+      const expiresAt = new Date(
+        now.getTime() + tokenData.expires_in * 1000
+      ).toISOString();
+
+      const storedData: StoredTokenData = {
+        access_token: tokenData.access_token,
+        token_type: tokenData.token_type,
+        expires_at: expiresAt,
+      };
+
+      utils.logger.info('Calculated expiry timestamp', {
+        currentTime: now.toISOString(),
+        expiresAt,
+        expiresIn: tokenData.expires_in,
+      });
+
+      await updateParameter(parameterName, JSON.stringify(storedData));
       utils.logger.info('Spotify access token stored successfully');
       utils.metrics.addMetric(
         'SpotifyTokenRetrievalSuccess',
