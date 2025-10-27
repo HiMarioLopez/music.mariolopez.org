@@ -1,0 +1,11 @@
+meta {
+  name: Get Spotify Auth Token (Raw)
+  type: http
+  seq: 5
+}
+
+get {
+  url: {{ADMIN_API_GATEWAY_URL}}/prod/nodejs/v1/spotify/token
+  body: none
+  auth: none
+}

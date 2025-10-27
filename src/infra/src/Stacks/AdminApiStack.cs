@@ -5,6 +5,7 @@ using Amazon.CDK.AWS.CertificateManager;
 using Amazon.CDK.AWS.Cognito;
 using Amazon.CDK.AWS.IAM;
 using Amazon.CDK.AWS.Lambda;
+using Amazon.CDK.AWS.SecretsManager;
 using Amazon.CDK.AWS.SSM;
 using Cdklabs.CdkNag;
 using Constructs;
@@ -23,7 +24,7 @@ public sealed class AdminApiStack : Stack
     internal AdminApiStack(Construct scope, string id, IStackProps? props = null, IConfiguration? configuration = null)
         : base(scope, id, props)
     {
-        #region SSM Parameter
+        #region SSM Parameters
 
         // Create SSM Parameter for storing MUT
         var mutParameter = new StringParameter(this, "Music-MutParameter", new StringParameterProps
@@ -31,6 +32,23 @@ public sealed class AdminApiStack : Stack
             ParameterName = "/Music/AdminPanel/MUT",
             Description = "Music User Token for accessing Apple Music data",
             StringValue = "placeholder" // Initial 'placeholder' value
+        });
+
+        // Create SSM Parameter for storing Spotify Token
+        var spotifyTokenParameter = new StringParameter(this, "Music-SpotifyTokenParameter", new StringParameterProps
+        {
+            ParameterName = "/Music/AdminPanel/Spotify/Token",
+            Description = "Auth Token for accessing Spotify data",
+            StringValue = "placeholder" // Initial 'placeholder' value
+        });
+
+        #endregion
+
+        #region Secret
+
+        var spotifyClientSecret = new Secret(this, "Music-SpotifyClientSecret", new SecretProps
+        {
+            SecretName = "SpotifyClientSecret"
         });
 
         #endregion
@@ -161,6 +179,43 @@ public sealed class AdminApiStack : Stack
 
         // Grant Lambda permission to read from Parameter Store
         mutParameter.GrantRead(getMutV1Function);
+
+        #endregion
+
+        #region Get Spotify Auth Token Lambda
+
+        // Create Lambda function to update MUT
+        var getSpotifyAuthTokenV1FunctionConstruct = new NodejsLambdaFunction(this, "Music-GetSpotifyAuthTokenFunctionV1",
+            new NodejsLambdaFunctionProps
+            {
+                Handler = "get-spotify-auth-token.handler",
+                Code = Code.FromAsset("../app/backend/dist/handlers/api/v1/admin"),
+                Environment = new Dictionary<string, string>
+                {
+                    ["AWS_NODEJS_CONNECTION_REUSE_ENABLED"] = "1",
+                    ["PARAMETER_NAME"] = "/Music/AdminPanel/Spotify/Token"
+                },
+                Description = "Lambda function to get (and potentially update) Spotify Auth Token (Version 1)",
+                Role = new Role(this, "Music-GetSpotifyAuthTokenFunctionV1Role", new RoleProps
+                {
+                    AssumedBy = new ServicePrincipal("lambda.amazonaws.com")
+                })
+            });
+        var getSpotifyAuthTokenV1Function = getSpotifyAuthTokenV1FunctionConstruct.Function;
+
+        getSpotifyAuthTokenV1Function.AddToRolePolicy(new PolicyStatement(new PolicyStatementProps
+        {
+            Effect = Effect.ALLOW,
+            Actions = ["ssm:GetParameter", "ssm:PutParameter"],
+            Resources = [$"arn:aws:ssm:{Region}:{Account}:parameter/Music/AdminPanel/Spotify/Token"]
+        }));
+
+        getSpotifyAuthTokenV1Function.AddToRolePolicy(new PolicyStatement(new PolicyStatementProps
+        {
+            Effect = Effect.ALLOW,
+            Actions = ["secretsmanager:GetSecretValue"],
+            Resources = [spotifyClientSecret.SecretArn],
+        }));
 
         #endregion
 
@@ -347,6 +402,18 @@ public sealed class AdminApiStack : Stack
             PathPart = "mut"
         }).Resource;
 
+        var spotifyV1Resource = new ApiGatewayResource(this, "Music-SpotifyV1Resource", new ApiGatewayResourceProps
+        {
+            ParentResource = v1Resource,
+            PathPart = "spotify"
+        }).Resource;
+
+        var spotifyTokenV1Resource = new ApiGatewayResource(this, "Music-SpotifyTokenV1Resource", new ApiGatewayResourceProps
+        {
+            ParentResource = spotifyV1Resource,
+            PathPart = "token"
+        }).Resource;
+
         var scheduleV1Resource = new ApiGatewayResource(this, "Music-ScheduleV1Resource", new ApiGatewayResourceProps
         {
             ParentResource = v1Resource,
@@ -373,6 +440,12 @@ public sealed class AdminApiStack : Stack
             new ApiGatewayIntegrationProps
             {
                 Function = setMutV1Function
+            });
+
+        var getSpotifyAuthTokenV1Integration = new ApiGatewayIntegration(this, "Music-GetSpotifyAuthTokenV1Integration",
+            new ApiGatewayIntegrationProps
+            {
+                Function = getSpotifyAuthTokenV1Function
             });
 
         var getScheduleRateV1Integration = new ApiGatewayIntegration(this, "Music-GetScheduleRateV1Integration",
@@ -428,6 +501,14 @@ public sealed class AdminApiStack : Stack
             AuthorizationType = AuthorizationType.COGNITO,
             Authorizer = authorizer,
             RequestValidator = requestValidator
+        });
+
+        var getSpotifyAuthTokenV1Method = new ApiGatewayMethod(this, "Music-GetSpotifyAuthTokenV1Method", new ApiGatewayMethodProps
+        {
+            Resource = spotifyTokenV1Resource,
+            HttpMethod = "GET",
+            Integration = getSpotifyAuthTokenV1Integration.Integration,
+            AuthorizationType = AuthorizationType.NONE, // TODO: IAM Permissions for direct Lambda invocation access (?)
         });
 
         var getScheduleV1Method = new ApiGatewayMethod(this, "Music-GetScheduleV1Method", new ApiGatewayMethodProps
@@ -501,6 +582,11 @@ public sealed class AdminApiStack : Stack
             },
             new NagPackSuppression
             {
+                Id = "AwsSolutions-COG4",
+                Reason = "Validating behaviors; Granular permissions will soon be enabled."
+            },
+            new NagPackSuppression
+            {
                 Id = "AwsSolutions-APIG1",
                 Reason = "Logging is relatively expensive. Will enable when needed for debugging."
             },
@@ -511,8 +597,18 @@ public sealed class AdminApiStack : Stack
             },
             new NagPackSuppression
             {
+                Id = "AwsSolutions-APIG4",
+                Reason = "Validating behaviors; Granular permissions will soon be enabled."
+            },
+            new NagPackSuppression
+            {
                 Id = "AwsSolutions-APIG6",
                 Reason = "Logging is relatively expensive. Will enable when needed for debugging."
+            },
+            new NagPackSuppression
+            {
+                Id = "AwsSolutions-SMG4",
+                Reason = "This secret will soon be an SSM Parameter."
             }
         ]);
 
