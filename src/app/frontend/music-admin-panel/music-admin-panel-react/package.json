@@ -2,7 +2,7 @@
   "name": "music-admin-panel-react",
   "description": "Admin panel for my Music app. Built with React.",
   "homepage": "https://admin.music.mariolopez.org/",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "author": {
     "name": "Mario Lopez Martinez",
     "email": "mario@lopez.fyi"
@@ -17,25 +17,25 @@
   "dependencies": {
     "@aws-amplify/auth": "^6.16.0",
     "@aws-amplify/core": "^6.13.3",
-    "@aws-amplify/ui-react": "^6.13.0",
+    "@aws-amplify/ui-react": "^6.13.1",
     "@types/musickit-js": "^1.0.10",
     "aws-amplify": "^6.15.7",
-    "axios": "^1.12.2",
+    "axios": "^1.13.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0"
   },
   "devDependencies": {
-    "@eslint/js": "^9.37.0",
+    "@eslint/js": "^9.38.0",
     "@types/react": "^19.2.2",
     "@types/react-dom": "^19.2.2",
-    "@vitejs/plugin-react": "^5.0.4",
-    "eslint": "^9.37.0",
-    "eslint-plugin-react-hooks": "^7.0.0",
-    "eslint-plugin-react-refresh": "^0.4.23",
+    "@vitejs/plugin-react": "^5.1.0",
+    "eslint": "^9.38.0",
+    "eslint-plugin-react-hooks": "^7.0.1",
+    "eslint-plugin-react-refresh": "^0.4.24",
     "globals": "^16.4.0",
-    "rollup-plugin-visualizer": "^6.0.4",
+    "rollup-plugin-visualizer": "^6.0.5",
     "typescript": "~5.9.3",
-    "typescript-eslint": "^8.46.1",
-    "vite": "^7.1.10"
+    "typescript-eslint": "^8.46.2",
+    "vite": "^7.1.12"
   }
 }
