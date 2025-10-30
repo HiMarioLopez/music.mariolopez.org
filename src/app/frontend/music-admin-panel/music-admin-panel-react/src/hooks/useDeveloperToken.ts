@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { fetchDeveloperToken } from '../utils/api';
 
 interface DeveloperTokenState {
@@ -16,7 +16,7 @@ export function useDeveloperToken() {
         lastFetched: null,
     });
 
-    const fetchToken = async () => {
+    const fetchToken = useCallback(async () => {
         setState(prev => ({ ...prev, isLoading: true, error: null }));
         try {
             const token = await fetchDeveloperToken();
@@ -36,7 +36,14 @@ export function useDeveloperToken() {
             }));
             throw err;
         }
-    };
+    }, []);
+
+    // Auto-fetch token on mount
+    useEffect(() => {
+        fetchToken().catch(() => {
+            // Error handling is done in fetchToken
+        });
+    }, [fetchToken]);
 
     const formatTimestamp = (date: Date) => {
         return `${date.toLocaleTimeString()} (${Intl.DateTimeFormat().resolvedOptions().timeZone})`;

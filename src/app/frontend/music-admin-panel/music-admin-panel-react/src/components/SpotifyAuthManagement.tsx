@@ -1,6 +1,6 @@
-import { useState } from 'react';
-import { useSpotifyAuth } from '../hooks/useSpotifyAuth';
-import './SpotifyAuthManagement.css';
+import { useState } from "react";
+import { useSpotifyAuth } from "../hooks/useSpotifyAuth";
+import "./SpotifyAuthManagement.css";
 
 export function SpotifyAuthManagement() {
   const {
@@ -20,9 +20,9 @@ export function SpotifyAuthManagement() {
 
   // Function to mask the token, showing only the first 10 characters
   const getMaskedToken = (fullToken: string) => {
-    if (!fullToken) return '';
+    if (!fullToken) return "";
     const visiblePart = fullToken.substring(0, 10);
-    const maskedPart = '••••••••••••••••••••••••••••••••••••';
+    const maskedPart = "••••••••••••••••••••••••••••••••••••";
     return visiblePart + maskedPart;
   };
 
@@ -38,18 +38,14 @@ export function SpotifyAuthManagement() {
           ) : (
             <span
               className={
-                isAuthorized ? 'status-authorized' : 'status-unauthorized'
+                isAuthorized ? "status-authorized" : "status-unauthorized"
               }
             >
-              {isAuthorized ? 'Authorized' : 'Not Authorized'}
+              {isAuthorized ? "Authorized" : "Not Authorized"}
             </span>
           )}
         </p>
-        {message && (
-          <p className="message-text">
-            {message}
-          </p>
-        )}
+        {message && <p className="message-text">{message}</p>}
       </div>
 
       <div className="token-display">
@@ -61,7 +57,7 @@ export function SpotifyAuthManagement() {
                 onClick={toggleTokenVisibility}
                 className="toggle-visibility-btn"
               >
-                {isTokenVisible ? 'Hide Token' : 'Show Token'}
+                {isTokenVisible ? "Hide Token" : "Show Token"}
               </button>
             </div>
             <pre
@@ -84,7 +80,7 @@ export function SpotifyAuthManagement() {
             className="primary-button"
             disabled={isLoading}
           >
-            {isLoading ? 'Connecting...' : 'Authorize with Spotify'}
+            {isLoading ? "Connecting..." : "Authorize with Spotify"}
           </button>
         ) : (
           <button
@@ -92,7 +88,7 @@ export function SpotifyAuthManagement() {
             className="primary-button"
             disabled={isLoading}
           >
-            {isLoading ? 'Refreshing...' : 'Refresh Status'}
+            {isLoading ? "Refreshing..." : "Refresh Status"}
           </button>
         )}
       </div>
@@ -102,11 +98,10 @@ export function SpotifyAuthManagement() {
           <strong>Scope:</strong> user-read-recently-played
         </p>
         <p>
-          The access token is stored securely in AWS SSM Parameter Store and
-          can be used by your public site to fetch recently played tracks.
+          The access token is stored securely in AWS SSM Parameter Store and can
+          be used by your public site to fetch recently played tracks.
         </p>
       </div>
     </div>
   );
 }
-

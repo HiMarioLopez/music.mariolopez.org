@@ -369,12 +369,12 @@ public sealed class AdminApiStack : Stack
             });
         var getSpotifyOAuthUrlV1Function = getSpotifyOAuthUrlV1FunctionConstruct.Function;
 
-        // Grant Lambda permission to write PKCE parameters to Parameter Store
+        // Grant Lambda permission to write PKCE parameter to Parameter Store (using fixed parameter name for in-place replacement)
         getSpotifyOAuthUrlV1Function.AddToRolePolicy(new PolicyStatement(new PolicyStatementProps
         {
             Effect = Effect.ALLOW,
             Actions = ["ssm:PutParameter"],
-            Resources = [$"arn:aws:ssm:{Region}:{Account}:parameter/Music/AdminPanel/Spotify/PKCE/*"]
+            Resources = [$"arn:aws:ssm:{Region}:{Account}:parameter/Music/AdminPanel/Spotify/PKCE/Current"]
         }));
 
         #endregion
@@ -411,12 +411,12 @@ public sealed class AdminApiStack : Stack
         spotifyUserAccessTokenParameter.GrantWrite(getSpotifyOAuthCallbackV1Function);
         spotifyUserRefreshTokenParameter.GrantWrite(getSpotifyOAuthCallbackV1Function);
 
-        // Grant Lambda permission to read PKCE parameters from Parameter Store
+        // Grant Lambda permission to read and delete PKCE parameter from Parameter Store (using fixed parameter name)
         getSpotifyOAuthCallbackV1Function.AddToRolePolicy(new PolicyStatement(new PolicyStatementProps
         {
             Effect = Effect.ALLOW,
-            Actions = ["ssm:GetParameter"],
-            Resources = [$"arn:aws:ssm:{Region}:{Account}:parameter/Music/AdminPanel/Spotify/PKCE/*"]
+            Actions = ["ssm:GetParameter", "ssm:DeleteParameter"],
+            Resources = [$"arn:aws:ssm:{Region}:{Account}:parameter/Music/AdminPanel/Spotify/PKCE/Current"]
         }));
 
         #endregion
@@ -428,7 +428,7 @@ public sealed class AdminApiStack : Stack
             "Music-GetSpotifyAuthorizationStatusFunction_V1",
             new NodejsLambdaFunctionProps
             {
-                Handler = "get-spotify-authorization-status.handler",
+                Handler = "get-spotify-status.handler",
                 Code = Code.FromAsset("../app/backend/dist/handlers/api/v1/admin"),
                 Environment = new Dictionary<string, string>
                 {

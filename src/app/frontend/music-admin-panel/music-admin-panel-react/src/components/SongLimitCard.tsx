@@ -121,7 +121,9 @@ export const SongLimitCard: React.FC = () => {
 
         {status && (
           <div
-            className={`status-message ${status.includes("Error") ? "error" : "success"} ${shouldFadeOut ? "fade-out" : ""}`}
+            className={`status-message ${
+              status.includes("Error") ? "error" : "success"
+            } ${shouldFadeOut ? "fade-out" : ""}`}
           >
             {status}
           </div>

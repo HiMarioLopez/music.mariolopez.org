@@ -2,7 +2,7 @@ import { Logger } from '@aws-lambda-powertools/logger';
 import { MetricUnit } from '@aws-lambda-powertools/metrics';
 import { RATE_LIMITS } from '@config/rate-limits';
 import { exchangeCodeForToken } from '@services/spotify';
-import { getParameter } from '@services/parameter';
+import { deleteParameter, getParameter } from '@services/parameter';
 import { wrapHandler } from '@utils/lambda-handler';
 import { checkRateLimit } from '@utils/rate-limiter';
 import { HttpStatus } from '@utils/types';
@@ -55,17 +55,56 @@ export const handler = wrapHandler<APIGatewayProxyEvent, APIGatewayProxyResult>(
         stateLength: state?.length,
       });
 
-      // Retrieve code_verifier from Parameter Store using state
-      const pkceParameterName = `/Music/AdminPanel/Spotify/PKCE/${state}`;
-      const codeVerifier = await getParameter(pkceParameterName);
+      // Retrieve PKCE data from Parameter Store (using fixed parameter name)
+      const pkceParameterName = '/Music/AdminPanel/Spotify/PKCE/Current';
+      const pkceDataJson = await getParameter(pkceParameterName);
 
-      if (!codeVerifier) {
+      if (!pkceDataJson) {
         return utils.createErrorResponse(
           event,
-          new Error('Missing code verifier'),
+          new Error('Missing PKCE data'),
           HttpStatus.BAD_REQUEST,
-          'Code verifier not found for this state. It may have expired or been used already.'
+          'PKCE data not found. The OAuth flow may have expired or been used already.'
         );
+      }
+
+      // Parse the stored PKCE data
+      let pkceData: { state: string; codeVerifier: string };
+      try {
+        pkceData = JSON.parse(pkceDataJson);
+      } catch (error) {
+        logger.error('Failed to parse PKCE data', { error });
+        return utils.createErrorResponse(
+          event,
+          new Error('Invalid PKCE data format'),
+          HttpStatus.BAD_REQUEST,
+          'PKCE data format is invalid.'
+        );
+      }
+
+      // Validate that the state matches (CSRF protection)
+      if (pkceData.state !== state) {
+        logger.warn('State mismatch in OAuth callback', {
+          expectedState: pkceData.state,
+          receivedState: state,
+        });
+        return utils.createErrorResponse(
+          event,
+          new Error('State mismatch'),
+          HttpStatus.BAD_REQUEST,
+          'State parameter does not match. This may be a CSRF attack.'
+        );
+      }
+
+      const codeVerifier = pkceData.codeVerifier;
+
+      // Delete the PKCE parameter after retrieving it (single-use, clean up)
+      try {
+        await deleteParameter(pkceParameterName);
+        logger.info('Deleted PKCE parameter after use');
+      } catch (error) {
+        logger.warn('Failed to delete PKCE parameter', { error });
+        // Don't fail the flow if cleanup fails
       }
 
       // Exchange authorization code for tokens (this also stores them in Parameter Store)

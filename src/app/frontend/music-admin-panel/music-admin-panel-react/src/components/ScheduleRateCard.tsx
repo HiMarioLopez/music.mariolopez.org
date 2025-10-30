@@ -123,8 +123,8 @@ export const ScheduleRateCard: React.FC = () => {
             {isLoading
               ? "Loading..."
               : rateType === "simple"
-                ? `rate(${value} ${unit})`
-                : `cron(${cronExpression})`}
+              ? `rate(${value} ${unit})`
+              : `cron(${cronExpression})`}
           </pre>
         </div>
       </div>
@@ -203,7 +203,9 @@ export const ScheduleRateCard: React.FC = () => {
 
         {status && (
           <div
-            className={`status-message ${status.includes("Error") ? "error" : "success"} ${shouldFadeOut ? "fade-out" : ""}`}
+            className={`status-message ${
+              status.includes("Error") ? "error" : "success"
+            } ${shouldFadeOut ? "fade-out" : ""}`}
           >
             {status}
           </div>

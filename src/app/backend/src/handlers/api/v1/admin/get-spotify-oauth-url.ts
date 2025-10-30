@@ -43,10 +43,11 @@ export const handler = wrapHandler<APIGatewayProxyEvent, APIGatewayProxyResult>(
       // Generate state for CSRF protection (16 char random hex)
       const state = randomBytes(8).toString('hex');
 
-      // Store code_verifier in Parameter Store BEFORE generating URL
-      // This ensures it's available when callback arrives
-      const pkceParameterName = `/Music/AdminPanel/Spotify/PKCE/${state}`;
-      await updateParameter(pkceParameterName, codeVerifier);
+      // Store code_verifier and state together in a single fixed parameter
+      // Using in-place replacement instead of creating new parameters each time
+      const pkceParameterName = '/Music/AdminPanel/Spotify/PKCE/Current';
+      const pkceData = JSON.stringify({ state, codeVerifier });
+      await updateParameter(pkceParameterName, pkceData);
       logger.info('Stored PKCE code verifier in Parameter Store', {
         state,
         parameterName: pkceParameterName,
