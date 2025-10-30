@@ -474,6 +474,133 @@ public sealed class AdminApiStack : Stack
 
         #endregion
 
+        #region Set Spotify Schedule Rate Lambda
+
+        // Create Lambda function to update Spotify schedule rate
+        var setSpotifyScheduleRateV1FunctionConstruct = new NodejsLambdaFunction(this,
+            "Music-SetSpotifyScheduleRateFunction",
+            new NodejsLambdaFunctionProps
+            {
+                Handler = "set-spotify-schedule-rate.handler",
+                Code = Code.FromAsset("../app/backend/dist/handlers/api/v1/admin"),
+                Environment = new Dictionary<string, string>
+                {
+                    ["AWS_NODEJS_CONNECTION_REUSE_ENABLED"] = "1",
+                    ["PARAMETER_NAME"] = "/Music/SpotifyHistory/ScheduleRate"
+                },
+                Description = "Lambda function to update the Spotify history job schedule rate (Version 1)",
+                Role = new Role(this, "Music-SetSpotifyScheduleRateFunctionV1Role", new RoleProps
+                {
+                    AssumedBy = new ServicePrincipal("lambda.amazonaws.com")
+                })
+            });
+        var setSpotifyScheduleRateV1Function = setSpotifyScheduleRateV1FunctionConstruct.Function;
+
+        // Grant Lambda permission to write to Parameter Store
+        setSpotifyScheduleRateV1Function.AddToRolePolicy(new PolicyStatement(new PolicyStatementProps
+        {
+            Effect = Effect.ALLOW,
+            Actions = ["ssm:PutParameter"],
+            Resources = [$"arn:aws:ssm:{Region}:{Account}:parameter/Music/SpotifyHistory/ScheduleRate"]
+        }));
+
+        #endregion
+
+        #region Get Spotify Schedule Rate Lambda
+
+        // Create Lambda function to get Spotify schedule rate
+        var getSpotifyScheduleRateV1FunctionConstruct = new NodejsLambdaFunction(this,
+            "Music-GetSpotifyScheduleRateFunction_V1",
+            new NodejsLambdaFunctionProps
+            {
+                Handler = "get-spotify-schedule-rate.handler",
+                Code = Code.FromAsset("../app/backend/dist/handlers/api/v1/admin"),
+                Environment = new Dictionary<string, string>
+                {
+                    ["AWS_NODEJS_CONNECTION_REUSE_ENABLED"] = "1",
+                    ["PARAMETER_NAME"] = "/Music/SpotifyHistory/ScheduleRate"
+                },
+                Description = "Lambda function to get the Spotify history job schedule rate (Version 1)",
+                Role = new Role(this, "GetSpotifyScheduleRateFunctionV1Role", new RoleProps
+                {
+                    AssumedBy = new ServicePrincipal("lambda.amazonaws.com")
+                })
+            });
+        var getSpotifyScheduleRateV1Function = getSpotifyScheduleRateV1FunctionConstruct.Function;
+
+        // Grant Lambda permission to read from Parameter Store
+        getSpotifyScheduleRateV1Function.AddToRolePolicy(new PolicyStatement(new PolicyStatementProps
+        {
+            Effect = Effect.ALLOW,
+            Actions = ["ssm:GetParameter"],
+            Resources = [$"arn:aws:ssm:{Region}:{Account}:parameter/Music/SpotifyHistory/ScheduleRate"]
+        }));
+
+        #endregion
+
+        #region Set Spotify Song Limit Lambda
+
+        // Create Lambda function to update Spotify song limit
+        var setSpotifySongLimitV1FunctionConstruct = new NodejsLambdaFunction(this,
+            "Music-SetSpotifySongLimitFunction_V1",
+            new NodejsLambdaFunctionProps
+            {
+                Handler = "set-spotify-song-limit.handler",
+                Code = Code.FromAsset("../app/backend/dist/handlers/api/v1/admin"),
+                Environment = new Dictionary<string, string>
+                {
+                    ["AWS_NODEJS_CONNECTION_REUSE_ENABLED"] = "1",
+                    ["PARAMETER_NAME"] = "/Music/SpotifyHistory/SongLimit"
+                },
+                Description = "Lambda function to update the Spotify history song limit (Version 1)",
+                Role = new Role(this, "Music-SetSpotifySongLimitFunctionV1Role", new RoleProps
+                {
+                    AssumedBy = new ServicePrincipal("lambda.amazonaws.com")
+                })
+            });
+        var setSpotifySongLimitV1Function = setSpotifySongLimitV1FunctionConstruct.Function;
+
+        // Grant Lambda permissions
+        setSpotifySongLimitV1Function.AddToRolePolicy(new PolicyStatement(new PolicyStatementProps
+        {
+            Effect = Effect.ALLOW,
+            Actions = ["ssm:PutParameter"],
+            Resources = [$"arn:aws:ssm:{Region}:{Account}:parameter/Music/SpotifyHistory/SongLimit"]
+        }));
+
+        #endregion
+
+        #region Get Spotify Song Limit Lambda
+
+        // Create Lambda function to get Spotify song limit
+        var getSpotifySongLimitV1FunctionConstruct = new NodejsLambdaFunction(this,
+            "Music-GetSpotifySongLimitFunction_V1",
+            new NodejsLambdaFunctionProps
+            {
+                Handler = "get-spotify-song-limit.handler",
+                Code = Code.FromAsset("../app/backend/dist/handlers/api/v1/admin"),
+                Environment = new Dictionary<string, string>
+                {
+                    ["AWS_NODEJS_CONNECTION_REUSE_ENABLED"] = "1",
+                    ["PARAMETER_NAME"] = "/Music/SpotifyHistory/SongLimit"
+                },
+                Description = "Lambda function to get the Spotify history song limit (Version 1)",
+                Role = new Role(this, "Music-GetSpotifySongLimitFunctionV1Role", new RoleProps
+                {
+                    AssumedBy = new ServicePrincipal("lambda.amazonaws.com")
+                })
+            });
+        var getSpotifySongLimitV1Function = getSpotifySongLimitV1FunctionConstruct.Function;
+
+        getSpotifySongLimitV1Function.AddToRolePolicy(new PolicyStatement(new PolicyStatementProps
+        {
+            Effect = Effect.ALLOW,
+            Actions = ["ssm:GetParameter"],
+            Resources = [$"arn:aws:ssm:{Region}:{Account}:parameter/Music/SpotifyHistory/SongLimit"]
+        }));
+
+        #endregion
+
         #endregion
 
         #region API Gateway Integrations
@@ -553,6 +680,34 @@ public sealed class AdminApiStack : Stack
             new ApiGatewayIntegrationProps
             {
                 Function = getSpotifyTokenV1Function
+            });
+
+        var getSpotifyScheduleRateV1Integration = new ApiGatewayIntegration(this,
+            "Music-GetSpotifyScheduleRateV1Integration",
+            new ApiGatewayIntegrationProps
+            {
+                Function = getSpotifyScheduleRateV1Function
+            });
+
+        var updateSpotifyScheduleRateV1Integration = new ApiGatewayIntegration(this,
+            "Music-UpdateSpotifyScheduleRateV1Integration",
+            new ApiGatewayIntegrationProps
+            {
+                Function = setSpotifyScheduleRateV1Function
+            });
+
+        var getSpotifySongLimitV1Integration = new ApiGatewayIntegration(this,
+            "Music-GetSpotifySongLimitV1Integration",
+            new ApiGatewayIntegrationProps
+            {
+                Function = getSpotifySongLimitV1Function
+            });
+
+        var updateSpotifySongLimitV1Integration = new ApiGatewayIntegration(this,
+            "Music-UpdateSpotifySongLimitV1Integration",
+            new ApiGatewayIntegrationProps
+            {
+                Function = setSpotifySongLimitV1Function
             });
 
         #endregion
@@ -701,6 +856,22 @@ public sealed class AdminApiStack : Stack
                 PathPart = "token"
             }).Resource;
 
+        var spotifyScheduleV1Resource = new ApiGatewayResource(this,
+            "Music-SpotifyScheduleV1Resource",
+            new ApiGatewayResourceProps
+            {
+                ParentResource = spotifyV1Resource,
+                PathPart = "schedule"
+            }).Resource;
+
+        var spotifySongLimitV1Resource = new ApiGatewayResource(this,
+            "Music-SpotifySongLimitV1Resource",
+            new ApiGatewayResourceProps
+            {
+                ParentResource = spotifyV1Resource,
+                PathPart = "song-limit"
+            }).Resource;
+
         #endregion
 
         #region API Gateway Methods
@@ -841,6 +1012,54 @@ public sealed class AdminApiStack : Stack
                 Resource = getSpotifyTokenV1Resource,
                 HttpMethod = "GET",
                 Integration = getSpotifyTokenV1Integration.Integration,
+                AuthorizationType = AuthorizationType.COGNITO,
+                Authorizer = authorizer,
+                RequestValidator = requestValidator
+            });
+
+        var getSpotifyScheduleV1Method = new ApiGatewayMethod(this,
+            "Music-GetSpotifyScheduleV1Method",
+            new ApiGatewayMethodProps
+            {
+                Resource = spotifyScheduleV1Resource,
+                HttpMethod = "GET",
+                Integration = getSpotifyScheduleRateV1Integration.Integration,
+                AuthorizationType = AuthorizationType.COGNITO,
+                Authorizer = authorizer,
+                RequestValidator = requestValidator
+            });
+
+        var updateSpotifyScheduleV1Method = new ApiGatewayMethod(this,
+            "Music-UpdateSpotifyScheduleV1Method",
+            new ApiGatewayMethodProps
+            {
+                Resource = spotifyScheduleV1Resource,
+                HttpMethod = "POST",
+                Integration = updateSpotifyScheduleRateV1Integration.Integration,
+                AuthorizationType = AuthorizationType.COGNITO,
+                Authorizer = authorizer,
+                RequestValidator = requestValidator
+            });
+
+        var getSpotifySongLimitV1Method = new ApiGatewayMethod(this,
+            "Music-GetSpotifySongLimitV1Method",
+            new ApiGatewayMethodProps
+            {
+                Resource = spotifySongLimitV1Resource,
+                HttpMethod = "GET",
+                Integration = getSpotifySongLimitV1Integration.Integration,
+                AuthorizationType = AuthorizationType.COGNITO,
+                Authorizer = authorizer,
+                RequestValidator = requestValidator
+            });
+
+        var updateSpotifySongLimitV1Method = new ApiGatewayMethod(this,
+            "Music-UpdateSpotifySongLimitV1Method",
+            new ApiGatewayMethodProps
+            {
+                Resource = spotifySongLimitV1Resource,
+                HttpMethod = "POST",
+                Integration = updateSpotifySongLimitV1Integration.Integration,
                 AuthorizationType = AuthorizationType.COGNITO,
                 Authorizer = authorizer,
                 RequestValidator = requestValidator

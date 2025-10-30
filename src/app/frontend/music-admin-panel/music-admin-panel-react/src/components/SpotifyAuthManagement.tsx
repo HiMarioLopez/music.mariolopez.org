@@ -97,10 +97,6 @@ export function SpotifyAuthManagement() {
         <p>
           <strong>Scope:</strong> user-read-recently-played
         </p>
-        <p>
-          The access token is stored securely in AWS SSM Parameter Store and can
-          be used by your public site to fetch recently played tracks.
-        </p>
       </div>
     </div>
   );

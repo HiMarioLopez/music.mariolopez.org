@@ -3,7 +3,7 @@ import { Tracer } from '@aws-lambda-powertools/tracer';
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import { DynamoDBDocumentClient, PutCommand } from '@aws-sdk/lib-dynamodb';
 import { createHash } from 'crypto';
-import { Song } from '../../models/song';
+import { Song, isAppleMusicSong, isSpotifySong } from '../../models/song';
 
 const logger = new Logger({ serviceName: 'dynamodb-song-service' });
 const tracer = new Tracer({ serviceName: 'dynamodb-song-service' });
@@ -61,10 +61,11 @@ export const storeSongsInDynamoDB = async (
         entityType: 'SONG',
         processedTimestamp: songWithoutId.processedTimestamp,
         songId: id,
+        source: song.source,
       });
 
-      // Create the item to be stored
-      const item = {
+      // Create the base item with common fields
+      const item: Record<string, any> = {
         entityType: 'SONG',
         processedTimestamp: songWithoutId.processedTimestamp,
         id: hashId,
@@ -72,18 +73,39 @@ export const storeSongsInDynamoDB = async (
         artistName: song.artistName,
         name: song.name,
         albumName: song.albumName,
-        genreNames: song.genreNames,
-        trackNumber: song.trackNumber,
-        durationInMillis: song.durationInMillis,
-        releaseDate: song.releaseDate,
-        isrc: song.isrc,
+        source: song.source,
         artworkUrl: song.artworkUrl,
-        composerName: song.composerName,
         url: song.url,
-        hasLyrics: song.hasLyrics,
-        isAppleDigitalMaster: song.isAppleDigitalMaster,
-        artworkColors: song.artworkColors,
       };
+
+      // Add Apple Music specific fields
+      if (isAppleMusicSong(song)) {
+        item.genreNames = song.genreNames;
+        item.trackNumber = song.trackNumber;
+        item.durationInMillis = song.durationInMillis;
+        item.releaseDate = song.releaseDate;
+        item.isrc = song.isrc;
+        item.composerName = song.composerName;
+        item.hasLyrics = song.hasLyrics;
+        item.isAppleDigitalMaster = song.isAppleDigitalMaster;
+        item.artworkColors = song.artworkColors;
+      }
+
+      // Add Spotify specific fields
+      if (isSpotifySong(song)) {
+        item.spotifyId = song.spotifyId;
+        item.spotifyUrl = song.spotifyUrl;
+        item.durationMs = song.durationMs;
+        item.popularity = song.popularity;
+        item.previewUrl = song.previewUrl;
+        item.externalUrls = song.externalUrls;
+        item.albumId = song.albumId;
+        item.artistId = song.artistId;
+        item.discNumber = song.discNumber;
+        item.trackNumber = song.trackNumber;
+        item.isLocal = song.isLocal;
+        item.isExplicit = song.isExplicit;
+      }
 
       // Make sure we're using a unique processedTimestamp for each record
       // This is important since it's our sort key

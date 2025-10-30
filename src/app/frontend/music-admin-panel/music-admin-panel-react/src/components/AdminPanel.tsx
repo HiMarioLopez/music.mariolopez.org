@@ -2,11 +2,13 @@ import { useAppleMusic } from "../contexts/AppleMusicContext";
 import "../styles/components.css";
 import "../styles/theme.css";
 import "./AdminPanel.css";
+import { AppleScheduleRateCard } from "./AppleScheduleRateCard";
+import { AppleSongLimitCard } from "./AppleSongLimitCard";
 import { DeveloperTokenManagement } from "./DeveloperTokenManagement";
 import { MusicUserTokenManagement } from "./MusicUserTokenManagement";
-import { ScheduleRateCard } from "./ScheduleRateCard";
-import { SongLimitCard } from "./SongLimitCard";
 import { SpotifyAuthManagement } from "./SpotifyAuthManagement";
+import { SpotifyScheduleRateCard } from "./SpotifyScheduleRateCard";
+import { SpotifySongLimitCard } from "./SpotifySongLimitCard";
 import { ThemeToggle } from "./ThemeToggle";
 
 // Note: Amplify libs are so large! Fix this... eventually?
@@ -43,8 +45,10 @@ export function AdminPanel() {
                 <DeveloperTokenManagement onTokenFetched={setDeveloperToken} />
                 <MusicUserTokenManagement />
                 <SpotifyAuthManagement />
-                <ScheduleRateCard />
-                <SongLimitCard />
+                <AppleScheduleRateCard />
+                <AppleSongLimitCard />
+                <SpotifyScheduleRateCard />
+                <SpotifySongLimitCard />
               </div>
             </main>
           </div>

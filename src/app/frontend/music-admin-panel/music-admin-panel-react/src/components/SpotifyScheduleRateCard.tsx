@@ -1,6 +1,9 @@
 import React, { useState, useEffect, useRef } from "react";
-import { RateUnit, useScheduleRate } from "../hooks/useScheduleRate";
-import "./ScheduleRateCard.css";
+import {
+  RateUnit,
+  useSpotifyScheduleRate,
+} from "../hooks/useSpotifyScheduleRate";
+import "./SSMParameterCard.css";
 
 const UNIT_OPTIONS = [
   { value: "minute", label: "Minute", plural: "minutes" },
@@ -8,7 +11,7 @@ const UNIT_OPTIONS = [
   { value: "day", label: "Day", plural: "days" },
 ] as const;
 
-export const ScheduleRateCard: React.FC = () => {
+export const SpotifyScheduleRateCard: React.FC = () => {
   const [
     { rateType, value, unit, cronExpression, status, isLoading },
     {
@@ -19,7 +22,7 @@ export const ScheduleRateCard: React.FC = () => {
       handleUpdate,
       refresh,
     },
-  ] = useScheduleRate();
+  ] = useSpotifyScheduleRate();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [shouldFadeOut, setShouldFadeOut] = useState(false);
@@ -91,7 +94,7 @@ export const ScheduleRateCard: React.FC = () => {
 
   return (
     <div className="content-card schedule-card">
-      <h2>Update Music History Job Schedule</h2>
+      <h2>Update Spotify History Job Schedule</h2>
 
       <div className="token-display">
         <div className="secure-token-container">

@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useRef } from "react";
-import { useSongLimit } from "../hooks/useSongLimit";
-import "./ScheduleRateCard.css"; // Reusing the same styles from ScheduleRateCard.tsx
+import { useSpotifySongLimit } from "../hooks/useSpotifySongLimit";
+import "./SSMParameterCard.css";
 
-export const SongLimitCard: React.FC = () => {
+export const SpotifySongLimitCard: React.FC = () => {
   const [{ value, status, isLoading }, { setValue, handleUpdate, refresh }] =
-    useSongLimit();
+    useSpotifySongLimit();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [shouldFadeOut, setShouldFadeOut] = useState(false);
@@ -50,7 +50,7 @@ export const SongLimitCard: React.FC = () => {
 
   return (
     <div className="content-card schedule-card">
-      <h2>Update Music History Song Limit Configuration</h2>
+      <h2>Update Spotify History Song Limit Configuration</h2>
 
       <div className="token-display">
         <div className="secure-token-container">
@@ -91,13 +91,13 @@ export const SongLimitCard: React.FC = () => {
             <input
               id="song-limit"
               type="number"
-              min="5"
-              max="30"
+              min="1"
+              max="50"
               value={value}
               onChange={(e) => setValue(parseInt(e.target.value, 10))}
             />
             <small style={{ color: "var(--text-secondary)" }}>
-              Enter a value between 5 and 30
+              Enter a value between 1 and 50
             </small>
           </div>
         </div>

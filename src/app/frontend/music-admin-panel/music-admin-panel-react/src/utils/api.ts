@@ -150,6 +150,37 @@ export async function getSongLimit() {
   });
 }
 
+// Spotify History Configuration API Functions
+export async function updateSpotifyScheduleRate(rate: string) {
+  return apiRequest({
+    method: "POST",
+    path: "spotify/schedule",
+    body: { rate },
+  });
+}
+
+export async function getSpotifyScheduleRate() {
+  return apiRequest<{ rate: string }>({
+    method: "GET",
+    path: "spotify/schedule",
+  });
+}
+
+export async function updateSpotifySongLimit(songLimit: number) {
+  return apiRequest({
+    method: "POST",
+    path: "spotify/song-limit",
+    body: { songLimit },
+  });
+}
+
+export async function getSpotifySongLimit() {
+  return apiRequest<{ songLimit: number }>({
+    method: "GET",
+    path: "spotify/song-limit",
+  });
+}
+
 // Spotify OAuth API Functions
 export interface SpotifyOAuthUrlResponse {
   authorization_url: string;

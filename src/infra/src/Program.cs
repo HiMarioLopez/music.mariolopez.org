@@ -65,14 +65,23 @@ public static class Program
 
         adminPanelFrontendStack.AddDependency(adminApiStack);
 
-        var historyStack = new AppleMusicHistoryStack(app, "AppleMusicHistoryStack", new StackProps
+        var appleMusicHistoryStack = new AppleMusicHistoryStack(app, "AppleMusicHistoryStack", new StackProps
         {
             Env = env,
             StackName = "AppleMusicHistoryStack",
             Description = "This stack contains resources for recording and displaying Apple Music listening history."
         }, configuration);
 
-        historyStack.AddDependency(integrationApiStack);
+        appleMusicHistoryStack.AddDependency(integrationApiStack);
+
+        var spotifyHistoryStack = new SpotifyHistoryStack(app, "SpotifyHistoryStack", new StackProps
+        {
+            Env = env,
+            StackName = "SpotifyHistoryStack",
+            Description = "This stack contains resources for recording and displaying Spotify listening history."
+        }, configuration);
+
+        spotifyHistoryStack.AddDependency(integrationApiStack);
 
         app.Synth();
     }

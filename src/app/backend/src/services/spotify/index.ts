@@ -1,5 +1,7 @@
 import { Logger } from '@aws-lambda-powertools/logger';
 import { Song } from '../../models/song';
+import { fetchRecentlyPlayedTracks, getSpotifyAccessToken } from './api';
+import { getParameter } from '../parameter';
 
 const logger = new Logger({ serviceName: 'spotify-service' });
 
@@ -18,6 +20,47 @@ export {
   type SpotifyTokenResponse,
   type SpotifyTrack,
 } from './api';
+
+/**
+ * Fetch recent songs from Spotify API
+ *
+ * @param accessToken - Spotify Access Token (optional, will fetch if not provided)
+ * @param songLimitParameterName - Parameter name for song limit in SSM
+ * @returns Promise resolving to an array of Song objects
+ */
+export const fetchRecentSongs = async (
+  accessToken?: string,
+  songLimitParameterName?: string
+): Promise<Song[]> => {
+  try {
+    // Get access token if not provided
+    if (!accessToken) {
+      accessToken = await getSpotifyAccessToken();
+    }
+
+    // Get song limit from SSM if parameter name provided
+    let limit = 25; // Default limit
+    if (songLimitParameterName) {
+      const songLimit = await getParameter(songLimitParameterName);
+      if (songLimit) {
+        limit = parseInt(songLimit, 10);
+      } else {
+        logger.warn('Song limit not found, using default value of 25');
+      }
+    }
+
+    logger.info('Fetching recent songs from Spotify', { limit });
+
+    // Fetch recently played tracks
+    const songs = await fetchRecentlyPlayedTracks(limit, accessToken);
+
+    logger.info('Successfully fetched songs', { count: songs.length });
+    return songs;
+  } catch (error) {
+    logger.error('Error fetching songs from Spotify API', { error });
+    throw error;
+  }
+};
 
 /**
  * Process Spotify songs and filter out already processed ones
