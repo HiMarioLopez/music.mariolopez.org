@@ -1,8 +1,8 @@
 import { Logger } from '@aws-lambda-powertools/logger';
 import axios from 'axios';
-import { Song } from '../../models/song';
-import { getParameter } from '../parameter';
+import { AppleMusicSong, Song } from '../../models/song';
 import { extractAppleMusicEndpoint } from '../../utils/path-utils';
+import { getParameter } from '../parameter';
 
 const logger = new Logger({ serviceName: 'apple-music-api-service' });
 
@@ -307,11 +307,12 @@ export const fetchRecentSongs = async (
             return null;
           }
 
-          return {
+          const appleSong: AppleMusicSong = {
             id,
             artistName: attributes.artistName || 'Unknown Artist',
             name: attributes.name || 'Unknown Track',
             albumName: attributes.albumName || 'Unknown Album',
+            source: 'apple',
             genreNames: attributes.genreNames,
             trackNumber: attributes.trackNumber,
             durationInMillis: attributes.durationInMillis,
@@ -333,6 +334,8 @@ export const fetchRecentSongs = async (
                 }
               : undefined,
           };
+
+          return appleSong;
         } catch (err) {
           logger.warn('Error processing song', { error: err });
           return null;

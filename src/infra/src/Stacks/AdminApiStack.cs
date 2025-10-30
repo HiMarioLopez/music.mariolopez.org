@@ -26,21 +26,32 @@ public sealed class AdminApiStack : Stack
     {
         #region SSM Parameters
 
-        // Create SSM Parameter for storing MUT
-        var mutParameter = new StringParameter(this, "Music-MutParameter", new StringParameterProps
-        {
-            ParameterName = "/Music/AdminPanel/MUT",
-            Description = "Music User Token for accessing Apple Music data",
-            StringValue = "placeholder" // Initial 'placeholder' value
-        });
+        // Create SSM Parameter for storing Apple MUT
+        var appleMusicUserTokenParameter = new StringParameter(this, "Music-AppleMusicUserTokenParameter",
+            new StringParameterProps
+            {
+                ParameterName = "/Music/AdminPanel/Apple/MUT",
+                Description = "Music User Token for accessing Apple Music data",
+                StringValue = "placeholder" // Initial 'placeholder' value
+            });
 
-        // Create SSM Parameter for storing Spotify Token
-        var spotifyTokenParameter = new StringParameter(this, "Music-SpotifyTokenParameter", new StringParameterProps
-        {
-            ParameterName = "/Music/AdminPanel/Spotify/Token",
-            Description = "Auth Token for accessing Spotify data",
-            StringValue = "placeholder" // Initial 'placeholder' value
-        });
+        // Create SSM Parameter for storing Spotify User Access Token (OAuth)
+        var spotifyUserAccessTokenParameter = new StringParameter(this, "Music-SpotifyUserAccessTokenParameter",
+            new StringParameterProps
+            {
+                ParameterName = "/Music/AdminPanel/Spotify/UserAccessToken",
+                Description = "Spotify User Access Token from OAuth flow",
+                StringValue = "placeholder" // Initial 'placeholder' value
+            });
+
+        // Create SSM Parameter for storing Spotify User Refresh Token (OAuth)
+        var spotifyUserRefreshTokenParameter = new StringParameter(this, "Music-SpotifyUserRefreshTokenParameter",
+            new StringParameterProps
+            {
+                ParameterName = "/Music/AdminPanel/Spotify/UserRefreshToken",
+                Description = "Spotify User Refresh Token from OAuth flow",
+                StringValue = "placeholder" // Initial 'placeholder' value
+            });
 
         #endregion
 
@@ -48,14 +59,14 @@ public sealed class AdminApiStack : Stack
 
         var spotifyClientSecret = new Secret(this, "Music-SpotifyClientSecret", new SecretProps
         {
-            SecretName = "SpotifyClientSecret"
+            SecretName = "SpotifyClientSecret",
+            Description = "Contains both Client ID and Client Secret values for accessing Spotify API."
         });
 
         #endregion
 
         #region Cognito
 
-        // Create Cognito User Pool
         var userPool = new UserPool(this, "Music-AdminUserPool", new UserPoolProps
         {
             UserPoolName = "Music-AdminUserPool",
@@ -129,95 +140,6 @@ public sealed class AdminApiStack : Stack
         #endregion
 
         #region Lambda Functions
-
-        #region Set MUT Lambda
-
-        // Create Lambda function to update MUT
-        var setMutV1FunctionConstruct = new NodejsLambdaFunction(this, "Music-SetMutFunctionV1",
-            new NodejsLambdaFunctionProps
-            {
-                Handler = "set-mut.handler",
-                Code = Code.FromAsset("../app/backend/dist/handlers/api/v1/admin"),
-                Environment = new Dictionary<string, string>
-                {
-                    ["AWS_NODEJS_CONNECTION_REUSE_ENABLED"] = "1",
-                    ["PARAMETER_NAME"] = "/Music/AdminPanel/MUT"
-                },
-                Description = "Lambda function to update Music User Token (Version 1)",
-                Role = new Role(this, "Music-SetMutFunctionV1Role", new RoleProps
-                {
-                    AssumedBy = new ServicePrincipal("lambda.amazonaws.com")
-                })
-            });
-        var setMutV1Function = setMutV1FunctionConstruct.Function;
-
-        // Grant Lambda permission to write to Parameter Store
-        mutParameter.GrantWrite(setMutV1Function);
-
-        #endregion
-
-        #region Get MUT Lambda
-
-        // Create Lambda function to read MUT
-        var getMutV1FunctionConstruct = new NodejsLambdaFunction(this, "Music-GetMutFunction",
-            new NodejsLambdaFunctionProps
-            {
-                Handler = "get-mut.handler",
-                Code = Code.FromAsset("../app/backend/dist/handlers/api/v1/admin"),
-                Environment = new Dictionary<string, string>
-                {
-                    ["AWS_NODEJS_CONNECTION_REUSE_ENABLED"] = "1",
-                    ["PARAMETER_NAME"] = "/Music/AdminPanel/MUT"
-                },
-                Description = "Lambda function to retrieve Music User Token from Parameter Store (Version 1)",
-                Role = new Role(this, "Music-GetMutFunctionV1Role", new RoleProps
-                {
-                    AssumedBy = new ServicePrincipal("lambda.amazonaws.com")
-                })
-            });
-        var getMutV1Function = getMutV1FunctionConstruct.Function;
-
-        // Grant Lambda permission to read from Parameter Store
-        mutParameter.GrantRead(getMutV1Function);
-
-        #endregion
-
-        #region Get Spotify Auth Token Lambda
-
-        // Create Lambda function to update MUT
-        var getSpotifyAuthTokenV1FunctionConstruct = new NodejsLambdaFunction(this, "Music-GetSpotifyAuthTokenFunctionV1",
-            new NodejsLambdaFunctionProps
-            {
-                Handler = "get-spotify-auth-token.handler",
-                Code = Code.FromAsset("../app/backend/dist/handlers/api/v1/admin"),
-                Environment = new Dictionary<string, string>
-                {
-                    ["AWS_NODEJS_CONNECTION_REUSE_ENABLED"] = "1",
-                    ["PARAMETER_NAME"] = "/Music/AdminPanel/Spotify/Token"
-                },
-                Description = "Lambda function to get (and potentially update) Spotify Auth Token (Version 1)",
-                Role = new Role(this, "Music-GetSpotifyAuthTokenFunctionV1Role", new RoleProps
-                {
-                    AssumedBy = new ServicePrincipal("lambda.amazonaws.com")
-                })
-            });
-        var getSpotifyAuthTokenV1Function = getSpotifyAuthTokenV1FunctionConstruct.Function;
-
-        getSpotifyAuthTokenV1Function.AddToRolePolicy(new PolicyStatement(new PolicyStatementProps
-        {
-            Effect = Effect.ALLOW,
-            Actions = ["ssm:GetParameter", "ssm:PutParameter"],
-            Resources = [$"arn:aws:ssm:{Region}:{Account}:parameter/Music/AdminPanel/Spotify/Token"]
-        }));
-
-        getSpotifyAuthTokenV1Function.AddToRolePolicy(new PolicyStatement(new PolicyStatementProps
-        {
-            Effect = Effect.ALLOW,
-            Actions = ["secretsmanager:GetSecretValue"],
-            Resources = [spotifyClientSecret.SecretArn],
-        }));
-
-        #endregion
 
         #region Set Schedule Rate Lambda
 
@@ -342,6 +264,297 @@ public sealed class AdminApiStack : Stack
 
         #endregion
 
+        #region Set Apple Music User Token Lambda
+
+        // Create Lambda function to update Apple Music User Token (AppleMUT)
+        var setAppleMusicUserTokenV1FunctionConstruct = new NodejsLambdaFunction(this,
+            "Music-SetAppleMusicUserTokenFunctionV1",
+            new NodejsLambdaFunctionProps
+            {
+                Handler = "set-apple-mut.handler",
+                Code = Code.FromAsset("../app/backend/dist/handlers/api/v1/admin"),
+                Environment = new Dictionary<string, string>
+                {
+                    ["AWS_NODEJS_CONNECTION_REUSE_ENABLED"] = "1",
+                    ["PARAMETER_NAME"] = "/Music/AdminPanel/Apple/MUT"
+                },
+                Description = "Lambda function to update Music User Token (Version 1)",
+                Role = new Role(this, "Music-SetAppleMusicUserTokenFunctionV1Role", new RoleProps
+                {
+                    AssumedBy = new ServicePrincipal("lambda.amazonaws.com")
+                })
+            });
+        var setAppleMusicUserTokenV1Function = setAppleMusicUserTokenV1FunctionConstruct.Function;
+
+        // Grant Lambda permission to write to Parameter Store
+        appleMusicUserTokenParameter.GrantWrite(setAppleMusicUserTokenV1Function);
+
+        #endregion
+
+        #region Get Apple Music User Token Lambda
+
+        // Create Lambda function to read Apple MUT
+        var getAppleMusicUserTokenV1FunctionConstruct = new NodejsLambdaFunction(this,
+            "Music-GetAppleMusicUserTokenFunctionV1",
+            new NodejsLambdaFunctionProps
+            {
+                Handler = "get-apple-mut.handler",
+                Code = Code.FromAsset("../app/backend/dist/handlers/api/v1/admin"),
+                Environment = new Dictionary<string, string>
+                {
+                    ["AWS_NODEJS_CONNECTION_REUSE_ENABLED"] = "1",
+                    ["PARAMETER_NAME"] = "/Music/AdminPanel/Apple/MUT"
+                },
+                Description = "Lambda function to retrieve Music User Token from Parameter Store (Version 1)",
+                Role = new Role(this, "Music-GetAppleMusicUserTokenFunctionV1Role", new RoleProps
+                {
+                    AssumedBy = new ServicePrincipal("lambda.amazonaws.com")
+                })
+            });
+        var getAppleMusicUserTokenV1Function = getAppleMusicUserTokenV1FunctionConstruct.Function;
+
+        // Grant Lambda permission to read from Parameter Store
+        appleMusicUserTokenParameter.GrantRead(getAppleMusicUserTokenV1Function);
+
+        #endregion
+
+        #region Get Apple Music User Token Authorization Status Lambda
+
+        // Create Lambda function to check Apple MUT status
+        var getAppleMusicUserTokenStatusV1FunctionConstruct = new NodejsLambdaFunction(this,
+            "Music-GetAppleMusicUserTokenStatusFunctionV1",
+            new NodejsLambdaFunctionProps
+            {
+                Handler = "get-apple-mut-status.handler",
+                Code = Code.FromAsset("../app/backend/dist/handlers/api/v1/admin"),
+                Environment = new Dictionary<string, string>
+                {
+                    ["AWS_NODEJS_CONNECTION_REUSE_ENABLED"] = "1",
+                    ["PARAMETER_NAME"] = "/Music/AdminPanel/Apple/MUT"
+                },
+                Description = "Lambda function to check Apple Music User Token authorization status (Version 1)",
+                Role = new Role(this, "Music-GetAppleMusicUserTokenStatusFunctionV1Role", new RoleProps
+                {
+                    AssumedBy = new ServicePrincipal("lambda.amazonaws.com")
+                })
+            });
+        var getAppleMusicUserTokenStatusV1Function = getAppleMusicUserTokenStatusV1FunctionConstruct.Function;
+
+        // Grant Lambda permission to read from Parameter Store
+        appleMusicUserTokenParameter.GrantRead(getAppleMusicUserTokenStatusV1Function);
+
+        #endregion
+
+        #region Get Spotify OAuth URL Lambda
+
+        // Create Lambda function for Spotify OAuth URL generation
+        var getSpotifyOAuthUrlV1FunctionConstruct = new NodejsLambdaFunction(this,
+            "Music-GetSpotifyOAuthUrlFunction_V1",
+            new NodejsLambdaFunctionProps
+            {
+                Handler = "get-spotify-oauth-url.handler",
+                Code = Code.FromAsset("../app/backend/dist/handlers/api/v1/admin"),
+                Environment = new Dictionary<string, string>
+                {
+                    ["AWS_NODEJS_CONNECTION_REUSE_ENABLED"] = "1",
+                    ["SPOTIFY_CLIENT_ID"] = spotifyClientSecret.SecretValueFromJson("client_id").UnsafeUnwrap(),
+                    ["SPOTIFY_CLIENT_SECRET"] = spotifyClientSecret.SecretValueFromJson("client_secret").UnsafeUnwrap(),
+                    ["SPOTIFY_REDIRECT_URI"] = "https://admin.music.mariolopez.org/api/nodejs/v1/spotify/oauth/callback"
+                },
+                Description = "Lambda function to generate Spotify OAuth authorization URL (Version 1)",
+                Role = new Role(this, "Music-SpotifyOAuthUrlFunctionV1Role", new RoleProps
+                {
+                    AssumedBy = new ServicePrincipal("lambda.amazonaws.com")
+                })
+            });
+        var getSpotifyOAuthUrlV1Function = getSpotifyOAuthUrlV1FunctionConstruct.Function;
+
+        // Grant Lambda permission to write PKCE parameters to Parameter Store
+        getSpotifyOAuthUrlV1Function.AddToRolePolicy(new PolicyStatement(new PolicyStatementProps
+        {
+            Effect = Effect.ALLOW,
+            Actions = ["ssm:PutParameter"],
+            Resources = [$"arn:aws:ssm:{Region}:{Account}:parameter/Music/AdminPanel/Spotify/PKCE/*"]
+        }));
+
+        #endregion
+
+        #region Get Spotify OAuth Callback URL Lambda
+
+        // Create Lambda function for Spotify OAuth callback handling
+        var getSpotifyOAuthCallbackV1FunctionConstruct = new NodejsLambdaFunction(this,
+            "Music-GetSpotifyOAuthCallbackFunction_V1",
+            new NodejsLambdaFunctionProps
+            {
+                Handler = "get-spotify-oauth-callback.handler",
+                Code = Code.FromAsset("../app/backend/dist/handlers/api/v1/admin"),
+                Environment = new Dictionary<string, string>
+                {
+                    ["AWS_NODEJS_CONNECTION_REUSE_ENABLED"] = "1",
+                    ["SPOTIFY_CLIENT_ID"] = spotifyClientSecret.SecretValueFromJson("client_id").UnsafeUnwrap(),
+                    ["SPOTIFY_CLIENT_SECRET"] = spotifyClientSecret.SecretValueFromJson("client_secret").UnsafeUnwrap(),
+                    ["SPOTIFY_REDIRECT_URI"] =
+                        "https://admin.music.mariolopez.org/api/nodejs/v1/spotify/oauth/callback",
+                    ["SPOTIFY_ACCESS_TOKEN_PARAMETER"] = "/Music/AdminPanel/Spotify/UserAccessToken",
+                    ["SPOTIFY_REFRESH_TOKEN_PARAMETER"] = "/Music/AdminPanel/Spotify/UserRefreshToken",
+                    ["ADMIN_PANEL_URL"] = "https://admin.music.mariolopez.org"
+                },
+                Description = "Lambda function to handle Spotify OAuth callback and store tokens (Version 1)",
+                Role = new Role(this, "Music-SpotifyOAuthCallbackFunctionV1Role", new RoleProps
+                {
+                    AssumedBy = new ServicePrincipal("lambda.amazonaws.com")
+                })
+            });
+        var getSpotifyOAuthCallbackV1Function = getSpotifyOAuthCallbackV1FunctionConstruct.Function;
+
+        // Grant Lambda permission to write to Spotify Parameter Store parameters
+        spotifyUserAccessTokenParameter.GrantWrite(getSpotifyOAuthCallbackV1Function);
+        spotifyUserRefreshTokenParameter.GrantWrite(getSpotifyOAuthCallbackV1Function);
+
+        // Grant Lambda permission to read PKCE parameters from Parameter Store
+        getSpotifyOAuthCallbackV1Function.AddToRolePolicy(new PolicyStatement(new PolicyStatementProps
+        {
+            Effect = Effect.ALLOW,
+            Actions = ["ssm:GetParameter"],
+            Resources = [$"arn:aws:ssm:{Region}:{Account}:parameter/Music/AdminPanel/Spotify/PKCE/*"]
+        }));
+
+        #endregion
+
+        #region Get Spotify Authorization Status Lambda
+
+        // Create Lambda function for checking Spotify OAuth status
+        var getSpotifyAuthorizationStatusV1FunctionConstruct = new NodejsLambdaFunction(this,
+            "Music-GetSpotifyAuthorizationStatusFunction_V1",
+            new NodejsLambdaFunctionProps
+            {
+                Handler = "get-spotify-authorization-status.handler",
+                Code = Code.FromAsset("../app/backend/dist/handlers/api/v1/admin"),
+                Environment = new Dictionary<string, string>
+                {
+                    ["AWS_NODEJS_CONNECTION_REUSE_ENABLED"] = "1",
+                    ["SPOTIFY_ACCESS_TOKEN_PARAMETER"] = "/Music/AdminPanel/Spotify/UserAccessToken"
+                },
+                Description = "Lambda function to check Spotify OAuth authorization status (Version 1)",
+                Role = new Role(this, "Music-SpotifyStatusFunctionV1Role", new RoleProps
+                {
+                    AssumedBy = new ServicePrincipal("lambda.amazonaws.com")
+                })
+            });
+        var getSpotifyAuthorizationStatusV1Function = getSpotifyAuthorizationStatusV1FunctionConstruct.Function;
+
+        // Grant Lambda permission to read from Parameter Store
+        spotifyUserAccessTokenParameter.GrantRead(getSpotifyAuthorizationStatusV1Function);
+
+        #endregion
+
+        #region Get Spotify Token Lambda
+
+        // Create Lambda function for retrieving Spotify access token
+        var getSpotifyTokenV1FunctionConstruct = new NodejsLambdaFunction(this, "Music-GetSpotifyTokenFunction_V1",
+            new NodejsLambdaFunctionProps
+            {
+                Handler = "get-spotify-token.handler",
+                Code = Code.FromAsset("../app/backend/dist/handlers/api/v1/admin"),
+                Environment = new Dictionary<string, string>
+                {
+                    ["AWS_NODEJS_CONNECTION_REUSE_ENABLED"] = "1",
+                    ["SPOTIFY_ACCESS_TOKEN_PARAMETER"] = "/Music/AdminPanel/Spotify/UserAccessToken"
+                },
+                Description = "Lambda function to retrieve Spotify access token from Parameter Store (Version 1)",
+                Role = new Role(this, "Music-GetSpotifyTokenFunctionV1Role", new RoleProps
+                {
+                    AssumedBy = new ServicePrincipal("lambda.amazonaws.com")
+                })
+            });
+        var getSpotifyTokenV1Function = getSpotifyTokenV1FunctionConstruct.Function;
+
+        // Grant Lambda permission to read from Parameter Store
+        spotifyUserAccessTokenParameter.GrantRead(getSpotifyTokenV1Function);
+
+        #endregion
+
+        #endregion
+
+        #region API Gateway Integrations
+
+        var getScheduleRateV1Integration = new ApiGatewayIntegration(this,
+            "Music-GetScheduleRateV1Integration",
+            new ApiGatewayIntegrationProps
+            {
+                Function = getScheduleRateV1Function
+            });
+
+        var updateScheduleRateV1Integration = new ApiGatewayIntegration(this,
+            "Music-UpdateScheduleRateV1Integration",
+            new ApiGatewayIntegrationProps
+            {
+                Function = setScheduleRateV1Function
+            });
+
+        var getSongLimitV1Integration = new ApiGatewayIntegration(this,
+            "Music-GetSongLimitV1Integration",
+            new ApiGatewayIntegrationProps
+            {
+                Function = getSongLimitV1Function
+            });
+
+        var updateSongLimitV1Integration = new ApiGatewayIntegration(this,
+            "Music-UpdateSongLimitV1Integration",
+            new ApiGatewayIntegrationProps
+            {
+                Function = setSongLimitV1Function
+            });
+
+        var getAppleMusicUserTokenV1Integration = new ApiGatewayIntegration(this,
+            "Music-GetAppleMusicUserTokenV1Integration",
+            new ApiGatewayIntegrationProps
+            {
+                Function = getAppleMusicUserTokenV1Function
+            });
+
+        var getAppleMusicUserTokenStatusV1Integration = new ApiGatewayIntegration(this,
+            "Music-GetAppleMusicUserTokenStatusV1Integration",
+            new ApiGatewayIntegrationProps
+            {
+                Function = getAppleMusicUserTokenStatusV1Function
+            });
+
+        var updateAppleMusicUserTokenV1Integration = new ApiGatewayIntegration(this,
+            "Music-UpdateAppleMusicUserTokenV1Integration",
+            new ApiGatewayIntegrationProps
+            {
+                Function = setAppleMusicUserTokenV1Function
+            });
+
+        var getSpotifyOAuthUrlV1Integration = new ApiGatewayIntegration(this,
+            "Music-GetSpotifyOAuthUrlV1Integration",
+            new ApiGatewayIntegrationProps
+            {
+                Function = getSpotifyOAuthUrlV1Function
+            });
+
+        var getSpotifyOAuthCallbackV1Integration = new ApiGatewayIntegration(this,
+            "Music-SpotifyOAuthCallbackV1Integration",
+            new ApiGatewayIntegrationProps
+            {
+                Function = getSpotifyOAuthCallbackV1Function
+            });
+
+        var getSpotifyAuthorizationStatusV1Integration = new ApiGatewayIntegration(this,
+            "Music-GetSpotifyAuthorizationStatusV1Integration",
+            new ApiGatewayIntegrationProps
+            {
+                Function = getSpotifyAuthorizationStatusV1Function
+            });
+
+        var getSpotifyTokenV1Integration = new ApiGatewayIntegration(this,
+            "Music-GetSpotifyTokenV1Integration",
+            new ApiGatewayIntegrationProps
+            {
+                Function = getSpotifyTokenV1Function
+            });
+
         #endregion
 
         #region API Gateway
@@ -384,144 +597,137 @@ public sealed class AdminApiStack : Stack
 
         #region API Gateway Resources
 
-        var nodejsResource = new ApiGatewayResource(this, "Music-NodejsResource", new ApiGatewayResourceProps
-        {
-            ParentResource = restApiGateway.Root,
-            PathPart = "nodejs"
-        }).Resource;
-
-        var v1Resource = new ApiGatewayResource(this, "Music-V1Resource", new ApiGatewayResourceProps
-        {
-            ParentResource = nodejsResource,
-            PathPart = "v1"
-        }).Resource;
-
-        var mutV1Resource = new ApiGatewayResource(this, "Music-MutV1Resource", new ApiGatewayResourceProps
-        {
-            ParentResource = v1Resource,
-            PathPart = "mut"
-        }).Resource;
-
-        var spotifyV1Resource = new ApiGatewayResource(this, "Music-SpotifyV1Resource", new ApiGatewayResourceProps
-        {
-            ParentResource = v1Resource,
-            PathPart = "spotify"
-        }).Resource;
-
-        var spotifyTokenV1Resource = new ApiGatewayResource(this, "Music-SpotifyTokenV1Resource", new ApiGatewayResourceProps
-        {
-            ParentResource = spotifyV1Resource,
-            PathPart = "token"
-        }).Resource;
-
-        var scheduleV1Resource = new ApiGatewayResource(this, "Music-ScheduleV1Resource", new ApiGatewayResourceProps
-        {
-            ParentResource = v1Resource,
-            PathPart = "schedule"
-        }).Resource;
-
-        var songLimitV1Resource = new ApiGatewayResource(this, "Music-SongLimitV1Resource", new ApiGatewayResourceProps
-        {
-            ParentResource = v1Resource,
-            PathPart = "song-limit"
-        }).Resource;
-
-        #endregion
-
-        #region API Gateway Integrations
-
-        var getMutV1Integration = new ApiGatewayIntegration(this, "Music-GetMutV1Integration",
-            new ApiGatewayIntegrationProps
+        var nodejsResource = new ApiGatewayResource(this,
+            "Music-NodejsResource",
+            new ApiGatewayResourceProps
             {
-                Function = getMutV1Function
-            });
+                ParentResource = restApiGateway.Root,
+                PathPart = "nodejs"
+            }).Resource;
 
-        var updateMutV1Integration = new ApiGatewayIntegration(this, "Music-UpdateMutV1Integration",
-            new ApiGatewayIntegrationProps
+        var v1Resource = new ApiGatewayResource(this,
+            "Music-V1Resource",
+            new ApiGatewayResourceProps
             {
-                Function = setMutV1Function
-            });
+                ParentResource = nodejsResource,
+                PathPart = "v1"
+            }).Resource;
 
-        var getSpotifyAuthTokenV1Integration = new ApiGatewayIntegration(this, "Music-GetSpotifyAuthTokenV1Integration",
-            new ApiGatewayIntegrationProps
+        var scheduleV1Resource = new ApiGatewayResource(this,
+            "Music-ScheduleV1Resource",
+            new ApiGatewayResourceProps
             {
-                Function = getSpotifyAuthTokenV1Function
-            });
+                ParentResource = v1Resource,
+                PathPart = "schedule"
+            }).Resource;
 
-        var getScheduleRateV1Integration = new ApiGatewayIntegration(this, "Music-GetScheduleRateV1Integration",
-            new ApiGatewayIntegrationProps
+        var songLimitV1Resource = new ApiGatewayResource(this,
+            "Music-SongLimitV1Resource",
+            new ApiGatewayResourceProps
             {
-                Function = getScheduleRateV1Function
-            });
+                ParentResource = v1Resource,
+                PathPart = "song-limit"
+            }).Resource;
 
-        var updateScheduleRateV1Integration = new ApiGatewayIntegration(this, "Music-UpdateScheduleRateV1Integration",
-            new ApiGatewayIntegrationProps
+        var appleV1Resource = new ApiGatewayResource(this,
+            "Music-AppleV1Resource",
+            new ApiGatewayResourceProps
             {
-                Function = setScheduleRateV1Function
-            });
+                ParentResource = v1Resource,
+                PathPart = "apple"
+            }).Resource;
 
-        var getSongLimitV1Integration = new ApiGatewayIntegration(this, "Music-GetSongLimitV1Integration",
-            new ApiGatewayIntegrationProps
+        var appleMusicUserTokenV1Resource = new ApiGatewayResource(this,
+            "Music-AppleMusicUserTokenV1Resource",
+            new ApiGatewayResourceProps
             {
-                Function = getSongLimitV1Function
-            });
+                ParentResource = appleV1Resource,
+                PathPart = "mut"
+            }).Resource;
 
-        var updateSongLimitV1Integration = new ApiGatewayIntegration(this, "Music-UpdateSongLimitV1Integration",
-            new ApiGatewayIntegrationProps
+        var appleMusicUserTokenStatusV1Resource = new ApiGatewayResource(this,
+            "Music-AppleMusicUserTokenStatusV1Resource",
+            new ApiGatewayResourceProps
             {
-                Function = setSongLimitV1Function
-            });
+                ParentResource = appleMusicUserTokenV1Resource,
+                PathPart = "status"
+            }).Resource;
+
+        var spotifyV1Resource = new ApiGatewayResource(this,
+            "Music-SpotifyV1Resource",
+            new ApiGatewayResourceProps
+            {
+                ParentResource = v1Resource,
+                PathPart = "spotify"
+            }).Resource;
+
+        var spotifyOAuthV1Resource = new ApiGatewayResource(this,
+            "Music-SpotifyOAuthV1Resource",
+            new ApiGatewayResourceProps
+            {
+                ParentResource = spotifyV1Resource,
+                PathPart = "oauth"
+            }).Resource;
+
+        var spotifyOAuthUrlV1Resource = new ApiGatewayResource(this,
+            "Music-SpotifyOAuthUrlV1Resource",
+            new ApiGatewayResourceProps
+            {
+                ParentResource = spotifyOAuthV1Resource,
+                PathPart = "url"
+            }).Resource;
+
+        var spotifyOAuthCallbackV1Resource = new ApiGatewayResource(this,
+            "Music-SpotifyOAuthCallbackV1Resource",
+            new ApiGatewayResourceProps
+            {
+                ParentResource = spotifyOAuthV1Resource,
+                PathPart = "callback"
+            }).Resource;
+
+        var spotifyStatusV1Resource = new ApiGatewayResource(this,
+            "Music-SpotifyStatusV1Resource",
+            new ApiGatewayResourceProps
+            {
+                ParentResource = spotifyV1Resource,
+                PathPart = "status"
+            }).Resource;
+
+        var getSpotifyTokenV1Resource = new ApiGatewayResource(this,
+            "Music-GetSpotifyTokenV1Resource",
+            new ApiGatewayResourceProps
+            {
+                ParentResource = spotifyV1Resource,
+                PathPart = "token"
+            }).Resource;
 
         #endregion
 
         #region API Gateway Methods
 
-        var requestValidator = new RequestValidator(this, "Music-AdminApiRequestValidator", new RequestValidatorProps
-        {
-            RestApi = restApiGateway,
-            ValidateRequestBody = true,
-            ValidateRequestParameters = true
-        });
+        var requestValidator = new RequestValidator(this,
+            "Music-AdminApiRequestValidator",
+            new RequestValidatorProps
+            {
+                RestApi = restApiGateway,
+                ValidateRequestBody = true,
+                ValidateRequestParameters = true
+            });
 
-        var getMutV1Method = new ApiGatewayMethod(this, "Music-GetMutV1Method", new ApiGatewayMethodProps
-        {
-            Resource = mutV1Resource,
-            HttpMethod = "GET",
-            Integration = getMutV1Integration.Integration,
-            AuthorizationType = AuthorizationType.COGNITO,
-            Authorizer = authorizer,
-            RequestValidator = requestValidator
-        });
+        var getScheduleV1Method = new ApiGatewayMethod(this,
+            "Music-GetScheduleV1Method",
+            new ApiGatewayMethodProps
+            {
+                Resource = scheduleV1Resource,
+                HttpMethod = "GET",
+                Integration = getScheduleRateV1Integration.Integration,
+                AuthorizationType = AuthorizationType.COGNITO,
+                Authorizer = authorizer,
+                RequestValidator = requestValidator
+            });
 
-        var updateMutV1Method = new ApiGatewayMethod(this, "Music-UpdateMutV1Method", new ApiGatewayMethodProps
-        {
-            Resource = mutV1Resource,
-            HttpMethod = "POST",
-            Integration = updateMutV1Integration.Integration,
-            AuthorizationType = AuthorizationType.COGNITO,
-            Authorizer = authorizer,
-            RequestValidator = requestValidator
-        });
-
-        var getSpotifyAuthTokenV1Method = new ApiGatewayMethod(this, "Music-GetSpotifyAuthTokenV1Method", new ApiGatewayMethodProps
-        {
-            Resource = spotifyTokenV1Resource,
-            HttpMethod = "GET",
-            Integration = getSpotifyAuthTokenV1Integration.Integration,
-            AuthorizationType = AuthorizationType.NONE, // TODO: IAM Permissions for direct Lambda invocation access (?)
-        });
-
-        var getScheduleV1Method = new ApiGatewayMethod(this, "Music-GetScheduleV1Method", new ApiGatewayMethodProps
-        {
-            Resource = scheduleV1Resource,
-            HttpMethod = "GET",
-            Integration = getScheduleRateV1Integration.Integration,
-            AuthorizationType = AuthorizationType.COGNITO,
-            Authorizer = authorizer,
-            RequestValidator = requestValidator
-        });
-
-        var updateScheduleV1Method = new ApiGatewayMethod(this, "Music-UpdateScheduleV1Method",
+        var updateScheduleV1Method = new ApiGatewayMethod(this,
+            "Music-UpdateScheduleV1Method",
             new ApiGatewayMethodProps
             {
                 Resource = scheduleV1Resource,
@@ -532,22 +738,109 @@ public sealed class AdminApiStack : Stack
                 RequestValidator = requestValidator
             });
 
-        var getSongLimitV1Method = new ApiGatewayMethod(this, "Music-GetSongLimitV1Method", new ApiGatewayMethodProps
-        {
-            Resource = songLimitV1Resource,
-            HttpMethod = "GET",
-            Integration = getSongLimitV1Integration.Integration,
-            AuthorizationType = AuthorizationType.COGNITO,
-            Authorizer = authorizer,
-            RequestValidator = requestValidator
-        });
+        var getSongLimitV1Method = new ApiGatewayMethod(this,
+            "Music-GetSongLimitV1Method",
+            new ApiGatewayMethodProps
+            {
+                Resource = songLimitV1Resource,
+                HttpMethod = "GET",
+                Integration = getSongLimitV1Integration.Integration,
+                AuthorizationType = AuthorizationType.COGNITO,
+                Authorizer = authorizer,
+                RequestValidator = requestValidator
+            });
 
-        var updateSongLimitV1Method = new ApiGatewayMethod(this, "Music-UpdateSongLimitV1Method",
+        var updateSongLimitV1Method = new ApiGatewayMethod(this,
+            "Music-UpdateSongLimitV1Method",
             new ApiGatewayMethodProps
             {
                 Resource = songLimitV1Resource,
                 HttpMethod = "POST",
                 Integration = updateSongLimitV1Integration.Integration,
+                AuthorizationType = AuthorizationType.COGNITO,
+                Authorizer = authorizer,
+                RequestValidator = requestValidator
+            });
+
+        var getAppleMutV1Method = new ApiGatewayMethod(this,
+            "Music-GetAppleMutV1Method",
+            new ApiGatewayMethodProps
+            {
+                Resource = appleMusicUserTokenV1Resource,
+                HttpMethod = "GET",
+                Integration = getAppleMusicUserTokenV1Integration.Integration,
+                AuthorizationType = AuthorizationType.COGNITO,
+                Authorizer = authorizer,
+                RequestValidator = requestValidator
+            });
+
+        var getAppleMutStatusV1Method = new ApiGatewayMethod(this,
+            "Music-GetAppleMutStatusV1Method",
+            new ApiGatewayMethodProps
+            {
+                Resource = appleMusicUserTokenStatusV1Resource,
+                HttpMethod = "GET",
+                Integration = getAppleMusicUserTokenStatusV1Integration.Integration,
+                AuthorizationType = AuthorizationType.COGNITO,
+                Authorizer = authorizer,
+                RequestValidator = requestValidator
+            });
+
+        var updateAppleMutV1Method = new ApiGatewayMethod(this,
+            "Music-UpdateAppleMutV1Method",
+            new ApiGatewayMethodProps
+            {
+                Resource = appleMusicUserTokenV1Resource,
+                HttpMethod = "POST",
+                Integration = updateAppleMusicUserTokenV1Integration.Integration,
+                AuthorizationType = AuthorizationType.COGNITO,
+                Authorizer = authorizer,
+                RequestValidator = requestValidator
+            });
+
+        var getSpotifyOAuthUrlV1Method = new ApiGatewayMethod(this,
+            "Music-GetSpotifyOAuthUrlV1Method",
+            new ApiGatewayMethodProps
+            {
+                Resource = spotifyOAuthUrlV1Resource,
+                HttpMethod = "GET",
+                Integration = getSpotifyOAuthUrlV1Integration.Integration,
+                AuthorizationType = AuthorizationType.COGNITO,
+                Authorizer = authorizer,
+                RequestValidator = requestValidator
+            });
+
+        var getSpotifyOAuthCallbackV1Method = new ApiGatewayMethod(this,
+            "Music-GetSpotifyOAuthCallbackV1Method",
+            new ApiGatewayMethodProps
+            {
+                Resource = spotifyOAuthCallbackV1Resource,
+                HttpMethod = "GET",
+                Integration = getSpotifyOAuthCallbackV1Integration.Integration,
+                AuthorizationType =
+                    AuthorizationType.NONE, // OAuth callback doesn't need authentication during the flow
+                RequestValidator = requestValidator
+            });
+
+        var getSpotifyStatusV1Method = new ApiGatewayMethod(this,
+            "Music-GetSpotifyStatusV1Method",
+            new ApiGatewayMethodProps
+            {
+                Resource = spotifyStatusV1Resource,
+                HttpMethod = "GET",
+                Integration = getSpotifyAuthorizationStatusV1Integration.Integration,
+                AuthorizationType = AuthorizationType.COGNITO,
+                Authorizer = authorizer,
+                RequestValidator = requestValidator
+            });
+
+        var getSpotifyTokenV1Method = new ApiGatewayMethod(this,
+            "Music-GetSpotifyTokenV1Method",
+            new ApiGatewayMethodProps
+            {
+                Resource = getSpotifyTokenV1Resource,
+                HttpMethod = "GET",
+                Integration = getSpotifyTokenV1Integration.Integration,
                 AuthorizationType = AuthorizationType.COGNITO,
                 Authorizer = authorizer,
                 RequestValidator = requestValidator
@@ -582,11 +875,6 @@ public sealed class AdminApiStack : Stack
             },
             new NagPackSuppression
             {
-                Id = "AwsSolutions-COG4",
-                Reason = "Validating behaviors; Granular permissions will soon be enabled."
-            },
-            new NagPackSuppression
-            {
                 Id = "AwsSolutions-APIG1",
                 Reason = "Logging is relatively expensive. Will enable when needed for debugging."
             },
@@ -597,11 +885,6 @@ public sealed class AdminApiStack : Stack
             },
             new NagPackSuppression
             {
-                Id = "AwsSolutions-APIG4",
-                Reason = "Validating behaviors; Granular permissions will soon be enabled."
-            },
-            new NagPackSuppression
-            {
                 Id = "AwsSolutions-APIG6",
                 Reason = "Logging is relatively expensive. Will enable when needed for debugging."
             },
@@ -609,6 +892,16 @@ public sealed class AdminApiStack : Stack
             {
                 Id = "AwsSolutions-SMG4",
                 Reason = "This secret will soon be an SSM Parameter."
+            },
+            new NagPackSuppression
+            {
+                Id = "AwsSolutions-APIG4",
+                Reason = "(Relates to Callback URL Endpoint) This is a public API."
+            },
+            new NagPackSuppression
+            {
+                Id = "AwsSolutions-COG4",
+                Reason = "(Relates to Callback URL Endpoint) This is a public API."
             }
         ]);
 

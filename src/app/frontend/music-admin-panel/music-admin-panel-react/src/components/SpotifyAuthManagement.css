@@ -1,0 +1,88 @@
+.message-text {
+  margin-top: 0.5rem;
+  font-size: 0.875rem;
+}
+
+.token-display {
+  overflow-x: auto;
+  white-space: pre-wrap;
+  word-break: break-all;
+  padding: 1rem;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+  border-radius: 0.5rem;
+  margin: 1rem 0;
+  font-family: monospace;
+  color: var(--text-primary);
+}
+
+.secure-token-container {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.token-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.token-label {
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.toggle-visibility-btn {
+  background: transparent;
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  padding: 0.25rem 0.75rem;
+  border-radius: 0.25rem;
+  cursor: pointer;
+  font-size: 0.875rem;
+  transition: background-color 0.2s;
+}
+
+.toggle-visibility-btn:hover {
+  background-color: var(--bg-tertiary);
+}
+
+.clickable-token {
+  flex-grow: 1;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  padding: 10px;
+  border-radius: 4px;
+  overflow: auto;
+  white-space: pre-wrap;
+  word-break: break-all;
+  margin: 0;
+}
+
+.clickable-token:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.button-container {
+  margin-top: 1rem;
+}
+
+.info-section {
+  margin-top: 1rem;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
+.info-section p + p {
+  margin-top: 0.5rem;
+}
+
+@media (max-width: 640px) {
+  .token-display {
+    font-size: 0.75rem;
+    padding: 0.75rem;
+  }
+}
+

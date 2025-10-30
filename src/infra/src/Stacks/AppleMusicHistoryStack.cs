@@ -110,7 +110,7 @@ public sealed class AppleMusicHistoryStack : Stack
             [
                 historyTable.TableArn,
                 $"arn:aws:ssm:{Region}:{Account}:parameter/Music/AppleMusicHistory/LastProcessedSongId",
-                $"arn:aws:ssm:{Region}:{Account}:parameter/Music/AdminPanel/MUT",
+                $"arn:aws:ssm:{Region}:{Account}:parameter/Music/AdminPanel/Apple/MUT",
                 $"arn:aws:ssm:{Region}:{Account}:parameter/Music/AppleMusicHistory/SongLimit"
             ]
         }));
@@ -135,7 +135,7 @@ public sealed class AppleMusicHistoryStack : Stack
                 {
                     ["DYNAMODB_TABLE_NAME"] = historyTable.TableName,
                     ["LAST_PROCESSED_SONG_PARAMETER"] = lastProcessedSongIdParameter.ParameterName,
-                    ["MUSIC_USER_TOKEN_PARAMETER"] = "/Music/AdminPanel/MUT",
+                    ["MUSIC_USER_TOKEN_PARAMETER"] = "/Music/AdminPanel/Apple/MUT",
                     ["SONG_LIMIT_PARAMETER"] = songLimitParameter.ParameterName
                 }
             });

@@ -1,11 +1,11 @@
 meta {
-  name: Store MUT (Raw)
+  name: Set Apple MUT
   type: http
-  seq: 4
+  seq: 3
 }
 
 post {
-  url: {{ADMIN_API_GATEWAY_URL}}/prod/nodejs/mut/store
+  url: https://admin.music.mariolopez.org/api/nodejs/v1/apple/mut
   body: json
   auth: bearer
 }

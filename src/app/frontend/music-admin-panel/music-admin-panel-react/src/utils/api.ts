@@ -30,7 +30,9 @@ async function apiRequest<T>({
   baseUrl,
   requiresAuth = true,
 }: ApiOptions): Promise<T> {
-  const url = `${baseUrl || import.meta.env.VITE_ADMIN_API_BASE_URL}/api/nodejs/v1/${path}`;
+  const url = `${
+    baseUrl || import.meta.env.VITE_ADMIN_API_BASE_URL
+  }/api/nodejs/v1/${path}`;
   console.log("Making request to:", url);
 
   const headers: Record<string, string> = {};
@@ -77,8 +79,29 @@ async function apiRequest<T>({
 export async function updateMusicUserToken(musicUserToken: string) {
   return apiRequest({
     method: "POST",
-    path: "mut",
+    path: "apple/mut",
     body: { musicUserToken },
+  });
+}
+
+export async function getMusicUserToken() {
+  const response = await apiRequest<{ musicUserToken: string }>({
+    method: "GET",
+    path: "apple/mut",
+  });
+  return response.musicUserToken;
+}
+
+export interface MusicUserTokenStatusResponse {
+  authorized: boolean;
+  message: string;
+  musicUserToken: string | null;
+}
+
+export async function getMusicUserTokenStatus() {
+  return apiRequest<MusicUserTokenStatusResponse>({
+    method: "GET",
+    path: "apple/mut/status",
   });
 }
 
@@ -124,5 +147,38 @@ export async function getSongLimit() {
   return apiRequest<{ songLimit: number }>({
     method: "GET",
     path: "song-limit",
+  });
+}
+
+// Spotify OAuth API Functions
+export interface SpotifyOAuthUrlResponse {
+  authorization_url: string;
+  state: string;
+  // code_verifier is handled server-side
+}
+
+export interface SpotifyStatusResponse {
+  authorized: boolean;
+  message: string;
+}
+
+export async function getSpotifyOAuthUrl() {
+  return apiRequest<SpotifyOAuthUrlResponse>({
+    method: "GET",
+    path: "spotify/oauth/url",
+  });
+}
+
+export async function getSpotifyStatus() {
+  return apiRequest<SpotifyStatusResponse>({
+    method: "GET",
+    path: "spotify/status",
+  });
+}
+
+export async function getSpotifyToken() {
+  return apiRequest<{ accessToken: string }>({
+    method: "GET",
+    path: "spotify/token",
   });
 }

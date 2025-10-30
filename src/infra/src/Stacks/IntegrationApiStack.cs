@@ -90,7 +90,7 @@ public sealed class IntegrationApiStack : Stack
         var appleMusicTokenParameter = StringParameter.FromSecureStringParameterAttributes(this, "AppleMusicApiToken",
             new SecureStringParameterAttributes
             {
-                ParameterName = "/Music/AdminPanel/MUT"
+                ParameterName = "/Music/AdminPanel/Apple/MUT"
             });
 
         #endregion
@@ -178,7 +178,7 @@ public sealed class IntegrationApiStack : Stack
                     ["TOKEN_REFRESH_SNS_TOPIC_ARN"] = tokenRefreshTopic.TopicArn,
                     ["UPSTASH_REDIS_URL"] = configuration["AppleMusicApi:UpstashRedis:Url"]!,
                     ["UPSTASH_REDIS_TOKEN"] = configuration["AppleMusicApi:UpstashRedis:Token"]!,
-                    ["MUSIC_USER_TOKEN_PARAMETER"] = "/Music/AdminPanel/MUT"
+                    ["MUSIC_USER_TOKEN_PARAMETER"] = "/Music/AdminPanel/Apple/MUT"
                 }
             });
         appleMusicDataFetchingLambda = dataFetchingLambdaConstruct.Function;
