@@ -22,34 +22,34 @@ export const MusicProvider: React.FC<MusicProviderProps> = ({ children }) => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Function to generate gradient colors from Apple Music artwork colors
-  const generateGradientColors = (song: AppleMusicSong | null) => {
-    if (!song?.artworkColors) {
-      // Default gradient colors
-      return {
-        color1: '#fa573c',
-        color2: '#61dafb',
-        color3: '#60a4f4',
-        color4: '#fa573c',
-        color5: '#1f2378',
-      };
+  // Bright, vibrant color palettes
+  const BRIGHT_PALETTES = [
+    // Vibrant Purple/Pink/Blue
+    ['#ff006e', '#8338ec', '#3a86ff', '#06ffa5', '#fb5607'],
+    // Electric Cyan/Pink/Orange
+    ['#ff006e', '#00f5ff', '#ffbe0b', '#fb5607', '#8338ec'],
+    // Neon Green/Blue/Purple
+    ['#06ffa5', '#00f5ff', '#8338ec', '#ff006e', '#ffbe0b'],
+    // Hot Pink/Yellow/Blue
+    ['#ff006e', '#ffbe0b', '#3a86ff', '#06ffa5', '#8338ec'],
+    // Orange/Red/Cyan
+    ['#fb5607', '#ff006e', '#00f5ff', '#8338ec', '#ffbe0b'],
+    // Blue/Purple/Green
+    ['#3a86ff', '#8338ec', '#06ffa5', '#ff006e', '#ffbe0b'],
+  ];
+
+  // Select a palette based on song ID for consistency, or rotate
+  const getBrightPalette = (song: AppleMusicSong | null): string[] => {
+    if (!song) {
+      return BRIGHT_PALETTES[0];
     }
-
-    const { backgroundColor, textColor1, textColor2, textColor3, textColor4 } = song.artworkColors;
-
-    // Create a gradient using the background color and text colors
-    // Mix background color with text colors for variety
-    return {
-      color1: backgroundColor,
-      color2: textColor1 || backgroundColor,
-      color3: textColor2 || backgroundColor,
-      color4: textColor3 || backgroundColor,
-      color5: textColor4 || backgroundColor,
-    };
+    // Use song ID to consistently pick a palette for the same song
+    const paletteIndex = parseInt(song.id.slice(-1), 16) % BRIGHT_PALETTES.length;
+    return BRIGHT_PALETTES[paletteIndex];
   };
 
-  const [gradientColors, setGradientColors] = useState(() =>
-    generateGradientColors(null)
+  const [gradientColors, setGradientColors] = useState<string[]>(() =>
+    BRIGHT_PALETTES[0]
   );
 
   const fetchMusicHistory = async () => {
@@ -103,7 +103,7 @@ export const MusicProvider: React.FC<MusicProviderProps> = ({ children }) => {
         setNowPlaying(processedItems[0]);
 
         // Update gradient colors based on the now playing song
-        setGradientColors(generateGradientColors(processedItems[0]));
+        setGradientColors(getBrightPalette(processedItems[0]));
 
         // Set the rest as recently played (remaining songs after now playing)
         setRecentlyPlayed(processedItems.slice(1));
@@ -135,8 +135,8 @@ export const MusicProvider: React.FC<MusicProviderProps> = ({ children }) => {
 
   // Update gradient colors when nowPlaying changes
   useEffect(() => {
-    setGradientColors(generateGradientColors(nowPlaying));
-  }, [nowPlaying]);
+    setGradientColors(getBrightPalette(nowPlaying));
+  }, [nowPlaying?.id]); // Track by song ID to update when song changes
 
   const refreshMusicHistory = async () => {
     await fetchMusicHistory();

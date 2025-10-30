@@ -1,5 +1,6 @@
 import cx from "classix";
-import React, { useEffect } from "react";
+import React from "react";
+import AnimatedBackground from "./components/AnimatedBackground/AnimatedBackground";
 import Footer from "./components/Footer/Footer";
 import Navbar from "./components/Navbar/Navbar";
 import NowPlaying from "./components/NowPlaying/NowPlaying";
@@ -11,19 +12,9 @@ import styles from "./styles/App.module.css";
 const AppContent: React.FC = () => {
   const { gradientColors } = useMusicContext();
 
-  // Apply dynamic gradient colors to CSS custom properties
-  useEffect(() => {
-    const root = document.documentElement;
-    root.style.setProperty('--gradient-color-1', gradientColors.color1);
-    root.style.setProperty('--gradient-color-2', gradientColors.color2);
-    root.style.setProperty('--gradient-color-3', gradientColors.color3);
-    root.style.setProperty('--gradient-color-4', gradientColors.color4);
-    root.style.setProperty('--gradient-color-5', gradientColors.color5);
-  }, [gradientColors]);
-
   return (
     <>
-      <div className={styles.appBg} />
+      <AnimatedBackground colors={gradientColors} />
       <div className={styles.app}>
         <Navbar />
         <div className={styles.mainContent}>
