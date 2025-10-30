@@ -9,7 +9,8 @@ interface MusicProviderProps {
 }
 
 const HISTORY_AUTO_REFRESH_INTERVAL = 60000; // Refresh every minute
-const HISTORY_TRACK_LIMIT = 16; // (5 x 3) carousels + 1 for now playing
+const APPLE_MUSIC_LIMIT = 15; // Songs from Apple Music
+const SPOTIFY_LIMIT = 15; // Songs from Spotify
 
 // TEMPORARY: Enable mock source data for testing indicators
 // Set to false once backend provides real source data
@@ -56,29 +57,55 @@ export const MusicProvider: React.FC<MusicProviderProps> = ({ children }) => {
       setLoading(true);
       setError(null);
 
-      const response = await apiService.getMusicHistory(HISTORY_TRACK_LIMIT);
+      // Fetch both endpoints in parallel
+      const [appleMusicResponse, spotifyResponse] = await Promise.all([
+        apiService.getMusicHistory(APPLE_MUSIC_LIMIT),
+        apiService.getSpotifyMusicHistory(SPOTIFY_LIMIT),
+      ]);
 
-      if (response.items.length > 0) {
-        // TEMPORARY: Add mock source data for testing
-        let processedItems = response.items;
+      // Process Apple Music songs - ensure source is set to 'apple' if not specified
+      const appleMusicSongs = appleMusicResponse.items.map((item) => ({
+        ...item,
+        source: (item.source || 'apple') as MusicSource,
+      }));
+
+      // Process Spotify songs - default to 'apple' if no source, but preserve 'spotify' if set
+      const spotifySongs = spotifyResponse.items.map((item) => ({
+        ...item,
+        source: (item.source || 'apple') as MusicSource,
+      }));
+
+      // Merge both arrays
+      const allSongs = [...appleMusicSongs, ...spotifySongs];
+
+      // Sort by processedTimestamp (most recent first)
+      allSongs.sort((a, b) => {
+        const timestampA = new Date(a.processedTimestamp).getTime();
+        const timestampB = new Date(b.processedTimestamp).getTime();
+        return timestampB - timestampA;
+      });
+
+      if (allSongs.length > 0) {
+        // TEMPORARY: Add mock source data for testing (if enabled)
+        let processedItems = allSongs;
         if (ENABLE_MOCK_SOURCE_DATA) {
-          processedItems = response.items.map((item, index) => {
+          processedItems = allSongs.map((item, index) => {
             // Alternate between apple, spotify, and no source for testing
             const sources: (MusicSource | undefined)[] = ['apple', 'spotify', undefined];
             return {
               ...item,
-              source: sources[index % 3],
+              source: sources[index % 3] || 'apple',
             };
           });
         }
 
-        // Set the first item as now playing
+        // Set the first (most recent) item as now playing
         setNowPlaying(processedItems[0]);
 
         // Update gradient colors based on the now playing song
         setGradientColors(generateGradientColors(processedItems[0]));
 
-        // Set the rest as recently played
+        // Set the rest as recently played (remaining songs after now playing)
         setRecentlyPlayed(processedItems.slice(1));
       } else {
         setNowPlaying(null);

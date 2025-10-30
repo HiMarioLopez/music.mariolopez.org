@@ -1,0 +1,19 @@
+meta {
+  name: Spotify Music History (Limit 5) (Raw)
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{MUSIC_API_GATEWAY_URL}}/prod/nodejs/v1/history/spotify?limit=5
+  body: none
+  auth: bearer
+}
+
+params:query {
+  limit: 5
+}
+
+auth:bearer {
+  token: {{AUTH_TOKEN}}
+}

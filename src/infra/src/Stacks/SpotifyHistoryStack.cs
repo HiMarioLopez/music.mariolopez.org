@@ -111,8 +111,17 @@ public sealed class SpotifyHistoryStack : Stack
                 historyTable.TableArn,
                 $"arn:aws:ssm:{Region}:{Account}:parameter/Music/SpotifyHistory/LastProcessedSongId",
                 $"arn:aws:ssm:{Region}:{Account}:parameter/Music/AdminPanel/Spotify/UserAccessToken",
+                $"arn:aws:ssm:{Region}:{Account}:parameter/Music/AdminPanel/Spotify/UserRefreshToken",
                 $"arn:aws:ssm:{Region}:{Account}:parameter/Music/SpotifyHistory/SongLimit"
             ]
+        }));
+
+        // Add Secrets Manager permissions for Spotify client secret
+        updateHistoryJobLambdaRole.AddToPolicy(new PolicyStatement(new PolicyStatementProps
+        {
+            Effect = Effect.ALLOW,
+            Actions = ["secretsmanager:GetSecretValue"],
+            Resources = [$"arn:aws:secretsmanager:{Region}:{Account}:secret:SpotifyClientSecret-*"]
         }));
 
         // Add CloudWatch permissions
@@ -136,6 +145,10 @@ public sealed class SpotifyHistoryStack : Stack
                     ["DYNAMODB_TABLE_NAME"] = historyTable.TableName,
                     ["LAST_PROCESSED_SONG_PARAMETER"] = lastProcessedSongIdParameter.ParameterName,
                     ["SPOTIFY_ACCESS_TOKEN_PARAMETER"] = "/Music/AdminPanel/Spotify/UserAccessToken",
+                    ["SPOTIFY_REFRESH_TOKEN_PARAMETER"] = "/Music/AdminPanel/Spotify/UserRefreshToken",
+                    ["SPOTIFY_CLIENT_SECRET_NAME"] = "SpotifyClientSecret",
+                    ["SPOTIFY_REDIRECT_URI"] =
+                        "https://admin.music.mariolopez.org/api/nodejs/v1/spotify/oauth/callback",
                     ["SONG_LIMIT_PARAMETER"] = songLimitParameter.ParameterName
                 }
             });

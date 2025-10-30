@@ -54,7 +54,7 @@ export const handler = wrapHandler<APIGatewayProxyEvent, APIGatewayProxyResult>(
       });
 
       // Generate Spotify auth URL with PKCE parameters
-      const authorizationUrl = generateSpotifyAuthUrl(
+      const authorizationUrl = await generateSpotifyAuthUrl(
         state,
         codeChallenge
       );

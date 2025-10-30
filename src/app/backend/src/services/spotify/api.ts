@@ -2,6 +2,7 @@ import { Logger } from '@aws-lambda-powertools/logger';
 import axios from 'axios';
 import { Song, SpotifySong } from '../../models/song';
 import { getParameter, updateParameter } from '../parameter';
+import { getSecretJson } from '../secret';
 
 const logger = new Logger({ serviceName: 'spotify-api-service' });
 
@@ -102,20 +103,52 @@ export interface SpotifyRecentlyPlayedResponse {
 }
 
 /**
- * Get Spotify configuration from environment variables
+ * Get Spotify configuration from Secrets Manager and environment variables
+ * 
+ * Retrieves client_id and client_secret from AWS Secrets Manager.
+ * Redirect URI is retrieved from environment variable as it's not stored in the secret.
  */
-export const getSpotifyConfig = (): SpotifyConfig => {
-  const clientId = process.env.SPOTIFY_CLIENT_ID;
-  const clientSecret = process.env.SPOTIFY_CLIENT_SECRET;
+export const getSpotifyConfig = async (): Promise<SpotifyConfig> => {
+  const secretName = process.env.SPOTIFY_CLIENT_SECRET_NAME;
   const redirectUri = process.env.SPOTIFY_REDIRECT_URI;
 
-  if (!clientId || !clientSecret || !redirectUri) {
+  if (!secretName) {
     throw new Error(
-      'Missing required Spotify environment variables: SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET, SPOTIFY_REDIRECT_URI'
+      'Missing required environment variable: SPOTIFY_CLIENT_SECRET_NAME'
     );
   }
 
-  return { clientId, clientSecret, redirectUri };
+  if (!redirectUri) {
+    throw new Error(
+      'Missing required environment variable: SPOTIFY_REDIRECT_URI'
+    );
+  }
+
+  try {
+    // Retrieve credentials from Secrets Manager
+    const secret = await getSecretJson<{ client_id: string; client_secret: string }>(
+      secretName
+    );
+
+    if (!secret.client_id || !secret.client_secret) {
+      throw new Error(
+        'Spotify secret is missing required fields: client_id, client_secret'
+      );
+    }
+
+    logger.info('Successfully retrieved Spotify configuration from Secrets Manager');
+
+    return {
+      clientId: secret.client_id,
+      clientSecret: secret.client_secret,
+      redirectUri,
+    };
+  } catch (error) {
+    logger.error('Failed to retrieve Spotify configuration', { error });
+    throw new Error(
+      `Failed to retrieve Spotify configuration from Secrets Manager: ${error instanceof Error ? error.message : String(error)}`
+    );
+  }
 };
 
 /**
@@ -197,7 +230,7 @@ export const storeSpotifyTokens = async (
  */
 export const refreshSpotifyAccessToken =
   async (): Promise<SpotifyRefreshTokenResponse> => {
-    const config = getSpotifyConfig();
+    const config = await getSpotifyConfig();
     const refreshToken = await getSpotifyRefreshToken();
 
     try {
@@ -437,12 +470,12 @@ export const fetchRecentlyPlayedTracks = async (
 /**
  * Generate Spotify authorization URL for OAuth flow with optional PKCE
  */
-export const generateSpotifyAuthUrl = (
+export const generateSpotifyAuthUrl = async (
   state?: string,
   codeChallenge?: string,
   codeVerifier?: string
-): string => {
-  const config = getSpotifyConfig();
+): Promise<string> => {
+  const config = await getSpotifyConfig();
 
   // Note: Code verifier should be stored BEFORE generating the URL
   // This function now only generates the URL, storage should happen in the handler
@@ -474,7 +507,7 @@ export const exchangeCodeForToken = async (
   code: string,
   codeVerifier?: string
 ): Promise<SpotifyTokenResponse> => {
-  const config = getSpotifyConfig();
+  const config = await getSpotifyConfig();
 
   try {
     const bodyParams: Record<string, string> = {

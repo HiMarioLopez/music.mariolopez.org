@@ -241,6 +241,62 @@ public sealed class IntegrationApiStack : Stack
 
         #endregion
 
+        #region Get Spotify Song History Lambda (Version 1)
+
+        var getSpotifySongHistoryLambdaRole = new Role(this, "GetSpotifySongHistoryLambdaRole", new RoleProps
+        {
+            AssumedBy = new ServicePrincipal("lambda.amazonaws.com"),
+            Description = "Role for get-spotify-song-history Lambda function",
+            ManagedPolicies = [ManagedPolicy.FromAwsManagedPolicyName("service-role/AWSLambdaBasicExecutionRole")]
+        });
+
+        // Add CloudWatch permissions to Spotify Lambda role
+        getSpotifySongHistoryLambdaRole.AddToPolicy(new PolicyStatement(new PolicyStatementProps
+        {
+            Effect = Effect.ALLOW,
+            Actions = ["cloudwatch:PutMetricData"],
+            Resources = ["*"]
+        }));
+
+        // Add DynamoDB permissions for Spotify song history
+        getSpotifySongHistoryLambdaRole.AddToPolicy(new PolicyStatement(new PolicyStatementProps
+        {
+            Effect = Effect.ALLOW,
+            Actions =
+            [
+                "dynamodb:Query",
+                "dynamodb:Scan",
+                "dynamodb:GetItem"
+            ],
+            Resources = [Fn.Join("", ["arn:aws:dynamodb:", Region, ":", Account, ":table/SpotifyHistory"])]
+        }));
+
+        // Add SSM Parameter Store read permission
+        getSpotifySongHistoryLambdaRole.AddToPolicy(new PolicyStatement(new PolicyStatementProps
+        {
+            Effect = Effect.ALLOW,
+            Actions = ["ssm:GetParameter"],
+            Resources = [$"arn:aws:ssm:{Region}:{Account}:parameter/Music/SpotifyHistory/TableName"]
+        }));
+
+        var getSpotifySongHistoryLambda = new NodejsLambdaFunction(this, "GetSpotifySongHistoryFunction",
+            new NodejsLambdaFunctionProps
+            {
+                Handler = "get-spotify-song-history.handler",
+                Code = Code.FromAsset("../app/backend/dist/handlers/api/v1/integration"),
+                Role = getSpotifySongHistoryLambdaRole,
+                Description = "Fetches Spotify song history from DynamoDB",
+                Environment = new Dictionary<string, string>
+                {
+                    ["AWS_NODEJS_CONNECTION_REUSE_ENABLED"] = "1",
+                    ["DYNAMODB_TABLE_NAME_PARAMETER"] = "/Music/SpotifyHistory/TableName",
+                    ["UPSTASH_REDIS_URL"] = configuration["AppleMusicApi:UpstashRedis:Url"]!,
+                    ["UPSTASH_REDIS_TOKEN"] = configuration["AppleMusicApi:UpstashRedis:Token"]!
+                }
+            }).Function;
+
+        #endregion
+
         #endregion
 
         #region API Gateway Resources
@@ -293,6 +349,12 @@ public sealed class IntegrationApiStack : Stack
                 ParentResource = appleMusicResource
             }).ProxyResource;
 
+        var spotifyHistoryResource = new ApiGatewayResource(this, "SpotifyHistoryResource", new ApiGatewayResourceProps
+        {
+            ParentResource = historyResource,
+            PathPart = "spotify"
+        }).Resource;
+
         #endregion
 
         #region API Gateway Integration
@@ -314,6 +376,12 @@ public sealed class IntegrationApiStack : Stack
                 Function = appleMusicDataFetchingLambda,
                 Proxy = true,
                 PassthroughBehavior = PassthroughBehavior.WHEN_NO_MATCH
+            });
+
+        var spotifyHistoryIntegration = new ApiGatewayIntegration(this, "SpotifyHistoryIntegration",
+            new ApiGatewayIntegrationProps
+            {
+                Function = getSpotifySongHistoryLambda
             });
 
         #endregion
@@ -340,6 +408,15 @@ public sealed class IntegrationApiStack : Stack
             Resource = musicHistoryResource,
             HttpMethod = "GET",
             Integration = musicHistoryIntegration.Integration,
+            AuthorizationType = AuthorizationType.NONE,
+            RequestValidator = requestValidator
+        });
+
+        var getSpotifyHistoryMethod = new ApiGatewayMethod(this, "GetSpotifyHistoryMethod", new ApiGatewayMethodProps
+        {
+            Resource = spotifyHistoryResource,
+            HttpMethod = "GET",
+            Integration = spotifyHistoryIntegration.Integration,
             AuthorizationType = AuthorizationType.NONE,
             RequestValidator = requestValidator
         });

@@ -198,4 +198,9 @@ export const apiService = {
       `${API_BASE_URL}/history/music?limit=${limit}`,
     );
   },
+  async getSpotifyMusicHistory(limit: number = 5): Promise<MusicHistoryResponse> {
+    return fetchWithErrorHandling<MusicHistoryResponse>(
+      `${API_BASE_URL}/history/spotify?limit=${limit}`,
+    );
+  },
 };

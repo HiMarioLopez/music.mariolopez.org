@@ -1,11 +1,11 @@
 meta {
-  name: Music History (Limit 5) (Raw)
+  name: Apple Music History (Limit 5)
   type: http
-  seq: 2
+  seq: 1
 }
 
 get {
-  url: {{MUSIC_API_GATEWAY_URL}}/prod/nodejs/v1/history/music?limit=5
+  url: https://music.mariolopez.org/api/nodejs/v1/history/music?limit=5
   body: none
   auth: bearer
 }

@@ -40,3 +40,29 @@ export const getSecret = async (secretName: string): Promise<string> => {
         throw new Error(`Failed to retrieve secret: ${secretName}`);
     }
 };
+
+/**
+ * Get a JSON secret from AWS Secrets Manager and parse it
+ * 
+ * @param secretName - Name of the secret to retrieve
+ * @returns Promise resolving to the parsed JSON object
+ * @throws Error if the secret cannot be retrieved or parsed
+ */
+export const getSecretJson = async <T = Record<string, any>>(
+    secretName: string
+): Promise<T> => {
+    try {
+        const secretString = await getSecret(secretName);
+        const parsed = JSON.parse(secretString) as T;
+        
+        logger.info('Successfully retrieved and parsed JSON secret', {
+            secretName,
+            hasValue: !!parsed
+        });
+
+        return parsed;
+    } catch (error) {
+        logger.error('Failed to retrieve or parse JSON secret', { secretName, error });
+        throw new Error(`Failed to retrieve or parse JSON secret: ${secretName}`);
+    }
+};
