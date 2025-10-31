@@ -1,0 +1,16 @@
+<div class="recentlyPlayedSkeletonContainer">
+  @for (rowNum of rows; track rowNum) {
+    <div class="recentlyPlayedSkeletonRow">
+      @for (item of skeletonItems; track $index) {
+        <div class="recentlyPlayedSkeletonSong">
+          <div class="recentlyPlayedSkeletonImg skeletonLoader"></div>
+          <div class="recentlyPlayedSkeletonText">
+            <div class="recentlyPlayedSkeletonTitle skeletonLoader"></div>
+            <div class="recentlyPlayedSkeletonSubtitle skeletonLoader"></div>
+          </div>
+        </div>
+      }
+    </div>
+  }
+</div>
+

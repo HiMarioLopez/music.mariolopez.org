@@ -1,0 +1,24 @@
+<div [attr.data-carousel-item]="index">
+  <div class="song">
+    <div class="albumArtContainer">
+      <img
+        [src]="imageError() ? getProcessedArtworkUrl(undefined) : artworkUrl()"
+        [alt]="song.name + ' Album Cover'"
+        [title]="song.url ? 'Click to open ' + song.name + ' in Apple Music' : song.name + ' by ' + song.artistName"
+        (error)="handleImageError()"
+        (click)="handleAlbumArtClick()"
+        [style.cursor]="song.url ? 'pointer' : 'default'"
+      />
+    </div>
+    <div class="songTextContainer">
+      <div class="songTitleContainer">
+        <app-source-indicator [source]="song.source" size="small" [url]="song.url" />
+        <h3 [title]="song.name">{{ song.name }}</h3>
+      </div>
+      <p [title]="song.artistName + ' - ' + song.albumName">
+        {{ song.artistName }} - {{ song.albumName }}
+      </p>
+    </div>
+  </div>
+</div>
+

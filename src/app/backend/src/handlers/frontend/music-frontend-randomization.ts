@@ -22,7 +22,7 @@ const siteVersions = [
   // '/vue',        // Under construction
   // '/preact',     // Under construction
   // '/next',       // Under construction
-  // '/angular',    // Under construction
+  '/angular',
 ];
 
 export const handler = (

@@ -1,11 +1,74 @@
-<div class="now-playing-component styled-container">
-    <img [src]="currentSong.albumCoverUrl" alt="Album Art" />
-    <div class="now-playing-component-text-container">
-        <h1>Mario's Now Playing</h1>
-        <div class="now-playing-component-text">
-            <h2>{{ currentSong.songTitle }}</h2>
-            <p>{{ currentSong.artistName }}</p>
-            <p>{{ currentSong.albumName }}</p>
-        </div>
+@if (musicService.loading() && !musicService.nowPlaying()) {
+  <div class="nowPlayingComponent">
+    <div class="albumArtContainer">
+      <div class="nowPlayingSkeletonImg skeletonLoader"></div>
     </div>
-</div>
+    <div class="nowPlayingComponentTextContainer">
+      <h1>Mario's Now Playing</h1>
+      <div class="nowPlayingComponentText">
+        <div class="songTitleContainer">
+          <div class="skeletonLoader" style="width: 14px; height: 14px; border-radius: 50%; flex-shrink: 0;"></div>
+          <div class="nowPlayingSkeletonTitle skeletonLoader"></div>
+        </div>
+        <div class="nowPlayingSkeletonArtist skeletonLoader"></div>
+        <div class="nowPlayingSkeletonAlbum skeletonLoader"></div>
+        <div class="nowPlayingSkeletonTimestamp skeletonLoader"></div>
+      </div>
+    </div>
+  </div>
+} @else if (musicService.error() && !musicService.nowPlaying()) {
+  <div class="nowPlayingComponent">
+    <img [src]="artworkUrl()" alt="Error Album Art" />
+    <div class="nowPlayingComponentTextContainer">
+      <h1>Mario's Now Playing</h1>
+      <div class="nowPlayingComponentText">
+        <h2>Unable to load music data</h2>
+        <p>{{ musicService.error() }}</p>
+      </div>
+    </div>
+  </div>
+} @else {
+  <div class="nowPlayingComponent">
+    <div class="albumArtContainer">
+      <img
+        [src]="artworkUrl()"
+        [alt]="musicService.nowPlaying()?.albumName || 'Album' + ' Art'"
+        (click)="handleAlbumArtClick()"
+        [style.cursor]="musicService.nowPlaying()?.url ? 'pointer' : 'default'"
+        [title]="musicService.nowPlaying()?.url ? 'Click to open ' + (musicService.nowPlaying()?.name || '') + ' in Apple Music' : ''"
+      />
+    </div>
+    <div class="nowPlayingComponentTextContainer">
+      <div class="nowPlayingHeader">
+        <h1>Mario's Now Playing</h1>
+      </div>
+      <div class="nowPlayingComponentText">
+        <div class="songTitleContainer">
+          <app-source-indicator
+            [source]="musicService.nowPlaying()?.source"
+            size="small"
+            [url]="musicService.nowPlaying()?.url"
+          />
+          <h2 [title]="musicService.nowPlaying()?.name || 'No song playing'">
+            {{ musicService.nowPlaying()?.name || 'No song playing' }}
+          </h2>
+        </div>
+        <p [title]="musicService.nowPlaying()?.artistName || 'Unknown Artist'">
+          {{ musicService.nowPlaying()?.artistName || 'Unknown Artist' }}
+        </p>
+        <p [title]="musicService.nowPlaying()?.albumName || 'Unknown Album'">
+          {{ musicService.nowPlaying()?.albumName || 'Unknown Album' }}
+        </p>
+        @if (relativeTime()) {
+          <span
+            class="nowPlayingTimestamp"
+            [title]="getTimestampTitle()"
+          >
+            {{ relativeTime() }}
+          </span>
+        }
+      </div>
+    </div>
+  </div>
+}
+

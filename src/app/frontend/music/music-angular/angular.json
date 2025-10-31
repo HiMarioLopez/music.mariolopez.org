@@ -5,36 +5,31 @@
   "projects": {
     "music-angular": {
       "projectType": "application",
-      "schematics": {},
+      "schematics": {
+        "@schematics/angular:component": {
+          "style": "css"
+        }
+      },
       "root": "",
       "sourceRoot": "src",
       "prefix": "app",
       "architect": {
         "build": {
-          "builder": "@angular-devkit/build-angular:browser",
+          "builder": "@angular-devkit/build-angular:application",
           "options": {
-            "outputPath": "dist",
+            "outputPath": "dist/music-angular",
             "index": "src/index.html",
-            "main": "src/main.ts",
-            "polyfills": [
-              "zone.js"
-            ],
+            "browser": "src/main.ts",
+            "polyfills": [],
             "tsConfig": "tsconfig.app.json",
-            "assets": [
-              "src/favicon.ico",
-              "src/assets"
-            ],
-            "styles": [
-              "src/styles.css"
-            ],
-            "scripts": []
+            "assets": ["src/favicon.ico", "src/assets"],
+            "styles": ["src/styles.css"],
+            "scripts": [],
+            "baseHref": "/angular/",
+            "deployUrl": "/angular/"
           },
           "configurations": {
             "production": {
-              "deployUrl": "https://music.mariolopez.org/angular/",
-              "aot": true,
-              "optimization": true,
-              "extractLicenses": true,
               "budgets": [
                 {
                   "type": "initial",
@@ -43,8 +38,8 @@
                 },
                 {
                   "type": "anyComponentStyle",
-                  "maximumWarning": "2kb",
-                  "maximumError": "4kb"
+                  "maximumWarning": "5kb",
+                  "maximumError": "10kb"
                 }
               ],
               "outputHashing": "all"
@@ -52,13 +47,7 @@
             "development": {
               "optimization": false,
               "extractLicenses": false,
-              "sourceMap": true,
-              "fileReplacements": [
-                {
-                  "replace": "src/environments/environment.ts",
-                  "with": "src/environments/environment.development.ts"
-                }
-              ]
+              "sourceMap": true
             }
           },
           "defaultConfiguration": "production"
@@ -70,33 +59,16 @@
               "buildTarget": "music-angular:build:production"
             },
             "development": {
-              "buildTarget": "music-angular:build:development"
+              "buildTarget": "music-angular:build:development",
+              "proxyConfig": "proxy.conf.json"
             }
           },
           "defaultConfiguration": "development"
         },
-        "extract-i18n": {
-          "builder": "@angular-devkit/build-angular:extract-i18n",
+        "lint": {
+          "builder": "@angular-eslint/builder:lint",
           "options": {
-            "buildTarget": "music-angular:build"
-          }
-        },
-        "test": {
-          "builder": "@angular-devkit/build-angular:karma",
-          "options": {
-            "polyfills": [
-              "zone.js",
-              "zone.js/testing"
-            ],
-            "tsConfig": "tsconfig.spec.json",
-            "assets": [
-              "src/favicon.ico",
-              "src/assets"
-            ],
-            "styles": [
-              "src/styles.css"
-            ],
-            "scripts": []
+            "lintFilePatterns": ["src/**/*.ts", "src/**/*.html"]
           }
         }
       }

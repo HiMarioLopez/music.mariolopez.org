@@ -104,7 +104,6 @@ const Navbar: React.FC = () => {
         href="https://music.mariolopez.org/angular"
         target="_self"
         rel="alternate"
-        className={styles.underConstruction}
         tabIndex={-1}
         aria-disabled="true"
       >

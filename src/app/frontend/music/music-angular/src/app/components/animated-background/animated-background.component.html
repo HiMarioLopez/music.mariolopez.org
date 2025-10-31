@@ -1,0 +1,31 @@
+<div class="container">
+  <!-- Animated gradient blobs -->
+  <div class="blobsContainer">
+    @for (blob of blobs; track blob.id) {
+      <div
+        class="blob"
+        [ngStyle]="getBlobStyle(blob)"
+      ></div>
+    }
+  </div>
+
+  <!-- Base gradient overlay -->
+  <div
+    class="gradientOverlay"
+    [ngStyle]="getGradientStyle()"
+  ></div>
+
+  <!-- Animated mesh gradient points -->
+  <div class="meshGradient">
+    @for (color of displayColors(); track $index; let i = $index) {
+      <div
+        class="meshPoint"
+        [style.background]="'radial-gradient(circle, ' + color + '80, ' + color + '40, transparent)'"
+        [style.left]="(i * 25 % 100) + '%'"
+        [style.top]="getMeshPointTop(i)"
+        [style.animation-delay]="(i * 2) + 's'"
+      ></div>
+    }
+  </div>
+</div>
+

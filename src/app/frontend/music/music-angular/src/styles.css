@@ -1,87 +1,70 @@
+/* Global reset styles that should apply everywhere */
 html,
 body,
 #root {
-    margin: 0;
-    padding: 0;
-    width: 100%;
-    height: 100%;
-    font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  font-family: -apple-system, BlinkMacSystemFont, Arial, sans-serif;
 }
 
 /* Style Variables */
-
 :root {
-    /* Font */
-    --font-color: aliceblue;
+  /* Font */
+  --font-color: aliceblue;
 
-    /* Colors */
-    --navbar-bg-color: rgba(35, 35, 35, 0.9);
-    --component-bg-color: rgba(50, 50, 50, 0.6);
-    --input-bg-color: rgba(32, 35, 42, 0.7);
-    --track-bg-color: rgba(60, 60, 60, 0.6);
-    --track-bg-color-hover: rgba(75, 75, 75, 0.7);
-    --scrollbar-start-color: rgba(255, 255, 255, 0.5);
-    --scrollbar-end-color: rgba(0, 0, 0, 0.1);
+  /* Colors */
+  --navbar-bg-color: rgb(26, 26, 26);
+  --component-bg-color: rgba(50, 50, 50, 0.6);
+  --input-bg-color: rgba(32, 35, 42, 0.7);
+  --track-bg-color: rgba(60, 60, 60, 0.6);
+  --track-bg-color-hover: rgba(75, 75, 75, 0.7);
+  --scrollbar-start-color: rgba(255, 255, 255, 0.5);
+  --scrollbar-end-color: rgba(0, 0, 0, 0.1);
 
-    /* Border Radius */
-    --border-radius-large: 15px;
-    /* Usually used for outer components */
-    --border-radius-medium: 7px;
-    /* Usually used for inner components */
-    --border-radius-small: 3px;
-    /* Usually used for the smallest of inner components */
+  /* Border Radius */
+  --border-radius-large: 15px;
+  /* Usually used for outer components */
+  --border-radius-medium: 7px;
+  /* Usually used for inner components */
+  --border-radius-small: 3px;
+  /* Usually used for the smallest of inner components */
 
-    /* Padding */
-    --padding-large: 20px;
-    --padding-medium: 10px;
+  /* Padding */
+  --padding-large: 20px;
+  --padding-medium: 10px;
 
-    /* Margin */
-    --margin-large: 20px;
-    --margin-medium: 10px;
-    --margin-small: 5px;
+  /* Margin */
+  --margin-large: 20px;
+  --margin-medium: 10px;
+  --margin-small: 5px;
 
-    /* Width and Height */
-    --max-width-large: 1200px;
-    --max-width-medium: 600px;
-    --width-mobile: 80vw;
-    --navbar-height-desktop: 40px;
-    --navbar-height-mobile: 30px;
-    --footer-height-desktop: 40px;
-    --footer-height-mobile: 70px;
-    --track-card-size: 60px;
+  /* Width and Height */
+  --navbar-height-desktop: 40px;
+  --navbar-height-mobile: 30px;
+  --footer-height-desktop: 40px;
+  --footer-height-mobile: 70px;
 
-    /* Input */
-    --input-border: 2px solid #fc3c44;
-    --button-hover-bg-color: #f94c57;
-    --button-bg-color: #fc3c44;
-    --focus-border-color: #f94c57;
+  /* Input */
+  --input-border: 2px solid #fc3c44;
+  --button-hover-bg-color: #f94c57;
+  --button-bg-color: #fc3c44;
+  --focus-border-color: #f94c57;
 
-    /* Images */
-    --album-art-size-small: 50px;
-    --album-art-size-large: 250px;
+  /* Images */
+  --album-art-size-small: 50px;
+  --album-art-size-medium: 200px;
+  --album-art-size-large: 350px;
 
-    /* Animations */
-    --transition-speed: 0.3s ease;
+  /* Animations */
+  --transition-speed: 0.3s ease;
+
+  /* Dynamic Gradient Colors */
+  --gradient-color-1: #fa573c;
+  --gradient-color-2: #61dafb;
+  --gradient-color-3: #60a4f4;
+  --gradient-color-4: #fa573c;
+  --gradient-color-5: #1f2378;
 }
 
-/* Shared Styles */
-
-.styled-container {
-    background: var(--component-bg-color);
-    color: var(--font-color);
-    padding: var(--padding-large);
-    border-radius: var(--border-radius-large);
-    box-shadow: inset 0 4px 8px rgba(0, 0, 0, 0.1);
-}
-
-@media (min-width: 1300px) {
-    .styled-container {
-        max-width: var(--max-width-large);
-    }
-}
-
-@media (max-width: 1299px) {
-    .styled-container {
-        max-width: var(--max-width-medium);
-    }
-}

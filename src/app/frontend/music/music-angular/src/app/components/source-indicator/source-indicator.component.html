@@ -1,0 +1,20 @@
+<div
+  class="indicator"
+  [class.small]="size === 'small'"
+  [class.large]="size === 'large'"
+  [class.apple]="actualSource === 'apple'"
+  [class.spotify]="actualSource === 'spotify'"
+  [title]="url ? 'Click to open in ' + displayName : displayName"
+  [attr.aria-label]="'Source: ' + displayName"
+  (click)="handleClick()"
+  [style.cursor]="url ? 'pointer' : 'default'"
+  [style.pointer-events]="url ? 'auto' : 'none'"
+>
+  @if (actualSource === 'apple') {
+    <app-apple-music-icon />
+  }
+  @if (actualSource === 'spotify') {
+    <app-spotify-icon />
+  }
+</div>
+

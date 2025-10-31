@@ -1,68 +1,32 @@
-.recently-played-list-component {
-    align-items: normal;
-    flex-direction: column;
-    overflow: hidden;
-    position: relative;
+.recentlyPlayedListComponent {
+  align-items: normal;
+  flex-direction: column;
+  overflow-x: hidden;
+  position: relative;
 }
 
-.recently-played-list-component h1 {
-    width: 100%;
-    text-align: left;
-    margin: 0 0 var(--margin-medium);
+.recentlyPlayedListComponent h1 {
+  /* Have to manually set back 'side' padding to keep 'overflow' style working */
+  padding-left: var(--padding-large);
+  padding-right: var(--padding-large);
+
+  width: 100%;
+  text-align: left;
+  margin: 0 0 var(--margin-medium);
+  text-overflow: ellipsis;
+  overflow: hidden;
 }
 
-.recently-played-list-component-list-container {
-    display: flex;
-    align-items: center;
-    overflow-x: auto;
-    white-space: nowrap;
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-}
-
-.recently-played-list-component-list-container::-webkit-scrollbar {
-    display: none;
-}
-
-.recently-played-list-component-track {
-    display: inline-flex;
-    align-items: center;
-    padding: var(--padding-medium);
-    margin-right: var(--margin-medium);
-    border-radius: var(--border-radius-medium);
-    background: var(--track-bg-color);
-    height: 60px;
-}
-
-.recently-played-list-component-track:hover {
-    background: var(--track-bg-color-hover);
-}
-
-.recently-played-list-component-track:last-child {
-    margin-right: 0;
-}
-
-.recently-played-list-component-track img {
-    width: var(--album-art-size-small);
-    height: var(--album-art-size-small);
-    margin-right: var(--margin-medium);
-    border-radius: var(--border-radius-small);
-}
-
-.recently-played-list-component-track-text-container {
-    display: flex;
-    flex-direction: column;
-    margin-right: var(--margin-small);
-}
-
-.recently-played-list-component-track-text-container h3,
-.recently-played-list-component-track-text-container p {
-    margin: 0;
-    color: var(--font-color);
+/* Remove margin from the last carousel row */
+.recentlyPlayedListComponent
+  app-carousel-row:last-child
+  ::ng-deep
+  .recentlyPlayedListRow {
+  margin-bottom: 0;
 }
 
 @media (max-width: 680px) {
-    .recently-played-list-component {
-        width: var(--width-mobile);
-    }
+  .recentlyPlayedListComponent {
+    width: var(--width-mobile);
+  }
 }

@@ -1,0 +1,67 @@
+/* Row container for each carousel */
+.recentlyPlayedListRow {
+  margin-bottom: 12px; /* Space between the rows */
+  height: auto; /* Allow natural height */
+  width: 100%;
+  overflow: hidden; /* Hide overflow for seamless infinite scroll */
+}
+
+/* Carousel container */
+.carouselContainer {
+  width: 100%;
+  overflow: hidden;
+  position: relative;
+}
+
+/* Carousel track - the moving container */
+.carouselTrack {
+  display: flex;
+  align-items: center;
+  will-change: transform;
+  width: fit-content;
+  /* CSS custom properties set via JS */
+  --carousel-content-width: 0px;
+  --carousel-duration: 60s;
+  --carousel-direction: normal;
+}
+
+/* Left direction animation - content moves left, appears to scroll right */
+@keyframes scrollLeft {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(calc(var(--carousel-content-width) * -1));
+  }
+}
+
+/* Right direction animation - content moves right, appears to scroll left */
+@keyframes scrollRight {
+  from {
+    transform: translateX(calc(var(--carousel-content-width) * -1));
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+/* Apply animations based on direction */
+.carouselTrackLeft {
+  animation: scrollLeft var(--carousel-duration) linear infinite;
+}
+
+.carouselTrackRight {
+  animation: scrollRight var(--carousel-duration) linear infinite;
+}
+
+/* Pause animation on hover */
+.carouselTrackPaused {
+  animation-play-state: paused;
+}
+
+/* Individual carousel item */
+.carouselItem {
+  flex-shrink: 0;
+  height: auto;
+}
+

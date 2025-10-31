@@ -1,21 +1,17 @@
-<div class="app-bg"></div>
+<app-animated-background [colors]="musicService.gradientColors()" />
+<div class="appBg"></div>
 <div class="app">
-  <app-navbar></app-navbar>
-  <div class="main-content">
-    <div class="left-column">
-      <div class="now-playing-container">
+  <app-navbar />
+  <div class="mainContent">
+    <div class="centerColumn">
+      <div class="nowPlayingContainer styledContainer">
         <app-now-playing />
       </div>
-      <app-recently-played-list />
-    </div>
-    <div class="right-column">
-      <div class="recommendation-form-container">
-        <app-recommendation-form (onRecommend)=handleNewRecommendation($event) />
-      </div>
-      <div class="recommendations-list-container">
-        <app-recommendation-list [recommendations]="recommendations" />
+      <div class="recentlyPlayedContainer styledContainer">
+        <app-recently-played-list />
       </div>
     </div>
   </div>
-  <app-footer></app-footer>
+  <app-footer />
 </div>
+

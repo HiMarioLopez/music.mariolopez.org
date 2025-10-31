@@ -1,23 +1,13 @@
-import { Component, ElementRef, ViewChild, AfterViewInit } from '@angular/core';
-import { environment } from '../../../environments/environment';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-navbar',
   standalone: true,
-  imports: [],
+  imports: [CommonModule],
   templateUrl: './navbar.component.html',
-  styleUrls: ['./navbar.component.css']
+  styleUrl: './navbar.component.css',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class NavbarComponent implements AfterViewInit {
-  basePath = environment.assetsBasePath;
+export class NavbarComponent {}
 
-  @ViewChild('navbar') navbar!: ElementRef;
-
-  // Scroll to the right when the component is initialized
-  ngAfterViewInit() {
-    if (this.navbar !== null) {
-      const navbarElement = this.navbar.nativeElement;
-      navbarElement.scrollLeft = navbarElement.scrollWidth - navbarElement.clientWidth;
-    }
-  }
-}

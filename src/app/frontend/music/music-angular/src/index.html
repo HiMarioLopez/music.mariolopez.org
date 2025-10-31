@@ -2,24 +2,17 @@
 <html lang="en">
 
 <head>
-  <meta charset="utf-8">
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/svg+xml" href="/angular.svg" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- Safari Mobile, please 😭 -->
+  <meta name="theme-color" content="#1a1a1a" />
+  <meta name="theme-color" content="#1a1a1a" media="(prefers-color-scheme: dark)" />
+  <meta name="theme-color" content="#1a1a1a" media="(prefers-color-scheme: light)" />
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
   <title>Music</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-
-  <!--
-    Hack: Get the baseHref to set based on whether the site was navigated to randomly
-    or using the direct `/angular` route. (This affects the generated build assets.)
-  -->
-  <script>
-    var baseHref = document.location.pathname;
-    document.write('<base href="' + baseHref + '" />');
-
-    if (baseHref === '/angular/') {
-      document.write('<link rel="icon" type="image/x-icon" href="favicon.ico">');
-    } else {
-      document.write('<link rel="icon" type="image/x-icon" href="/angular/favicon.ico">')
-    }
-  </script>
 </head>
 
 <body>
@@ -27,3 +20,4 @@
 </body>
 
 </html>
+

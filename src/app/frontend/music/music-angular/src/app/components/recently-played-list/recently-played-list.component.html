@@ -1,12 +1,36 @@
-<div class="recently-played-list-component styled-container">
-    <h1>Recently Played</h1>
-    <div class="recently-played-list-component-list-container" #scrollContainer>
-        <div *ngFor="let play of recentlyPlayed; let i = index" class="recently-played-list-component-track">
-            <img [src]="play.albumCoverUrl" alt="Album Cover" />
-            <div class="recently-played-list-component-track-text-container">
-                <h3>{{ play.songTitle }}</h3>
-                <p>{{ play.artistName }} - {{ play.albumName }}</p>
-            </div>
-        </div>
-    </div>
+<div class="recentlyPlayedListComponent">
+  <h1>Recently Played</h1>
+  @if (musicService.loading() && musicService.recentlyPlayed().length === 0) {
+    <app-skeleton-loader />
+  } @else if (musicService.error() && musicService.recentlyPlayed().length === 0) {
+    <p>Error loading songs: {{ musicService.error() }}</p>
+  } @else if (musicService.recentlyPlayed().length > 0) {
+    @if (distributedSongs().topRowSongs.length > 0) {
+      <!-- Top row slider - moves left to right -->
+      <app-carousel-row
+        [songs]="distributedSongs().topRowSongs"
+        [settings]="topSliderSettings"
+        rowName="top"
+      />
+    }
+    @if (distributedSongs().middleRowSongs.length > 0) {
+      <!-- Middle row slider - moves right to left -->
+      <app-carousel-row
+        [songs]="distributedSongs().middleRowSongs"
+        [settings]="middleSliderSettings"
+        rowName="middle"
+      />
+    }
+    @if (distributedSongs().bottomRowSongs.length > 0) {
+      <!-- Bottom row slider - moves left to right slower -->
+      <app-carousel-row
+        [songs]="distributedSongs().bottomRowSongs"
+        [settings]="bottomSliderSettings"
+        rowName="bottom"
+      />
+    }
+  } @else {
+    <p>No recently played songs available</p>
+  }
 </div>
+

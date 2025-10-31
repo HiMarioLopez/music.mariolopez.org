@@ -141,7 +141,7 @@ public sealed class MusicFrontendStack : Stack
         // Deploy Angular static site assets
         var deployAngularSite = new BucketDeployment(this, "Music-DeployAngularSite", new BucketDeploymentProps
         {
-            Sources = [Source.Asset("../app/frontend/music/music-angular/dist")],
+            Sources = [Source.Asset("../app/frontend/music/music-angular/dist/music-angular/browser")],
             DestinationBucket = siteBucket,
             DestinationKeyPrefix = "angular",
             MemoryLimit = 256
