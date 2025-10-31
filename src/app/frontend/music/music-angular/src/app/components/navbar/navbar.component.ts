@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { AfterViewInit, ChangeDetectionStrategy, Component, ElementRef, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 @Component({
@@ -9,5 +9,18 @@ import { CommonModule } from '@angular/common';
   styleUrl: './navbar.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class NavbarComponent {}
+export class NavbarComponent implements AfterViewInit {
+  @ViewChild('navElement', { static: false }) navElement!: ElementRef<HTMLElement>;
+
+  ngAfterViewInit(): void {
+    // Scroll to the rightmost position after view initialization
+    // This ensures the Angular icon (which is near the right) is visible
+    setTimeout(() => {
+      if (this.navElement?.nativeElement) {
+        const nav = this.navElement.nativeElement;
+        nav.scrollLeft = nav.scrollWidth - nav.clientWidth;
+      }
+    }, 0);
+  }
+}
 
