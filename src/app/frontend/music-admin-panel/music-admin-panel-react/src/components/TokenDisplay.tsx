@@ -1,4 +1,4 @@
-import React, { ReactNode } from 'react';
+import { ReactNode } from "react";
 
 interface TokenDisplayProps {
   token: string | null;
@@ -42,12 +42,14 @@ export function TokenDisplay({
     }
   };
 
-  const displayText = displayValue 
-    ? displayValue 
-    : isLoading 
-    ? loadingText 
-    : token 
-    ? (isTokenVisible ? token : getMaskedToken(token))
+  const displayText = displayValue
+    ? displayValue
+    : isLoading
+    ? loadingText
+    : token
+    ? isTokenVisible
+      ? token
+      : getMaskedToken(token)
     : "No token available";
 
   return (
@@ -56,7 +58,9 @@ export function TokenDisplay({
         <div className="secure-token-container">
           <div className="token-header">
             <span className="token-label">{label}</span>
-            <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+            <div
+              style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}
+            >
               {actionButton}
               {token && (
                 <button
@@ -82,4 +86,3 @@ export function TokenDisplay({
     </div>
   );
 }
-

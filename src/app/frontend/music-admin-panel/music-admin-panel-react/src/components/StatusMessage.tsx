@@ -1,5 +1,3 @@
-import React from 'react';
-
 interface StatusMessageProps {
   status: string | null;
   shouldFadeOut?: boolean;
@@ -20,12 +18,11 @@ export function StatusMessage({
 
   return (
     <div
-      className={`status-message ${
-        isError ? "error" : "success"
-      } ${shouldFadeOut ? "fade-out" : ""} ${className}`}
+      className={`status-message ${isError ? "error" : "success"} ${
+        shouldFadeOut ? "fade-out" : ""
+      } ${className}`}
     >
       {status}
     </div>
   );
 }
-

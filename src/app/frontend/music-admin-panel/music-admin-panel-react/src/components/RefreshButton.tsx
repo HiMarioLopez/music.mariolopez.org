@@ -1,5 +1,3 @@
-import React from 'react';
-
 interface RefreshButtonProps {
   onClick: () => void;
   isLoading?: boolean;
@@ -42,4 +40,3 @@ export function RefreshButton({
     </button>
   );
 }
-
