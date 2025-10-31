@@ -15,7 +15,6 @@ jobs:
         id: link-checker
         uses: tcort/github-action-markdown-link-check@v1.1.1
         with:
-          folder-path: __none__
           file-path: ./README.md
           use-verbose-mode: "yes"
 
