@@ -347,6 +347,20 @@ public sealed class AdminApiStack : Stack
 
         #region Get Spotify OAuth URL Lambda
 
+        // Create Lambda role for Spotify OAuth URL generation
+        var getSpotifyOAuthUrlV1Role = new Role(this, "Music-SpotifyOAuthUrlFunctionV1Role", new RoleProps
+        {
+            AssumedBy = new ServicePrincipal("lambda.amazonaws.com")
+        });
+
+        // Add Secrets Manager permissions for Spotify client secret
+        getSpotifyOAuthUrlV1Role.AddToPolicy(new PolicyStatement(new PolicyStatementProps
+        {
+            Effect = Effect.ALLOW,
+            Actions = ["secretsmanager:GetSecretValue"],
+            Resources = [$"arn:aws:secretsmanager:{Region}:{Account}:secret:SpotifyClientSecret-*"]
+        }));
+
         // Create Lambda function for Spotify OAuth URL generation
         var getSpotifyOAuthUrlV1FunctionConstruct = new NodejsLambdaFunction(this,
             "Music-GetSpotifyOAuthUrlFunction_V1",
@@ -357,15 +371,11 @@ public sealed class AdminApiStack : Stack
                 Environment = new Dictionary<string, string>
                 {
                     ["AWS_NODEJS_CONNECTION_REUSE_ENABLED"] = "1",
-                    ["SPOTIFY_CLIENT_ID"] = spotifyClientSecret.SecretValueFromJson("client_id").UnsafeUnwrap(),
-                    ["SPOTIFY_CLIENT_SECRET"] = spotifyClientSecret.SecretValueFromJson("client_secret").UnsafeUnwrap(),
+                    ["SPOTIFY_CLIENT_SECRET_NAME"] = spotifyClientSecret.SecretName,
                     ["SPOTIFY_REDIRECT_URI"] = "https://admin.music.mariolopez.org/api/nodejs/v1/spotify/oauth/callback"
                 },
                 Description = "Lambda function to generate Spotify OAuth authorization URL (Version 1)",
-                Role = new Role(this, "Music-SpotifyOAuthUrlFunctionV1Role", new RoleProps
-                {
-                    AssumedBy = new ServicePrincipal("lambda.amazonaws.com")
-                })
+                Role = getSpotifyOAuthUrlV1Role
             });
         var getSpotifyOAuthUrlV1Function = getSpotifyOAuthUrlV1FunctionConstruct.Function;
 
@@ -381,6 +391,20 @@ public sealed class AdminApiStack : Stack
 
         #region Get Spotify OAuth Callback URL Lambda
 
+        // Create Lambda role for Spotify OAuth callback handling
+        var getSpotifyOAuthCallbackV1Role = new Role(this, "Music-SpotifyOAuthCallbackFunctionV1Role", new RoleProps
+        {
+            AssumedBy = new ServicePrincipal("lambda.amazonaws.com")
+        });
+
+        // Add Secrets Manager permissions for Spotify client secret
+        getSpotifyOAuthCallbackV1Role.AddToPolicy(new PolicyStatement(new PolicyStatementProps
+        {
+            Effect = Effect.ALLOW,
+            Actions = ["secretsmanager:GetSecretValue"],
+            Resources = [$"arn:aws:secretsmanager:{Region}:{Account}:secret:SpotifyClientSecret-*"]
+        }));
+
         // Create Lambda function for Spotify OAuth callback handling
         var getSpotifyOAuthCallbackV1FunctionConstruct = new NodejsLambdaFunction(this,
             "Music-GetSpotifyOAuthCallbackFunction_V1",
@@ -391,8 +415,7 @@ public sealed class AdminApiStack : Stack
                 Environment = new Dictionary<string, string>
                 {
                     ["AWS_NODEJS_CONNECTION_REUSE_ENABLED"] = "1",
-                    ["SPOTIFY_CLIENT_ID"] = spotifyClientSecret.SecretValueFromJson("client_id").UnsafeUnwrap(),
-                    ["SPOTIFY_CLIENT_SECRET"] = spotifyClientSecret.SecretValueFromJson("client_secret").UnsafeUnwrap(),
+                    ["SPOTIFY_CLIENT_SECRET_NAME"] = spotifyClientSecret.SecretName,
                     ["SPOTIFY_REDIRECT_URI"] =
                         "https://admin.music.mariolopez.org/api/nodejs/v1/spotify/oauth/callback",
                     ["SPOTIFY_ACCESS_TOKEN_PARAMETER"] = "/Music/AdminPanel/Spotify/UserAccessToken",
@@ -400,10 +423,7 @@ public sealed class AdminApiStack : Stack
                     ["ADMIN_PANEL_URL"] = "https://admin.music.mariolopez.org"
                 },
                 Description = "Lambda function to handle Spotify OAuth callback and store tokens (Version 1)",
-                Role = new Role(this, "Music-SpotifyOAuthCallbackFunctionV1Role", new RoleProps
-                {
-                    AssumedBy = new ServicePrincipal("lambda.amazonaws.com")
-                })
+                Role = getSpotifyOAuthCallbackV1Role
             });
         var getSpotifyOAuthCallbackV1Function = getSpotifyOAuthCallbackV1FunctionConstruct.Function;
 
