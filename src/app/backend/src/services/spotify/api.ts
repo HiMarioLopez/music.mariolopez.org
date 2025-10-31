@@ -240,17 +240,22 @@ export const refreshSpotifyAccessToken =
     const refreshToken = await getSpotifyRefreshToken();
 
     try {
+      // Use Basic authentication for confidential clients (recommended by Spotify)
+      // Encode client_id:client_secret as base64 for Authorization header
+      const credentials = Buffer.from(
+        `${config.clientId}:${config.clientSecret}`
+      ).toString('base64');
+
       const response = await axios.post(
         `${SPOTIFY_ACCOUNTS_BASE_URL}/api/token`,
         new URLSearchParams({
           grant_type: 'refresh_token',
           refresh_token: refreshToken,
-          client_id: config.clientId,
-          client_secret: config.clientSecret,
         }),
         {
           headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
+            'Authorization': `Basic ${credentials}`,
           },
           timeout: 10000,
         }
@@ -269,6 +274,7 @@ export const refreshSpotifyAccessToken =
         logger.error('Spotify refresh token error details', {
           status: error.response?.status,
           data: error.response?.data,
+          statusText: error.response?.statusText,
         });
 
         // Check if the refresh token has been revoked
