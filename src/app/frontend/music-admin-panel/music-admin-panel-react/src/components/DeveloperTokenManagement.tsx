@@ -1,5 +1,8 @@
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { useDeveloperToken } from "../hooks/useDeveloperToken";
+import { useTokenVisibility } from "../hooks/useTokenVisibility";
+import { TokenDisplay } from "./TokenDisplay";
+import { SubmitButton } from "./SubmitButton";
 import "./DeveloperTokenManagement.css";
 
 interface DeveloperTokenManagementProps {
@@ -11,7 +14,7 @@ export function DeveloperTokenManagement({
 }: DeveloperTokenManagementProps) {
   const { token, isLoading, error, lastFetched, fetchToken, formatTimestamp } =
     useDeveloperToken();
-  const [isTokenVisible, setIsTokenVisible] = useState(false);
+  const { isTokenVisible, toggleTokenVisibility, hideToken } = useTokenVisibility();
 
   // Call onTokenFetched when token is loaded (either auto-loaded or manually fetched)
   useEffect(() => {
@@ -22,11 +25,7 @@ export function DeveloperTokenManagement({
 
   const handleFetchToken = async () => {
     await fetchToken();
-    setIsTokenVisible(false); // Hide token when fetching a new one
-  };
-
-  const toggleTokenVisibility = () => {
-    setIsTokenVisible(!isTokenVisible);
+    hideToken(); // Hide token when fetching a new one
   };
 
   const copyToken = () => {
@@ -34,14 +33,6 @@ export function DeveloperTokenManagement({
       navigator.clipboard.writeText(token);
       alert("Developer Token copied to clipboard!");
     }
-  };
-
-  // Function to mask the token, showing only the first 10 characters
-  const getMaskedToken = (fullToken: string) => {
-    if (!fullToken) return "";
-    const visiblePart = fullToken.substring(0, 10);
-    const maskedPart = "••••••••••••••••••••••••••••••••••••";
-    return visiblePart + maskedPart;
   };
 
   return (
@@ -56,39 +47,23 @@ export function DeveloperTokenManagement({
         </p>
       )}
 
-      <div className="token-display">
-        {token ? (
-          <div className="secure-token-container">
-            <div className="token-header">
-              <span className="token-label">Developer Token</span>
-              <button
-                onClick={toggleTokenVisibility}
-                className="toggle-visibility-btn"
-              >
-                {isTokenVisible ? "Hide Token" : "Show Token"}
-              </button>
-            </div>
-            <pre
-              onClick={copyToken}
-              title="Click to copy token"
-              className="clickable-token"
-            >
-              {isTokenVisible ? token : getMaskedToken(token)}
-            </pre>
-          </div>
-        ) : (
-          <p>No token available</p>
-        )}
-      </div>
+      <TokenDisplay
+        token={token}
+        label="Developer Token"
+        isTokenVisible={isTokenVisible}
+        onToggleVisibility={toggleTokenVisibility}
+        onCopy={copyToken}
+        isLoading={false}
+      />
 
       <div className="button-container">
-        <button
+        <SubmitButton
           onClick={handleFetchToken}
-          className="primary-button"
-          disabled={isLoading}
+          isLoading={isLoading}
+          loadingText="Fetching Token..."
         >
-          {isLoading ? "Fetching Token..." : "Fetch Developer Token"}
-        </button>
+          Fetch Developer Token
+        </SubmitButton>
       </div>
     </div>
   );

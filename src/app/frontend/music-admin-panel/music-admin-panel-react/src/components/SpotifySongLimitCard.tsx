@@ -1,5 +1,10 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState } from "react";
 import { useSpotifySongLimit } from "../hooks/useSpotifySongLimit";
+import { useStatusFade } from "../hooks/useStatusFade";
+import { TokenDisplay } from "./TokenDisplay";
+import { RefreshButton } from "./RefreshButton";
+import { SubmitButton } from "./SubmitButton";
+import { StatusMessage } from "./StatusMessage";
 import "./SSMParameterCard.css";
 
 export const SpotifySongLimitCard: React.FC = () => {
@@ -7,40 +12,10 @@ export const SpotifySongLimitCard: React.FC = () => {
     useSpotifySongLimit();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [shouldFadeOut, setShouldFadeOut] = useState(false);
-  const statusTimeoutRef = useRef<number | null>(null);
-
-  // Clear any existing timeouts when component unmounts
-  useEffect(() => {
-    return () => {
-      if (statusTimeoutRef.current) {
-        clearTimeout(statusTimeoutRef.current);
-      }
-    };
-  }, []);
-
-  // Set up fade-out effect when status changes
-  useEffect(() => {
-    if (status) {
-      // Reset fade state
-      setShouldFadeOut(false);
-
-      // Clear any existing timeout
-      if (statusTimeoutRef.current) {
-        clearTimeout(statusTimeoutRef.current);
-      }
-
-      // Set timeout to fade out after 5 seconds
-      statusTimeoutRef.current = window.setTimeout(() => {
-        setShouldFadeOut(true);
-      }, 3000);
-    }
-  }, [status]);
+  const shouldFadeOut = useStatusFade(status);
 
   const handleSubmit = async () => {
     setIsSubmitting(true);
-    // Reset fade state if there was a previous status
-    setShouldFadeOut(false);
     try {
       await handleUpdate();
     } finally {
@@ -52,37 +27,22 @@ export const SpotifySongLimitCard: React.FC = () => {
     <div className="content-card schedule-card">
       <h2>Update Spotify History Song Limit Configuration</h2>
 
-      <div className="token-display">
-        <div className="secure-token-container">
-          <div className="token-header">
-            <span className="token-label">Current Song Limit</span>
-            <button
-              className={`refresh-button ${isLoading ? "spinning" : ""}`}
-              onClick={refresh}
-              disabled={isLoading}
-              title="Refresh song limit"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M21 2v6h-6"></path>
-                <path d="M3 12a9 9 0 0 1 15-6.7L21 8"></path>
-                <path d="M3 22v-6h6"></path>
-                <path d="M21 12a9 9 0 0 1-15 6.7L3 16"></path>
-              </svg>
-            </button>
-          </div>
-          <pre className="clickable-token">
-            {isLoading ? "Loading..." : value}
-          </pre>
-        </div>
-      </div>
+      <TokenDisplay
+        token={null}
+        label="Current Song Limit"
+        isTokenVisible={false}
+        onToggleVisibility={() => {}}
+        isLoading={isLoading}
+        loadingText="Loading..."
+        displayValue={isLoading ? undefined : String(value)}
+        actionButton={
+          <RefreshButton
+            onClick={refresh}
+            isLoading={isLoading}
+            title="Refresh song limit"
+          />
+        }
+      />
 
       {!isLoading && (
         <div className="schedule-controls">
@@ -104,30 +64,15 @@ export const SpotifySongLimitCard: React.FC = () => {
       )}
 
       <div className="button-container">
-        <button
+        <SubmitButton
           onClick={handleSubmit}
-          className={`primary-button ${isSubmitting ? "loading" : ""}`}
-          disabled={isSubmitting}
+          isLoading={isSubmitting}
+          loadingText="Updating..."
         >
-          {isSubmitting ? (
-            <>
-              <span className="spinner"></span>
-              Updating...
-            </>
-          ) : (
-            "Update Song Limit"
-          )}
-        </button>
+          Update Song Limit
+        </SubmitButton>
 
-        {status && (
-          <div
-            className={`status-message ${
-              status.includes("Error") ? "error" : "success"
-            } ${shouldFadeOut ? "fade-out" : ""}`}
-          >
-            {status}
-          </div>
-        )}
+        <StatusMessage status={status} shouldFadeOut={shouldFadeOut} />
       </div>
     </div>
   );

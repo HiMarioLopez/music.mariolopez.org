@@ -1,5 +1,7 @@
-import { useState } from "react";
 import { useSpotifyAuth } from "../hooks/useSpotifyAuth";
+import { useTokenVisibility } from "../hooks/useTokenVisibility";
+import { TokenDisplay } from "./TokenDisplay";
+import { SubmitButton } from "./SubmitButton";
 import "./SpotifyAuthManagement.css";
 
 export function SpotifyAuthManagement() {
@@ -12,19 +14,7 @@ export function SpotifyAuthManagement() {
     handleRefreshStatus,
     handleCopyToken,
   } = useSpotifyAuth();
-  const [isTokenVisible, setIsTokenVisible] = useState(false);
-
-  const toggleTokenVisibility = () => {
-    setIsTokenVisible(!isTokenVisible);
-  };
-
-  // Function to mask the token, showing only the first 10 characters
-  const getMaskedToken = (fullToken: string) => {
-    if (!fullToken) return "";
-    const visiblePart = fullToken.substring(0, 10);
-    const maskedPart = "••••••••••••••••••••••••••••••••••••";
-    return visiblePart + maskedPart;
-  };
+  const { isTokenVisible, toggleTokenVisibility } = useTokenVisibility();
 
   return (
     <div className="content-card">
@@ -48,48 +38,32 @@ export function SpotifyAuthManagement() {
         {message && <p className="message-text">{message}</p>}
       </div>
 
-      <div className="token-display">
-        {accessToken ? (
-          <div className="secure-token-container">
-            <div className="token-header">
-              <span className="token-label">Access Token</span>
-              <button
-                onClick={toggleTokenVisibility}
-                className="toggle-visibility-btn"
-              >
-                {isTokenVisible ? "Hide Token" : "Show Token"}
-              </button>
-            </div>
-            <pre
-              onClick={handleCopyToken}
-              title="Click to copy token"
-              className="clickable-token"
-            >
-              {isTokenVisible ? accessToken : getMaskedToken(accessToken)}
-            </pre>
-          </div>
-        ) : (
-          <p>No token available</p>
-        )}
-      </div>
+      <TokenDisplay
+        token={accessToken}
+        label="Access Token"
+        isTokenVisible={isTokenVisible}
+        onToggleVisibility={toggleTokenVisibility}
+        onCopy={handleCopyToken}
+        isLoading={false}
+      />
 
       <div className="button-container">
         {!isAuthorized ? (
-          <button
+          <SubmitButton
             onClick={handleAuthorize}
-            className="primary-button"
-            disabled={isLoading}
+            isLoading={isLoading}
+            loadingText="Connecting..."
           >
-            {isLoading ? "Connecting..." : "Authorize with Spotify"}
-          </button>
+            Authorize with Spotify
+          </SubmitButton>
         ) : (
-          <button
+          <SubmitButton
             onClick={handleRefreshStatus}
-            className="primary-button"
-            disabled={isLoading}
+            isLoading={isLoading}
+            loadingText="Refreshing..."
           >
-            {isLoading ? "Refreshing..." : "Refresh Status"}
-          </button>
+            Refresh Status
+          </SubmitButton>
         )}
       </div>
 

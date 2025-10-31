@@ -1,5 +1,7 @@
-import { useState } from "react";
 import { useMusicUserToken } from "../hooks/useMusicUserToken";
+import { useTokenVisibility } from "../hooks/useTokenVisibility";
+import { TokenDisplay } from "./TokenDisplay";
+import { SubmitButton } from "./SubmitButton";
 import "./MusicUserTokenManagement.css";
 
 export function MusicUserTokenManagement() {
@@ -13,19 +15,7 @@ export function MusicUserTokenManagement() {
     handleCopyToken,
     formatTimestamp,
   } = useMusicUserToken();
-  const [isTokenVisible, setIsTokenVisible] = useState(false);
-
-  const toggleTokenVisibility = () => {
-    setIsTokenVisible(!isTokenVisible);
-  };
-
-  // Function to mask the token, showing only the first 10 characters
-  const getMaskedToken = (fullToken: string) => {
-    if (!fullToken) return "";
-    const visiblePart = fullToken.substring(0, 10);
-    const maskedPart = "••••••••••••••••••••••••••••••••••••";
-    return visiblePart + maskedPart;
-  };
+  const { isTokenVisible, toggleTokenVisibility } = useTokenVisibility();
 
   return (
     <div className="content-card">
@@ -50,44 +40,28 @@ export function MusicUserTokenManagement() {
         </p>
       )}
 
-      <div className="token-display">
-        {musicUserToken ? (
-          <div className="secure-token-container">
-            <div className="token-header">
-              <span className="token-label">User Token</span>
-              <button
-                onClick={toggleTokenVisibility}
-                className="toggle-visibility-btn"
-              >
-                {isTokenVisible ? "Hide Token" : "Show Token"}
-              </button>
-            </div>
-            <pre
-              onClick={handleCopyToken}
-              title="Click to copy token"
-              className="clickable-token"
-            >
-              {isTokenVisible ? musicUserToken : getMaskedToken(musicUserToken)}
-            </pre>
-          </div>
-        ) : (
-          <p>No token available</p>
-        )}
-      </div>
+      <TokenDisplay
+        token={musicUserToken}
+        label="User Token"
+        isTokenVisible={isTokenVisible}
+        onToggleVisibility={toggleTokenVisibility}
+        onCopy={handleCopyToken}
+        isLoading={false}
+      />
 
       <div className="button-container">
         {!isAuthorized ? (
-          <button onClick={handleAuthorize} className="primary-button">
+          <SubmitButton onClick={handleAuthorize}>
             Authorize with Apple Music
-          </button>
+          </SubmitButton>
         ) : (
           <>
-            <button onClick={handleRefreshToken} className="primary-button">
+            <SubmitButton onClick={handleRefreshToken}>
               Refresh Token
-            </button>
-            <button onClick={handleLogout} className="primary-button">
+            </SubmitButton>
+            <SubmitButton onClick={handleLogout}>
               Logout from Apple Music
-            </button>
+            </SubmitButton>
           </>
         )}
       </div>
