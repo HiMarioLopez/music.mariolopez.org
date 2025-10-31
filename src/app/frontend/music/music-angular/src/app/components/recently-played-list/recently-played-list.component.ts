@@ -1,4 +1,4 @@
-import { Component, computed, ChangeDetectionStrategy } from '@angular/core';
+import { Component, computed, ChangeDetectionStrategy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MusicService } from '../../../services/music.service';
 import { AppleMusicSong } from '../../../models/apple-music-song';
@@ -19,7 +19,7 @@ interface CarouselSettings {
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class RecentlyPlayedListComponent {
-  constructor(public musicService: MusicService) {}
+  readonly musicService = inject(MusicService);
 
   // Carousel settings - normalized speed
   private readonly normalizedSpeed = 100000; // 100 seconds per cycle

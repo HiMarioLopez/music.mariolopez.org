@@ -1,4 +1,4 @@
-@if (songs.length > 0) {
+@if (songs().length > 0) {
   <div
     class="recentlyPlayedListRow"
     (mouseenter)="onMouseEnter()"
@@ -8,16 +8,16 @@
       <div
         #trackRef
         class="carouselTrack"
-        [class.carouselTrackLeft]="settings.direction === 'left'"
-        [class.carouselTrackRight]="settings.direction === 'right'"
+        [class.carouselTrackLeft]="settings().direction === 'left'"
+        [class.carouselTrackRight]="settings().direction === 'right'"
         [class.carouselTrackPaused]="isHovered()"
       >
-        @for (song of duplicatedSongs; track trackByIndex($index, song)) {
+        @for (song of duplicatedSongs(); track trackByIndex($index, song)) {
           <div class="carouselItem">
             <app-song-item
               [song]="song"
               [index]="$index"
-              [rowName]="rowName"
+              [rowName]="rowName()"
             />
           </div>
         }

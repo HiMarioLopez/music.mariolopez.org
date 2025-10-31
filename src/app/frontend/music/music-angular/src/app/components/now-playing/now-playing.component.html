@@ -17,8 +17,8 @@
     </div>
   </div>
 } @else if (musicService.error() && !musicService.nowPlaying()) {
-  <div class="nowPlayingComponent">
-    <img [src]="artworkUrl()" alt="Error Album Art" />
+  <div class="nowPlayingComponent" role="alert" aria-live="polite">
+    <img [src]="artworkUrl()" alt="Error placeholder for album artwork" />
     <div class="nowPlayingComponentTextContainer">
       <h1>Mario's Now Playing</h1>
       <div class="nowPlayingComponentText">
@@ -32,10 +32,12 @@
     <div class="albumArtContainer">
       <img
         [src]="artworkUrl()"
-        [alt]="musicService.nowPlaying()?.albumName || 'Album' + ' Art'"
+        [alt]="(musicService.nowPlaying()?.albumName || 'Album') + ' artwork for ' + (musicService.nowPlaying()?.name || 'song')"
         (click)="handleAlbumArtClick()"
         [style.cursor]="musicService.nowPlaying()?.url ? 'pointer' : 'default'"
         [title]="musicService.nowPlaying()?.url ? 'Click to open ' + (musicService.nowPlaying()?.name || '') + ' in Apple Music' : ''"
+        [attr.aria-label]="musicService.nowPlaying()?.name ? 'Album artwork for ' + musicService.nowPlaying()!.name : 'Album artwork'"
+        loading="eager"
       />
     </div>
     <div class="nowPlayingComponentTextContainer">

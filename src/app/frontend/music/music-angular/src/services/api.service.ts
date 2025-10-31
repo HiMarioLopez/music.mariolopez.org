@@ -1,6 +1,6 @@
 import { Injectable, PLATFORM_ID, inject } from '@angular/core';
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { Observable, catchError, firstValueFrom, throwError } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
+import { Observable, firstValueFrom } from 'rxjs';
 import { isPlatformBrowser } from '@angular/common';
 import { MusicHistoryResponse } from '../models/music-history-response';
 
@@ -31,6 +31,7 @@ export class ApiService {
   private readonly STORAGE_TOKEN_KEY = 'music_app_auth_token';
   private readonly STORAGE_EXPIRES_KEY = 'music_app_auth_expires_at';
 
+  private readonly http = inject(HttpClient);
   private readonly platformId = inject(PLATFORM_ID);
   private readonly isBrowser = isPlatformBrowser(this.platformId);
 
@@ -38,7 +39,7 @@ export class ApiService {
   private tokenExpiresAt: number | null = null;
   private tokenRefreshPromise: Promise<string> | null = null;
 
-  constructor(private http: HttpClient) {
+  constructor() {
     this.loadPersistedToken();
   }
 
@@ -82,28 +83,16 @@ export class ApiService {
   }
 
   async getDeveloperToken(): Promise<string> {
-    try {
-      const response = await firstValueFrom(
-        this.http.get<AuthResponse>(`${API_BASE_URL}/auth/token`).pipe(
-          catchError((error: HttpErrorResponse) =>
-            throwError(() => new ApiError(`API error: ${error.statusText}`, error.status))
-          )
-        )
-      );
+    // Error handling is now done by the HTTP interceptor
+    const response = await firstValueFrom(
+      this.http.get<AuthResponse>(`${API_BASE_URL}/auth/token`)
+    );
 
-      if (!response.token) {
-        throw new ApiError('Failed to retrieve authentication token', 401);
-      }
-
-      return response.token;
-    } catch (error) {
-      if (error instanceof ApiError) {
-        throw error;
-      }
-
-      const message = error instanceof Error ? error.message : 'Unknown error occurred';
-      throw new ApiError(message, 500);
+    if (!response.token) {
+      throw new ApiError('Failed to retrieve authentication token', 401);
     }
+
+    return response.token;
   }
 
   async getTokenWithCache(): Promise<string> {
@@ -163,29 +152,16 @@ export class ApiService {
   }
 
   // Music history API methods
+  // Error handling is now done by the HTTP interceptor
   getMusicHistory(limit: number = 5): Observable<MusicHistoryResponse> {
     return this.http.get<MusicHistoryResponse>(
       `${API_BASE_URL}/history/music?limit=${limit}`
-    ).pipe(
-      catchError((error: HttpErrorResponse) => {
-        return throwError(() => new ApiError(
-          `API error: ${error.statusText}`,
-          error.status
-        ));
-      })
     );
   }
 
   getSpotifyMusicHistory(limit: number = 5): Observable<MusicHistoryResponse> {
     return this.http.get<MusicHistoryResponse>(
       `${API_BASE_URL}/history/spotify?limit=${limit}`
-    ).pipe(
-      catchError((error: HttpErrorResponse) => {
-        return throwError(() => new ApiError(
-          `API error: ${error.statusText}`,
-          error.status
-        ));
-      })
     );
   }
 }

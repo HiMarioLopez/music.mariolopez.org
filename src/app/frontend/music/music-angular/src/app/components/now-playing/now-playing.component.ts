@@ -1,4 +1,4 @@
-import { Component, computed, ChangeDetectionStrategy } from '@angular/core';
+import { Component, computed, ChangeDetectionStrategy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MusicService } from '../../../services/music.service';
 import { formatRelativeTime } from '../../../utils/formatters';
@@ -15,7 +15,7 @@ import { SourceIndicatorComponent } from '../source-indicator/source-indicator.c
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class NowPlayingComponent {
-  constructor(public musicService: MusicService) {}
+  readonly musicService = inject(MusicService);
 
   readonly relativeTime = computed(() => {
     const nowPlaying = this.musicService.nowPlaying();

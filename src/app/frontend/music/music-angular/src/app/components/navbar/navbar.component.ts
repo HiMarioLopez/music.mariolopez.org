@@ -15,12 +15,15 @@ export class NavbarComponent implements AfterViewInit {
   ngAfterViewInit(): void {
     // Scroll to the rightmost position after view initialization
     // This ensures the Angular icon (which is near the right) is visible
-    setTimeout(() => {
-      if (this.navElement?.nativeElement) {
-        const nav = this.navElement.nativeElement;
-        nav.scrollLeft = nav.scrollWidth - nav.clientWidth;
-      }
-    }, 0);
+    // Use requestAnimationFrame for better performance than setTimeout
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        if (this.navElement?.nativeElement) {
+          const nav = this.navElement.nativeElement;
+          nav.scrollLeft = nav.scrollWidth - nav.clientWidth;
+        }
+      });
+    });
   }
 }
 

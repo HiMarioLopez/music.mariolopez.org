@@ -1,4 +1,4 @@
-import { Component, Input, ChangeDetectionStrategy, signal, computed } from '@angular/core';
+import { Component, ChangeDetectionStrategy, signal, computed, input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AppleMusicSong } from '../../../../../models/apple-music-song';
 import { getProcessedArtworkUrl } from '../../../../../utils/image-processing';
@@ -14,13 +14,13 @@ import { SourceIndicatorComponent } from '../../../source-indicator/source-indic
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class SongItemComponent {
-  @Input({ required: true }) song!: AppleMusicSong;
-  @Input({ required: true }) index!: number;
-  @Input({ required: true }) rowName!: string;
+  readonly song = input.required<AppleMusicSong>();
+  readonly index = input.required<number>();
+  readonly rowName = input.required<string>();
 
   readonly imageError = signal(false);
 
-  readonly artworkUrl = computed(() => getProcessedArtworkUrl(this.song?.artworkUrl));
+  readonly artworkUrl = computed(() => getProcessedArtworkUrl(this.song()?.artworkUrl));
 
   // Expose getProcessedArtworkUrl to template
   getProcessedArtworkUrl = getProcessedArtworkUrl;
@@ -30,7 +30,7 @@ export class SongItemComponent {
   }
 
   handleAlbumArtClick(): void {
-    openUrlInNewTab(this.song.url);
+    openUrlInNewTab(this.song().url);
   }
 }
 

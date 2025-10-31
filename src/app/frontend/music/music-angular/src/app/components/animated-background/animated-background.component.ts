@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, Input, OnInit, OnDestroy, PLATFORM_ID, computed, effect, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, PLATFORM_ID, computed, effect, inject, signal, input, AfterViewInit } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 
 interface Blob {
@@ -23,8 +23,8 @@ const DEFAULT_COLORS = ['#ff006e', '#8338ec', '#3a86ff', '#06ffa5', '#fb5607'];
   styleUrl: './animated-background.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class AnimatedBackgroundComponent implements OnInit, OnDestroy {
-  @Input() colors: string[] = [];
+export class AnimatedBackgroundComponent implements AfterViewInit {
+  readonly colors = input<string[]>([]);
 
   private readonly _isMobile = signal<boolean>(false);
   private readonly _blobs = signal<Blob[]>([]);
@@ -33,12 +33,23 @@ export class AnimatedBackgroundComponent implements OnInit, OnDestroy {
   private readonly isBrowser = isPlatformBrowser(this.platformId);
   
   readonly displayColors = computed(() => {
-    return this.colors && this.colors.length > 0 ? this.colors : DEFAULT_COLORS;
+    const colorsArray = this.colors();
+    return colorsArray && colorsArray.length > 0 ? colorsArray : DEFAULT_COLORS;
   });
 
   private resizeListener?: () => void;
 
-  ngOnInit(): void {
+  constructor() {
+    // Regenerate blobs when colors change - moved from ngOnInit
+    effect(() => {
+      this.displayColors();
+      if (this.isBrowser) {
+        this.generateBlobs();
+      }
+    });
+  }
+
+  ngAfterViewInit(): void {
     if (!this.isBrowser) {
       this.generateBlobs();
       return;
@@ -51,24 +62,17 @@ export class AnimatedBackgroundComponent implements OnInit, OnDestroy {
       this.checkMobile();
       this.generateBlobs();
     };
-    window.addEventListener('resize', this.resizeListener);
-    this.destroyRef.onDestroy(() => {
-      if (this.resizeListener) {
-        window.removeEventListener('resize', this.resizeListener);
-        this.resizeListener = undefined;
-      }
-    });
     
-    // Regenerate blobs when colors change
-    effect(() => {
-      this.displayColors();
-      this.generateBlobs();
-    });
-  }
-
-  ngOnDestroy(): void {
-    if (this.isBrowser && this.resizeListener) {
-      window.removeEventListener('resize', this.resizeListener);
+    if (typeof window !== 'undefined') {
+      window.addEventListener('resize', this.resizeListener);
+      
+      // Use destroyRef for cleanup instead of ngOnDestroy
+      this.destroyRef.onDestroy(() => {
+        if (this.resizeListener) {
+          window.removeEventListener('resize', this.resizeListener);
+          this.resizeListener = undefined;
+        }
+      });
     }
   }
 

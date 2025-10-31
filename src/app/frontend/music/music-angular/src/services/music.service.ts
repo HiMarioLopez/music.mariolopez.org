@@ -1,6 +1,7 @@
 import { DestroyRef, Injectable, PLATFORM_ID, computed, effect, inject, signal } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
-import { forkJoin, firstValueFrom } from 'rxjs';
+import { forkJoin, firstValueFrom, interval } from 'rxjs';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ApiService } from './api.service';
 import { AppleMusicSong } from '../models/apple-music-song';
 import { MusicSource } from '../models/music-source';
@@ -52,8 +53,6 @@ export class MusicService {
   readonly error = this._error.asReadonly();
   readonly gradientColors = this._gradientColors.asReadonly();
 
-  private refreshInterval: ReturnType<typeof setInterval> | null = null;
-
   constructor() {
     effect(
       () => {
@@ -67,7 +66,6 @@ export class MusicService {
 
     if (this.isBrowser) {
       this.startAutoRefresh();
-      this.destroyRef.onDestroy(() => this.clearAutoRefresh());
     }
   }
 
@@ -139,9 +137,18 @@ export class MusicService {
         this._recentlyPlayed.set([]);
       }
     } catch (err) {
-      this._error.set(
-        err instanceof Error ? err.message : 'Failed to fetch music history'
-      );
+      let errorMessage = 'Failed to load music history';
+      
+      if (err instanceof Error) {
+        // Check if it's an ApiError with a user-friendly message
+        if (err.name === 'ApiError') {
+          errorMessage = err.message;
+        } else {
+          errorMessage = 'Unable to connect to the music service. Please try again later.';
+        }
+      }
+      
+      this._error.set(errorMessage);
       console.error('Error fetching music history:', err);
     } finally {
       this._loading.set(false);
@@ -153,17 +160,12 @@ export class MusicService {
   }
 
   private startAutoRefresh(): void {
-    this.clearAutoRefresh();
-    this.refreshInterval = setInterval(() => {
-      void this.fetchMusicHistory();
-    }, HISTORY_AUTO_REFRESH_INTERVAL);
-  }
-
-  private clearAutoRefresh(): void {
-    if (this.refreshInterval !== null) {
-      clearInterval(this.refreshInterval);
-      this.refreshInterval = null;
-    }
+    // Use RxJS interval with takeUntilDestroyed for automatic cleanup
+    interval(HISTORY_AUTO_REFRESH_INTERVAL)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => {
+        void this.fetchMusicHistory();
+      });
   }
 }
 

@@ -3,7 +3,9 @@
   @if (musicService.loading() && musicService.recentlyPlayed().length === 0) {
     <app-skeleton-loader />
   } @else if (musicService.error() && musicService.recentlyPlayed().length === 0) {
-    <p>Error loading songs: {{ musicService.error() }}</p>
+    <div role="alert" aria-live="polite">
+      <p>Error loading songs: {{ musicService.error() }}</p>
+    </div>
   } @else if (musicService.recentlyPlayed().length > 0) {
     @if (distributedSongs().topRowSongs.length > 0) {
       <!-- Top row slider - moves left to right -->
