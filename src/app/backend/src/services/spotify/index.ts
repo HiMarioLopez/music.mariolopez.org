@@ -12,6 +12,8 @@ export {
   generateSpotifyAuthUrl,
   getSpotifyAccessToken,
   getSpotifyConfig,
+  isRefreshTokenRevokedError,
+  isTokenExpirationError,
   makeSpotifyApiRequest,
   refreshSpotifyAccessToken,
   type SpotifyConfig,

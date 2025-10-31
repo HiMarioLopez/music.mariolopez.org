@@ -1,7 +1,7 @@
 import { Logger } from '@aws-lambda-powertools/logger';
 import axios from 'axios';
 import { Song, SpotifySong } from '../../models/song';
-import { getParameter, updateParameter } from '../parameter';
+import { getParameter } from '../parameter';
 import { getSecretJson } from '../secret';
 
 const logger = new Logger({ serviceName: 'spotify-api-service' });
@@ -104,7 +104,7 @@ export interface SpotifyRecentlyPlayedResponse {
 
 /**
  * Get Spotify configuration from Secrets Manager and environment variables
- * 
+ *
  * Retrieves client_id and client_secret from AWS Secrets Manager.
  * Redirect URI is retrieved from environment variable as it's not stored in the secret.
  */
@@ -126,9 +126,10 @@ export const getSpotifyConfig = async (): Promise<SpotifyConfig> => {
 
   try {
     // Retrieve credentials from Secrets Manager
-    const secret = await getSecretJson<{ client_id: string; client_secret: string }>(
-      secretName
-    );
+    const secret = await getSecretJson<{
+      client_id: string;
+      client_secret: string;
+    }>(secretName);
 
     if (!secret.client_id || !secret.client_secret) {
       throw new Error(
@@ -136,7 +137,9 @@ export const getSpotifyConfig = async (): Promise<SpotifyConfig> => {
       );
     }
 
-    logger.info('Successfully retrieved Spotify configuration from Secrets Manager');
+    logger.info(
+      'Successfully retrieved Spotify configuration from Secrets Manager'
+    );
 
     return {
       clientId: secret.client_id,
@@ -144,7 +147,10 @@ export const getSpotifyConfig = async (): Promise<SpotifyConfig> => {
       redirectUri,
     };
   } catch (error) {
-    logger.error('Failed to retrieve Spotify configuration', { error });
+    logger.error(
+      'Failed to retrieve Spotify configuration from Secrets Manager',
+      { error }
+    );
     throw new Error(
       `Failed to retrieve Spotify configuration from Secrets Manager: ${error instanceof Error ? error.message : String(error)}`
     );
@@ -264,10 +270,62 @@ export const refreshSpotifyAccessToken =
           status: error.response?.status,
           data: error.response?.data,
         });
+
+        // Check if the refresh token has been revoked
+        if (isRefreshTokenRevokedError(error)) {
+          logger.error('Spotify refresh token has been revoked', {
+            status: error.response?.status,
+            errorData: error.response?.data,
+          });
+
+          // Send notification to admins that re-authentication is required
+          try {
+            const { sendTokenRefreshNotification } = await import(
+              '../notification'
+            );
+            await sendTokenRefreshNotification(
+              'Spotify refresh token has been revoked. Re-authentication is required to restore access to Spotify API.',
+              'Spotify Refresh Token Revoked - Re-authentication Required'
+            );
+            logger.info(
+              'Sent notification about revoked Spotify refresh token'
+            );
+          } catch (notificationError) {
+            logger.error(
+              'Failed to send notification about revoked refresh token',
+              {
+                notificationError,
+              }
+            );
+            // Don't throw - we still want to throw the revoked token error
+          }
+
+          // Throw a specific error indicating re-authentication is needed
+          throw new Error(
+            'Spotify refresh token has been revoked. Re-authentication is required.'
+          );
+        }
       }
       throw new Error('Failed to refresh Spotify access token');
     }
   };
+
+/**
+ * Check if an error is due to a revoked refresh token
+ * This occurs when the refresh token has been invalidated (user revoked access, token expired, etc.)
+ */
+export const isRefreshTokenRevokedError = (error: any): boolean => {
+  if (axios.isAxiosError(error) && error.response?.status === 400) {
+    const errorData = error.response.data;
+    return !!(
+      errorData &&
+      errorData.error === 'invalid_grant' &&
+      (errorData.error_description?.includes('revoked') ||
+        errorData.error_description?.includes('Refresh token revoked'))
+    );
+  }
+  return false;
+};
 
 /**
  * Check if an error is due to token expiration
