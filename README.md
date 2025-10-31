@@ -1,6 +1,6 @@
 # music.mariolopez.org
 
-A simple site to songs what I'm currently listening to on [Apple Music](https://www.apple.com/apple-music/), and send me new recommendations.
+A simple site to songs what I'm currently listening to on [Apple Music](https://www.apple.com/apple-music/) or [Spotify](https://www.spotify.com/). Why two streaming services? Because Jackie sends me song recommendations every morning and I'm too lazy to manually 'translate' them over to Apple Music.
 
 ## Inspiration
 
