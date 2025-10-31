@@ -74,13 +74,16 @@ public static class Program
 
         appleMusicHistoryStack.AddDependency(integrationApiStack);
 
-        var spotifyHistoryStack = new SpotifyHistoryStack(app, "SpotifyHistoryStack", new StackProps
-        {
-            Env = env,
-            StackName = "SpotifyHistoryStack",
-            Description = "This stack contains resources for recording and displaying Spotify listening history."
-        }, configuration);
+        var spotifyHistoryStack = new SpotifyHistoryStack(app, "SpotifyHistoryStack",
+            tokenRefreshNotificationStack.TokenRefreshTopic,
+            new StackProps
+            {
+                Env = env,
+                StackName = "SpotifyHistoryStack",
+                Description = "This stack contains resources for recording and displaying Spotify listening history."
+            }, configuration);
 
+        spotifyHistoryStack.AddDependency(tokenRefreshNotificationStack);
         spotifyHistoryStack.AddDependency(integrationApiStack);
 
         app.Synth();

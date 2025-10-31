@@ -5,6 +5,7 @@ using Amazon.CDK.AWS.Events;
 using Amazon.CDK.AWS.Events.Targets;
 using Amazon.CDK.AWS.IAM;
 using Amazon.CDK.AWS.Lambda;
+using Amazon.CDK.AWS.SNS;
 using Amazon.CDK.AWS.SSM;
 using Cdklabs.CdkNag;
 using Constructs;
@@ -28,7 +29,7 @@ public sealed class SpotifyHistoryStack : Stack
     private readonly Table historyTable;
     private readonly Function updateHistoryJobLambda;
 
-    internal SpotifyHistoryStack(Construct scope, string id, IStackProps? props = null,
+    internal SpotifyHistoryStack(Construct scope, string id, Topic tokenRefreshTopic, IStackProps? props = null,
         IConfiguration? configuration = null)
         : base(scope, id, props)
     {
@@ -132,6 +133,14 @@ public sealed class SpotifyHistoryStack : Stack
             Resources = ["*"]
         }));
 
+        // Add permissions for SNS
+        updateHistoryJobLambdaRole.AddToPolicy(new PolicyStatement(new PolicyStatementProps
+        {
+            Effect = Effect.ALLOW,
+            Actions = ["sns:Publish"],
+            Resources = [tokenRefreshTopic.TopicArn]
+        }));
+
         // Use the NodejsLambdaFunction construct instead of directly creating a Function
         var updateHistoryJobLambdaConstruct = new NodejsLambdaFunction(this, "UpdateSpotifyHistoryJobLambda",
             new NodejsLambdaFunctionProps
@@ -149,7 +158,8 @@ public sealed class SpotifyHistoryStack : Stack
                     ["SPOTIFY_CLIENT_SECRET_NAME"] = "SpotifyClientSecret",
                     ["SPOTIFY_REDIRECT_URI"] =
                         "https://admin.music.mariolopez.org/api/nodejs/v1/spotify/oauth/callback",
-                    ["SONG_LIMIT_PARAMETER"] = songLimitParameter.ParameterName
+                    ["SONG_LIMIT_PARAMETER"] = songLimitParameter.ParameterName,
+                    ["TOKEN_REFRESH_TOPIC_ARN"] = tokenRefreshTopic.TopicArn
                 }
             });
 
