@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 
 interface SubmitButtonProps {
   onClick: () => void | Promise<void>;
@@ -30,11 +30,10 @@ export function SubmitButton({
         <>
           <span className="spinner"></span>
           {loadingText || children}
-        </span>
+        </>
       ) : (
         children
       )}
     </button>
   );
 }
-
