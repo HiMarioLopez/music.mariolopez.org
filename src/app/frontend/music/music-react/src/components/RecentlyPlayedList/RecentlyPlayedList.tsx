@@ -6,10 +6,6 @@ import { useCarouselSettings } from "./hooks/useCarouselSettings";
 import { useSongDistribution } from "./hooks/useSongDistribution";
 import styles from "./styles/RecentlyPlayedList.module.css";
 
-// Import React Slick CSS
-import "slick-carousel/slick/slick-theme.css";
-import "slick-carousel/slick/slick.css";
-
 /**
  * RecentlyPlayedList component displays three horizontal carousels
  * of the user's recently played songs

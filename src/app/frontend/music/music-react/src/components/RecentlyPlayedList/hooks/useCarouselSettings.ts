@@ -6,38 +6,26 @@ import { useMemo } from "react";
 export const useCarouselSettings = () => {
   // Using useMemo to prevent recreating these objects on every render
   return useMemo(() => {
-    // Base settings that apply to all carousels
-    const baseSettings = {
-      dots: false,
-      arrows: false,
-      infinite: true,
-      autoplay: true,
-      autoplaySpeed: 0,
-      cssEase: "linear",
-      pauseOnHover: true,
-      variableWidth: true,
-      swipeToSlide: true,
-    };
+    // Normalized speed - all carousels move at the same speed
+    // Duration in ms for one complete cycle (3x slower than before)
+    const normalizedSpeed = 100000; // 100 seconds per cycle
 
-    // React Slick carousel settings for top row - moves left to right
+    // Carousel settings for top row - moves left to right
     const topSliderSettings = {
-      ...baseSettings,
-      speed: 20000,
-      rtl: false, // Right to left is false - moves left to right
+      speed: normalizedSpeed,
+      direction: "left" as const, // Moves left to right (content moves left)
     };
 
-    // React Slick carousel settings for middle row - moves right to left
+    // Carousel settings for middle row - moves right to left
     const middleSliderSettings = {
-      ...baseSettings,
-      speed: 22000, // Slightly different speed for visual interest
-      rtl: true, // Right to left is true - moves right to left
+      speed: normalizedSpeed,
+      direction: "right" as const, // Moves right to left (content moves right)
     };
 
-    // React Slick carousel settings for bottom row - moves left to right but slower
+    // Carousel settings for bottom row - moves left to right
     const bottomSliderSettings = {
-      ...baseSettings,
-      speed: 24000, // Even slower speed for bottom row
-      rtl: false, // Right to left is false - moves left to right
+      speed: normalizedSpeed,
+      direction: "left" as const, // Moves left to right (content moves left)
     };
 
     return {

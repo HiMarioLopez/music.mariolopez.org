@@ -6,11 +6,21 @@ import { AppleMusicSong } from "../../../models/AppleMusicSong";
  */
 export const useSongDistribution = (recentlyPlayed: AppleMusicSong[]) => {
   return useMemo(() => {
+    // Remove duplicate songs based on song ID, keeping first occurrence
+    const seenIds = new Set<string>();
+    const uniqueSongs = recentlyPlayed.filter((song) => {
+      if (seenIds.has(song.id)) {
+        return false;
+      }
+      seenIds.add(song.id);
+      return true;
+    });
+
     // Prepare song data - if we have fewer than desired songs, duplicate them
     const processedSongs =
-      recentlyPlayed.length < 10
-        ? [...recentlyPlayed, ...recentlyPlayed, ...recentlyPlayed]
-        : [...recentlyPlayed];
+      uniqueSongs.length < 10
+        ? [...uniqueSongs, ...uniqueSongs, ...uniqueSongs]
+        : [...uniqueSongs];
 
     // Split songs into three arrays for top, middle, and bottom sliders
     const songCount = processedSongs.length;

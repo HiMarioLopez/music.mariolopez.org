@@ -1,5 +1,5 @@
 import { render, screen } from "@testing-library/react";
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect, vi, beforeEach } from "vitest";
 import RecentlyPlayedList from "../RecentlyPlayedList";
 import { createMockMusicItem } from "../../../mocks/context/MusicContextMock";
 import { AppleMusicSong } from "../../../models/AppleMusicSong";
@@ -27,26 +27,12 @@ vi.mock("../../../context/MusicContext", () => ({
   useMusicContext: () => mockContextValue,
 }));
 
-// Mock the react-slick library
-vi.mock("slick-carousel/slick/slick.css", () => ({}));
-vi.mock("slick-carousel/slick/slick-theme.css", () => ({}));
-vi.mock("react-slick", () => ({
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  default: function MockSlider({ children, ...props }: any) {
-    return (
-      <div data-testid="mock-slider" {...props}>
-        {children}
-      </div>
-    );
-  },
-}));
-
 // Mock the useCarouselSettings hook
 vi.mock("../hooks/useCarouselSettings", () => ({
   useCarouselSettings: () => ({
-    topSliderSettings: { speed: 20000, rtl: false },
-    middleSliderSettings: { speed: 22000, rtl: true },
-    bottomSliderSettings: { speed: 24000, rtl: false },
+    topSliderSettings: { speed: 20000, direction: "left" },
+    middleSliderSettings: { speed: 22000, direction: "right" },
+    bottomSliderSettings: { speed: 24000, direction: "left" },
   }),
 }));
 
@@ -116,9 +102,6 @@ describe("RecentlyPlayedList Component", () => {
     // Check that tracks are rendered
     expect(screen.getAllByText("Track 1")).toBeDefined();
     expect(screen.getAllByText("Artist 1 - Album 1")).toBeDefined();
-
-    // Check for the carousel sliders
-    expect(screen.getAllByTestId("mock-slider")).toHaveLength(3);
   });
 
   it("renders the loading state with skeleton loader", () => {
@@ -148,7 +131,7 @@ describe("RecentlyPlayedList Component", () => {
 
     // Check that the error message is displayed
     expect(
-      screen.getByText(`Error loading tracks: ${errorMessage}`),
+      screen.getByText(`Error loading songs: ${errorMessage}`),
     ).toBeDefined();
   });
 
@@ -162,7 +145,7 @@ describe("RecentlyPlayedList Component", () => {
 
     // Check for the empty state message
     expect(
-      screen.getByText("No recently played tracks available"),
+      screen.getByText("No recently played songs available"),
     ).toBeDefined();
   });
 });

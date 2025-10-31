@@ -26,9 +26,7 @@
     "classix": "^2.2.4",
     "framer-motion": "^12.23.24",
     "react": "^19.2.0",
-    "react-dom": "^19.2.0",
-    "react-slick": "^0.31.0",
-    "slick-carousel": "^1.8.1"
+    "react-dom": "^19.2.0"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^6.9.1",
@@ -37,7 +35,6 @@
     "@types/jest": "^30.0.0",
     "@types/react": "^19.2.2",
     "@types/react-dom": "^19.2.2",
-    "@types/react-slick": "^0.23.13",
     "@typescript-eslint/eslint-plugin": "^8.46.1",
     "@typescript-eslint/parser": "^8.46.1",
     "@vitejs/plugin-react-swc": "^4.1.0",

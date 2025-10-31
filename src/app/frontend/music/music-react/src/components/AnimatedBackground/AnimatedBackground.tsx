@@ -1,6 +1,6 @@
-import { motion } from 'framer-motion';
-import React, { useEffect, useMemo, useState } from 'react';
-import styles from './AnimatedBackground.module.css';
+import { motion } from "framer-motion";
+import React, { useEffect, useMemo, useState } from "react";
+import styles from "./AnimatedBackground.module.css";
 
 interface AnimatedBackgroundProps {
   colors: string[];
@@ -13,12 +13,12 @@ interface Blob {
   size: number;
   color: string;
   duration: number;
-  moveX: number[];
-  moveY: number[];
+  moveX: (number | string)[];
+  moveY: (number | string)[];
 }
 
 // Default fallback colors if none provided - bright vibrant palette
-const DEFAULT_COLORS = ['#ff006e', '#8338ec', '#3a86ff', '#06ffa5', '#fb5607'];
+const DEFAULT_COLORS = ["#ff006e", "#8338ec", "#3a86ff", "#06ffa5", "#fb5607"];
 
 const AnimatedBackground: React.FC<AnimatedBackgroundProps> = ({ colors }) => {
   const [isMobile, setIsMobile] = useState(false);
@@ -35,8 +35,8 @@ const AnimatedBackground: React.FC<AnimatedBackgroundProps> = ({ colors }) => {
       setIsMobile(window.innerWidth < 768 || window.innerHeight < 600);
     };
     checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
   // Generate animated blobs based on colors - regenerate when colors change
@@ -48,7 +48,7 @@ const AnimatedBackground: React.FC<AnimatedBackgroundProps> = ({ colors }) => {
       const colorIndex = i % displayColors.length;
       const baseX = Math.random() * 100;
       const baseY = Math.random() * 100;
-      
+
       // Create more interesting movement patterns
       const moveX = [
         `${baseX + (Math.random() - 0.5) * 60}%`,
@@ -56,7 +56,7 @@ const AnimatedBackground: React.FC<AnimatedBackgroundProps> = ({ colors }) => {
         `${baseX + (Math.random() - 0.5) * 60}%`,
         `${baseX}%`,
       ];
-      
+
       const moveY = [
         `${baseY + (Math.random() - 0.5) * 60}%`,
         `${baseY + (Math.random() - 0.5) * 60}%`,
@@ -68,9 +68,7 @@ const AnimatedBackground: React.FC<AnimatedBackgroundProps> = ({ colors }) => {
         id: i,
         initialX: baseX,
         initialY: baseY,
-        size: isMobile 
-          ? 250 + Math.random() * 200 
-          : 400 + Math.random() * 350,
+        size: isMobile ? 250 + Math.random() * 200 : 400 + Math.random() * 350,
         color: displayColors[colorIndex],
         duration: 25 + Math.random() * 20, // 25-45 seconds
         moveX,
@@ -104,7 +102,7 @@ const AnimatedBackground: React.FC<AnimatedBackgroundProps> = ({ colors }) => {
             transition={{
               duration: blob.duration,
               repeat: Infinity,
-              ease: 'easeInOut',
+              ease: "easeInOut",
             }}
           />
         ))}
@@ -114,22 +112,22 @@ const AnimatedBackground: React.FC<AnimatedBackgroundProps> = ({ colors }) => {
       <motion.div
         className={styles.gradientOverlay}
         style={{
-          background: `radial-gradient(circle at 50% 50%, ${displayColors.join(', ')})`,
+          background: `radial-gradient(circle at 50% 50%, ${displayColors.join(", ")})`,
         }}
         animate={{
           backgroundPosition: [
-            '0% 0%',
-            '100% 100%',
-            '50% 100%',
-            '100% 0%',
-            '0% 50%',
-            '0% 0%',
+            "0% 0%",
+            "100% 100%",
+            "50% 100%",
+            "100% 0%",
+            "0% 50%",
+            "0% 0%",
           ],
         }}
         transition={{
           duration: 25,
           repeat: Infinity,
-          ease: 'easeInOut',
+          ease: "easeInOut",
         }}
       />
 
@@ -147,13 +145,19 @@ const AnimatedBackground: React.FC<AnimatedBackgroundProps> = ({ colors }) => {
             animate={{
               scale: [1, 1.8, 0.7, 1.5, 1],
               opacity: [0.4, 0.8, 0.3, 0.7, 0.4],
-              x: [`${(Math.random() - 0.5) * 20}%`, `${(Math.random() - 0.5) * 20}%`],
-              y: [`${(Math.random() - 0.5) * 20}%`, `${(Math.random() - 0.5) * 20}%`],
+              x: [
+                `${(Math.random() - 0.5) * 20}%`,
+                `${(Math.random() - 0.5) * 20}%`,
+              ],
+              y: [
+                `${(Math.random() - 0.5) * 20}%`,
+                `${(Math.random() - 0.5) * 20}%`,
+              ],
             }}
             transition={{
               duration: 12 + index * 2,
               repeat: Infinity,
-              ease: 'easeInOut',
+              ease: "easeInOut",
             }}
           />
         ))}
@@ -163,4 +167,3 @@ const AnimatedBackground: React.FC<AnimatedBackgroundProps> = ({ colors }) => {
 };
 
 export default AnimatedBackground;
-
