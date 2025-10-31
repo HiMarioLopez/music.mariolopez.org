@@ -2,19 +2,18 @@
 .indicator {
   position: relative;
   border-radius: 50%;
-  display: flex;
   align-items: center;
   justify-content: center;
   backdrop-filter: blur(8px);
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
   z-index: 10;
   flex-shrink: 0;
 }
 
 .indicator:hover {
   transform: scale(1.1);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
 }
 
 /* Size variants */
@@ -30,26 +29,20 @@
   padding: 4px;
 }
 
-/* Apple Music styling - gradient from light pink to red */
-.apple {
-  background: linear-gradient(135deg, #fc3c44 0%, #ff375f 100%);
-}
-
-.apple svg {
-  color: white;
+.apple svg,
+.apple img {
   width: 100%;
   height: 100%;
+  object-fit: contain;
+  display: block;
 }
 
-/* Spotify styling - green */
-.spotify {
-  background: #1DB954;
-}
-
-.spotify svg {
-  color: white;
+.spotify svg,
+.spotify img {
   width: 100%;
   height: 100%;
+  object-fit: contain;
+  display: block;
 }
 
 /* Responsive adjustments */
