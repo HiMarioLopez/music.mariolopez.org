@@ -15,7 +15,8 @@ jobs:
         id: link-checker
         uses: tcort/github-action-markdown-link-check@v1.1.1
         with:
-          # Specify files to check (README.md by default; add more if needed)
+          folder-path: __none__
+          file-path: ./README.md
           use-verbose-mode: "yes"
 
       # Optional: Create an issue if broken links are found
