@@ -22,6 +22,7 @@
     "------------Frontend (Music)------------": "--------------------------------",
     "update-build-deploy:showcase": "pnpm run-s update-and-build:showcase deploy:showcase",
     "update-build-deploy:showcase-react": "pnpm run-s update:music-react build:music-react deploy:showcase",
+    "update-build-deploy:showcase-angular": "pnpm run-s update:music-angular build:music-angular deploy:showcase",
     "update-and-build:showcase": "pnpm run-s update:showcase build:showcase",
     "deploy:showcase": "cd src/infra && cdk deploy MusicFrontendStack",
     "update:showcase": "pnpm run-p update:music-*",
@@ -61,9 +62,9 @@
     "build:backend": "cd src/app/backend && pnpm build"
   },
   "devDependencies": {
-    "@commitlint/cli": "^19.8.0",
-    "@commitlint/config-conventional": "^19.8.0",
+    "@commitlint/cli": "^20.1.0",
+    "@commitlint/config-conventional": "^20.0.0",
     "husky": "^9.1.7",
-    "npm-run-all2": "^7.0.2"
+    "npm-run-all2": "^8.0.4"
   }
 }
