@@ -39,3 +39,20 @@ export const formatRelativeTime = (timestamp: string): string => {
     return `${days} ${days === 1 ? "day" : "days"} ago`;
   }
 };
+
+/**
+ * Formats a build time ISO string for display
+ * @param isoString ISO date string to format
+ * @returns Formatted date string with timezone
+ */
+export const formatBuildTime = (isoString: string): string => {
+  const date = new Date(isoString);
+  return date.toLocaleString("en-US", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    timeZoneName: "short",
+  });
+};

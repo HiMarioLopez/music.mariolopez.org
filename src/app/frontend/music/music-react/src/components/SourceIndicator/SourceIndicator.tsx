@@ -1,5 +1,6 @@
 import { memo } from 'react';
 import { MusicSource, getMusicSourceDisplayName } from '../../types/MusicSource';
+import { openUrlInNewTab } from '../../utils/navigation';
 import { AppleMusicIcon, SpotifyIcon } from '../Icons/Icons';
 import styles from './SourceIndicator.module.css';
 
@@ -26,8 +27,8 @@ export const SourceIndicator = memo(({ source, size = 'small', url, onClick }: S
   const handleClick = () => {
     if (url && onClick) {
       onClick();
-    } else if (url) {
-      window.open(url, '_blank', 'noopener,noreferrer');
+    } else {
+      openUrlInNewTab(url);
     }
   };
 

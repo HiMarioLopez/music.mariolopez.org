@@ -306,10 +306,10 @@
   }
 
   .nowPlayingSkeletonImg {
-    width: var(--width-mobile);
-    height: auto;
+    width: 100%;
     aspect-ratio: 1 / 1;
     margin: var(--margin-medium) 0;
+    display: block;
   }
 
   .nowPlayingSkeletonTitle {

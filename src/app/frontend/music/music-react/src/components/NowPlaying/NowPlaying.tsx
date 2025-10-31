@@ -1,27 +1,24 @@
 import cx from "classix";
 import React from "react";
-import placeholderAlbumArt from "../../assets/300.png";
 import { useMusicContext } from "../../context/MusicContext";
 import { formatRelativeTime } from "../../utils/formatters";
+import { getProcessedArtworkUrl } from "../../utils/imageProcessing";
+import { openUrlInNewTab } from "../../utils/navigation";
 import { SourceIndicator } from "../SourceIndicator/SourceIndicator";
 import styles from "./NowPlaying.module.css";
 
 const NowPlaying: React.FC = () => {
   const { nowPlaying, loading, error } = useMusicContext();
 
-  // Replace {w}x{h} in the artworkUrl with actual dimensions
-  const getProcessedArtworkUrl = (url: string | undefined) => {
-    if (!url) return placeholderAlbumArt;
-    return url.replace("{w}x{h}", "300x300");
-  };
-
   // Show skeleton loader during loading
   if (loading && !nowPlaying) {
     return (
       <div className={styles.nowPlayingComponent}>
-        <div
-          className={cx(styles.nowPlayingSkeletonImg, styles.skeletonLoader)}
-        ></div>
+        <div className={styles.albumArtContainer}>
+          <div
+            className={cx(styles.nowPlayingSkeletonImg, styles.skeletonLoader)}
+          ></div>
+        </div>
         <div className={styles.nowPlayingComponentTextContainer}>
           <h1>Mario's Now Playing</h1>
           <div className={styles.nowPlayingComponentText}>
@@ -70,7 +67,7 @@ const NowPlaying: React.FC = () => {
   if (error && !nowPlaying) {
     return (
       <div className={styles.nowPlayingComponent}>
-        <img src={placeholderAlbumArt} alt="Error Album Art" />
+        <img src={getProcessedArtworkUrl(undefined)} alt="Error Album Art" />
         <div className={styles.nowPlayingComponentTextContainer}>
           <h1>Mario's Now Playing</h1>
           <div className={styles.nowPlayingComponentText}>
@@ -88,16 +85,14 @@ const NowPlaying: React.FC = () => {
     : "";
 
   const handleAlbumArtClick = () => {
-    if (nowPlaying?.url) {
-      window.open(nowPlaying.url, "_blank", "noopener,noreferrer");
-    }
+    openUrlInNewTab(nowPlaying?.url);
   };
 
   return (
     <div className={styles.nowPlayingComponent}>
       <div className={styles.albumArtContainer}>
         <img
-          src={getProcessedArtworkUrl(nowPlaying?.artworkUrl)}
+          src={getProcessedArtworkUrl(nowPlaying?.artworkUrl, "300x300")}
           alt={`${nowPlaying?.albumName || "Album"} Art`}
           onClick={handleAlbumArtClick}
           style={{ cursor: nowPlaying?.url ? "pointer" : "default" }}

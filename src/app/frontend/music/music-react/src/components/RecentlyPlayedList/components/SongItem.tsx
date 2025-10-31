@@ -1,7 +1,7 @@
 import React, { memo, useMemo, useState } from "react";
-import albumPlaceholder from "../../../assets/album-placeholder.svg";
 import { AppleMusicSong } from "../../../models/AppleMusicSong";
 import { getProcessedArtworkUrl } from "../../../utils/imageProcessing";
+import { openUrlInNewTab } from "../../../utils/navigation";
 import { SourceIndicator } from "../../SourceIndicator/SourceIndicator";
 import styles from "../styles/SongItem.module.css";
 
@@ -30,9 +30,7 @@ const SongItem: React.FC<SongItemProps> = ({ song, index, rowName }) => {
   };
 
   const handleAlbumArtClick = () => {
-    if (song.url) {
-      window.open(song.url, '_blank', 'noopener,noreferrer');
-    }
+    openUrlInNewTab(song.url);
   };
 
   return (
@@ -40,7 +38,7 @@ const SongItem: React.FC<SongItemProps> = ({ song, index, rowName }) => {
       <div className={styles.song}>
         <div className={styles.albumArtContainer}>
           <img
-            src={imageError ? albumPlaceholder : artworkUrl}
+            src={imageError ? getProcessedArtworkUrl(undefined) : artworkUrl}
             alt={`${song.name} Album Cover`}
             title={song.url ? `Click to open ${song.name} in Apple Music` : `${song.name} by ${song.artistName}`}
             onError={handleImageError}
