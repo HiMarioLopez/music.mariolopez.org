@@ -1,5 +1,5 @@
 import React, { memo } from "react";
-import angularLogo from "../../assets/angular.svg";
+import angularLogo from "../../assets/angular.webp";
 import litLogo from "../../assets/lit.svg";
 import nextLogo from "../../assets/next.svg";
 import preactLogo from "../../assets/preact.svg";
