@@ -154,8 +154,8 @@ export const authService = {
 // Try to load persisted token during module initialization
 authService.loadPersistedToken();
 
-// Fetch wrapper with auth retry
-const fetchWithAuthRetry = async <T>(
+// Fetch wrapper with auth retry (currently unused, reserved for future authenticated endpoints)
+const _fetchWithAuthRetry = async <T>(
   url: string,
   options?: RequestInit,
   retryAttempted: boolean = false,
@@ -182,7 +182,7 @@ const fetchWithAuthRetry = async <T>(
       authService.clearToken();
 
       // Only retry once to prevent infinite loops
-      return fetchWithAuthRetry<T>(url, options, true);
+      return _fetchWithAuthRetry<T>(url, options, true);
     }
 
     // If we've already retried or it's not an auth error, propagate the error
@@ -198,7 +198,9 @@ export const apiService = {
       `${API_BASE_URL}/history/music?limit=${limit}`,
     );
   },
-  async getSpotifyMusicHistory(limit: number = 5): Promise<MusicHistoryResponse> {
+  async getSpotifyMusicHistory(
+    limit: number = 5,
+  ): Promise<MusicHistoryResponse> {
     return fetchWithErrorHandling<MusicHistoryResponse>(
       `${API_BASE_URL}/history/spotify?limit=${limit}`,
     );

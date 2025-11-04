@@ -1,4 +1,4 @@
-import React from "react";
+import React, { memo } from "react";
 import angularLogo from "../../assets/angular.svg";
 import litLogo from "../../assets/lit.svg";
 import nextLogo from "../../assets/next.svg";
@@ -123,4 +123,4 @@ const Navbar: React.FC = () => {
   );
 };
 
-export default Navbar;
+export default memo(Navbar);

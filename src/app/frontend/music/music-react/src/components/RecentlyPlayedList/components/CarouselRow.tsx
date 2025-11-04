@@ -1,4 +1,11 @@
-import React, { memo, useRef, useState, useEffect, useCallback } from "react";
+import React, {
+  memo,
+  useRef,
+  useState,
+  useEffect,
+  useCallback,
+  useMemo,
+} from "react";
 import { AppleMusicSong } from "../../../models/AppleMusicSong";
 import styles from "../styles/CarouselRow.module.css";
 import SongItem from "./SongItem";
@@ -25,9 +32,13 @@ const CarouselRow: React.FC<CarouselRowProps> = ({
   const [isHovered, setIsHovered] = useState(false);
   const [contentWidth, setContentWidth] = useState(0);
 
+  // Memoize duplicated songs to prevent recalculation on every render
   // Duplicate songs multiple times for seamless infinite scroll
   // Need enough duplicates to ensure seamless looping
-  const duplicatedSongs = [...songs, ...songs, ...songs];
+  const duplicatedSongs = useMemo(
+    () => [...songs, ...songs, ...songs],
+    [songs],
+  );
 
   // Calculate content width (width of one set of songs)
   const updateContentWidth = useCallback(() => {
@@ -68,6 +79,16 @@ const CarouselRow: React.FC<CarouselRowProps> = ({
     }
   }, [contentWidth, settings.speed]);
 
+  // Memoize mouse event handlers to prevent recreation on every render
+  // Must be before any early returns (React hooks rule)
+  const handleMouseEnter = useCallback(() => {
+    setIsHovered(true);
+  }, []);
+
+  const handleMouseLeave = useCallback(() => {
+    setIsHovered(false);
+  }, []);
+
   if (songs.length === 0) {
     return null;
   }
@@ -81,13 +102,17 @@ const CarouselRow: React.FC<CarouselRowProps> = ({
   return (
     <div
       className={styles.recentlyPlayedListRow}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+      role="region"
+      aria-label={`${rowName} carousel of recently played songs`}
+      aria-live="polite"
     >
       <div className={styles.carouselContainer}>
         <div
           ref={trackRef}
           className={`${styles.carouselTrack} ${animationClass} ${isHovered ? styles.carouselTrackPaused : ""}`}
+          aria-hidden="false"
         >
           {duplicatedSongs.map((song, index) => (
             <div

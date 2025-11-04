@@ -20,14 +20,27 @@ interface Blob {
 // Default fallback colors if none provided - bright vibrant palette
 const DEFAULT_COLORS = ["#ff006e", "#8338ec", "#3a86ff", "#06ffa5", "#fb5607"];
 
+// Simple seeded random number generator for consistent blob generation
+const seededRandom = (seed: number) => {
+  let value = seed;
+  return () => {
+    value = (value * 9301 + 49297) % 233280;
+    return value / 233280;
+  };
+};
+
 const AnimatedBackground: React.FC<AnimatedBackgroundProps> = ({ colors }) => {
   const [isMobile, setIsMobile] = useState(false);
-  const [blobs, setBlobs] = useState<Blob[]>([]);
 
   // Use provided colors or fallback to defaults
   const displayColors = useMemo(() => {
     return colors && colors.length > 0 ? colors : DEFAULT_COLORS;
   }, [colors]);
+
+  // Create a stable key from colors array to detect actual color changes
+  const colorsKey = useMemo(() => {
+    return displayColors.join(",");
+  }, [displayColors]);
 
   // Detect mobile devices
   useEffect(() => {
@@ -39,28 +52,30 @@ const AnimatedBackground: React.FC<AnimatedBackgroundProps> = ({ colors }) => {
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
-  // Generate animated blobs based on colors - regenerate when colors change
-  useEffect(() => {
+  // Memoize blob generation to prevent regeneration when colors array reference changes
+  // but values remain the same. Only regenerate when colorsKey or isMobile changes.
+  const blobs = useMemo(() => {
     const blobCount = isMobile ? 6 : 10;
     const newBlobs: Blob[] = [];
 
     for (let i = 0; i < blobCount; i++) {
-      const colorIndex = i % displayColors.length;
-      const baseX = Math.random() * 100;
-      const baseY = Math.random() * 100;
+      // Use index as seed for consistent generation
+      const random = seededRandom(i + colorsKey.length);
+      const baseX = random() * 100;
+      const baseY = random() * 100;
 
-      // Create more interesting movement patterns
+      // Create more interesting movement patterns with seeded randomness
       const moveX = [
-        `${baseX + (Math.random() - 0.5) * 60}%`,
-        `${baseX + (Math.random() - 0.5) * 60}%`,
-        `${baseX + (Math.random() - 0.5) * 60}%`,
+        `${baseX + (random() - 0.5) * 60}%`,
+        `${baseX + (random() - 0.5) * 60}%`,
+        `${baseX + (random() - 0.5) * 60}%`,
         `${baseX}%`,
       ];
 
       const moveY = [
-        `${baseY + (Math.random() - 0.5) * 60}%`,
-        `${baseY + (Math.random() - 0.5) * 60}%`,
-        `${baseY + (Math.random() - 0.5) * 60}%`,
+        `${baseY + (random() - 0.5) * 60}%`,
+        `${baseY + (random() - 0.5) * 60}%`,
+        `${baseY + (random() - 0.5) * 60}%`,
         `${baseY}%`,
       ];
 
@@ -68,16 +83,30 @@ const AnimatedBackground: React.FC<AnimatedBackgroundProps> = ({ colors }) => {
         id: i,
         initialX: baseX,
         initialY: baseY,
-        size: isMobile ? 250 + Math.random() * 200 : 400 + Math.random() * 350,
-        color: displayColors[colorIndex],
-        duration: 25 + Math.random() * 20, // 25-45 seconds
+        size: isMobile ? 250 + random() * 200 : 400 + random() * 350,
+        color: displayColors[i % displayColors.length],
+        duration: 25 + random() * 20, // 25-45 seconds
         moveX,
         moveY,
       });
     }
 
-    setBlobs(newBlobs);
-  }, [displayColors, isMobile]);
+    return newBlobs;
+  }, [colorsKey, isMobile, displayColors]);
+
+  // Memoize mesh gradient animation values to avoid Math.random() in render
+  const meshGradientAnimations = useMemo(() => {
+    return displayColors.map((color, index) => {
+      // Use seeded random for consistent values
+      const random = seededRandom(index + colorsKey.length + 1000);
+      return {
+        color,
+        index,
+        x: [`${(random() - 0.5) * 20}%`, `${(random() - 0.5) * 20}%`],
+        y: [`${(random() - 0.5) * 20}%`, `${(random() - 0.5) * 20}%`],
+      };
+    });
+  }, [displayColors, colorsKey]);
 
   return (
     <div className={styles.container}>
@@ -133,29 +162,23 @@ const AnimatedBackground: React.FC<AnimatedBackgroundProps> = ({ colors }) => {
 
       {/* Animated mesh gradient points */}
       <div className={styles.meshGradient}>
-        {displayColors.map((color, index) => (
+        {meshGradientAnimations.map((animation) => (
           <motion.div
-            key={`${color}-${index}`}
+            key={`${animation.color}-${animation.index}`}
             className={styles.meshPoint}
             style={{
-              background: `radial-gradient(circle, ${color}80, ${color}40, transparent)`,
-              left: `${(index * 25) % 100}%`,
-              top: `${(Math.floor(index / 4) * 40) % 100}%`,
+              background: `radial-gradient(circle, ${animation.color}80, ${animation.color}40, transparent)`,
+              left: `${(animation.index * 25) % 100}%`,
+              top: `${(Math.floor(animation.index / 4) * 40) % 100}%`,
             }}
             animate={{
               scale: [1, 1.8, 0.7, 1.5, 1],
               opacity: [0.4, 0.8, 0.3, 0.7, 0.4],
-              x: [
-                `${(Math.random() - 0.5) * 20}%`,
-                `${(Math.random() - 0.5) * 20}%`,
-              ],
-              y: [
-                `${(Math.random() - 0.5) * 20}%`,
-                `${(Math.random() - 0.5) * 20}%`,
-              ],
+              x: animation.x,
+              y: animation.y,
             }}
             transition={{
-              duration: 12 + index * 2,
+              duration: 12 + animation.index * 2,
               repeat: Infinity,
               ease: "easeInOut",
             }}

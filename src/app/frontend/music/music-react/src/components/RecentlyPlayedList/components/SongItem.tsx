@@ -1,4 +1,4 @@
-import React, { memo, useMemo, useState } from "react";
+import React, { memo, useCallback, useMemo, useState } from "react";
 import { AppleMusicSong } from "../../../models/AppleMusicSong";
 import { getProcessedArtworkUrl } from "../../../utils/imageProcessing";
 import { openUrlInNewTab } from "../../../utils/navigation";
@@ -24,14 +24,14 @@ const SongItem: React.FC<SongItemProps> = ({ song, index, rowName }) => {
     [song.artworkUrl],
   );
 
-  // Handle image loading errors
-  const handleImageError = () => {
+  // Handle image loading errors - no dependencies as it only sets state
+  const handleImageError = useCallback(() => {
     setImageError(true);
-  };
+  }, []);
 
-  const handleAlbumArtClick = () => {
+  const handleAlbumArtClick = useCallback(() => {
     openUrlInNewTab(song.url);
-  };
+  }, [song.url]);
 
   return (
     <div key={`${rowName}-${song.id}-${index}`}>
@@ -40,10 +40,14 @@ const SongItem: React.FC<SongItemProps> = ({ song, index, rowName }) => {
           <img
             src={imageError ? getProcessedArtworkUrl(undefined) : artworkUrl}
             alt={`${song.name} Album Cover`}
-            title={song.url ? `Click to open ${song.name} in Apple Music` : `${song.name} by ${song.artistName}`}
+            title={
+              song.url
+                ? `Click to open ${song.name} in Apple Music`
+                : `${song.name} by ${song.artistName}`
+            }
             onError={handleImageError}
             onClick={handleAlbumArtClick}
-            style={{ cursor: song.url ? 'pointer' : 'default' }}
+            style={{ cursor: song.url ? "pointer" : "default" }}
           />
         </div>
         <div className={styles.songTextContainer}>

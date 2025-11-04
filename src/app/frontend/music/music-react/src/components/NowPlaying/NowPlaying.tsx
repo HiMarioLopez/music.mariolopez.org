@@ -1,5 +1,5 @@
 import cx from "classix";
-import React from "react";
+import React, { useCallback } from "react";
 import { useMusicContext } from "../../context/MusicContext";
 import { formatRelativeTime } from "../../utils/formatters";
 import { getProcessedArtworkUrl } from "../../utils/imageProcessing";
@@ -9,6 +9,16 @@ import styles from "./NowPlaying.module.css";
 
 const NowPlaying: React.FC = () => {
   const { nowPlaying, loading, error } = useMusicContext();
+
+  // Format the timestamp if available
+  const relativeTime = nowPlaying?.processedTimestamp
+    ? formatRelativeTime(nowPlaying.processedTimestamp)
+    : "";
+
+  // Memoize callback before any early returns (React hooks rule)
+  const handleAlbumArtClick = useCallback(() => {
+    openUrlInNewTab(nowPlaying?.url);
+  }, [nowPlaying?.url]);
 
   // Show skeleton loader during loading
   if (loading && !nowPlaying) {
@@ -78,15 +88,6 @@ const NowPlaying: React.FC = () => {
       </div>
     );
   }
-
-  // Format the timestamp if available
-  const relativeTime = nowPlaying?.processedTimestamp
-    ? formatRelativeTime(nowPlaying.processedTimestamp)
-    : "";
-
-  const handleAlbumArtClick = () => {
-    openUrlInNewTab(nowPlaying?.url);
-  };
 
   return (
     <div className={styles.nowPlayingComponent}>

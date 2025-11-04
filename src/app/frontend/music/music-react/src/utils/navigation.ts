@@ -11,4 +11,3 @@ export const openUrlInNewTab = (url: string | undefined): void => {
     window.open(url, "_blank", "noopener,noreferrer");
   }
 };
-

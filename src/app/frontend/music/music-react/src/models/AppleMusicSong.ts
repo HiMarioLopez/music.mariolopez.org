@@ -1,4 +1,4 @@
-import { MusicSource } from '../types/MusicSource';
+import { MusicSource } from "../types/MusicSource";
 
 // Apple Music Song API response
 export interface AppleMusicSong {
