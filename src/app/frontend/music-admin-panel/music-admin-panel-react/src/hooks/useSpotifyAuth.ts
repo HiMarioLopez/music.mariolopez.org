@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { getSpotifyOAuthUrl, getSpotifyStatus, getSpotifyToken, type SpotifyStatusResponse } from '../utils/api';
 
 interface SpotifyAuthState {
@@ -39,6 +39,9 @@ export function useSpotifyAuth(): SpotifyAuthManagement {
     }
   }, []);
 
+  // Ref to track if we are processing a callback to prevent race conditions
+  const processingCallback = useRef(false);
+
   // Initial status check
   const checkStatus = useCallback(async () => {
     try {
@@ -71,6 +74,10 @@ export function useSpotifyAuth(): SpotifyAuthManagement {
     const spotifyAuth = urlParams.get('spotify_auth');
     const error = urlParams.get('error');
 
+    if (spotifyAuth || error) {
+      processingCallback.current = true;
+    }
+
     if (spotifyAuth === 'success') {
       // Authorization successful, refresh status
       setAuthState((prev) => ({
@@ -83,6 +90,7 @@ export function useSpotifyAuth(): SpotifyAuthManagement {
       // Refresh status after a brief delay
       setTimeout(() => {
         checkStatus();
+        processingCallback.current = false;
       }, 500);
     } else if (spotifyAuth === 'error' || error) {
       // Authorization failed
@@ -95,6 +103,7 @@ export function useSpotifyAuth(): SpotifyAuthManagement {
       });
       // Clean up URL parameters
       window.history.replaceState({}, document.title, window.location.pathname);
+      processingCallback.current = false;
     }
     // Clean up session storage if we have old entries
     const urlParamsOld = new URLSearchParams(window.location.search);
@@ -105,6 +114,11 @@ export function useSpotifyAuth(): SpotifyAuthManagement {
 
   useEffect(() => {
     // Don't check status if we're in the middle of an OAuth callback or success redirect
+    // Use ref to check if we're processing a callback (since URL params might be cleared by the first effect)
+    if (processingCallback.current) {
+      return;
+    }
+
     const urlParams = new URLSearchParams(window.location.search);
     const spotifyAuth = urlParams.get('spotify_auth');
     if (!spotifyAuth) {
