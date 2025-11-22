@@ -7,6 +7,7 @@ import "./MusicUserTokenManagement.css";
 export function MusicUserTokenManagement() {
   const {
     isAuthorized,
+    isLoading, // Destructure isLoading from the hook
     musicUserToken,
     tokenInfo,
     handleAuthorize,
@@ -24,13 +25,17 @@ export function MusicUserTokenManagement() {
       <div className="auth-status">
         <p>
           <strong>Authorization Status: </strong>
-          <span
-            className={
-              isAuthorized ? "status-authorized" : "status-unauthorized"
-            }
-          >
-            {isAuthorized ? "Authorized" : "Not Authorized"}
-          </span>
+          {isLoading ? (
+             <span>Loading...</span>
+          ) : (
+            <span
+                className={
+                isAuthorized ? "status-authorized" : "status-unauthorized"
+                }
+            >
+                {isAuthorized ? "Authorized" : "Not Authorized"}
+            </span>
+          )}
         </p>
       </div>
 

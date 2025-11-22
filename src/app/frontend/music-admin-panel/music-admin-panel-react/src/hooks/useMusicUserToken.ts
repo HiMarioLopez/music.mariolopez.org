@@ -8,6 +8,7 @@ interface TokenInfo {
 
 interface TokenManagement {
   isAuthorized: boolean;
+  isLoading: boolean;
   musicUserToken: string | null;
   tokenInfo: TokenInfo;
   handleAuthorize: () => Promise<void>;
@@ -28,7 +29,12 @@ export function useMusicUserToken(): TokenManagement {
   // Check status from Parameter Store
   const checkStatus = useCallback(async () => {
     try {
-      setIsLoading(true);
+      // Don't set loading to true here to avoid flashing "Loading..." or unauthorized state
+      // if we already have some state. Only set if we're doing the initial load.
+      if (!isAuthorized && !musicUserToken) {
+          setIsLoading(true);
+      }
+      
       const response: MusicUserTokenStatusResponse = await getMusicUserTokenStatus();
       
       if (response.authorized && response.musicUserToken) {
@@ -49,7 +55,7 @@ export function useMusicUserToken(): TokenManagement {
     } finally {
       setIsLoading(false);
     }
-  }, [contextToken]);
+  }, [contextToken, isAuthorized, musicUserToken]);
 
   // Initial status check
   useEffect(() => {
@@ -115,6 +121,7 @@ export function useMusicUserToken(): TokenManagement {
 
   return {
     isAuthorized,
+    isLoading, // Export isLoading
     musicUserToken,
     tokenInfo: {
       timestamp,
