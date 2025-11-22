@@ -37,6 +37,7 @@ export interface SpotifyRefreshTokenResponse {
   token_type: string;
   scope: string;
   expires_in: number;
+  refresh_token?: string;
 }
 
 /**
@@ -263,8 +264,8 @@ export const refreshSpotifyAccessToken =
 
       const tokenData: SpotifyRefreshTokenResponse = response.data;
 
-      // Store the new access token
-      await storeSpotifyTokens(tokenData.access_token);
+      // Store the new access token and refresh token (if provided by Spotify)
+      await storeSpotifyTokens(tokenData.access_token, tokenData.refresh_token);
 
       logger.info('Successfully refreshed Spotify access token');
       return tokenData;
