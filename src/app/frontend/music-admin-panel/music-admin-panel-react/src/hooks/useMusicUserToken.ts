@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useAppleMusic } from '../contexts/AppleMusicContext';
 import { getMusicUserTokenStatus, type MusicUserTokenStatusResponse } from '../utils/api';
 
@@ -23,6 +23,7 @@ export function useMusicUserToken(): TokenManagement {
   const [isAuthorized, setIsAuthorized] = useState(false);
   const [musicUserToken, setMusicUserToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const prevContextAuthorized = useRef(contextAuthorized);
 
   // Check status from Parameter Store
   const checkStatus = useCallback(async () => {
@@ -57,16 +58,21 @@ export function useMusicUserToken(): TokenManagement {
 
   // Sync with context when it changes (e.g., after authorization)
   useEffect(() => {
+    // If context is authorized, always sync
     if (contextAuthorized && contextToken) {
       setIsAuthorized(true);
       setMusicUserToken(contextToken);
-    } else if (!contextAuthorized && !contextToken) {
+    } 
+    // Only wipe local state if context explicitly transitioned from authorized -> not authorized (logout)
+    else if (prevContextAuthorized.current && !contextAuthorized) {
       // Only update if we're not loading to avoid race conditions
       if (!isLoading) {
         setIsAuthorized(false);
         setMusicUserToken(null);
       }
     }
+    
+    prevContextAuthorized.current = contextAuthorized;
   }, [contextAuthorized, contextToken, isLoading]);
 
   useEffect(() => {
