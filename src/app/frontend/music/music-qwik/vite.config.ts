@@ -8,9 +8,11 @@ export default defineConfig({
       csr: true,
     }),
   ],
-  base: 'https://music.mariolopez.org/qwik',
+  // Deployed under https://music.mariolopez.org/qwik/
+  // Vite requires base to start and end with `/`.
+  base: '/qwik/',
   build: {
     minify: 'esbuild',
     reportCompressedSize: true
-  }
+  },
 })
