@@ -1,8 +1,8 @@
 module.exports = {
   testEnvironment: 'node',
-  preset: 'ts-jest',
+  coverageProvider: 'v8',
   transform: {
-    '^.+\.ts$': 'ts-jest'
+    '^.+\\.ts$': ['@swc/jest']
   },
   testMatch: ['**/*.test.ts'],
   collectCoverageFrom: [
