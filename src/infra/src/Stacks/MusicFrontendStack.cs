@@ -132,7 +132,7 @@ public sealed class MusicFrontendStack : Stack
         // Deploy Next static site assets
         var deployNextSite = new BucketDeployment(this, "Music-DeployNextSite", new BucketDeploymentProps
         {
-            Sources = [Source.Asset("../app/frontend/music/music-next/dist")],
+            Sources = [Source.Asset("../app/frontend/music/music-next/out")],
             DestinationBucket = siteBucket,
             DestinationKeyPrefix = "next",
             MemoryLimit = 256

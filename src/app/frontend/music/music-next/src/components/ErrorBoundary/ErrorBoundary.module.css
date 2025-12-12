@@ -1,0 +1,101 @@
+.errorBoundary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 2rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.errorBoundaryContent {
+  max-width: 600px;
+  width: 100%;
+  text-align: center;
+}
+
+.errorBoundaryTitle {
+  font-size: 2rem;
+  font-weight: bold;
+  margin-bottom: 1rem;
+}
+
+.errorBoundaryMessage {
+  font-size: 1.125rem;
+  margin-bottom: 2rem;
+  opacity: 0.9;
+}
+
+.errorBoundaryDetails {
+  margin: 2rem 0;
+  text-align: left;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
+  padding: 1rem;
+}
+
+.errorBoundaryDetails summary {
+  cursor: pointer;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  padding: 0.5rem;
+}
+
+.errorBoundaryStack {
+  font-size: 0.875rem;
+  font-family: monospace;
+  white-space: pre-wrap;
+  word-break: break-all;
+  overflow-x: auto;
+  padding: 1rem;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 4px;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.errorBoundaryButton {
+  background: white;
+  color: #667eea;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  border-radius: 8px;
+  cursor: pointer;
+  margin: 0.5rem;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.errorBoundaryButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.errorBoundaryButton:active {
+  transform: translateY(0);
+}
+
+.errorBoundaryButtonSecondary {
+  background: transparent;
+  color: white;
+  border: 2px solid white;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  border-radius: 8px;
+  cursor: pointer;
+  margin: 0.5rem;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.errorBoundaryButtonSecondary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.errorBoundaryButtonSecondary:active {
+  transform: translateY(0);
+}
+

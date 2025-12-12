@@ -1,0 +1,77 @@
+import React, { memo, useCallback, useMemo, useState } from "react";
+import { AppleMusicSong } from "../../../models/AppleMusicSong";
+import { getProcessedArtworkUrl } from "../../../utils/imageProcessing";
+import { openUrlInNewTab } from "../../../utils/navigation";
+import { SourceIndicator } from "../../SourceIndicator/SourceIndicator";
+import styles from "../styles/SongItem.module.css";
+
+interface SongItemProps {
+  song: AppleMusicSong;
+  index: number;
+  rowName: string;
+}
+
+/**
+ * Individual song item component used in carousels
+ */
+const SongItem: React.FC<SongItemProps> = ({ song, index, rowName }) => {
+  // State to song if image loading has failed
+  const [imageError, setImageError] = useState(false);
+
+  // Memoize the processed artwork URL to avoid recalculating on every render
+  const artworkUrl = useMemo(
+    () => getProcessedArtworkUrl(song.artworkUrl),
+    [song.artworkUrl],
+  );
+
+  // Handle image loading errors - no dependencies as it only sets state
+  const handleImageError = useCallback(() => {
+    setImageError(true);
+  }, []);
+
+  const handleAlbumArtClick = useCallback(() => {
+    openUrlInNewTab(song.url);
+  }, [song.url]);
+
+  return (
+    <div key={`${rowName}-${song.id}-${index}`}>
+      <div className={styles.song}>
+        <div className={styles.albumArtContainer}>
+          <img
+            src={imageError ? getProcessedArtworkUrl(undefined) : artworkUrl}
+            alt={`${song.name} Album Cover`}
+            title={
+              song.url
+                ? `Click to open ${song.name} in Apple Music`
+                : `${song.name} by ${song.artistName}`
+            }
+            onError={handleImageError}
+            onClick={handleAlbumArtClick}
+            style={{ cursor: song.url ? "pointer" : "default" }}
+          />
+        </div>
+        <div className={styles.songTextContainer}>
+          <div className={styles.songTitleContainer}>
+            <SourceIndicator source={song.source} size="small" url={song.url} />
+            <h3 title={song.name}>{song.name}</h3>
+          </div>
+          <p title={`${song.artistName} - ${song.albumName}`}>
+            {song.artistName} - {song.albumName}
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// Custom comparison function for memo
+// Only re-render if song ID changes or index changes
+const arePropsEqual = (prevProps: SongItemProps, nextProps: SongItemProps) => {
+  return (
+    prevProps.song.id === nextProps.song.id &&
+    prevProps.index === nextProps.index &&
+    prevProps.rowName === nextProps.rowName
+  );
+};
+
+export default memo(SongItem, arePropsEqual);

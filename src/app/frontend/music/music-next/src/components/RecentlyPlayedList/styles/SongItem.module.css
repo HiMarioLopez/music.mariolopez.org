@@ -1,0 +1,76 @@
+/* Individual song styles */
+.song {
+  display: flex;
+  align-items: center;
+  padding: var(--padding-medium);
+  border-radius: var(--border-radius-medium);
+  background: var(--track-bg-color);
+  height: auto; /* Allow natural height */
+  transition: transform 0.2s ease-in-out, background 0.2s ease;
+  margin: 0 8px; /* Reduced horizontal margin for less space between song pairs */
+  width: 280px !important; /* Fixed width for consistent sizing */
+}
+
+.song:hover {
+  background: var(--track-bg-color-hover);
+  transform: translateY(-2px); /* Slight lift effect on hover */
+}
+
+/* Album art container */
+.albumArtContainer {
+  width: 50px;
+  height: 50px;
+  margin-right: var(--margin-small);
+  flex-shrink: 0; /* Prevent container from shrinking */
+}
+
+/* Style for the images to ensure consistent sizing */
+.song img {
+  width: 100%;
+  height: 100%;
+  border-radius: 5px;
+  object-fit: cover;
+  display: block;
+}
+
+/* Text container styling */
+.songTextContainer {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  overflow: hidden;
+  max-width: calc(100% - 60px); /* Account for image width and margin */
+  width: 100%; /* Take up available space */
+}
+
+.songTitleContainer {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 2px;
+}
+
+.songTextContainer h3,
+.songTextContainer p {
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  width: 100%; /* Ensure text takes full width of container */
+}
+
+/* Apply specific max-width for the artist-album line which tends to be longer */
+.songTextContainer p {
+  max-width: 100%;
+  font-size: 0.9em; /* Slightly smaller text for artist/album */
+}
+
+@media (max-width: 680px) {
+  .song {
+      width: 220px !important; /* Smaller width on mobile */
+  }
+
+  .songTitleContainer {
+    gap: 4px; /* Smaller gap on mobile */
+  }
+}

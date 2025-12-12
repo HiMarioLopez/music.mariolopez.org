@@ -1,35 +1,28 @@
 {
   "name": "music-next",
-  "description": "A simple app to track my music habits and send me recommendations. Built with Next.",
-  "homepage": "https://music.mariolopez.org/next",
-  "version": "0.2.0",
-  "author": {
-    "name": "Mario Lopez Martinez",
-    "email": "mario@lopez.fyi"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/HiMarioLopez/music.mariolopez.org/tree/main/src/app/frontend/music/music-next"
-  },
-  "license": "GPL-3.0-only",
-  "private": false,
+  "version": "0.1.0",
+  "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "eslint"
   },
   "dependencies": {
-    "react": "^18",
-    "react-dom": "^18",
-    "next": "14.1.0"
+    "classix": "^2.2.6",
+    "framer-motion": "^12.23.26",
+    "next": "16.0.10",
+    "react": "19.2.3",
+    "react-dom": "19.2.3"
   },
   "devDependencies": {
-    "typescript": "^5",
-    "@types/node": "^20",
-    "@types/react": "^18",
-    "@types/react-dom": "^18",
-    "eslint": "^8",
-    "eslint-config-next": "14.1.0"
+    "@tailwindcss/postcss": "^4.1.18",
+    "@types/node": "^25.0.0",
+    "@types/react": "^19.2.7",
+    "@types/react-dom": "^19.2.3",
+    "eslint": "^9.39.1",
+    "eslint-config-next": "16.0.10",
+    "tailwindcss": "^4.1.18",
+    "typescript": "^5.9.3"
   }
 }

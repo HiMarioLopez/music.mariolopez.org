@@ -23,6 +23,7 @@
     "update-build-deploy:showcase": "pnpm run-s update-and-build:showcase deploy:showcase",
     "update-build-deploy:showcase-react": "pnpm run-s update:music-react build:music-react deploy:showcase",
     "update-build-deploy:showcase-angular": "pnpm run-s update:music-angular build:music-angular deploy:showcase",
+    "update-build-deploy:showcase-next": "pnpm run-s update:music-next build:music-next deploy:showcase",
     "update-and-build:showcase": "pnpm run-s update:showcase build:showcase",
     "deploy:showcase": "cd src/infra && cdk deploy MusicFrontendStack",
     "update:showcase": "pnpm run-p update:music-*",

@@ -21,7 +21,7 @@ const siteVersions = [
   // '/svelte',     // Under construction
   // '/vue',        // Under construction
   // '/preact',     // Under construction
-  // '/next',       // Under construction
+  '/next',
   '/angular',
 ];
 

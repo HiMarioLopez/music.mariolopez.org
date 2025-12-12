@@ -1,4 +1,4 @@
-import { writeFileSync } from 'fs';
+import { writeFileSync, mkdirSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 
@@ -12,6 +12,7 @@ export const BUILD_TIME = '${buildTime}';
 `;
 
 const outputPath = join(__dirname, '..', 'src', 'generated', 'build-time.ts');
+mkdirSync(dirname(outputPath), { recursive: true });
 writeFileSync(outputPath, content, 'utf-8');
 
 console.log(`Generated build time: ${buildTime}`);

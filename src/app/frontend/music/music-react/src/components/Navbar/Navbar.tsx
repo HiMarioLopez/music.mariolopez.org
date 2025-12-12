@@ -104,8 +104,6 @@ const Navbar: React.FC = () => {
         href="https://music.mariolopez.org/angular"
         target="_self"
         rel="alternate"
-        tabIndex={-1}
-        aria-disabled="true"
       >
         <img src={angularLogo} alt="Angular" />
       </a>
@@ -113,9 +111,6 @@ const Navbar: React.FC = () => {
         href="https://music.mariolopez.org/next"
         target="_self"
         rel="alternate"
-        className={styles.underConstruction}
-        tabIndex={-1}
-        aria-disabled="true"
       >
         <img src={nextLogo} alt="Next" />
       </a>
