@@ -34,7 +34,7 @@
   }
 </script>
 
-<div class="app-bg" />
+<div class="app-bg"></div>
 <div class="app">
   <Navbar />
   <div class="main-content">
