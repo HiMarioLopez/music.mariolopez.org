@@ -52,7 +52,7 @@ public class NodejsLambdaFunction : Construct
     // Create the Lambda function
     Function = new Function(this, id, new FunctionProps
     {
-      Runtime = Runtime.NODEJS_22_X,
+      Runtime = Runtime.NODEJS_24_X,
       Handler = props.Handler,
       Code = props.Code,
       Role = Role,
