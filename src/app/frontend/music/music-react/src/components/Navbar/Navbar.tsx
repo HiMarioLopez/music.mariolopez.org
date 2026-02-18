@@ -1,4 +1,4 @@
-import React, { memo } from "react";
+import { memo, type FC } from "react";
 import angularLogo from "../../assets/angular.webp";
 import litLogo from "../../assets/lit.svg";
 import nextLogo from "../../assets/next.svg";
@@ -12,7 +12,7 @@ import tsLogo from "../../assets/typescript.svg";
 import vueLogo from "../../assets/vue.svg";
 import styles from "./Navbar.module.css";
 
-const Navbar: React.FC = () => {
+const Navbar: FC = () => {
   return (
     <nav className={styles.navbar}>
       <a href="https://music.mariolopez.org" target="_self" rel="alternate">
@@ -84,9 +84,7 @@ const Navbar: React.FC = () => {
         href="https://music.mariolopez.org/vue"
         target="_self"
         rel="alternate"
-        className={styles.underConstruction}
-        tabIndex={-1}
-        aria-disabled="true"
+        title="Vue implementation of the Music site"
       >
         <img src={vueLogo} alt="Vue" />
       </a>
