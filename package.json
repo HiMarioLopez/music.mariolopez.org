@@ -51,11 +51,11 @@
     "------------Frontend (Music Start Scripts)------------": "--------------------------------",
     "dev:music-react": "cd src/app/frontend/music/music-react && pnpm dev",
     "------------Frontend (Admin Panel)------------": "--------------------------------",
-    "update-build-deploy:admin": "pnpm run-s update-and-build:admin deploy:admin",
-    "update-and-build:admin": "pnpm run-s update:admin build:admin",
+    "update-build-deploy:admin": "run-s update-and-build:admin deploy:admin",
+    "update-and-build:admin": "run-s update:admin build:admin",
     "deploy:admin": "cd src/infra && cdk deploy AdminPanelFrontendStack",
-    "update:admin": "cd src/app/frontend/music-admin-panel/music-admin-panel-react && pnpm install",
-    "build:admin": "cd src/app/frontend/music-admin-panel/music-admin-panel-react && pnpm build",
+    "update:admin": "cd src/app/frontend/music-admin-panel/music-admin-panel-react && bun install",
+    "build:admin": "cd src/app/frontend/music-admin-panel/music-admin-panel-react && bun run build",
     "------------Backend------------": "--------------------------------",
     "update-build-deploy:backend": "pnpm run-s update:backend build:backend && cd src/infra && cdk deploy --all",
     "update-and-build:backend": "pnpm run-s update:backend build:backend",
@@ -63,9 +63,10 @@
     "build:backend": "cd src/app/backend && pnpm build"
   },
   "devDependencies": {
-    "@commitlint/cli": "^20.2.0",
-    "@commitlint/config-conventional": "^20.2.0",
+    "@commitlint/cli": "^20.4.1",
+    "@commitlint/config-conventional": "^20.4.1",
     "husky": "^9.1.7",
     "npm-run-all2": "^8.0.4"
-  }
+  },
+  "packageManager": "pnpm@10.30.0+sha512.2b5753de015d480eeb88f5b5b61e0051f05b4301808a82ec8b840c9d2adf7748eb352c83f5c1593ca703ff1017295bc3fdd3119abb9686efc96b9fcb18200937"
 }
