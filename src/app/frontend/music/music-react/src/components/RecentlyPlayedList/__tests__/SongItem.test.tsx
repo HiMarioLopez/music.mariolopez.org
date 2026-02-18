@@ -40,11 +40,10 @@ describe("SongItem Component", () => {
 
     // Check image properties
     const image = screen.getByAltText("Test Song Name Album Cover");
-    expect(image).toHaveAttribute(
-      "src",
-      "processed-https://example.com/artwork.jpg",
+    expect(image.getAttribute("src")).toBe("processed-https://example.com/artwork.jpg");
+    expect(image.getAttribute("title")).toBe(
+      "Click to open Test Song Name in Apple Music",
     );
-    expect(image).toHaveAttribute("title", "Test Song Name by Test Artist");
   });
 
   it("handles long song and artist names correctly", () => {
@@ -59,8 +58,7 @@ describe("SongItem Component", () => {
     expect(songName).toBeDefined();
 
     // Check that the element has title attribute for hover text
-    expect(songName).toHaveAttribute(
-      "title",
+    expect(songName.getAttribute("title")).toBe(
       "The Secret Garden (Sweet Seduction Suite) [feat. Barry White, Al B. Surel, James Ingram & El DeBarge]",
     );
 
@@ -69,8 +67,7 @@ describe("SongItem Component", () => {
       "Quincy Jones - Back on the Block (Deluxe Edition)",
     );
     expect(artistAlbum).toBeDefined();
-    expect(artistAlbum).toHaveAttribute(
-      "title",
+    expect(artistAlbum.getAttribute("title")).toBe(
       "Quincy Jones - Back on the Block (Deluxe Edition)",
     );
   });

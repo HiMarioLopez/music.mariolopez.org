@@ -48,7 +48,7 @@ describe("SkeletonLoader Component", () => {
     const skeletonElements = container.querySelectorAll(".skeletonLoader");
     skeletonElements.forEach((element) => {
       // Check that the element has the proper class
-      expect(element).toHaveClass("skeletonLoader");
+      expect(element.classList.contains("skeletonLoader")).toBe(true);
     });
   });
 });

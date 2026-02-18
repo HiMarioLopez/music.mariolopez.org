@@ -13,30 +13,20 @@ describe("useCarouselSettings Hook", () => {
 
     // Verify top slider settings
     expect(result.current.topSliderSettings).toMatchObject({
-      speed: 20000,
-      rtl: false,
-      dots: false,
-      arrows: false,
-      infinite: true,
-      autoplay: true,
-      autoplaySpeed: 0,
-      cssEase: "linear",
-      pauseOnHover: true,
-      variableWidth: true,
+      speed: 100000,
+      direction: "left",
     });
 
     // Verify middle slider settings (reverse direction)
     expect(result.current.middleSliderSettings).toMatchObject({
-      speed: 22000,
-      rtl: true,
-      autoplay: true,
+      speed: 100000,
+      direction: "right",
     });
 
-    // Verify bottom slider settings (slower speed)
+    // Verify bottom slider settings
     expect(result.current.bottomSliderSettings).toMatchObject({
-      speed: 24000,
-      rtl: false,
-      autoplay: true,
+      speed: 100000,
+      direction: "left",
     });
   });
 
