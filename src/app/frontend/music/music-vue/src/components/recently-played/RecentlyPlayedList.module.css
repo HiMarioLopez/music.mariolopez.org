@@ -1,0 +1,22 @@
+.recentlyPlayedListComponent {
+  align-items: normal;
+  flex-direction: column;
+  overflow-x: hidden;
+  position: relative;
+}
+
+.recentlyPlayedListComponent h1 {
+  padding-left: var(--padding-large);
+  padding-right: var(--padding-large);
+  width: 100%;
+  text-align: left;
+  margin: 0 0 var(--margin-medium);
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+
+@media (max-width: 680px) {
+  .recentlyPlayedListComponent {
+    width: var(--width-mobile);
+  }
+}

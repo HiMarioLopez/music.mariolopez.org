@@ -1,0 +1,85 @@
+.skeletonLoader {
+  background: var(--track-bg-color);
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--border-radius-small);
+}
+
+.skeletonLoader::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.1) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  animation: shimmer 1.5s infinite;
+}
+
+.recentlyPlayedSkeletonContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+}
+
+.recentlyPlayedSkeletonRow {
+  display: flex;
+  gap: var(--margin-medium);
+  width: 100%;
+}
+
+.recentlyPlayedSkeletonSong {
+  display: flex;
+  align-items: center;
+  padding: var(--padding-medium);
+  background: var(--track-bg-color);
+  height: auto;
+  border-radius: var(--border-radius-medium);
+  min-width: 280px;
+  flex-shrink: 0;
+}
+
+.recentlyPlayedSkeletonImg {
+  width: 50px;
+  height: 50px;
+  border-radius: 5px;
+  margin-right: var(--margin-small);
+  flex-shrink: 0;
+}
+
+.recentlyPlayedSkeletonText {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  flex-grow: 1;
+  gap: 8px;
+}
+
+.recentlyPlayedSkeletonTitle {
+  height: 1rem;
+  width: 80%;
+}
+
+.recentlyPlayedSkeletonSubtitle {
+  height: 0.9rem;
+  width: 90%;
+}
+
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+@media (max-width: 680px) {
+  .recentlyPlayedSkeletonSong {
+    min-width: 220px;
+  }
+}

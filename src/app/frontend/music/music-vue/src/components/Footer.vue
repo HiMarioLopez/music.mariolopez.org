@@ -1,66 +1,44 @@
 <template>
-    <footer>
-        <div class="footer-component-link-container">
-            <a href="https://github.com/HiMarioLopez/music.mariolopez.org/tree/main/src/app/frontend/music/music-vue" target="_blank"
-                rel="noopener noreferrer">Site Source</a>
-            <a href="https://music.mariolopez.org/" target="_blank" rel="noopener noreferrer">Randomize</a>
-            <a href="https://vuejs.org/" target="_blank" rel="noopener noreferrer">Vue</a>
-        </div>
-        <div class="footer-component-copyright-container">© 2024 Mario Lopez</div>
-    </footer>
+  <footer :class="styles.footer">
+    <div :class="styles.footerComponentLinkContainer">
+      <a
+        href="https://github.com/HiMarioLopez/music.mariolopez.org/tree/main/src/app/frontend/music/music-vue"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        Site Source
+      </a>
+      <a
+        href="https://music.mariolopez.org/"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        Randomize
+      </a>
+      <a href="https://vuejs.org/" target="_blank" rel="noopener noreferrer">
+        Vue
+      </a>
+    </div>
+    <div :class="styles.footerComponentCopyrightContainer">
+      <a href="https://mariolopez.org" target="_blank" rel="noopener noreferrer">
+        © {{ currentYear }} Mario Lopez
+      </a>
+    </div>
+    <div :class="styles.footerBuildInfo">Build: {{ buildTime }}</div>
+  </footer>
 </template>
-  
-<script lang="ts">
-export default {
-    name: 'Footer'
-};
+
+<script setup lang="ts">
+import { computed } from "vue";
+import { formatBuildTime } from "../utils/formatters";
+import styles from "./Footer.module.css";
+
+const currentYear = new Date().getFullYear();
+
+const buildTime = computed(() => {
+  return typeof __BUILD_TIME__ === "string"
+    ? formatBuildTime(__BUILD_TIME__)
+    : "Unknown";
+});
 </script>
-  
-<style>
-footer {
-    position: absolute;
-    bottom: 0;
-    width: 100%;
-    height: var(--footer-height-desktop);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: var(--padding-medium) 0;
-    background-color: var(--navbar-bg-color);
-    color: var(--font-color);
-}
-
-footer a {
-    margin: 0 var(--margin-medium);
-    color: var(--font-color);
-    text-decoration: none;
-}
-
-footer a:hover {
-    text-decoration: underline;
-}
-
-footer .footer-component-copyright-container {
-    margin: 0 var(--margin-medium);
-}
-
-@media (max-height: 1000px) and (max-width: 680px),
-(max-width: 1299px) and (max-height: 1080px),
-(max-width: 680px) {
-    footer {
-        flex-direction: column;
-        height: auto;
-        position: relative;
-        font-size: small;
-    }
-
-    footer .footer-component-link-container {
-        margin: var(--margin-small) 0;
-    }
-
-    footer .footer-component-copyright-container {
-        margin: var(--margin-small) 0;
-    }
-}
-</style>
   

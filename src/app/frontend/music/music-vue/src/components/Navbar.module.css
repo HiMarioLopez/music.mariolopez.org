@@ -1,0 +1,80 @@
+.navbar {
+  display: flex;
+  justify-content: center;
+  padding: var(--padding-medium);
+  background: var(--navbar-bg-color);
+  color: white;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: var(--navbar-height-desktop);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+  z-index: 1000;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.navbar::after {
+  display: none;
+}
+
+.navbar img {
+  width: var(--navbar-height-desktop);
+  height: var(--navbar-height-desktop);
+  margin: 0 var(--margin-medium);
+  transition: opacity 0.3s ease;
+}
+
+.focusedIcon {
+  opacity: 1;
+}
+
+.navbar img:not(.focusedIcon) {
+  opacity: 0.25;
+}
+
+.navbar img:hover {
+  opacity: 1;
+}
+
+.underConstruction {
+  position: relative;
+  display: inline-block;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.underConstruction img {
+  filter: grayscale(100%);
+  opacity: 0.4;
+}
+
+.underConstruction:hover img {
+  filter: grayscale(70%);
+  opacity: 0.6;
+}
+
+@media (max-width: 680px) {
+  .navbar {
+    height: var(--navbar-height-mobile);
+  }
+
+  .navbar img {
+    width: var(--navbar-height-mobile);
+    height: var(--navbar-height-mobile);
+    margin: 0 7px;
+  }
+
+  .navbar a:last-child img {
+    margin-right: var(--margin-large);
+  }
+}
+
+@media (max-width: 510px) {
+  .navbar {
+    justify-content: flex-start;
+  }
+}

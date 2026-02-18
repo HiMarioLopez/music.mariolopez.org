@@ -1,0 +1,50 @@
+.indicator {
+  position: relative;
+  border-radius: 50%;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(8px);
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+  z-index: 10;
+  flex-shrink: 0;
+}
+
+.indicator:hover {
+  transform: scale(1.1);
+}
+
+.small {
+  width: 14px;
+  height: 14px;
+  padding: 2px;
+}
+
+.large {
+  width: 26px;
+  height: 26px;
+  padding: 4px;
+}
+
+.apple img,
+.spotify img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+@media (max-width: 680px) {
+  .small {
+    width: 12px;
+    height: 12px;
+    padding: 1.5px;
+  }
+
+  .large {
+    width: 22px;
+    height: 22px;
+    padding: 3.5px;
+  }
+}

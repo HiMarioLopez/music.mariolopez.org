@@ -1,0 +1,63 @@
+.recentlyPlayedListRow {
+  margin-bottom: 12px;
+  height: auto;
+  width: 100%;
+  overflow: hidden;
+}
+
+.recentlyPlayedListRow:last-child {
+  margin-bottom: 0;
+}
+
+.carouselContainer {
+  width: 100%;
+  overflow: hidden;
+  position: relative;
+}
+
+.carouselTrack {
+  display: flex;
+  align-items: center;
+  will-change: transform;
+  width: fit-content;
+  --carousel-content-width: 0px;
+  --carousel-duration: 60s;
+  --carousel-direction: normal;
+}
+
+@keyframes scrollLeft {
+  from {
+    transform: translateX(0);
+  }
+
+  to {
+    transform: translateX(calc(var(--carousel-content-width) * -1));
+  }
+}
+
+@keyframes scrollRight {
+  from {
+    transform: translateX(calc(var(--carousel-content-width) * -1));
+  }
+
+  to {
+    transform: translateX(0);
+  }
+}
+
+.carouselTrackLeft {
+  animation: scrollLeft var(--carousel-duration) linear infinite;
+}
+
+.carouselTrackRight {
+  animation: scrollRight var(--carousel-duration) linear infinite;
+}
+
+.carouselTrackPaused {
+  animation-play-state: paused;
+}
+
+.carouselItem {
+  flex-shrink: 0;
+  height: auto;
+}
