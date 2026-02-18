@@ -19,7 +19,7 @@ const siteVersions = [
   // '/qwik',       // Under construction
   // '/solid',      // Under construction
   // '/svelte',     // Under construction
-  // '/vue',        // Under construction
+  '/vue',
   // '/preact',     // Under construction
   '/next',
   '/angular',
