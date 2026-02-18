@@ -94,9 +94,7 @@ const Navbar: FC = () => {
         href="https://music.mariolopez.org/preact"
         target="_self"
         rel="alternate"
-        className={styles.underConstruction}
-        tabIndex={-1}
-        aria-disabled="true"
+        title="Preact implementation of the Music site"
       >
         <img src={preactLogo} alt="Preact" />
       </a>

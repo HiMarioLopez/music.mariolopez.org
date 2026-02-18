@@ -1,0 +1,174 @@
+.animated-background-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  height: 100%;
+  min-height: 100vh;
+  z-index: -1;
+  overflow: hidden;
+  background: linear-gradient(
+    135deg,
+    #0f172a 0%,
+    #1f2937 35%,
+    #2f495e 70%,
+    #42b883 100%
+  );
+}
+
+.animated-background-blobs-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  filter: blur(80px);
+  opacity: 0.85;
+  will-change: transform;
+}
+
+.animated-background-blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(50px);
+  will-change: transform;
+  pointer-events: none;
+  transform-origin: center;
+  animation: blobMove var(--blob-duration) ease-in-out infinite;
+  animation-delay: var(--blob-delay);
+}
+
+@keyframes blobMove {
+  0% {
+    transform: translate(var(--blob-x-start), var(--blob-y-start)) scale(1);
+  }
+
+  35% {
+    transform: translate(var(--blob-x-mid), var(--blob-y-mid)) scale(1.3);
+  }
+
+  70% {
+    transform: translate(var(--blob-x-end), var(--blob-y-end)) scale(0.85);
+  }
+
+  100% {
+    transform: translate(var(--blob-x-start), var(--blob-y-start)) scale(1);
+  }
+}
+
+.animated-background-gradient-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-size: 250% 250%;
+  opacity: 0.5;
+  mix-blend-mode: overlay;
+  pointer-events: none;
+  will-change: background-position;
+  animation: overlayMove 25s ease-in-out infinite;
+}
+
+@keyframes overlayMove {
+  0% {
+    background-position: 0% 0%;
+  }
+
+  20% {
+    background-position: 100% 100%;
+  }
+
+  40% {
+    background-position: 50% 100%;
+  }
+
+  60% {
+    background-position: 100% 0%;
+  }
+
+  80% {
+    background-position: 0% 50%;
+  }
+
+  100% {
+    background-position: 0% 0%;
+  }
+}
+
+.animated-background-mesh-gradient {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.animated-background-mesh-point {
+  position: absolute;
+  width: 500px;
+  height: 500px;
+  border-radius: 50%;
+  filter: blur(100px);
+  will-change: transform, opacity;
+  animation: meshMove var(--mesh-duration) ease-in-out infinite;
+  animation-delay: var(--mesh-delay);
+}
+
+@keyframes meshMove {
+  0% {
+    transform: translate(var(--mesh-x-start), var(--mesh-y-start)) scale(1);
+    opacity: 0.4;
+  }
+
+  33% {
+    transform: translate(var(--mesh-x-end), var(--mesh-y-end)) scale(1.8);
+    opacity: 0.8;
+  }
+
+  66% {
+    transform: translate(var(--mesh-x-start), var(--mesh-y-end)) scale(0.7);
+    opacity: 0.3;
+  }
+
+  100% {
+    transform: translate(var(--mesh-x-start), var(--mesh-y-start)) scale(1);
+    opacity: 0.4;
+  }
+}
+
+@media (max-width: 767px) {
+  .animated-background-blobs-container {
+    filter: blur(60px);
+    opacity: 0.75;
+  }
+
+  .animated-background-blob {
+    filter: blur(40px);
+  }
+
+  .animated-background-mesh-point {
+    width: 300px;
+    height: 300px;
+    filter: blur(70px);
+  }
+
+  .animated-background-gradient-overlay {
+    opacity: 0.4;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animated-background-blob,
+  .animated-background-mesh-point,
+  .animated-background-gradient-overlay {
+    animation: none;
+  }
+
+  .animated-background-blobs-container {
+    filter: blur(40px);
+  }
+}

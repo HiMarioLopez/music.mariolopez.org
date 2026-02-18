@@ -1,64 +1,33 @@
-import { useState } from 'preact/hooks';
-import './app.css';
-import Navbar from './components/Navbar';
-import NowPlaying from './components/NowPlaying';
-import RecentlyPlayedList from './components/RecentlyPlayedList';
-import RecommendationForm from './components/RecommendationForm';
-import RecommendationList from './components/RecommendationList';
-import { Song } from './types/song';
-import placeholderAlbumCover from './assets/50.png';
-import Footer from './components/Footer';
+import "./app.css";
+import AnimatedBackground from "./components/AnimatedBackground";
+import Footer from "./components/Footer";
+import Navbar from "./components/Navbar";
+import NowPlaying from "./components/NowPlaying";
+import RecentlyPlayedList from "./components/RecentlyPlayedList";
+import { useMusicStore } from "./hooks/useMusicStore";
 
 export function App() {
-  // State to hold the list of recommendations with initial mock data
-  const [recommendations, setRecommendations] = useState<Song[]>([
-    {
-      songTitle: 'Song One',
-      artistName: 'Artist One',
-      albumName: 'Album One',
-      albumCoverUrl: placeholderAlbumCover
-    },
-    {
-      songTitle: 'Song Two',
-      artistName: 'Artist Two',
-      albumName: 'Album Two',
-      albumCoverUrl: placeholderAlbumCover
-    },
-  ]);
+  const { nowPlaying, recentlyPlayed, loading, error, gradientColors } = useMusicStore();
 
-  // Function to handle new recommendations
-  const handleNewRecommendation = (songTitle: string) => {
-    // Mock additional data
-    const newRecommendation = {
-      songTitle: songTitle,
-      artistName: 'Mock Artist',
-      albumName: 'Mock Album',
-      albumCoverUrl: placeholderAlbumCover
-    };
-
-    setRecommendations(prevRecommendations => [...prevRecommendations, newRecommendation]);
-  };
   return (
     <>
-      <div className="app-bg" />
+      <AnimatedBackground colors={gradientColors} />
       <div className="app">
         <Navbar />
-        <div className="main-content">
-          <div className="left-column">
-            <div className="now-playing-container">
-              <NowPlaying />
+        <main className="main-content" role="main">
+          <div className="center-column">
+            <div className="now-playing-container styled-container">
+              <NowPlaying nowPlaying={nowPlaying} loading={loading} error={error} />
             </div>
-            <RecentlyPlayedList />
-          </div>
-          <div className="right-column">
-            <div className="recommendation-form-container">
-              <RecommendationForm onRecommend={handleNewRecommendation} />
-            </div>
-            <div className="recommendations-list-container">
-              <RecommendationList recommendations={recommendations} />
+            <div className="recently-played-container styled-container">
+              <RecentlyPlayedList
+                recentlyPlayed={recentlyPlayed}
+                loading={loading}
+                error={error}
+              />
             </div>
           </div>
-        </div>
+        </main>
         <Footer />
       </div>
     </>

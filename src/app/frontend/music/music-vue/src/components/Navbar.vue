@@ -74,12 +74,10 @@
       <img :class="styles.focusedIcon" :src="vueLogo" alt="Vue" />
     </a>
     <a
-      :class="styles.underConstruction"
       href="https://music.mariolopez.org/preact"
       target="_self"
       rel="alternate"
-      tabindex="-1"
-      aria-disabled="true"
+      title="Preact implementation of the Music site"
     >
       <img :src="preactLogo" alt="Preact" />
     </a>

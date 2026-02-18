@@ -20,7 +20,7 @@ const siteVersions = [
   // '/solid',      // Under construction
   // '/svelte',     // Under construction
   '/vue',
-  // '/preact',     // Under construction
+  '/preact',
   '/next',
   '/angular',
 ];

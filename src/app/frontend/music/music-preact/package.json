@@ -2,7 +2,7 @@
   "name": "music-preact",
   "description": "A simple app to track my music habits and send me recommendations. Built with Preact.",
   "homepage": "https://music.mariolopez.org/preact",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "author": {
     "name": "Mario Lopez Martinez",
     "email": "mario@lopez.fyi"
@@ -14,17 +14,22 @@
   "license": "GPL-3.0-only",
   "private": false,
   "type": "module",
+  "packageManager": "bun@1.3.8",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
+    "lint": "biome lint .",
+    "lint:fix": "biome lint --write .",
+    "format": "biome format --write .",
     "preview": "vite preview"
   },
   "dependencies": {
     "preact": "^10.28.0"
   },
   "devDependencies": {
+    "@biomejs/biome": "^2.4.2",
     "@preact/preset-vite": "^2.10.2",
     "typescript": "^5.9.3",
-    "vite": "^7.2.7"
+    "vite": "^7.3.1"
   }
 }
