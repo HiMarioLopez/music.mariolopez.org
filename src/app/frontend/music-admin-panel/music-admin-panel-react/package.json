@@ -7,35 +7,31 @@
     "name": "Mario Lopez Martinez",
     "email": "mario@lopez.fyi"
   },
+  "packageManager": "bun@1.3.8",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
-    "lint": "eslint .",
+    "lint": "biome lint .",
     "preview": "vite preview"
   },
   "dependencies": {
-    "@aws-amplify/auth": "^6.17.1",
-    "@aws-amplify/core": "^6.15.0",
-    "@aws-amplify/ui-react": "^6.13.2",
-    "@types/musickit-js": "^1.0.10",
-    "aws-amplify": "^6.15.9",
-    "axios": "^1.13.2",
-    "react": "^19.2.3",
-    "react-dom": "^19.2.3"
+    "@aws-amplify/auth": "^6.19.1",
+    "@aws-amplify/core": "^6.16.1",
+    "@aws-amplify/ui-react": "^6.15.0",
+    "@types/musickit-js": "^1.0.11",
+    "aws-amplify": "^6.16.2",
+    "axios": "^1.13.5",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4"
   },
   "devDependencies": {
-    "@eslint/js": "^9.39.1",
-    "@types/react": "^19.2.7",
+    "@biomejs/biome": "^2.4.2",
+    "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
-    "@vitejs/plugin-react": "^5.1.2",
-    "eslint": "^9.39.1",
-    "eslint-plugin-react-hooks": "^7.0.1",
-    "eslint-plugin-react-refresh": "^0.4.24",
-    "globals": "^16.5.0",
+    "@vitejs/plugin-react": "^5.1.4",
     "rollup-plugin-visualizer": "^6.0.5",
     "typescript": "~5.9.3",
-    "typescript-eslint": "^8.49.0",
-    "vite": "^7.2.7"
+    "vite": "^7.3.1"
   }
 }
