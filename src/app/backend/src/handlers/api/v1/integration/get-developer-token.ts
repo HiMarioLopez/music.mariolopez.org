@@ -24,13 +24,13 @@ export const handler = wrapHandler<APIGatewayProxyEvent, APIGatewayProxyResult>(
 
     try {
       // Get and validate required environment variables
-      const authKeySecretName = utils.getRequiredEnvVar(
-        'APPLE_AUTH_KEY_SECRET_NAME'
+      const authKeyParameterName = utils.getRequiredEnvVar(
+        'APPLE_AUTH_KEY_PARAMETER'
       );
       const teamId = utils.getRequiredEnvVar('APPLE_TEAM_ID');
       const keyId = utils.getRequiredEnvVar('APPLE_KEY_ID');
 
-      if (!authKeySecretName || !teamId || !keyId) {
+      if (!authKeyParameterName || !teamId || !keyId) {
         return utils.createErrorResponse(
           event,
           new Error('Missing required environment variables'),
@@ -44,7 +44,7 @@ export const handler = wrapHandler<APIGatewayProxyEvent, APIGatewayProxyResult>(
       utils.metrics.addMetric('TokenGenerationAttempt', MetricUnit.Count, 1);
 
       const token = await generateDeveloperToken({
-        APPLE_AUTH_KEY_SECRET_NAME: authKeySecretName,
+        APPLE_AUTH_KEY_PARAMETER: authKeyParameterName,
         APPLE_TEAM_ID: teamId,
         APPLE_KEY_ID: keyId,
       });

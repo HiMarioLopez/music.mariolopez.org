@@ -6,6 +6,7 @@ using Amazon.CDK.AWS.IAM;
 using Amazon.CDK.AWS.Lambda;
 using Amazon.CDK.AWS.SNS;
 using Amazon.CDK.AWS.SNS.Subscriptions;
+using Amazon.CDK.AWS.SQS;
 using Cdklabs.CdkNag;
 using Constructs;
 using Microsoft.Extensions.Configuration;
@@ -91,8 +92,28 @@ public sealed class TokenRefreshNotificationStack : Stack
 
         #region Event Sources and Subscriptions
 
+        // Dead-letter queue so failed notifications (e.g. transient SES errors) are
+        // captured instead of retried indefinitely, which previously drove runaway cost.
+        var notificationDlq = new Queue(this, "TokenRefreshNotificationDlq", new QueueProps
+        {
+            QueueName = "AppleMusicApiTokenRefreshNotificationDlq",
+            RetentionPeriod = Duration.Days(14),
+            EnforceSSL = true
+        });
+
         // Connect SNS topic to Token Refresh Notification Lambda
-        tokenRefreshTopic.AddSubscription(new LambdaSubscription(tokenRefreshFunction));
+        tokenRefreshTopic.AddSubscription(new LambdaSubscription(tokenRefreshFunction, new LambdaSubscriptionProps
+        {
+            DeadLetterQueue = notificationDlq
+        }));
+
+        // Do not retry failed notifications: a failure means the token is already known
+        // to need refreshing, and repeated re-delivery only multiplies invocation cost.
+        tokenRefreshFunction.ConfigureAsyncInvoke(new EventInvokeConfigOptions
+        {
+            RetryAttempts = 0,
+            MaxEventAge = Duration.Minutes(5)
+        });
 
         #endregion
 
@@ -108,6 +129,11 @@ public sealed class TokenRefreshNotificationStack : Stack
             {
                 Id = "AwsSolutions-IAM5",
                 Reason = "Permissions are implicitly defined with wildcards."
+            },
+            new NagPackSuppression
+            {
+                Id = "AwsSolutions-SQS3",
+                Reason = "This queue is itself the dead-letter queue (terminal sink) for the token refresh notification subscription; it does not need its own DLQ."
             }
         ]);
 

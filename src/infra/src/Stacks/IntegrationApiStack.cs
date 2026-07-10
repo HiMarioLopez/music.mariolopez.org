@@ -4,7 +4,6 @@ using Amazon.CDK.AWS.APIGateway;
 using Amazon.CDK.AWS.CertificateManager;
 using Amazon.CDK.AWS.IAM;
 using Amazon.CDK.AWS.Lambda;
-using Amazon.CDK.AWS.SecretsManager;
 using Amazon.CDK.AWS.SNS;
 using Amazon.CDK.AWS.SSM;
 using Cdklabs.CdkNag;
@@ -77,10 +76,14 @@ public sealed class IntegrationApiStack : Stack
 
         #region Auth Secret and Parameter Store
 
-        var appleAuthKey = new Secret(this, "Music-AppleAuthKey", new SecretProps
-        {
-            SecretName = "AppleAuthKey"
-        });
+        // Apple auth key (PEM private key) stored as a SecureString SSM parameter
+        // instead of Secrets Manager to avoid per-secret monthly storage cost.
+        var appleAuthKeyParameterName = "/Music/AppleMusicApi/AuthKey";
+        var appleAuthKeyParameter = StringParameter.FromSecureStringParameterAttributes(this, "AppleAuthKeyParameter",
+            new SecureStringParameterAttributes
+            {
+                ParameterName = appleAuthKeyParameterName
+            });
 
         var appleSettings = configuration!.GetSection("AppleSettings").Get<AppleDeveloperSettings>();
         var teamId = appleSettings!.TeamId;
@@ -106,11 +109,19 @@ public sealed class IntegrationApiStack : Stack
             ManagedPolicies = [ManagedPolicy.FromAwsManagedPolicyName("service-role/AWSLambdaBasicExecutionRole")]
         });
 
-        // Add Secret Manager permissions to Auth Handler role
+        // Add SSM Parameter Store read permission to Auth Handler role
         authHandlerRole.AddToPolicy(new PolicyStatement(new PolicyStatementProps
         {
-            Actions = ["secretsmanager:GetSecretValue"],
-            Resources = [appleAuthKey.SecretArn],
+            Actions = ["ssm:GetParameter"],
+            Resources = [$"arn:aws:ssm:{Region}:{Account}:parameter{appleAuthKeyParameterName}"],
+            Effect = Effect.ALLOW
+        }));
+
+        // SecureString decryption uses the AWS-managed SSM KMS key
+        authHandlerRole.AddToPolicy(new PolicyStatement(new PolicyStatementProps
+        {
+            Actions = ["kms:Decrypt"],
+            Resources = [$"arn:aws:kms:{Region}:{Account}:alias/aws/ssm"],
             Effect = Effect.ALLOW
         }));
 
@@ -125,7 +136,7 @@ public sealed class IntegrationApiStack : Stack
                 Environment = new Dictionary<string, string>
                 {
                     ["AWS_NODEJS_CONNECTION_REUSE_ENABLED"] = "1",
-                    ["APPLE_AUTH_KEY_SECRET_NAME"] = appleAuthKey.SecretName,
+                    ["APPLE_AUTH_KEY_PARAMETER"] = appleAuthKeyParameterName,
                     ["APPLE_TEAM_ID"] = teamId,
                     ["APPLE_KEY_ID"] = keyId
                 }
@@ -176,8 +187,6 @@ public sealed class IntegrationApiStack : Stack
                 {
                     ["AWS_NODEJS_CONNECTION_REUSE_ENABLED"] = "1",
                     ["TOKEN_REFRESH_SNS_TOPIC_ARN"] = tokenRefreshTopic.TopicArn,
-                    ["UPSTASH_REDIS_URL"] = configuration["AppleMusicApi:UpstashRedis:Url"]!,
-                    ["UPSTASH_REDIS_TOKEN"] = configuration["AppleMusicApi:UpstashRedis:Token"]!,
                     ["MUSIC_USER_TOKEN_PARAMETER"] = "/Music/AdminPanel/Apple/MUT"
                 }
             });
@@ -233,9 +242,7 @@ public sealed class IntegrationApiStack : Stack
                 Environment = new Dictionary<string, string>
                 {
                     ["AWS_NODEJS_CONNECTION_REUSE_ENABLED"] = "1",
-                    ["DYNAMODB_TABLE_NAME_PARAMETER"] = "/Music/AppleMusicHistory/TableName",
-                    ["UPSTASH_REDIS_URL"] = configuration["AppleMusicApi:UpstashRedis:Url"]!,
-                    ["UPSTASH_REDIS_TOKEN"] = configuration["AppleMusicApi:UpstashRedis:Token"]!
+                    ["DYNAMODB_TABLE_NAME_PARAMETER"] = "/Music/AppleMusicHistory/TableName"
                 }
             }).Function;
 
@@ -289,9 +296,7 @@ public sealed class IntegrationApiStack : Stack
                 Environment = new Dictionary<string, string>
                 {
                     ["AWS_NODEJS_CONNECTION_REUSE_ENABLED"] = "1",
-                    ["DYNAMODB_TABLE_NAME_PARAMETER"] = "/Music/SpotifyHistory/TableName",
-                    ["UPSTASH_REDIS_URL"] = configuration["AppleMusicApi:UpstashRedis:Url"]!,
-                    ["UPSTASH_REDIS_TOKEN"] = configuration["AppleMusicApi:UpstashRedis:Token"]!
+                    ["DYNAMODB_TABLE_NAME_PARAMETER"] = "/Music/SpotifyHistory/TableName"
                 }
             }).Function;
 

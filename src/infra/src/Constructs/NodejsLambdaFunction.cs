@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using Amazon.CDK;
 using Amazon.CDK.AWS.IAM;
 using Amazon.CDK.AWS.Lambda;
+using Amazon.CDK.AWS.Logs;
 using Constructs;
 
 namespace Music.Infra.Constructs;
@@ -49,6 +50,15 @@ public class NodejsLambdaFunction : Construct
       Resources = ["*"]
     }));
 
+    // Explicit log group with bounded retention (default: two weeks) so logs do
+    // not accumulate forever. Uses LogGroup rather than the deprecated
+    // Function.LogRetention prop, which would spawn a custom-resource Lambda per function.
+    var logGroup = new LogGroup(this, $"{id}LogGroup", new LogGroupProps
+    {
+      Retention = props.LogRetention ?? RetentionDays.TWO_WEEKS,
+      RemovalPolicy = RemovalPolicy.DESTROY
+    });
+
     // Create the Lambda function
     Function = new Function(this, id, new FunctionProps
     {
@@ -65,7 +75,8 @@ public class NodejsLambdaFunction : Construct
       },
       Architecture = props.Architecture ?? Architecture.ARM_64,
       EphemeralStorageSize = props.EphemeralStorageSize ?? Size.Mebibytes(512),
-      Tracing = props.Tracing ?? Tracing.ACTIVE
+      Tracing = props.Tracing ?? Tracing.ACTIVE,
+      LogGroup = logGroup
     });
   }
 }
@@ -124,4 +135,9 @@ public class NodejsLambdaFunctionProps
   /// The tracing mode for the Lambda function (default: ACTIVE)
   /// </summary>
   public Tracing? Tracing { get; set; }
+
+  /// <summary>
+  /// The CloudWatch log retention period for the Lambda function (default: two weeks)
+  /// </summary>
+  public RetentionDays? LogRetention { get; set; }
 }

@@ -1,39 +1,8 @@
 import { APIGatewayProxyEvent } from 'aws-lambda';
-import { Logger } from '@aws-lambda-powertools/logger';
-import { Redis } from "@upstash/redis"
-
-const logger = new Logger({ serviceName: 'cache-service' });
 
 // In-memory cache Map
 const memoryCache = new Map<string, { data: any; timestamp: number }>();
-const MEMORY_CACHE_TTL = 5 * 60 * 1000; // 1 minute in milliseconds
-
-// Redis client setup
-const getRedisClient = () => {
-  const redisUrl = process.env.UPSTASH_REDIS_URL;
-  if (!redisUrl) {
-    logger.warn('No UPSTASH_REDIS_URL environment variable found, Redis caching disabled');
-    return null;
-  }
-
-  const redisToken = process.env.UPSTASH_REDIS_TOKEN;
-  if (!redisToken) {
-    logger.warn('No UPSTASH_REDIS_TOKEN environment variable found, Redis caching disabled');
-    return null;
-  }
-
-  try {
-    const client = new Redis({
-      url: redisUrl,
-      token: redisToken
-    });
-    
-    return client;
-  } catch (error) {
-    logger.error('Failed to create Redis client', { error });
-    return null;
-  }
-};
+const MEMORY_CACHE_TTL = 5 * 60 * 1000;
 
 // Cache key creation helpers
 export interface CacheKeyOptions {
@@ -107,58 +76,24 @@ export const setInMemory = (key: string, data: any): void => {
   });
 };
 
-/**
- * Get data from Redis cache
- */
-export const getFromRedis = async (key: string): Promise<any | null> => {
-  const client = getRedisClient();
-  if (!client) return null;
-  
-  try {
-    const value = await client.get(key);
-    
-    if (value) {
-      return value;
-    }
-    
-    return null;
-  } catch (error) {
-    logger.error('Error getting data from Redis', { key, error });    
-    return null;
-  }
-};
+const counters = new Map<string, { count: number; expiresAt: number }>();
 
 /**
- * Set data in Redis cache
- */
-export const setInRedis = async (key: string, data: any, ttl = 300): Promise<void> => {
-  const client = getRedisClient();
-  if (!client) return;
-  
-  try {
-    await client.set(key, JSON.stringify(data), { ex: ttl });
-  } catch (error) {
-    logger.error('Error setting data in Redis', { key, error });
-  }
-};
-
-/**
- * Increment a counter in Redis (used for rate limiting)
+ * Increment a rate-limit counter in the warm-container's memory.
+ *
+ * This is per-instance rather than global (each concurrent Lambda has its own
+ * memory), so limits are approximate under concurrency - acceptable here since
+ * the previous Redis-backed limiter is decommissioned and this fails open.
  */
 export const incrementCounter = async (key: string, ttl = 60): Promise<number> => {
-  const client = getRedisClient();
-  if (!client) return 1; // If Redis is not available, allow the request
-  
-  try {     
-    // Increment the counter and set expiration if it's a new key
-    const count = await client.incr(key);
-    if (count === 1) {
-      await client.expire(key, ttl);
-    }
+  const now = Date.now();
+  const existing = counters.get(key);
 
-    return count;
-  } catch (error) {
-    logger.error('Error incrementing counter in Redis', { key, error });    
-    return 1; // If there's an error, allow the request
+  if (!existing || existing.expiresAt <= now) {
+    counters.set(key, { count: 1, expiresAt: now + ttl * 1000 });
+    return 1;
   }
+
+  existing.count += 1;
+  return existing.count;
 };

@@ -41,9 +41,9 @@ public sealed class AppleMusicHistoryStack : Stack
             SortKey = new Attribute { Name = "processedTimestamp", Type = AttributeType.STRING },
             BillingMode = BillingMode.PAY_PER_REQUEST,
             PointInTimeRecoverySpecification = new PointInTimeRecoverySpecification
-            {
-                PointInTimeRecoveryEnabled = true
-            }
+                        {
+                            PointInTimeRecoveryEnabled = false
+                        }
         });
 
         #endregion

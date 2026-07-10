@@ -2,9 +2,7 @@ import { Logger } from '@aws-lambda-powertools/logger';
 import { Metrics, MetricUnit } from '@aws-lambda-powertools/metrics';
 import {
   getFromMemory,
-  getFromRedis,
   setInMemory,
-  setInRedis,
 } from '../services/cache';
 import { getCorsHeaders } from './cors';
 import { APIGatewayProxyEvent } from 'aws-lambda';
@@ -80,7 +78,7 @@ export async function withCaching<T>(
   options: CacheOptions = {}
 ): Promise<{
   data: T;
-  source: 'memory-cache' | 'redis-cache' | 'api';
+  source: 'memory-cache' | 'api';
   statusCode: number;
   headers: Record<string, string>;
 }> {
@@ -121,29 +119,6 @@ export async function withCaching<T>(
     };
   }
 
-  // Check Redis (L2) cache
-  const redisData = await getFromRedis(requestKey);
-  if (redisData) {
-    logger?.info('Redis cache hit');
-    metrics?.addMetric('L2CacheHit', MetricUnit.Count, 1);
-
-    // Update in-memory cache
-    setInMemory(requestKey, redisData);
-
-    const origin = getOrigin(event);
-    const method = getHttpMethod(event);
-
-    return {
-      data: redisData as T,
-      source: 'redis-cache',
-      statusCode: 200,
-      headers: {
-        ...getCorsHeaders(origin, method),
-        'Cache-Control': `max-age=${ttlSeconds}`,
-      },
-    };
-  }
-
   // Cache miss - fetch fresh data
   logger?.info('Cache miss, fetching fresh data');
   metrics?.addMetric('CacheMiss', MetricUnit.Count, 1);
@@ -151,9 +126,7 @@ export async function withCaching<T>(
   try {
     const data = await fetchData();
 
-    // Store in both caches
     setInMemory(requestKey, data);
-    await setInRedis(requestKey, data, ttlSeconds);
 
     const origin = getOrigin(event);
     const method = getHttpMethod(event);

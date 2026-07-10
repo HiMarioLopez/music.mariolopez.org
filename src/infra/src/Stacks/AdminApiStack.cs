@@ -5,7 +5,6 @@ using Amazon.CDK.AWS.CertificateManager;
 using Amazon.CDK.AWS.Cognito;
 using Amazon.CDK.AWS.IAM;
 using Amazon.CDK.AWS.Lambda;
-using Amazon.CDK.AWS.SecretsManager;
 using Amazon.CDK.AWS.SSM;
 using Cdklabs.CdkNag;
 using Constructs;
@@ -55,13 +54,11 @@ public sealed class AdminApiStack : Stack
 
         #endregion
 
-        #region Secret
+        #region Spotify Client Secret Parameter
 
-        var spotifyClientSecret = new Secret(this, "Music-SpotifyClientSecret", new SecretProps
-        {
-            SecretName = "SpotifyClientSecret",
-            Description = "Contains both Client ID and Client Secret values for accessing Spotify API."
-        });
+        // Spotify client_id/client_secret (JSON) stored as a SecureString SSM
+        // parameter instead of Secrets Manager to avoid per-secret monthly storage cost.
+        var spotifyClientSecretParameterName = "/Music/AdminPanel/Spotify/ClientSecret";
 
         #endregion
 
@@ -353,12 +350,18 @@ public sealed class AdminApiStack : Stack
             AssumedBy = new ServicePrincipal("lambda.amazonaws.com")
         });
 
-        // Add Secrets Manager permissions for Spotify client secret
+        // Add SSM + KMS permissions for Spotify client secret (SecureString)
         getSpotifyOAuthUrlV1Role.AddToPolicy(new PolicyStatement(new PolicyStatementProps
         {
             Effect = Effect.ALLOW,
-            Actions = ["secretsmanager:GetSecretValue"],
-            Resources = [$"arn:aws:secretsmanager:{Region}:{Account}:secret:SpotifyClientSecret-*"]
+            Actions = ["ssm:GetParameter"],
+            Resources = [$"arn:aws:ssm:{Region}:{Account}:parameter{spotifyClientSecretParameterName}"]
+        }));
+        getSpotifyOAuthUrlV1Role.AddToPolicy(new PolicyStatement(new PolicyStatementProps
+        {
+            Effect = Effect.ALLOW,
+            Actions = ["kms:Decrypt"],
+            Resources = [$"arn:aws:kms:{Region}:{Account}:alias/aws/ssm"]
         }));
 
         // Create Lambda function for Spotify OAuth URL generation
@@ -371,7 +374,7 @@ public sealed class AdminApiStack : Stack
                 Environment = new Dictionary<string, string>
                 {
                     ["AWS_NODEJS_CONNECTION_REUSE_ENABLED"] = "1",
-                    ["SPOTIFY_CLIENT_SECRET_NAME"] = spotifyClientSecret.SecretName,
+                    ["SPOTIFY_CLIENT_SECRET_PARAMETER"] = spotifyClientSecretParameterName,
                     ["SPOTIFY_REDIRECT_URI"] = "https://admin.music.mariolopez.org/api/nodejs/v1/spotify/oauth/callback"
                 },
                 Description = "Lambda function to generate Spotify OAuth authorization URL (Version 1)",
@@ -397,12 +400,18 @@ public sealed class AdminApiStack : Stack
             AssumedBy = new ServicePrincipal("lambda.amazonaws.com")
         });
 
-        // Add Secrets Manager permissions for Spotify client secret
+        // Add SSM + KMS permissions for Spotify client secret (SecureString)
         getSpotifyOAuthCallbackV1Role.AddToPolicy(new PolicyStatement(new PolicyStatementProps
         {
             Effect = Effect.ALLOW,
-            Actions = ["secretsmanager:GetSecretValue"],
-            Resources = [$"arn:aws:secretsmanager:{Region}:{Account}:secret:SpotifyClientSecret-*"]
+            Actions = ["ssm:GetParameter"],
+            Resources = [$"arn:aws:ssm:{Region}:{Account}:parameter{spotifyClientSecretParameterName}"]
+        }));
+        getSpotifyOAuthCallbackV1Role.AddToPolicy(new PolicyStatement(new PolicyStatementProps
+        {
+            Effect = Effect.ALLOW,
+            Actions = ["kms:Decrypt"],
+            Resources = [$"arn:aws:kms:{Region}:{Account}:alias/aws/ssm"]
         }));
 
         // Create Lambda function for Spotify OAuth callback handling
@@ -415,7 +424,7 @@ public sealed class AdminApiStack : Stack
                 Environment = new Dictionary<string, string>
                 {
                     ["AWS_NODEJS_CONNECTION_REUSE_ENABLED"] = "1",
-                    ["SPOTIFY_CLIENT_SECRET_NAME"] = spotifyClientSecret.SecretName,
+                    ["SPOTIFY_CLIENT_SECRET_PARAMETER"] = spotifyClientSecretParameterName,
                     ["SPOTIFY_REDIRECT_URI"] =
                         "https://admin.music.mariolopez.org/api/nodejs/v1/spotify/oauth/callback",
                     ["SPOTIFY_ACCESS_TOKEN_PARAMETER"] = "/Music/AdminPanel/Spotify/UserAccessToken",

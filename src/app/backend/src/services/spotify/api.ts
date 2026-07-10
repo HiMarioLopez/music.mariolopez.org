@@ -2,7 +2,6 @@ import { Logger } from '@aws-lambda-powertools/logger';
 import axios from 'axios';
 import { Song, SpotifySong } from '../../models/song';
 import { getParameter } from '../parameter';
-import { getSecretJson } from '../secret';
 
 const logger = new Logger({ serviceName: 'spotify-api-service' });
 
@@ -104,18 +103,19 @@ export interface SpotifyRecentlyPlayedResponse {
 }
 
 /**
- * Get Spotify configuration from Secrets Manager and environment variables
+ * Get Spotify configuration from SSM Parameter Store and environment variables
  *
- * Retrieves client_id and client_secret from AWS Secrets Manager.
- * Redirect URI is retrieved from environment variable as it's not stored in the secret.
+ * Retrieves client_id and client_secret from a SecureString SSM parameter
+ * (stored as JSON). Redirect URI is retrieved from environment variable as it's
+ * not stored in the parameter.
  */
 export const getSpotifyConfig = async (): Promise<SpotifyConfig> => {
-  const secretName = process.env.SPOTIFY_CLIENT_SECRET_NAME;
+  const clientSecretParameterName = process.env.SPOTIFY_CLIENT_SECRET_PARAMETER;
   const redirectUri = process.env.SPOTIFY_REDIRECT_URI;
 
-  if (!secretName) {
+  if (!clientSecretParameterName) {
     throw new Error(
-      'Missing required environment variable: SPOTIFY_CLIENT_SECRET_NAME'
+      'Missing required environment variable: SPOTIFY_CLIENT_SECRET_PARAMETER'
     );
   }
 
@@ -126,34 +126,41 @@ export const getSpotifyConfig = async (): Promise<SpotifyConfig> => {
   }
 
   try {
-    // Retrieve credentials from Secrets Manager
-    const secret = await getSecretJson<{
+    const parameterValue = await getParameter(clientSecretParameterName);
+
+    if (!parameterValue) {
+      throw new Error(
+        `Spotify client secret parameter not found: ${clientSecretParameterName}`
+      );
+    }
+
+    const credentials = JSON.parse(parameterValue) as {
       client_id: string;
       client_secret: string;
-    }>(secretName);
+    };
 
-    if (!secret.client_id || !secret.client_secret) {
+    if (!credentials.client_id || !credentials.client_secret) {
       throw new Error(
-        'Spotify secret is missing required fields: client_id, client_secret'
+        'Spotify client secret parameter is missing required fields: client_id, client_secret'
       );
     }
 
     logger.info(
-      'Successfully retrieved Spotify configuration from Secrets Manager'
+      'Successfully retrieved Spotify configuration from Parameter Store'
     );
 
     return {
-      clientId: secret.client_id,
-      clientSecret: secret.client_secret,
+      clientId: credentials.client_id,
+      clientSecret: credentials.client_secret,
       redirectUri,
     };
   } catch (error) {
     logger.error(
-      'Failed to retrieve Spotify configuration from Secrets Manager',
+      'Failed to retrieve Spotify configuration from Parameter Store',
       { error }
     );
     throw new Error(
-      `Failed to retrieve Spotify configuration from Secrets Manager: ${error instanceof Error ? error.message : String(error)}`
+      `Failed to retrieve Spotify configuration from Parameter Store: ${error instanceof Error ? error.message : String(error)}`
     );
   }
 };

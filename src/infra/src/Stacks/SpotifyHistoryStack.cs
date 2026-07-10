@@ -42,9 +42,9 @@ public sealed class SpotifyHistoryStack : Stack
             SortKey = new Attribute { Name = "processedTimestamp", Type = AttributeType.STRING },
             BillingMode = BillingMode.PAY_PER_REQUEST,
             PointInTimeRecoverySpecification = new PointInTimeRecoverySpecification
-            {
-                PointInTimeRecoveryEnabled = true
-            }
+                        {
+                            PointInTimeRecoveryEnabled = false
+                        }
         });
 
         #endregion
@@ -117,12 +117,18 @@ public sealed class SpotifyHistoryStack : Stack
             ]
         }));
 
-        // Add Secrets Manager permissions for Spotify client secret
+        // Add SSM + KMS permissions for Spotify client secret (SecureString)
         updateHistoryJobLambdaRole.AddToPolicy(new PolicyStatement(new PolicyStatementProps
         {
             Effect = Effect.ALLOW,
-            Actions = ["secretsmanager:GetSecretValue"],
-            Resources = [$"arn:aws:secretsmanager:{Region}:{Account}:secret:SpotifyClientSecret-*"]
+            Actions = ["ssm:GetParameter"],
+            Resources = [$"arn:aws:ssm:{Region}:{Account}:parameter/Music/AdminPanel/Spotify/ClientSecret"]
+        }));
+        updateHistoryJobLambdaRole.AddToPolicy(new PolicyStatement(new PolicyStatementProps
+        {
+            Effect = Effect.ALLOW,
+            Actions = ["kms:Decrypt"],
+            Resources = [$"arn:aws:kms:{Region}:{Account}:alias/aws/ssm"]
         }));
 
         // Add CloudWatch permissions
@@ -155,7 +161,7 @@ public sealed class SpotifyHistoryStack : Stack
                     ["LAST_PROCESSED_SONG_PARAMETER"] = lastProcessedSongIdParameter.ParameterName,
                     ["SPOTIFY_ACCESS_TOKEN_PARAMETER"] = "/Music/AdminPanel/Spotify/UserAccessToken",
                     ["SPOTIFY_REFRESH_TOKEN_PARAMETER"] = "/Music/AdminPanel/Spotify/UserRefreshToken",
-                    ["SPOTIFY_CLIENT_SECRET_NAME"] = "SpotifyClientSecret",
+                    ["SPOTIFY_CLIENT_SECRET_PARAMETER"] = "/Music/AdminPanel/Spotify/ClientSecret",
                     ["SPOTIFY_REDIRECT_URI"] =
                         "https://admin.music.mariolopez.org/api/nodejs/v1/spotify/oauth/callback",
                     ["SONG_LIMIT_PARAMETER"] = songLimitParameter.ParameterName,

@@ -1,11 +1,11 @@
 import { Logger } from '@aws-lambda-powertools/logger';
-import { getSecret } from './secret';
+import { getParameter } from './parameter';
 import { sign } from 'jsonwebtoken';
 
 const logger = new Logger({ serviceName: 'developer-token-service' });
 
 interface TokenConfig {
-    APPLE_AUTH_KEY_SECRET_NAME: string;
+    APPLE_AUTH_KEY_PARAMETER: string;
     APPLE_TEAM_ID: string;
     APPLE_KEY_ID: string;
 }
@@ -19,8 +19,8 @@ interface TokenConfig {
  */
 export const generateDeveloperToken = async (config: TokenConfig): Promise<string> => {
     try {
-        // Retrieve the private key from AWS Secrets Manager
-        const applePrivateKey = await getSecret(config.APPLE_AUTH_KEY_SECRET_NAME);
+        // Retrieve the private key (PEM) from SSM Parameter Store (SecureString)
+        const applePrivateKey = await getParameter(config.APPLE_AUTH_KEY_PARAMETER);
 
         if (!applePrivateKey) {
             throw new Error('Failed to retrieve Apple private key');

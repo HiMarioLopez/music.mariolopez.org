@@ -60,12 +60,23 @@ export const handler = wrapHandler<APIGatewayProxyEvent, APIGatewayProxyResult>(
       const pkceDataJson = await getParameter(pkceParameterName);
 
       if (!pkceDataJson) {
-        return utils.createErrorResponse(
-          event,
-          new Error('Missing PKCE data'),
-          HttpStatus.BAD_REQUEST,
-          'PKCE data not found. The OAuth flow may have expired or been used already.'
+        // The PKCE parameter is single-use and deleted after a successful
+        // exchange. A missing parameter most commonly means the callback URL
+        // was hit more than once (browser reload/prefetch) after the flow
+        // already succeeded, so redirect to success rather than showing an error.
+        const adminPanelUrl =
+          process.env.ADMIN_PANEL_URL || 'https://admin.music.mariolopez.org';
+        logger.info(
+          'PKCE data not found; treating as duplicate callback and redirecting to success'
         );
+        return {
+          statusCode: 302,
+          headers: {
+            Location: `${adminPanelUrl}?spotify_auth=success`,
+            'Cache-Control': 'no-cache',
+          },
+          body: '',
+        };
       }
 
       // Parse the stored PKCE data
